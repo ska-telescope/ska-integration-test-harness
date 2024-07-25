@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "ska-integration-test-harness"
+version = "0.1.0"
+description = "For now, a test harness for TMC-CSP integration tests. In future, a generic test harness integration testing an arbitrary combination of production or emulated SKA subsystems."
+authors = ["Emanuele Lena <emanuele.lena@designcoaching.net>"]
+license = "BSD-3-Clause"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
