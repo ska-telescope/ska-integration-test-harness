@@ -12,11 +12,13 @@ packages = [
 
 
 [[tool.poetry.source]]
-name = 'ska-nexus'
+name = 'skao'
 url = 'https://artefact.skao.int/repository/pypi-internal/simple'
 
 [[tool.poetry.source]]
-name = "PyPI"
+name = "PyPI-public"
+url = 'https://pypi.org/simple'
+
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -42,5 +44,5 @@ sphinx-autodoc-typehints = "^2.2.3"
 typing-extensions = "^4.12.2"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
