@@ -30,7 +30,7 @@ def generate_id(id_pattern: str) -> str:
     id_pattern = re.findall(r"(?=\*)[\*-]*(?<=\*)", id_pattern)[0]
     length = id_pattern.count("*")
     assert length <= EB_PB_ID_LENGTH
-    LOGGER.info(f"<SB or PB ID >Length: {length}")
+    LOGGER.info("<SB or PB ID >Length: %s", length)
     timestamp = str(datetime.now().timestamp()).replace(".", "")
     sections = id_pattern.split("-")
     unique_id = ""

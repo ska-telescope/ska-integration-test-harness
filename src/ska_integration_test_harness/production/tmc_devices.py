@@ -56,16 +56,16 @@ class ProductionTMCDevices(TMCDevices):
 
     def tear_down(self) -> None:
         """Tear down the TMC devices."""
-        Subarray_node_obsstate = self.subarray_node.obsState
         LOGGER.info(
-            f"Calling tear down for CentralNode for SubarrayNode's \
-                {Subarray_node_obsstate} obsstate."
+            "Calling tear down for CentralNode "
+            "for SubarrayNode's %s obsstate.",
+            self.subarray_node.obsState,
         )
 
         if self.subarray_node.obsState == ObsState.IDLE:
             LOGGER.info("Calling Release Resource on centralnode")
             CentralNodeReleaseResources(
-                self.default_commands_input.release_input
+                self.default_commands_input.get_release_input
             ).execute()
 
         ForceChangeOfObsState(

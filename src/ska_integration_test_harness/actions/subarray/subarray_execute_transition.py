@@ -44,7 +44,7 @@ class SubarrayExecuteTransition(TelescopeAction):
             result, message = self.telescope.tmc.subarray_node.command_inout(
                 self.command_name, self.argin
             )
-            LOGGER.info(f"Invoked {self.command_name} on SubarrayNode")
+            LOGGER.info("Invoked %s on SubarrayNode", self.command_name)
             return (
                 result,
                 message,

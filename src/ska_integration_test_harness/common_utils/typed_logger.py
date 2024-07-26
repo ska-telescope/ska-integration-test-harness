@@ -15,7 +15,7 @@ from ska_integration_test_harness.common_utils.typed_tracer import (
 # (instead of a full logger)
 def log_events(
     device_attribute_map: dict["str | tango.DeviceProxy", list[str]],
-    attribute_enum_map: dict[str, type] = {},
+    attribute_enum_map: dict[str, type] | None = None,
     dev_factory: Callable[[str], tango.DeviceProxy] | None = None,
 ) -> TangoEventLogger:
     """Log events from devices and attributes, optionally specifying enums,
@@ -36,7 +36,7 @@ def log_events(
         the given events.
     """
     logger = TangoEventLogger()
-    event_enum_map = EventTypeMapper(attribute_enum_map)
+    event_enum_map = EventTypeMapper(attribute_enum_map or {})
 
     def typed_msg_builder(event: ReceivedEvent) -> str:
         """Build a log message from a TypedReceivedEvent."""

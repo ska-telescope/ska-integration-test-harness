@@ -28,57 +28,45 @@ class ObsStateCommandsInput:
     TODO: maybe add more commands.
     """
 
-    _assign_input: JSONInput | None = None
-    _configure_input: JSONInput | None = None
-    _scan_input: JSONInput | None = None
-    _release_input: JSONInput | None = None
+    assign_input: JSONInput | None = None
+    """The input for the AssignResources command."""
 
-    def __init__(
-        self,
-        assign_input: JSONInput | None = None,
-        configure_input: JSONInput | None = None,
-        scan_input: JSONInput | None = None,
-        release_input: JSONInput | None = None,
-    ):
-        """Initialize the ObsStateCommandsInput with the given JSON inputs.
+    configure_input: JSONInput | None = None
+    """The input for the Configure command."""
 
-        :param assign_input: The AssignResources JSON input.
-        :param configure_input: The Configure JSON input.
-        :param scan_input: The Scan JSON input.
-        :param release_input: The ReleaseResources JSON input.
-        """
-        self._assign_input = assign_input
-        self._configure_input = configure_input
-        self._scan_input = scan_input
-        self._release_input = release_input
+    scan_input: JSONInput | None = None
+    """The input for the Scan command."""
+
+    release_input: JSONInput | None = None
+    """The input for the ReleaseResources command."""
 
     @property
-    def assign_input(self) -> JSONInput | None:
-        """Get the AssignResources JSON input."""
-        if self._assign_input is None:
+    def get_assign_input(self) -> JSONInput | None:
+        """Get the AssignResources JSON input (or fail if not set)."""
+        if self.assign_input is None:
             raise ValueError("AssignResources input is not set.")
-        return self._assign_input
+        return self.assign_input
 
     @property
-    def configure_input(self) -> JSONInput | None:
-        """Get the Configure JSON input."""
-        if self._configure_input is None:
+    def get_configure_input(self) -> JSONInput | None:
+        """Get the Configure JSON input (or fail if not set)."""
+        if self.configure_input is None:
             raise ValueError("Configure input is not set.")
-        return self._configure_input
+        return self.configure_input
 
     @property
-    def scan_input(self) -> JSONInput | None:
-        """Get the Scan JSON input."""
-        if self._scan_input is None:
+    def get_scan_input(self) -> JSONInput | None:
+        """Get the Scan JSON input (or fail if not set)."""
+        if self.scan_input is None:
             raise ValueError("Scan input is not set.")
-        return self._scan_input
+        return self.scan_input
 
     @property
-    def release_input(self) -> JSONInput | None:
-        """Get the ReleaseResources JSON input."""
-        if self._release_input is None:
+    def get_release_input(self) -> JSONInput | None:
+        """Get the ReleaseResources JSON input (or fail if not set)."""
+        if self.release_input is None:
             raise ValueError("ReleaseResources input is not set.")
-        return self._release_input
+        return self.release_input
 
     def merge(self, other: "ObsStateCommandsInput") -> "ObsStateCommandsInput":
         """Merge this ObsStateCommandsInput with another one.
@@ -91,10 +79,10 @@ class ObsStateCommandsInput:
         :return: A new ObsStateCommandsInput with the merged inputs.
         """
         return ObsStateCommandsInput(
-            assign_input=self._assign_input or other._assign_input,
-            configure_input=self._configure_input or other._configure_input,
-            scan_input=self._scan_input or other._scan_input,
-            release_input=self._release_input or other._release_input,
+            assign_input=self.assign_input or other.assign_input,
+            configure_input=self.configure_input or other.configure_input,
+            scan_input=self.scan_input or other.scan_input,
+            release_input=self.release_input or other.release_input,
         )
 
     def __str__(self) -> str:
@@ -109,17 +97,17 @@ class ObsStateCommandsInput:
         """Return a dict containing the JSON inputs."""
         res = {}
 
-        if self._assign_input is not None:
-            res["AssignResources"] = self._assign_input
+        if self.assign_input is not None:
+            res["AssignResources"] = self.assign_input
 
-        if self._configure_input is not None:
-            res["Configure"] = self._configure_input
+        if self.configure_input is not None:
+            res["Configure"] = self.configure_input
 
-        if self._scan_input is not None:
-            res["Scan"] = self._scan_input
+        if self.scan_input is not None:
+            res["Scan"] = self.scan_input
 
-        if self._release_input is not None:
-            res["ReleaseResources"] = self._release_input
+        if self.release_input is not None:
+            res["ReleaseResources"] = self.release_input
 
         return res
 

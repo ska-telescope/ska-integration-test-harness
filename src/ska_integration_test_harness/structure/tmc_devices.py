@@ -12,6 +12,8 @@ from ska_integration_test_harness.config.components_config import (
 class TMCDevices(abc.ABC):
     """A wrapper for the TMC component."""
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, tmc_configuration: TMCConfiguration):
         """Initialise the TMC wrapper.
 
@@ -59,12 +61,12 @@ class TMCDevices(abc.ABC):
     # CentralNode properties
 
     @property
-    def IsDishVccConfigSet(self):
+    def is_dish_vcc_config_set(self):
         """Return DishVccConfigSet flag"""
         return self.central_node.isDishVccConfigSet
 
     @property
-    def DishVccValidationStatus(self):
+    def dish_vcc_validation_status(self):
         """Current dish vcc validation status of central node"""
         return self.central_node.DishVccValidationStatus
 

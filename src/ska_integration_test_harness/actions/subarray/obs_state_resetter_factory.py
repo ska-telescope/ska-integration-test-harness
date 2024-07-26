@@ -101,7 +101,7 @@ class SubarrayObsStateResetterFactory:
                 self.create_action_to_reset_subarray_to_empty(),
                 SubarrayExecuteTransition(
                     "AssignResources",
-                    argin=self.commands_inputs.assign_input.get_json_string(),
+                    argin=self.commands_inputs.get_assign_input.get_json_string(),  # pylint: disable=line-too-long # noqa: E501
                 ),
             ],
         )
@@ -115,7 +115,7 @@ class SubarrayObsStateResetterFactory:
         return TelescopeActionSequence(
             [
                 self.create_action_to_reset_subarray_to_empty(),
-                SubarrayAssignResources(self.commands_inputs.assign_input),
+                SubarrayAssignResources(self.commands_inputs.get_assign_input),
             ],
         )
 
@@ -160,7 +160,7 @@ class SubarrayObsStateResetterFactory:
                 WaitAddedForSkb372(),
                 SubarrayExecuteTransition(
                     "Configure",
-                    argin=self.commands_inputs.configure_input.get_json_string(),  # pylint: disable=line-too-long # noqa: E501
+                    argin=self.commands_inputs.get_configure_input.get_json_string(),  # pylint: disable=line-too-long # noqa: E501
                 ),
             ],
         )
@@ -176,7 +176,7 @@ class SubarrayObsStateResetterFactory:
                 self.create_action_to_reset_subarray_to_idle(),
                 # TODO: manage wait_added_for_skb372()
                 WaitAddedForSkb372(),
-                SubarrayConfigure(self.commands_inputs.configure_input),
+                SubarrayConfigure(self.commands_inputs.get_configure_input),
             ],
         )
 
@@ -189,7 +189,7 @@ class SubarrayObsStateResetterFactory:
         return TelescopeActionSequence(
             [
                 self.create_action_to_reset_subarray_to_ready(),
-                SubarrayScan(self.commands_inputs.scan_input),
+                SubarrayScan(self.commands_inputs.get_scan_input),
             ],
         )
 

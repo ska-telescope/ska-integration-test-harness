@@ -63,8 +63,8 @@ class TypedReceivedEvent(ReceivedEvent):
 class EventTypeMapper:
     """A class to associate attributes with their corresponding enum class."""
 
-    def __init__(self, event_enum_map: dict[str, type] = {}) -> None:
-        self._event_enum_map = {}
+    def __init__(self, event_enum_map: dict[str, type] | None = None) -> None:
+        self._event_enum_map = event_enum_map or {}
         for attr_name, enum_class in event_enum_map.items():
             self.associate_attribute_to_enum(attr_name, enum_class)
 
@@ -177,6 +177,6 @@ def _print_passed_event_args(
 # Force this function to be used in the assertion error message
 # (instead of the default one)
 
-ska_tango_testing.integration.assertions._print_passed_event_args = (
+ska_tango_testing.integration.assertions._print_passed_event_args = (  # pylint: disable=protected-access disable=line-too-long # noqa: E501
     _print_passed_event_args
 )

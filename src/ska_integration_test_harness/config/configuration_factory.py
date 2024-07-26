@@ -91,15 +91,15 @@ class TestHarnessConfigurationFactory:
     # -------------------------------
     # System components Configuration
 
-    def get_TMC_configuration(self):
+    def get_tmc_configuration(self):
         """Get the configuration for the TMC."""
         return TMCConfiguration()
 
-    def get_CSP_configuration(self):
+    def get_csp_configuration(self):
         """Get the configuration for the CSP."""
         return CSPConfiguration()
 
-    def get_SDP_configuration(self):
+    def get_sdp_configuration(self):
         """Get the configuration for the SDP."""
         return SDPConfiguration()
 

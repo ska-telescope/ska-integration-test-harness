@@ -107,7 +107,7 @@ class TelescopeStructureFactory:
         return: A TMC wrapper instance.
         """
         return ProductionTMCDevices(
-            self.config_factory.get_TMC_configuration(),
+            self.config_factory.get_tmc_configuration(),
             self.default_commands_input,
             self.default_vcc_config_input,
         )
@@ -119,11 +119,11 @@ class TelescopeStructureFactory:
         """
         if self._emulation_config.sdp:
             return EmulatedSDPDevices(
-                self.config_factory.get_SDP_configuration()
+                self.config_factory.get_sdp_configuration()
             )
 
         return ProductionSDPDevices(
-            self.config_factory.get_SDP_configuration()
+            self.config_factory.get_sdp_configuration()
         )
 
     def create_csp_wrapper(self) -> CSPDevices:
@@ -133,11 +133,11 @@ class TelescopeStructureFactory:
         """
         if self._emulation_config.csp:
             return EmulatedCSPDevices(
-                self.config_factory.get_CSP_configuration()
+                self.config_factory.get_csp_configuration()
             )
 
         return ProductionCSPDevices(
-            csp_configuration=self.config_factory.get_CSP_configuration(),
+            csp_configuration=self.config_factory.get_csp_configuration(),
             all_production=self._emulation_config.all_production,
         )
 

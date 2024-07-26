@@ -16,6 +16,8 @@ class TMCConfiguration:
     It is initialized with default values.
     """
 
+    # pylint: disable=too-many-instance-attributes
+
     centralnode_name: str = "ska_mid/tm_central/central_node"
     tmc_subarraynode1_name: str = "ska_mid/tm_subarray_node/1"
 

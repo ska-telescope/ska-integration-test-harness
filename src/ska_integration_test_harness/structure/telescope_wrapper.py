@@ -64,6 +64,11 @@ class TelescopeWrapper:
 
     _instance = None
 
+    _tmc: TMCDevices | None = None
+    _sdp: SDPDevices | None = None
+    _csp: CSPDevices | None = None
+    _dishes: DishesDevices | None = None
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(TelescopeWrapper, cls).__new__(cls)
