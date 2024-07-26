@@ -10,6 +10,9 @@ from ska_integration_test_harness.actions.expected_event import (
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
 )
+from ska_integration_test_harness.actions.utils.termination_conditions import (
+    all_subarrays_have_obs_state,
+)
 from ska_integration_test_harness.inputs.dish_mode import DishMode
 from ska_integration_test_harness.inputs.json_input import JSONInput
 from ska_integration_test_harness.inputs.pointing_state import PointingState
@@ -38,27 +41,8 @@ class SubarrayConfigure(TelescopeAction):
         # if invoked_from_ready:
         #         the_waiter.set_wait_for_configuring()
 
-        res = [
-            ExpectedStateChange(
-                self.telescope.tmc.csp_subarray_leaf_node,
-                "cspSubarrayObsState",
-                ObsState.READY,
-            ),
-            ExpectedStateChange(
-                self.telescope.tmc.sdp_subarray_leaf_node,
-                "sdpSubarrayObsState",
-                ObsState.READY,
-            ),
-            ExpectedStateChange(
-                self.telescope.csp.csp_subarray, "obsState", ObsState.READY
-            ),
-            ExpectedStateChange(
-                self.telescope.sdp.sdp_subarray, "obsState", ObsState.READY
-            ),
-            ExpectedStateChange(
-                self.telescope.tmc.subarray_node, "obsState", ObsState.READY
-            ),
-        ]
+        # all SA must be in READY state
+        res = all_subarrays_have_obs_state(self.telescope, ObsState.READY)
 
         for device in self.telescope.dishes.dish_master_list:
             res.extend(

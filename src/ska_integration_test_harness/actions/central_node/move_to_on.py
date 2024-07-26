@@ -4,11 +4,12 @@ import logging
 
 from tango import DevState
 
-from ska_integration_test_harness.actions.expected_event import (
-    ExpectedStateChange,
-)
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
+)
+from ska_integration_test_harness.actions.utils.termination_conditions import (
+    dishes_have_dish_mode,
+    master_and_subarray_devices_have_state,
 )
 from ska_integration_test_harness.inputs.dish_mode import DishMode
 
@@ -26,29 +27,15 @@ class MoveToOn(TelescopeAction):
 
     def termination_condition(self):
         """No expected outcome for this action."""
-        res = [
-            ExpectedStateChange(
-                self.telescope.tmc.central_node,
-                "telescopeState",
-                DevState.ON,
-            ),
-            ExpectedStateChange(
-                self.telescope.sdp.sdp_subarray, "State", DevState.ON
-            ),
-            ExpectedStateChange(
-                self.telescope.sdp.sdp_master, "State", DevState.ON
-            ),
-            ExpectedStateChange(
-                self.telescope.csp.csp_subarray, "State", DevState.ON
-            ),
-            ExpectedStateChange(
-                self.telescope.csp.csp_master, "State", DevState.ON
-            ),
-        ]
 
-        res += [
-            ExpectedStateChange(dish, "dishMode", DishMode.STANDBY_FP)
-            for dish in self.telescope.dishes.dish_master_list
-        ]
+        # The central node, SDP subarray, SDP master, CSP subarray, CSP master
+        # and all dishes should be in ON state.
+        res = master_and_subarray_devices_have_state(
+            self.telescope,
+            DevState.ON,
+        )
+
+        # All dishes should be in STANDBY_FP mode
+        res.extend(dishes_have_dish_mode(self.telescope, DishMode.STANDBY_FP))
 
         return res

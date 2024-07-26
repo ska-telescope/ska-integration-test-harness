@@ -4,11 +4,12 @@ import logging
 
 from tango import DevState
 
-from ska_integration_test_harness.actions.expected_event import (
-    ExpectedStateChange,
-)
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
+)
+from ska_integration_test_harness.actions.utils.termination_conditions import (
+    dishes_have_dish_mode,
+    master_and_subarray_devices_have_state,
 )
 from ska_integration_test_harness.inputs.dish_mode import DishMode
 
@@ -25,24 +26,15 @@ class MoveToOff(TelescopeAction):
         self.telescope.csp.move_to_off()
 
     def termination_condition(self):
-        res = [
-            ExpectedStateChange(
-                self.telescope.sdp.sdp_subarray, "State", DevState.OFF
-            ),
-            ExpectedStateChange(
-                self.telescope.sdp.sdp_master, "State", DevState.OFF
-            ),
-            ExpectedStateChange(
-                self.telescope.csp.csp_subarray, "State", DevState.OFF
-            ),
-            ExpectedStateChange(
-                self.telescope.csp.csp_master, "State", DevState.OFF
-            ),
-        ]
 
-        res += [
-            ExpectedStateChange(dish, "dishMode", DishMode.STANDBY_LP)
-            for dish in self.telescope.dishes.dish_master_list
-        ]
+        # The central node, SDP subarray, SDP master, CSP subarray, CSP master
+        # and all dishes should be in OFF state.
+        res = master_and_subarray_devices_have_state(
+            self.telescope,
+            DevState.OFF,
+        )
+
+        # All dishes should be in STANDBY_LP mode
+        res.extend(dishes_have_dish_mode(self.telescope, DishMode.STANDBY_LP))
 
         return res

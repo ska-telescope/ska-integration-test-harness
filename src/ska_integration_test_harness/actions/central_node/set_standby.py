@@ -10,6 +10,9 @@ from ska_integration_test_harness.actions.expected_event import (
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
 )
+from ska_integration_test_harness.actions.utils.termination_conditions import (
+    dishes_have_dish_mode,
+)
 from ska_integration_test_harness.inputs.dish_mode import DishMode
 
 LOGGER = logging.getLogger(__name__)
@@ -25,6 +28,8 @@ class SetStandby(TelescopeAction):
         self.telescope.csp.move_to_off()
 
     def termination_condition(self):
+        # subarrays must be in OFF state,
+        # master devices must be in STANDBY state
         res = [
             ExpectedStateChange(
                 self.telescope.sdp.sdp_subarray, "State", DevState.OFF
@@ -40,9 +45,7 @@ class SetStandby(TelescopeAction):
             ),
         ]
 
-        res += [
-            ExpectedStateChange(dish, "dishMode", DishMode.STANDBY_LP)
-            for dish in self.telescope.dishes.dish_master_list
-        ]
+        # All dishes should be in STANDBY_LP mode
+        res.extend(dishes_have_dish_mode(self.telescope, DishMode.STANDBY_LP))
 
         return res

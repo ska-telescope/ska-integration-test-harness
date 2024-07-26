@@ -4,11 +4,11 @@ import logging
 
 from ska_control_model import ObsState
 
-from ska_integration_test_harness.actions.expected_event import (
-    ExpectedStateChange,
-)
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
+)
+from ska_integration_test_harness.actions.utils.termination_conditions import (
+    all_subarrays_have_obs_state,
 )
 from ska_integration_test_harness.inputs.json_input import JSONInput
 
@@ -30,25 +30,5 @@ class SubarrayScan(TelescopeAction):
         return result, message
 
     def termination_condition(self):
-        """No expected outcome for this action."""
-        return [
-            ExpectedStateChange(
-                self.telescope.tmc.csp_subarray_leaf_node,
-                "cspSubarrayObsState",
-                ObsState.SCANNING,
-            ),
-            ExpectedStateChange(
-                self.telescope.tmc.sdp_subarray_leaf_node,
-                "sdpSubarrayObsState",
-                ObsState.SCANNING,
-            ),
-            ExpectedStateChange(
-                self.telescope.csp.csp_subarray, "obsState", ObsState.SCANNING
-            ),
-            ExpectedStateChange(
-                self.telescope.sdp.sdp_subarray, "obsState", ObsState.SCANNING
-            ),
-            ExpectedStateChange(
-                self.telescope.tmc.subarray_node, "obsState", ObsState.SCANNING
-            ),
-        ]
+        """All subarrays must be in SCANNING state."""
+        return all_subarrays_have_obs_state(self.telescope, ObsState.SCANNING)
