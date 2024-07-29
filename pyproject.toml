@@ -23,7 +23,7 @@ url = 'https://pypi.org/simple'
 [tool.poetry.dependencies]
 python = "^3.10"
 assertpy = "^1.1"
-pytango = "^9.5.1"
+pytango = "^9.4.2"
 ska-control-model = "^0.3.1"
 ska-tango-testing = "^0.7.1"
 ska-ser-logging = "^0.4.1"
