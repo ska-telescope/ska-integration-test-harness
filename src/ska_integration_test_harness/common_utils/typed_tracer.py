@@ -64,7 +64,10 @@ class EventTypeMapper:
     """A class to associate attributes with their corresponding enum class."""
 
     def __init__(self, event_enum_map: dict[str, type] | None = None) -> None:
-        self._event_enum_map = event_enum_map or {}
+        event_enum_map = event_enum_map or {}
+
+        # fill event enum map with the passed values (validating each of them)
+        self._event_enum_map = {}
         for attr_name, enum_class in event_enum_map.items():
             self.associate_attribute_to_enum(attr_name, enum_class)
 

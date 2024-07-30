@@ -36,7 +36,7 @@ def log_events(
         the given events.
     """
     logger = TangoEventLogger()
-    event_enum_map = EventTypeMapper(attribute_enum_map or {})
+    event_enum_map = EventTypeMapper(attribute_enum_map)
 
     def typed_msg_builder(event: ReceivedEvent) -> str:
         """Build a log message from a TypedReceivedEvent."""
