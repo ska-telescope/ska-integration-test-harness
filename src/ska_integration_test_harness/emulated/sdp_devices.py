@@ -9,6 +9,15 @@ from ska_integration_test_harness.structure.sdp_devices import SDPDevices
 class EmulatedSDPDevices(SDPDevices):
     """A wrapper for an emulated SDP."""
 
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._configure_transitions()
+
+    def _configure_transitions(self) -> None:
+        """Configure the needed for SDP emulated subarray."""
+        # SDP should do the ABORTING transition
+        self.sdp_subarray.AddTranstion('[["ABORTING", 0.1 ]]')
+
     def tear_down(self) -> None:
         """Tear down the SDP."""
         EmulatedTeardownHelper.reset_health_state(
