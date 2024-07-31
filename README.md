@@ -78,80 +78,84 @@ emulators without knowing it. See below for examples.
 
 The test harness files have this layout:
 
+To ensure the directory tree is displayed correctly in Markdown, you need to use a combination of spaces and backticks to preserve the formatting. Here is the revised tree:
+
+```plaintext
 .
 ├── common_utils
 ├── emulated
-│    ├── csp_devices.py
-│    ├── dishes_devices.py
-│    ├── sdp_devices.py
-│    └── utils
-│        └── teardown_helper.py
+│   ├── csp_devices.py
+│   ├── dishes_devices.py
+│   ├── sdp_devices.py
+│   └── utils
+│       └── teardown_helper.py
 ├── production
-│    ├── csp_devices.py
-│    ├── dishes_devices.py
-│    ├── sdp_devices.py
-│    └── tmc_devices.py
+│   ├── csp_devices.py
+│   ├── dishes_devices.py
+│   ├── sdp_devices.py
+│   └── tmc_devices.py
 ├── README.md
 ├── actions
-│    ├── central_node
-│    │    ├── central_node_assign_resources.py
-│    │    ├── central_node_load_dish_config.py
-│    │    ├── central_node_perform_action.py
-│    │    ├── central_node_release_resources.py
-│    │    ├── move_to_off.py
-│    │    ├── move_to_on.py
-│    │    └── set_standby.py
-│    ├── expected_event.py
-│    ├── sdp_subarray
-│    │    └── subarray_simulate_receive_addresses.py
-│    ├── state_change_waiter.py
-│    ├── subarray
-│    │    ├── force_change_of_obs_state.py
-│    │    ├── obs_state_resetter_factory.py
-│    │    ├── subarray_abort.py
-│    │    ├── subarray_assign_resources.py
-│    │    ├── subarray_clear_obs_state.py
-│    │    ├── subarray_configure.py
-│    │    ├── subarray_end_observation.py
-│    │    ├── subarray_end_scan.py
-│    │    ├── subarray_execute_transition.py
-│    │    ├── subarray_five_point_calibration_scan.py
-│    │    ├── subarray_force_abort.py
-│    │    ├── subarray_move_to_off.py
-│    │    ├── subarray_move_to_on.py
-│    │    ├── subarray_release_all_resources.py
-│    │    ├── subarray_restart.py
-│    │    └── subarray_scan.py
-│    ├── telescope_action.py
-│    ├── telescope_action_sequence.py
-│    └── utils
-│        ├── generate_eb_pb_ids.py
+│   ├── central_node
+│   │   ├── central_node_assign_resources.py
+│   │   ├── central_node_load_dish_config.py
+│   │   ├── central_node_perform_action.py
+│   │   ├── central_node_release_resources.py
+│   │   ├── move_to_off.py
+│   │   ├── move_to_on.py
+│   │   └── set_standby.py
+│   ├── expected_event.py
+│   ├── sdp_subarray
+│   │   └── subarray_simulate_receive_addresses.py
+│   ├── state_change_waiter.py
+│   ├── subarray
+│   │   ├── force_change_of_obs_state.py
+│   │   ├── obs_state_resetter_factory.py
+│   │   ├── subarray_abort.py
+│   │   ├── subarray_assign_resources.py
+│   │   ├── subarray_clear_obs_state.py
+│   │   ├── subarray_configure.py
+│   │   ├── subarray_end_observation.py
+│   │   ├── subarray_end_scan.py
+│   │   ├── subarray_execute_transition.py
+│   │   ├── subarray_five_point_calibration_scan.py
+│   │   ├── subarray_force_abort.py
+│   │   ├── subarray_move_to_off.py
+│   │   ├── subarray_move_to_on.py
+│   │   ├── subarray_release_all_resources.py
+│   │   ├── subarray_restart.py
+│   │   └── subarray_scan.py
+│   ├── telescope_action.py
+│   ├── telescope_action_sequence.py
+│   └── utils
+│       └── generate_eb_pb_ids.py
 ├── config
-│    ├── components_config.py
-│    ├── configuration_factory.py
-│    ├── emulation_config.py
-│    ├── hardcoded_values.py
-│    └── other_config.py
+│   ├── components_config.py
+│   ├── configuration_factory.py
+│   ├── emulation_config.py
+│   ├── hardcoded_values.py
+│   └── other_config.py
 ├── facades
-│    ├── csp_facade.py
-│    ├── dishes_facade.py
-│    ├── sdp_facade.py
-│    ├── tmc_central_node_facade.py
-│    └── tmc_subarray_node_facade.py
+│   ├── csp_facade.py
+│   ├── dishes_facade.py
+│   ├── sdp_facade.py
+│   ├── tmc_central_node_facade.py
+│   └── tmc_subarray_node_facade.py
 ├── init
-│    └── telescope_structure_factory.py
+│   └── telescope_structure_factory.py
 ├── inputs
-│    ├── dict_json_input.py
-│    ├── dish_mode.py
-│    ├── json_input.py
-│    ├── obs_state_commands_input.py
-│    └── pointing_state.py
+│   ├── dict_json_input.py
+│   ├── dish_mode.py
+│   ├── json_input.py
+│   ├── obs_state_commands_input.py
+│   └── pointing_state.py
 └── structure
     ├── csp_devices.py
     ├── dishes_devices.py
     ├── sdp_devices.py
     ├── telescope_wrapper.py
     └── tmc_devices.py
+```
 
 * Facades have to be added in the `facades` folder
 * Actions have to be added in the `actions` folder
@@ -161,14 +165,9 @@ The test harness files have this layout:
   subsystems.
 * Input-related classes have to be added in the `inputs` folder
 * configuration-related classes have to be added in the
-  `telescope_config` folder.
-
-
-## How to use this harness
-
-TODO: point to examples of test scripts
-
-TODO: explain how to avoid making assumptions on emulators
+  `config` folder.
+* The `init` folder contains all the factories needed to initialize
+  the test harness. 
 
 ## Design decisions
 
@@ -194,7 +193,8 @@ too many unrelated functionalities
 Facade is a design pattern
 ([FACADE](https://refactoring.guru/design-patterns/facade))
 that provides a simplified interface to a complex system.
-In this case the complex system is part of the SUT.
+In this case the complex system is the test harness itself, with the wrappers
+that represent the SUT and the actions that act over the wrappers.
 
 
 ### Why use actions?
@@ -230,12 +230,10 @@ Actions are based on the
 [COMMAND](https://refactoring.guru/design-patterns/command),
 [TEMPLATE METHOD](https://refactoring.guru/design-patterns/template-method) and
 [COMPOSITE](https://refactoring.guru/design-patterns/composite)
-design patterns. To implement an action, one has to subclass the
-`TelescopeAction` class and override the methods:
+design patterns. 
 
-- `_action` to implement the operation to be performed,
-- `termination_condition` to implement the termination condition (as a set
-  of expected events).
+To implement an action, one has to extend the
+`TelescopeAction` base class and override the abstract methods (to define the *procedure* that implements the action and the *synchronization condition* that defines when the action is completed).
 
 
 ### Why using wrappers?
@@ -247,12 +245,39 @@ Their responsibility is to hold the details about how to interact
 to such devices (i.e. names of commands, format of their input,
 attribute names and values, etc.).
 
+The main access point of the wrappers (`TelescopeWrapper`) is intended to be a [SINGLETON](https://refactoring.guru/design-patterns/singleton), so once it's initialized one time,
+you can access it from everywhere in the code just by creating an instance. 
+This way multiple facades and actions can share the same 
+(already configured) instance of the wrappers without being aware of it
+and without the need to pass it around.
+
 
 ### Why using argument factories?
 
-TODO
+Some actions over the telescope (such as the *scan*, *configure*, *assign resources*, etc. commands) require an input argument that is a JSON string.
+Some *reset* procedures too require default arguments to be used to call
+the various commands. 
 
-### Why using configurators?
+Passing these arguments around as strings or dictionaries is not a good
+practice, because it makes the code more technical (full of type conversions,
+explicit file reading, etc.) and so less readable. The idea of argument
+factories is to provide a structured object-oriented way to represent those
+arguments.
+
+An abstract base class (`JSONInput`) defines what is expected from a JSON input (return a string or a dictionary, create a copy of itself with some
+values changed, etc.). Through a concrete implementation of this class, 
+one can specify how to generate this JSON (e.g., accessing your own test data folders, associating keywords to each or your specific input, 
+through an hardcoded dictionary, etc.).
+
+This solution is inspired by various creational design patterns, such as
+[FACTORY METHOD](https://refactoring.guru/design-patterns/factory-method),
+[ABSTRACT FACTORY](https://refactoring.guru/design-patterns/abstract-factory)
+and [BUILDER](https://refactoring.guru/design-patterns/builder).
+
+In `inputs` folder you can find some examples of JSON input classes, but also
+other input-output related classes.
+
+### Why using configuration-classes?
 
 These are mechanisms that collect configuration data from files or
 runtime flags, represent them in objects, and support fixtures to setup the
@@ -263,31 +288,76 @@ There are a number of classes that represent the default configuration
 of the structure of the SUT. For example, the class `TMCConfiguration`
 contains the names of the devices that are part of the TMC. The class
 `CSPConfiguration` contains the names of the devices that are part of the CSP.
+The directive to use the emulated or the production devices is another
+example of configuration data (very important for the initialization of the
+test harness).
 
-The class `ConfigurationFactory` is used to create instances of these classes.  
+Since the configuration may come from different sources (environment variables,
+hardcoded values, files, etc.) and since it's easy to loose track of them an
+object-oriented approach is used to represent them in a structured way and
+to provide a consistent interface to them. To avoid inconsistencies, a 
+*factory* class (for now not abstract, but it could be) is used to create
+all the instances of those configurations. This way, the test harness initialization procedure or any other part of the
+code can access the same configurations.
 
-The class `TelescopeStructureFactory` is used to create instances
-of the facades and the structure of the SUT. It uses the
-`ConfigurationFactory` to create the instances of the classes that
-represent the structure of the SUT.
+## How to use and extend this harness
 
-## How to extend this harness
+At the moment (July-August 2024) this harness has no well defined
+extension points and it is pretty specific to the TMC-CSP integration tests 
+in MID and - in some extent - to the TMC-X integration tests (where X may be CSP,
+SDP or the Dishes), always in MID.
 
-At the moment (July 2024) this harness has no well defined extension points.
-So to adapt it to your needs the best way is to subclass key existing classes
-and override their methods or create your own classes.
+### How to use this test harness
 
-Key classes are:
+To use this test harness you need to:
 
-* Facade: create your own facade class.
-* Action: create your own action class by subclassing
-`TelescopeAction` or `TelescopeActionSequence`.
-* Wrapper: create your own wrapper class, by subclassing existing ones.
-  You'll need also to subclass the top structure class
-  which is `TelescopeWrapper`. 
-* TestHarnessConfigurationFactory: subclass it and override its methods
-  to provide alternative configurations. 
-* TelescopeStructureFactory: subclass it and override its methods to
-  instantiate your own facades.
+- Import the library `ska_integration_test_harness` in your test script.
+- In your test setup, init once the wrappers using the appropriate factory
+  you can find in the `init` module.
+  - *A good place to do this may be a `pytest.fixture`.For how `pytest` fixtures
+    work, a good way you can use to execute the *teardown* method after 
+    your test are finished is to*:
+    - *create an instance using the appropriate factory,*
+    - *`yield` it to the test function,*
+    - *and then call the `teardown` method on the instance, which will
+      be executed after the test is finished.*
+- The same way, init the facades you need (just creating instances of them
+  and passing your wrapper instance to them).
+- In your tests, use the facades methods to interact with the SUT and the
+  facades properties to access directly the (already configured) device
+  proxies.
+  - *Remember each facade represent a subsytem, so if you want to access a
+    certain device, ask yourself: which subsystem does it belong to?*
+  - *Since this test harness is focused on TMC, most if not all of the actions
+    are done by calling commands on TMC central node or TMC subarray node.*
 
-<!-- TODO: explain better this part! -->
+### How to extend this test harness (withing the current limitations)
+
+Within the current limitations, your main ways to extend this test harness
+are
+
+- **Add new actions**: you can add new actions by subclassing the
+  `TelescopeAction` class and implementing the abstract methods.
+  You can also create a sequence of actions by subclassing the
+  `TelescopeActionSequence` class and implementing the abstract methods.
+- **Add new facades**: you can create new facades that access the telescope
+  wrappers and the actions, hiding the implementation details for the tester.
+- **Add new input classes**: you can create new input classes that generate
+  the JSON input for the actions in your own ways (e.g., accessing your own
+  test data folders, etc.).
+
+If you wish to do more, you may copy this structure and adapt it to your needs.
+
+### How you will be able to extend this test harness in the future
+
+In the future, the test harness will be more flexible and will not be centered
+strictly on the TMC-X integration tests in MID. Other than what is already
+mentioned, you probably will be able to:
+
+- Customize the telescope structure, choosing which subsystems to include,
+  which are the targets of the actions and which are emulated or production
+  ones.
+  - Provide your own wrappers, if needed.
+- Have more control over the initialization of the test harness, extending
+  the configuration classes and the factories.
+- Have more generic actions, which can be used in different contexts.
