@@ -14,4 +14,4 @@ def dummy_version() -> str:
 
     :return: A dummy version string.
     """
-    return "SDP ABORTING configured"
+    return "SDP ABORTING configured 0.5"
