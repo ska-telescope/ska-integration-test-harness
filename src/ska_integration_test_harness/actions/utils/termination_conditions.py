@@ -117,10 +117,8 @@ def dishes_have_dish_mode(
     return res
 
 
-def release_and_restart_termination_condition(
-    telescope: TelescopeWrapper,
-) -> list[ExpectedEvent]:
-    """Termination condition for release and restart actions.
+def resources_are_released(telescope: TelescopeWrapper) -> list[ExpectedEvent]:
+    """Termination condition for resources are released.
 
     Since it's repeated three times in different actions, we encapsulate it
     here. The termination condition is that all subarrays must be in EMPTY
@@ -130,22 +128,14 @@ def release_and_restart_termination_condition(
 
     :return: The termination condition, as a sequence of expected events.
     """
-    # pre_action_attr_value = telescope.tmc.subarray_node.assignedResources
+    pre_action_attr_value = telescope.tmc.subarray_node.assignedResources
 
     # all subarrays must be in EMPTY state
-    res = all_subarrays_have_obs_state(telescope, ObsState.EMPTY)
-
-    # TODO: this verification is not working as expected in all the cases
-    # investigate when it is not working --> when it is appropriate
-    # and when it is not.
-    # assigned resources should have changed
-    # res.append(
-    #     ExpectedEvent(
-    #         device=telescope.tmc.subarray_node,
-    #         attribute="assignedResources",
-    #         predicate=lambda event: event.attribute_value
-    #         != pre_action_attr_value,
-    #     )
-    # )
-
-    return res
+    return [
+        ExpectedEvent(
+            device=telescope.tmc.subarray_node,
+            attribute="assignedResources",
+            predicate=lambda event: event.attribute_value
+            != pre_action_attr_value,
+        )
+    ]

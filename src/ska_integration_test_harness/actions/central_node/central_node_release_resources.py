@@ -2,11 +2,14 @@
 
 import logging
 
+from ska_control_model import ObsState
+
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
 )
 from ska_integration_test_harness.actions.utils.termination_conditions import (
-    release_and_restart_termination_condition,
+    all_subarrays_have_obs_state,
+    resources_are_released,
 )
 from ska_integration_test_harness.inputs.json_input import JSONInput
 
@@ -27,4 +30,10 @@ class CentralNodeReleaseResources(TelescopeAction):
         return result, message
 
     def termination_condition(self):
-        return release_and_restart_termination_condition(self.telescope)
+        # subarray devices are expected to be in EMPTY state
+        res = all_subarrays_have_obs_state(self.telescope, ObsState.EMPTY)
+
+        # resources should be released
+        res += resources_are_released(self.telescope)
+
+        return res
