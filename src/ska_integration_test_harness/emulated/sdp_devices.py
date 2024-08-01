@@ -16,7 +16,7 @@ class EmulatedSDPDevices(SDPDevices):
     def _configure_transitions(self) -> None:
         """Configure the needed for SDP emulated subarray."""
         # SDP should do the ABORTING transition
-        self.sdp_subarray.AddTransition('[["ABORTING", 0.5 ]]')
+        # self.sdp_subarray.AddTransition('[["ABORTING", 0.5 ]]')
 
     def tear_down(self) -> None:
         """Tear down the SDP."""
