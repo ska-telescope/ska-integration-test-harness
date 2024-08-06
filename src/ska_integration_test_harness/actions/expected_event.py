@@ -17,8 +17,8 @@ is executed. There are provided two classes:
 from dataclasses import dataclass
 from typing import Any, Callable
 
+import tango
 from ska_tango_testing.integration.event import ReceivedEvent
-from tango import DeviceProxy
 
 
 @dataclass
@@ -34,7 +34,7 @@ class ExpectedEvent:
       conditions.
     """
 
-    device: DeviceProxy | str
+    device: tango.DeviceProxy | str
     """The Tango device or its name you expect to change state."""
 
     attribute: str
@@ -44,7 +44,7 @@ class ExpectedEvent:
     """The predicate that defines the expected event."""
 
     def _device_to_str(self) -> str:
-        if isinstance(self.device, DeviceProxy):
+        if isinstance(self.device, tango.DeviceProxy):
             return self.device.dev_name()
         return self.device
 
@@ -89,7 +89,7 @@ class ExpectedStateChange(ExpectedEvent):
     with the value of the attribute in each event.
     """
 
-    device: DeviceProxy | str
+    device: tango.DeviceProxy | str
     """The Tango device or its name you expect to change state."""
 
     attribute: str
@@ -100,7 +100,7 @@ class ExpectedStateChange(ExpectedEvent):
 
     def __init__(
         self,
-        device: DeviceProxy | str,
+        device: tango.DeviceProxy | str,
         attribute: str,
         expected_value: Any,
     ) -> None:
@@ -119,6 +119,8 @@ class ExpectedStateChange(ExpectedEvent):
         )
 
     def _read_attribute(self) -> Any:
-        if isinstance(self.device, DeviceProxy):
+        if isinstance(self.device, tango.DeviceProxy):
             return self.device.read_attribute(self.attribute).value
-        return DeviceProxy(self.device).read_attribute(self.attribute).value
+        return (
+            tango.DeviceProxy(self.device).read_attribute(self.attribute).value
+        )

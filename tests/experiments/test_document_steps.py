@@ -18,6 +18,8 @@ from ska_integration_test_harness.experiments.document_steps import (
     PythonFileHandler,
     StepVisitor,
 )
+
+
 @pytest.mark.experiments
 class TestMarkdownFormatter:
     @pytest.fixture
@@ -265,6 +267,7 @@ def function_with_error(
     #     assert_that(scenarios).is_equal_to({"test_scenario": "Test Scenario"})
 
 
+
 @pytest.mark.experiments
 class TestStepVisitor:
     @pytest.fixture
@@ -490,6 +493,7 @@ def regular_function():
             "def func_with_var_args(*args, **kwargs):"
         )
 
+
 @pytest.mark.experiments
 class TestFileHandlers:
     @pytest.fixture
@@ -545,6 +549,7 @@ class TestFileHandlers:
             mock_write_markdown.assert_called_once_with(
                 "# Formatted Feature", "output.md"
             )
+
 
 @pytest.mark.experiments
 class TestFolderProcessor:
@@ -609,6 +614,7 @@ class TestFolderProcessor:
             "/root", "file.txt", "/output", "/repo/root"
         )
         assert_that(mock_handler.process_file.called).is_false()
+
 
 @pytest.mark.experiments
 class TestPostProcessor:
@@ -683,4 +689,3 @@ class TestPostProcessor:
             "    - [file2.md](path/to/subfolder/file2.md)",
             "- [file3.md](path/to/file3.md)",
         )
-
