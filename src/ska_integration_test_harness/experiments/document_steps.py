@@ -2,6 +2,7 @@
 
 import argparse
 import ast
+import logging
 import os
 from abc import ABC, abstractmethod
 from datetime import datetime
@@ -398,23 +399,23 @@ class StepVisitor(ast.NodeVisitor):
           to self.scenarios
         - If no valid scenario name is extracted, a warning is printed
         """
-        assert isinstance(node, ast.FunctionDef), "Node must be a FunctionDef"
-        assert isinstance(decorator, ast.Call), "Decorator must be a Call"
 
-        initial_scenarios_count = len(self.scenarios)
+        scenario_name = None
+        if decorator.args:
+            # Handle positional arguments
+            if len(decorator.args) >= 2 and isinstance(decorator.args[1], ast.Str):
+                scenario_name = decorator.args[1].s
+        else:
+            # Handle keyword arguments
+            for keyword in decorator.keywords:
+                if keyword.arg == "scenario_name" and isinstance(keyword.value, ast.Str):
+                    scenario_name = keyword.value.s
+                    break
 
-        scenario_name = self._extract_scenario_name(decorator)
         if scenario_name is not None:
             self.scenarios[node.name] = scenario_name
         else:
-            print(
-                "Warning: Could not extract scenario name "
-                f"for function {node.name}"
-            )
-
-        assert (
-            len(self.scenarios) >= initial_scenarios_count
-        ), "Scenarios should not decrease"
+            print(f"Warning: Could not extract scenario name for function {node.name}")
 
     def _extract_scenario_name(self, decorator: ast.Call) -> Optional[str]:
         """
@@ -428,11 +429,17 @@ class StepVisitor(ast.NodeVisitor):
         """
         assert isinstance(decorator, ast.Call), "Decorator must be a Call"
 
-        if len(decorator.args) >= 2 and isinstance(decorator.args[1], ast.Str):
-            return decorator.args[1].s
+        if decorator.args:
+            if len(decorator.args) >= 2 and isinstance(decorator.args[1], ast.Str):
+                return decorator.args[1].s
+
         for keyword in decorator.keywords:
-            if keyword.arg == "name" and isinstance(keyword.value, ast.Str):
-                return keyword.value.s
+            if keyword.arg == "scenario_name":
+                if isinstance(keyword.value, ast.Str):
+                    return keyword.value.s
+                elif isinstance(keyword.value, ast.Constant):  # For Python 3.8+
+                    return keyword.value.value
+
         return None
 
     @staticmethod
@@ -447,109 +454,47 @@ class StepVisitor(ast.NodeVisitor):
         - Returns a string representation of the function signature
         """
         assert isinstance(node, ast.FunctionDef), "Node must be a FunctionDef"
+        args_list = []
 
-        args = [arg.arg for arg in node.args.args]
-        return f"def {node.name}({', '.join(args)}):"
+        # Handle positional arguments
+        for arg in node.args.args:
+            args_list.append(arg.arg)
+
+        # Handle *args
+        if node.args.vararg:
+            args_list.append(f"*{node.args.vararg.arg}")
+
+        # Handle **kwargs
+        if node.args.kwarg:
+            args_list.append(f"**{node.args.kwarg.arg}")
+
+        args_str = ", ".join(args_list)
+        return f"def {node.name}({args_str}):"
 
 
 class FileScanner:
     """Class to scan the file and extract steps and scenarios."""
 
+
     @staticmethod
     def parse_file(filename: str) -> Tuple[List[Dict], Dict[str, str]]:
-        """Parse the given file and return steps and scenarios."""
+        logging.debug(f"Entering parse_file for {filename}")
         try:
             with open(filename, "r") as file:
                 content = file.read()
+            logging.debug("File read successfully")
             tree = ast.parse(content)
+            logging.debug("AST parsed successfully")
             visitor = StepVisitor()
             visitor.visit(tree)
+            logging.debug("StepVisitor completed")
             return visitor.steps, visitor.scenarios
         except SyntaxError as e:
-            print(f"SyntaxError in file {filename}: {str(e)}")
+            logging.error(f"SyntaxError in file {filename}: {str(e)}")
             return [], {}
         except Exception as e:
-            print(f"Error parsing file {filename}: {str(e)}")
+            logging.error(f"Error parsing file {filename}: {str(e)}")
             return [], {}
-
-
-class FolderProcessor2:
-    """Class to process a folder of Python and feature files."""
-
-    @staticmethod
-    def find_repository_root(path: str) -> str:
-        """Find the root of the repository by looking for .git folder."""
-        current_path = os.path.abspath(path)
-        while current_path != "/":
-            if os.path.exists(os.path.join(current_path, ".git")):
-                return current_path
-            current_path = os.path.dirname(current_path)
-        return path  # If no .git folder found, return the original path
-
-    @staticmethod
-    def process_folder(input_folder: str, output_folder: str) -> None:
-        """Process all Python and feature files in the given folder."""
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
-
-        repo_root = FolderProcessor.find_repository_root(input_folder)
-        print(f"Repository root: {repo_root}")
-
-        for root, _, files in os.walk(input_folder):
-            for filename in files:
-                input_path = os.path.join(root, filename)
-                relative_path = os.path.relpath(input_path, repo_root)
-
-                if filename.endswith(".py"):
-                    # Place Python step files in the 'steps' subfolder
-                    output_path = os.path.join(
-                        output_folder,
-                        "steps",
-                        f"{os.path.splitext(relative_path)[0]}.md",
-                    )
-                    steps, scenarios = FileScanner.parse_file(input_path)
-
-                    if steps or scenarios:
-                        markdown_content = MarkdownFormatter.generate_markdown(
-                            relative_path, steps, scenarios
-                        )
-                        MarkdownFormatter.write_markdown(
-                            markdown_content, output_path
-                        )
-                        print(f"Processed Python file: {relative_path}")
-                    else:
-                        print(
-                            "No steps or scenarios found "
-                            f"in {relative_path}. Skipping."
-                        )
-
-                elif filename.endswith(".feature"):
-                    # Place feature files in the 'features' subfolder
-                    output_path = os.path.join(
-                        output_folder,
-                        "features",
-                        f"{os.path.splitext(relative_path)[0]}.md",
-                    )
-                    try:
-                        with open(input_path, "r") as feature_file:
-                            feature_content = feature_file.read()
-                        markdown_content = (
-                            MarkdownFormatter.format_feature_file(
-                                feature_content
-                            )
-                        )
-                        MarkdownFormatter.write_markdown(
-                            markdown_content, output_path
-                        )
-                        print(f"Processed feature file: {relative_path}")
-                    except Exception as e:
-                        print(
-                            "Error processing feature file "
-                            f"{relative_path}: {str(e)}"
-                        )
-
-        # Run post-processor to create index file
-        PostProcessor.create_index_file(output_folder)
 
 
 class FileHandler(ABC):
@@ -676,43 +621,34 @@ class PostProcessor:
 
     @staticmethod
     def create_index_file(output_folder: str) -> None:
-        """Create a top-level index file pointing to all feature
-        and step files, including subfolder structure.
-        """
         feature_files = []
         step_files = []
 
         for root, _, files in os.walk(output_folder):
             for file in files:
                 if file.endswith(".md") and file != "index.md":
-                    file_path = os.path.join(root, file)
-                    relative_path = os.path.relpath(file_path, output_folder)
-                    if relative_path.startswith("features"):
-                        feature_files.append(relative_path)
-                    elif relative_path.startswith("steps"):
-                        step_files.append(relative_path)
+                    rel_path = os.path.relpath(os.path.join(root, file), output_folder)
+                    if rel_path.startswith("features"):
+                        feature_files.append(rel_path)
+                    elif rel_path.startswith("steps"):
+                        step_files.append(rel_path)
 
-        index_content = "# Test Documentation Index\n\n"
-        index_content += "Last updated on: "
-        index_content += f"{datetime.now().strftime('%d %B %Y %H:%M:%S')}\n\n"
+        content = "# Test Documentation Index\n\n"
+        content += f"Last updated on: {datetime.now().strftime('%d %B %Y %H:%M:%S')}\n\n"
 
         if feature_files:
-            index_content += "## Feature Files\n\n"
-            index_content += PostProcessor._generate_nested_list(
-                sorted(feature_files), "features"
-            )
-            index_content += "\n"
+            content += "## Feature Files\n\n"
+            for file in sorted(feature_files):
+                content += f"- [{os.path.basename(file)}]({file})\n"
+            content += "\n"
 
         if step_files:
-            index_content += "## Step Files\n\n"
-            index_content += PostProcessor._generate_nested_list(
-                sorted(step_files), "steps"
-            )
+            content += "## Step Files\n\n"
+            for file in sorted(step_files):
+                content += f"- [{os.path.basename(file)}]({file})\n"
 
-        index_file_path = os.path.join(output_folder, "index.md")
-        with open(index_file_path, "w") as index_file:
-            index_file.write(index_content)
-        print(f"Created index file: {index_file_path}")
+        with open(os.path.join(output_folder, "index.md"), "w") as index_file:
+            index_file.write(content)
 
     @staticmethod
     def _generate_nested_list(files: List[str], root_folder: str) -> str:

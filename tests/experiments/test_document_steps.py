@@ -1,7 +1,10 @@
 # pylint: skip-file
 
 import ast
-from unittest.mock import Mock, mock_open, patch
+import logging
+from datetime import datetime
+from io import StringIO
+from unittest.mock import Mock, mock_open, patch, call
 
 import pytest
 from assertpy import assert_that
@@ -244,7 +247,7 @@ def function_with_error(
         assert_that(steps).is_empty()
         assert_that(scenarios).is_empty()
 
-    @patch("ska_integration_test_harness.FileScanner.StepVisitor")
+    @patch("ska_integration_test_harness.experiments.document_steps.StepVisitor")
     def test_correct_extraction(self, mock_step_visitor):
         # Setup mock visitor
         mock_instance = mock_step_visitor.return_value
@@ -258,6 +261,7 @@ def function_with_error(
             [{"type": "given", "name": "a condition"}]
         )
         assert_that(scenarios).is_equal_to({"test_scenario": "Test Scenario"})
+
 
 @pytest.mark.experiments
 class TestStepVisitor:
@@ -362,7 +366,6 @@ def regular_function():
         assert_that(step_visitor._extract_step_name(decorator)).is_equal_to(
             "a keyword step"
         )
-
     def test__process_scenario_with_different_structures(self, step_visitor):
         # Test with positional arguments
         node = ast.FunctionDef(
@@ -384,6 +387,9 @@ def regular_function():
         assert_that(step_visitor.scenarios).contains_entry(
             {"test_scenario1": "Scenario 1"}
         )
+
+        # Reset scenarios dictionary
+        step_visitor.scenarios = {}
 
         # Test with keyword arguments
         node = ast.FunctionDef(
@@ -608,10 +614,15 @@ class TestPostProcessor:
     def post_processor(self):
         return PostProcessor()
 
-    def test_create_index_file(self, post_processor):
-        with patch("os.walk") as mock_walk, patch(
-            "builtins.open", mock_open()
-        ) as mock_file:
+    def test_create_index_file(self):
+        mock_date = datetime(2023, 1, 1, 0, 0, 0)
+        with patch("os.walk") as mock_walk, \
+             patch("builtins.open", mock_open()) as mock_file, \
+             patch("datetime.datetime") as mock_datetime:
+
+            # Mock the current date
+            mock_datetime.now.return_value = mock_date
+
             mock_walk.return_value = [
                 ("/output", ["features", "steps"], []),
                 ("/output/features", [], ["feature1.md", "feature2.md"]),
@@ -620,12 +631,27 @@ class TestPostProcessor:
 
             PostProcessor.create_index_file("/output")
 
+            # Check if the file was opened correctly
             mock_file.assert_called_once_with("/output/index.md", "w")
+
+            # Get the file handle
             handle = mock_file()
-            assert_that(handle.write.call_count).is_greater_than(1)
-            assert_that(handle.write.call_args_list[0][0][0]).contains(
-                "# Test Documentation Index"
+
+            # Check that write was called once
+            assert_that(handle.write.call_count).is_equal_to(1)
+
+            # Check the content of the write call
+            expected_content = (
+                "# Test Documentation Index\n\n"
+                "Last updated on: 01 January 2023 00:00:00\n\n"
+                "## Feature Files\n\n"
+                "- [feature1.md](features/feature1.md)\n"
+                "- [feature2.md](features/feature2.md)\n\n"
+                "## Step Files\n\n"
+                "- [step1.md](steps/step1.md)\n"
+                "- [step2.md](steps/step2.md)\n"
             )
+            assert_that(handle.write.call_args[0][0]).is_equal_to(expected_content)
 
     def test__generate_nested_list(self, post_processor):
         files = [
