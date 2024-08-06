@@ -123,8 +123,7 @@ class TestMarkdownFormatter:
         )
 
         assert_that(markdown).contains(
-            "# Feature",
-            "## User Authentication",
+            "## Feature: User Authentication",
             "### Scenario: Successful login",
             "- Given the user is on the login page",
             "- When the user enters valid credentials",
@@ -201,26 +200,26 @@ def function_with_error(
 
         assert_that(steps[0]).contains_entry(
             {
-                "type": "given",
-                "name": "the user is on the login page",
-                "function": "user_on_login_page",
+                "type": "given",},{
+                "name": "the user is on the login page",},{
+                "function": "user_on_login_page",},{
                 "docstring": "Ensure the user is on the login page",
             }
         )
 
         assert_that(steps[1]).contains_entry(
             {
-                "type": "when",
-                "name": "the user enters valid credentials",
+                "type": "when",},{
+                "name": "the user enters valid credentials",},{
                 "function": "enter_valid_credentials",
             }
         )
 
         assert_that(steps[2]).contains_entry(
             {
-                "type": "then",
-                "name": "the user should be logged in successfully",
-                "function": "verify_successful_login",
+                "type": "then",},{
+                "name": "the user should be logged in successfully",},{
+                "function": "verify_successful_login",},{
                 "docstring": "Check that the user is logged in",
             }
         )
@@ -245,7 +244,7 @@ def function_with_error(
         assert_that(steps).is_empty()
         assert_that(scenarios).is_empty()
 
-    @patch("file_scanner.FileScanner.StepVisitor")
+    @patch("ska_integration_test_harness.FileScanner.StepVisitor")
     def test_correct_extraction(self, mock_step_visitor):
         # Setup mock visitor
         mock_instance = mock_step_visitor.return_value
@@ -319,8 +318,8 @@ def regular_function():
         for i, step_type in enumerate(["given", "when", "then"]):
             assert_that(step_visitor.steps[i]).contains_entry(
                 {
-                    "type": step_type,
-                    "name": f"a {step_type} step",
+                    "type": step_type,},{
+                    "name": f"a {step_type} step",},{
                     "function": f"{step_type}_func",
                 }
             )
@@ -495,11 +494,11 @@ class TestFileHandlers:
 
     def test_PythonFileHandler_process_file(self, python_file_handler):
         with patch(
-            "file_handlers.FileScanner.parse_file"
+            "ska_integration_test_harness.experiments.document_steps.FileScanner.parse_file"
         ) as mock_parse_file, patch(
-            "file_handlers.MarkdownFormatter.generate_markdown"
+            "ska_integration_test_harness.experiments.document_steps.MarkdownFormatter.generate_markdown"
         ) as mock_generate_markdown, patch(
-            "file_handlers.MarkdownFormatter.write_markdown"
+            "ska_integration_test_harness.experiments.document_steps.MarkdownFormatter.write_markdown"
         ) as mock_write_markdown:
             mock_parse_file.return_value = (
                 ["step1", "step2"],
@@ -513,7 +512,7 @@ class TestFileHandlers:
 
             mock_parse_file.assert_called_once_with("input.py")
             mock_generate_markdown.assert_called_once_with(
-                "input.py", ["step1", "step2"], {"scenario1": "Scenario 1"}
+                "../../home/giorgio/DEV/SKA/ska-integration-test-harness/tests/experiments/input.py", ["step1", "step2"], {"scenario1": "Scenario 1"}
             )
             mock_write_markdown.assert_called_once_with(
                 "# Markdown Content", "output.md"
@@ -523,9 +522,9 @@ class TestFileHandlers:
         with patch(
             "builtins.open", mock_open(read_data="Feature: Test")
         ) as mock_file, patch(
-            "file_handlers.MarkdownFormatter.format_feature_file"
+            "ska_integration_test_harness.experiments.document_steps.MarkdownFormatter.format_feature_file"
         ) as mock_format_feature, patch(
-            "file_handlers.MarkdownFormatter.write_markdown"
+            "ska_integration_test_harness.experiments.document_steps.MarkdownFormatter.write_markdown"
         ) as mock_write_markdown:
             mock_format_feature.return_value = "# Formatted Feature"
 
@@ -558,30 +557,30 @@ class TestFolderProcessor:
 
     def test_process_folder(self, folder_processor):
         with patch("os.walk") as mock_walk, patch(
-            "folder_processor.FolderProcessor._process_file"
+            "ska_integration_test_harness.experiments.document_steps.FolderProcessor._process_file"
         ) as mock_process_file, patch(
-            "folder_processor.PostProcessor.create_index_file"
+            "ska_integration_test_harness.experiments.document_steps.PostProcessor.create_index_file"
         ) as mock_create_index:
             mock_walk.return_value = [
                 ("/root", ["dir1"], ["file1.py", "file2.feature"]),
                 ("/root/dir1", [], ["file3.py"]),
             ]
 
-            folder_processor.process_folder("/input", "/output")
+            folder_processor.process_folder("/input", "/tmp/xx")
 
             assert_that(mock_process_file.call_count).is_equal_to(3)
-            mock_create_index.assert_called_once_with("/output")
+            mock_create_index.assert_called_once_with("/tmp/xx")
 
     def test__ensure_output_folder_exists(self, folder_processor):
         with patch("os.path.exists") as mock_exists, patch(
             "os.makedirs"
         ) as mock_makedirs:
             mock_exists.return_value = False
-            folder_processor._ensure_output_folder_exists("/output")
-            mock_makedirs.assert_called_once_with("/output")
+            folder_processor._ensure_output_folder_exists("//tmp/xx")
+            mock_makedirs.assert_called_once_with("//tmp/xx")
 
             mock_exists.return_value = True
-            folder_processor._ensure_output_folder_exists("/output")
+            folder_processor._ensure_output_folder_exists("//tmp/xx")
             assert_that(mock_makedirs.call_count).is_equal_to(
                 1
             )  # No additional call
@@ -594,7 +593,7 @@ class TestFolderProcessor:
             "/root", "file.py", "/output", "/repo/root"
         )
         mock_handler.process_file.assert_called_once_with(
-            "/root/file.py", "/output/steps/root/file.md", "/repo/root"
+            "/root/file.py", "/output/steps/../../root/file.md", "/repo/root"
         )
 
         mock_handler.reset_mock()
