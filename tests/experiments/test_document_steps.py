@@ -18,9 +18,12 @@ from ska_integration_test_harness.experiments.document_steps import (
     PythonFileHandler,
     StepVisitor,
 )
-
 @pytest.mark.experiments
 class TestMarkdownFormatter:
+    @pytest.fixture
+    def markdown_formatter(self):
+        return MarkdownFormatter()
+
     @pytest.fixture
     def sample_steps(self):
         return [
@@ -29,7 +32,7 @@ class TestMarkdownFormatter:
                 "name": "the system is in a stable state",
                 "function": "given_stable_system",
                 "signature": "def given_stable_system():",
-                "docstring": "Ensure the system is in a stable state before the test.",  # pylint: disable=line-too-long # noqa E501
+                "docstring": "Ensure the system is in a stable state before the test.",
             },
             {
                 "type": "when",
@@ -75,9 +78,9 @@ class TestMarkdownFormatter:
               | nonuser  | pass123  | User does not exist     |
         """
 
-    def test_generate_markdown(self, sample_steps, sample_scenarios):
+    def test_generate_markdown(self, markdown_formatter, sample_steps, sample_scenarios):
         filepath = "test/path/to/file.py"
-        markdown = MarkdownFormatter.generate_markdown(
+        markdown = markdown_formatter.generate_markdown(
             filepath, sample_steps, sample_scenarios
         )
 
@@ -96,14 +99,14 @@ class TestMarkdownFormatter:
             "Ensure the system is in a stable state before the test.",
         )
 
-    def test_write_markdown(self):
+    def test_write_markdown(self, markdown_formatter):
         content = "# Test Markdown"
         output_file = "/path/to/output.md"
 
         mock_open_function = mock_open()
         with patch("builtins.open", mock_open_function):
             with patch("os.makedirs") as mock_makedirs:
-                MarkdownFormatter.write_markdown(content, output_file)
+                markdown_formatter.write_markdown(content, output_file)
 
         assert_that(mock_makedirs.call_count).is_equal_to(1)
         assert_that(mock_makedirs.call_args[0][0]).is_equal_to("/path/to")
@@ -120,8 +123,8 @@ class TestMarkdownFormatter:
             content
         )
 
-    def test_format_feature_file(self, sample_feature_content):
-        markdown = MarkdownFormatter.format_feature_file(
+    def test_format_feature_file(self, markdown_formatter, sample_feature_content):
+        markdown = markdown_formatter.format_feature_file(
             sample_feature_content
         )
 
@@ -138,13 +141,13 @@ class TestMarkdownFormatter:
             "| nonuser  | pass123  | User does not exist |",
         )
 
-    def test__format_example_table(self):
+    def test__format_example_table(self, markdown_formatter):
         table_lines = [
             "| header1 | header2 | header3 |",
             "| value1  | value2  | value3  |",
             "| a       | b       | c       |",
         ]
-        formatted_table = MarkdownFormatter._format_example_table(table_lines)
+        formatted_table = markdown_formatter._format_example_table(table_lines)
 
         expected_output = (
             "| header1 | header2 | header3 |\n"
@@ -154,9 +157,8 @@ class TestMarkdownFormatter:
         )
         assert_that(formatted_table).is_equal_to(expected_output)
 
-    def test__format_example_table_empty(self):
-        assert_that(MarkdownFormatter._format_example_table([])).is_empty()
-
+    def test__format_example_table_empty(self, markdown_formatter):
+        assert_that(markdown_formatter._format_example_table([])).is_empty()
 @pytest.mark.experiments
 class TestFileScanner:
     @pytest.fixture

@@ -129,113 +129,87 @@ from typing import Dict, List, Optional, Tuple
 class MarkdownFormatter:
     """Class for managing the output and MD formatting."""
 
-    @staticmethod
-    def format_feature_file(content: str) -> str:
-        """
-        Format feature file content as Markdown.
+    def generate_markdown(self, filepath: str, steps: List[Dict], scenarios: Dict[str, str]) -> str:
+        """Generate markdown content from steps and scenarios."""
+        current_time = datetime.now().strftime("%d %B %Y %H:%M:%S")
+        markdown = f"# Test Steps and Scenarios from {filepath}\n\n"
+        markdown += f"Last updated on: {current_time}\n\n"
 
-        Pre-conditions:
-        - content is a non-empty string containing feature file content
+        if scenarios:
+            markdown += "## Scenarios\n\n"
+            for func_name, scenario_name in scenarios.items():
+                markdown += f"- {scenario_name} (`{func_name}`)\n"
+            markdown += "\n"
 
-        Post-conditions:
-        - Returns a formatted Markdown string representing the feature file content
-        """
-        markdown = "# Feature\n\n"
-        lines = content.split("\n")
-        scenario_data = {"in_scenario": False, "in_example": False, "example_table": []}
-
-        for line in lines:
-            stripped_line = line.strip()
-            markdown += MarkdownFormatter._process_line(stripped_line, scenario_data)
-
-        # Handle case where file ends with an example table
-        if scenario_data["example_table"]:
-            markdown += MarkdownFormatter._format_example_table(scenario_data["example_table"])
+        if steps:
+            markdown += "## Steps\n\n"
+            for step in steps:
+                markdown += f"### {step['type'].capitalize()}: {step['name']}\n\n"
+                markdown += f"**Function:** `{step['function']}`\n\n"
+                markdown += f"**Signature:**\n```python\n{step['signature']}\n```\n\n"
+                markdown += f"**Description:**\n{step['docstring']}\n\n"
+                markdown += "---\n\n"
+        else:
+            markdown += "No steps found in this file.\n"
 
         return markdown
 
-    @staticmethod
-    def _process_line(line: str, scenario_data: dict) -> str:
-        """
-        Process a single line of the feature file.
+    def write_markdown(self, content: str, output_file: str) -> None:
+        """Write markdown content to a file."""
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+        with open(output_file, "w") as file:
+            file.write(content)
+        print(f"Markdown file '{output_file}' has been generated.")
+        print(f"Last updated on: {datetime.now().strftime('%d %B %Y %H:%M:%S')}")
 
-        Pre-conditions:
-        - line is a non-empty string
-        - scenario_data is a dictionary containing the current parsing state
+    def format_feature_file(self, content: str) -> str:
+        """Format feature file content as Markdown."""
+        markdown = "# Feature\n\n"
+        lines = content.split("\n")
+        in_scenario = False
+        in_example = False
+        example_table = []
 
-        Post-conditions:
-        - Returns a formatted Markdown string for the given line
-        - Updates the scenario_data dictionary as needed
-        """
-        if line.startswith("Feature:"):
-            return f"## {line}\n\n"
-        elif line.startswith("Scenario:") or line.startswith("Scenario Outline:"):
-            return MarkdownFormatter._process_scenario_start(line, scenario_data)
-        elif line.startswith(("Given ", "When ", "Then ", "And ", "But ")):
-            return f"- {line}\n"
-        elif line.startswith("Examples:"):
-            scenario_data["in_example"] = True
-            return f"#### {line}\n\n"
-        elif scenario_data["in_example"] and "|" in line:
-            scenario_data["example_table"].append(line)
-            return ""
-        elif line == "" and scenario_data["in_scenario"]:
-            return MarkdownFormatter._process_scenario_end(scenario_data)
-        else:
-            return f"{line}\n"
+        for line in lines:
+            stripped_line = line.strip()
+            if stripped_line.startswith("Feature:"):
+                markdown += f"## {stripped_line}\n\n"
+            elif stripped_line.startswith("Scenario:") or stripped_line.startswith("Scenario Outline:"):
+                if in_example:
+                    markdown += self._format_example_table(example_table)
+                    example_table = []
+                    in_example = False
+                in_scenario = True
+                markdown += f"### {stripped_line}\n\n"
+            elif (stripped_line.startswith("Given ") or
+                  stripped_line.startswith("When ") or
+                  stripped_line.startswith("Then ") or
+                  stripped_line.startswith("And ") or
+                  stripped_line.startswith("But ")):
+                markdown += f"- {stripped_line}\n"
+            elif stripped_line.startswith("Examples:"):
+                in_example = True
+                markdown += f"#### {stripped_line}\n\n"
+            elif in_example and "|" in stripped_line:
+                example_table.append(stripped_line)
+            elif stripped_line == "" and in_scenario:
+                if in_example:
+                    markdown += self._format_example_table(example_table)
+                    example_table = []
+                    in_example = False
+                in_scenario = False
+                markdown += "\n"
+            else:
+                markdown += f"{line}\n"
 
-    @staticmethod
-    def _process_scenario_start(line: str, scenario_data: dict) -> str:
-        """
-        Process the start of a new scenario.
+        # Handle case where file ends with an example table
+        if example_table:
+            markdown += self._format_example_table(example_table)
 
-        Pre-conditions:
-        - line is a string starting with "Scenario:" or "Scenario Outline:"
-        - scenario_data is a dictionary containing the current parsing state
+        return markdown
 
-        Post-conditions:
-        - Returns a formatted Markdown string for the scenario start
-        - Updates the scenario_data dictionary
-        """
-        markdown = ""
-        if scenario_data["in_example"]:
-            markdown += MarkdownFormatter._format_example_table(scenario_data["example_table"])
-            scenario_data["example_table"] = []
-            scenario_data["in_example"] = False
-        scenario_data["in_scenario"] = True
-        return markdown + f"### {line}\n\n"
-
-    @staticmethod
-    def _process_scenario_end(scenario_data: dict) -> str:
-        """
-        Process the end of a scenario.
-
-        Pre-conditions:
-        - scenario_data is a dictionary containing the current parsing state
-
-        Post-conditions:
-        - Returns a formatted Markdown string for the scenario end
-        - Updates the scenario_data dictionary
-        """
-        markdown = ""
-        if scenario_data["in_example"]:
-            markdown += MarkdownFormatter._format_example_table(scenario_data["example_table"])
-            scenario_data["example_table"] = []
-            scenario_data["in_example"] = False
-        scenario_data["in_scenario"] = False
-        return markdown + "\n"
-
-    @staticmethod
-    def _format_example_table(table_lines: List[str]) -> str:
-        """
-        Format an example table in Markdown.
-
-        Pre-conditions:
-        - table_lines is a non-empty list of strings, each representing a row in the table
-
-        Post-conditions:
-        - Returns a formatted Markdown string representing the table
-        """
+    def _format_example_table(self, table_lines: List[str]) -> str:
+        """Format an example table in Markdown."""
         if not table_lines:
             return ""
 
@@ -258,103 +232,6 @@ class MarkdownFormatter:
             formatted_table += "| " + " | ".join(cell.ljust(width) for cell, width in zip(row, col_widths)) + " |\n"
 
         return formatted_table + "\n"
-    @staticmethod
-    def generate_markdown(
-        filepath: str, steps: List[Dict], scenarios: Dict[str, str]
-    ) -> str:
-        """Generate markdown content from steps and scenarios."""
-        current_time = datetime.now().strftime("%d %B %Y %H:%M:%S")
-        markdown = f"# Test Steps and Scenarios from {filepath}\n\n"
-        markdown += f"Last updated on: {current_time}\n\n"
-
-        if scenarios:
-            markdown += "## Scenarios\n\n"
-            for func_name, scenario_name in scenarios.items():
-                markdown += f"- {scenario_name} (`{func_name}`)\n"
-            markdown += "\n"
-
-        if steps:
-            markdown += "## Steps\n\n"
-            for step in steps:
-                markdown += (
-                    f"### {step['type'].capitalize()}: {step['name']}\n\n"
-                )
-                markdown += f"**Function:** `{step['function']}`\n\n"
-                markdown += (
-                    f"**Signature:**\n```python\n{step['signature']}\n```\n\n"
-                )
-                markdown += f"**Description:**\n{step['docstring']}\n\n"
-                markdown += "---\n\n"
-        else:
-            markdown += "No steps found in this file.\n"
-
-        return markdown
-
-    @staticmethod
-    def write_markdown(content: str, output_file: str) -> None:
-        """Write markdown content to a file."""
-        os.makedirs(os.path.dirname(output_file), exist_ok=True)
-        with open(output_file, "w") as file:
-            file.write(content)
-        print(f"Markdown file '{output_file}' has been generated.")
-        print(
-            f"Last updated on: {datetime.now().strftime('%d %B %Y %H:%M:%S')}"
-        )
-
-    @staticmethod
-    def format_feature_file(content: str) -> str:
-        """Format feature file content as Markdown."""
-        markdown = "# Feature\n\n"
-        lines = content.split("\n")
-        in_scenario = False
-        in_example = False
-        example_table = []
-
-        for line in lines:
-            stripped_line = line.strip()
-            if stripped_line.startswith("Feature:"):
-                markdown += f"## {stripped_line}\n\n"
-            elif stripped_line.startswith(
-                "Scenario:"
-            ) or stripped_line.startswith("Scenario Outline:"):
-                if in_example:
-                    markdown += MarkdownFormatter._format_example_table(
-                        example_table
-                    )
-                    example_table = []
-                    in_example = False
-                in_scenario = True
-                markdown += f"### {stripped_line}\n\n"
-            elif (
-                stripped_line.startswith("Given ")
-                or stripped_line.startswith("When ")
-                or stripped_line.startswith("Then ")
-                or stripped_line.startswith("And ")
-                or stripped_line.startswith("But ")
-            ):
-                markdown += f"- {stripped_line}\n"
-            elif stripped_line.startswith("Examples:"):
-                in_example = True
-                markdown += f"#### {stripped_line}\n\n"
-            elif in_example and "|" in stripped_line:
-                example_table.append(stripped_line)
-            elif stripped_line == "" and in_scenario:
-                if in_example:
-                    markdown += MarkdownFormatter._format_example_table(
-                        example_table
-                    )
-                    example_table = []
-                    in_example = False
-                in_scenario = False
-                markdown += "\n"
-            else:
-                markdown += f"{line}\n"
-
-        # Handle case where file ends with an example table
-        if example_table:
-            markdown += MarkdownFormatter._format_example_table(example_table)
-
-        return markdown
 
 
 
@@ -594,10 +471,10 @@ class PythonFileHandler(FileHandler):
         steps, scenarios = FileScanner.parse_file(input_path)
 
         if steps or scenarios:
-            markdown_content = MarkdownFormatter.generate_markdown(
+            markdown_content = MarkdownFormatter().generate_markdown(
                 relative_path, steps, scenarios
             )
-            MarkdownFormatter.write_markdown(markdown_content, output_path)
+            MarkdownFormatter().write_markdown(markdown_content, output_path)
             print(f"Processed Python file: {relative_path}")
         else:
             print(f"No steps or scenarios found in {relative_path}. Skipping.")
@@ -611,10 +488,10 @@ class FeatureFileHandler(FileHandler):
         try:
             with open(input_path, "r") as feature_file:
                 feature_content = feature_file.read()
-            markdown_content = MarkdownFormatter.format_feature_file(
+            markdown_content = MarkdownFormatter().format_feature_file(
                 feature_content
             )
-            MarkdownFormatter.write_markdown(markdown_content, output_path)
+            (MarkdownFormatter().write_markdown(markdown_content, output_path))
             print(f"Processed feature file: {relative_path}")
         except Exception as e:
             print(f"Error processing feature file {relative_path}: {str(e)}")
