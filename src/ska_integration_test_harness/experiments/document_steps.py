@@ -127,10 +127,13 @@ from typing import Dict, List, Optional, Tuple
 
 #
 
+
 class MarkdownFormatter:
     """Class for managing the output and MD formatting."""
 
-    def generate_markdown(self, filepath: str, steps: List[Dict], scenarios: Dict[str, str]) -> str:
+    def generate_markdown(
+        self, filepath: str, steps: List[Dict], scenarios: Dict[str, str]
+    ) -> str:
         """Generate markdown content from steps and scenarios."""
         current_time = datetime.now().strftime("%d %B %Y %H:%M:%S")
         markdown = f"# Test Steps and Scenarios from {filepath}\n\n"
@@ -145,9 +148,13 @@ class MarkdownFormatter:
         if steps:
             markdown += "## Steps\n\n"
             for step in steps:
-                markdown += f"### {step['type'].capitalize()}: {step['name']}\n\n"
+                markdown += (
+                    f"### {step['type'].capitalize()}: {step['name']}\n\n"
+                )
                 markdown += f"**Function:** `{step['function']}`\n\n"
-                markdown += f"**Signature:**\n```python\n{step['signature']}\n```\n\n"
+                markdown += (
+                    f"**Signature:**\n```python\n{step['signature']}\n```\n\n"
+                )
                 markdown += f"**Description:**\n{step['docstring']}\n\n"
                 markdown += "---\n\n"
         else:
@@ -161,7 +168,9 @@ class MarkdownFormatter:
         with open(output_file, "w") as file:
             file.write(content)
         print(f"Markdown file '{output_file}' has been generated.")
-        print(f"Last updated on: {datetime.now().strftime('%d %B %Y %H:%M:%S')}")
+        print(
+            f"Last updated on: {datetime.now().strftime('%d %B %Y %H:%M:%S')}"
+        )
 
     def format_feature_file(self, content: str) -> str:
         """Format feature file content as Markdown."""
@@ -175,18 +184,22 @@ class MarkdownFormatter:
             stripped_line = line.strip()
             if stripped_line.startswith("Feature:"):
                 markdown += f"## {stripped_line}\n\n"
-            elif stripped_line.startswith("Scenario:") or stripped_line.startswith("Scenario Outline:"):
+            elif stripped_line.startswith(
+                "Scenario:"
+            ) or stripped_line.startswith("Scenario Outline:"):
                 if in_example:
                     markdown += self._format_example_table(example_table)
                     example_table = []
                     in_example = False
                 in_scenario = True
                 markdown += f"### {stripped_line}\n\n"
-            elif (stripped_line.startswith("Given ") or
-                  stripped_line.startswith("When ") or
-                  stripped_line.startswith("Then ") or
-                  stripped_line.startswith("And ") or
-                  stripped_line.startswith("But ")):
+            elif (
+                stripped_line.startswith("Given ")
+                or stripped_line.startswith("When ")
+                or stripped_line.startswith("Then ")
+                or stripped_line.startswith("And ")
+                or stripped_line.startswith("But ")
+            ):
                 markdown += f"- {stripped_line}\n"
             elif stripped_line.startswith("Examples:"):
                 in_example = True
@@ -215,7 +228,9 @@ class MarkdownFormatter:
             return ""
 
         # Strip leading and trailing pipes and spaces
-        cleaned_lines = [line.strip().strip("|").strip() for line in table_lines]
+        cleaned_lines = [
+            line.strip().strip("|").strip() for line in table_lines
+        ]
 
         # Split each line into cells
         table_data = [line.split("|") for line in cleaned_lines]
@@ -224,16 +239,32 @@ class MarkdownFormatter:
         table_data = [[cell.strip() for cell in row] for row in table_data]
 
         # Find the maximum width for each column
-        col_widths = [max(len(cell) for cell in col) for col in zip(*table_data)]
+        col_widths = [
+            max(len(cell) for cell in col) for col in zip(*table_data)
+        ]
 
         # Generate the formatted table
-        formatted_table = "| " + " | ".join(cell.ljust(width) for cell, width in zip(table_data[0], col_widths)) + " |\n"
-        formatted_table += "| " + " | ".join("-" * width for width in col_widths) + " |\n"
+        formatted_table = (
+            "| "
+            + " | ".join(
+                cell.ljust(width)
+                for cell, width in zip(table_data[0], col_widths)
+            )
+            + " |\n"
+        )
+        formatted_table += (
+            "| " + " | ".join("-" * width for width in col_widths) + " |\n"
+        )
         for row in table_data[1:]:
-            formatted_table += "| " + " | ".join(cell.ljust(width) for cell, width in zip(row, col_widths)) + " |\n"
+            formatted_table += (
+                "| "
+                + " | ".join(
+                    cell.ljust(width) for cell, width in zip(row, col_widths)
+                )
+                + " |\n"
+            )
 
         return formatted_table + "\n"
-
 
 
 class StepVisitor(ast.NodeVisitor):
@@ -583,6 +614,7 @@ class FolderProcessor:
                 input_path, output_path, repo_root
             )
 
+
 class PostProcessor:
     """Class to post-process generated markdown files and create an index."""
 
@@ -617,7 +649,9 @@ class PostProcessor:
         for root, _, files in os.walk(self.output_folder):
             for file in files:
                 if file.endswith(".md") and file != "index.md":
-                    rel_path = os.path.relpath(os.path.join(root, file), self.output_folder)
+                    rel_path = os.path.relpath(
+                        os.path.join(root, file), self.output_folder
+                    )
                     if rel_path.startswith("features"):
                         feature_files.append(rel_path)
                     elif rel_path.startswith("steps"):
@@ -635,7 +669,9 @@ class PostProcessor:
             content += "## Step Files\n\n"
             content += self._generate_nested_list(step_files, "steps")
 
-        with open(os.path.join(self.output_folder, "index.md"), "w") as index_file:
+        with open(
+            os.path.join(self.output_folder, "index.md"), "w"
+        ) as index_file:
             index_file.write(content)
 
     def _generate_nested_list(self, files: List[str], root_folder: str) -> str:
@@ -658,7 +694,9 @@ class PostProcessor:
                 if part not in current_dict:
                     current_dict[part] = {}
                 current_dict = current_dict[part]
-            current_dict[parts[-1]] = file  # Use the full relative path as the value
+            current_dict[parts[-1]] = (
+                file  # Use the full relative path as the value
+            )
 
         return self._dict_to_md_list(nested_dict, 0, root_folder)
 
@@ -680,7 +718,9 @@ class PostProcessor:
         for key, value in d.items():
             if isinstance(value, dict):
                 result += f"{indent}- {key}/\n"
-                result += self._dict_to_md_list(value, level + 1, os.path.join(root_folder, key))
+                result += self._dict_to_md_list(
+                    value, level + 1, os.path.join(root_folder, key)
+                )
             else:
                 # Use the full relative path in the link, but keep the filename as the link text
                 result += f"{indent}- [{key}]({value})\n"

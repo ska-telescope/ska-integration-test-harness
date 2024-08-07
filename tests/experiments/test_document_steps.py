@@ -81,7 +81,9 @@ class TestMarkdownFormatter:
               | nonuser  | pass123  | User does not exist     |
         """
 
-    def test_generate_markdown(self, markdown_formatter, sample_steps, sample_scenarios):
+    def test_generate_markdown(
+        self, markdown_formatter, sample_steps, sample_scenarios
+    ):
         filepath = "test/path/to/file.py"
         markdown = markdown_formatter.generate_markdown(
             filepath, sample_steps, sample_scenarios
@@ -126,7 +128,9 @@ class TestMarkdownFormatter:
             content
         )
 
-    def test_format_feature_file(self, markdown_formatter, sample_feature_content):
+    def test_format_feature_file(
+        self, markdown_formatter, sample_feature_content
+    ):
         markdown = markdown_formatter.format_feature_file(
             sample_feature_content
         )
@@ -162,6 +166,8 @@ class TestMarkdownFormatter:
 
     def test__format_example_table_empty(self, markdown_formatter):
         assert_that(markdown_formatter._format_example_table([])).is_empty()
+
+
 @pytest.mark.experiments
 class TestFileScanner:
     @pytest.fixture
@@ -647,9 +653,9 @@ class TestPostProcessor:
 
     def test_create_index_file(self):
         mock_date = datetime(2023, 1, 1, 0, 0, 0)
-        with patch("os.walk") as mock_walk, \
-             patch("builtins.open", mock_open()) as mock_file:
-
+        with patch("os.walk") as mock_walk, patch(
+            "builtins.open", mock_open()
+        ) as mock_file:
 
             mock_walk.return_value = [
                 ("/output", ["features", "steps"], []),
@@ -669,9 +675,8 @@ class TestPostProcessor:
             assert_that(handle.write.call_count).is_equal_to(1)
 
             # Check the content of the write call
-            expected_content_prefix = (
-                "# Test Documentation Index\n\n")
-            expected_content_suffix = ( # let's skip the date
+            expected_content_prefix = "# Test Documentation Index\n\n"
+            expected_content_suffix = (  # let's skip the date
                 "## Feature Files\n\n"
                 "- features/\n"
                 "  - [feature1.md](features/feature1.md)\n"
@@ -682,7 +687,9 @@ class TestPostProcessor:
                 "  - [step2.md](steps/step2.md)\n"
             )
             # assert_that(handle.write.call_args[0][0]).is_equal_to(expected_content)
-            assert_that(handle.write.call_args[0][0]).contains(expected_content_prefix).contains(expected_content_suffix)
+            assert_that(handle.write.call_args[0][0]).contains(
+                expected_content_prefix
+            ).contains(expected_content_suffix)
 
     def test__generate_nested_list(self, post_processor):
         files = [
@@ -693,7 +700,9 @@ class TestPostProcessor:
         ]
         result = PostProcessor("/")._generate_nested_list(files, "root")
         assert_that(result).contains(
-            "- [scenario1.md](features/scenario1.md)", "- subfolder/", "  - [scenario2.md](features/subfolder/scenario2.md)"
+            "- [scenario1.md](features/scenario1.md)",
+            "- subfolder/",
+            "  - [scenario2.md](features/subfolder/scenario2.md)",
         )
 
     def test__dict_to_md_list(self, post_processor):
