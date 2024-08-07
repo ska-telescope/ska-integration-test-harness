@@ -284,7 +284,6 @@ def function_with_error(
     #     assert_that(scenarios).is_equal_to({"test_scenario": "Test Scenario"})
 
 
-
 @pytest.mark.experiments
 class TestStepVisitor:
     @pytest.fixture
