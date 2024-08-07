@@ -492,9 +492,6 @@ class FileScanner:
         except SyntaxError as e:
             logging.error(f"SyntaxError in file {filename}: {str(e)}")
             return [], {}
-        except Exception as e:
-            logging.error(f"Error parsing file {filename}: {str(e)}")
-            return [], {}
 
 
 class FileHandler(ABC):
