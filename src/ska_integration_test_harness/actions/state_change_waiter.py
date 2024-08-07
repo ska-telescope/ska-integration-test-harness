@@ -75,6 +75,17 @@ class StateChangeWaiter:
 
         return False
 
+    def _all_state_changes_occurred(self) -> bool:
+        """Check if all the expected state changes have occurred.
+
+        :return: True if all the expected state changes have occurred,
+            False otherwise.
+        """
+        return all(
+            self._is_state_change_occurred(state_change)
+            for state_change in self.pending_state_changes
+        )
+
     def wait_all(self, timeout: int | float):
         """Wait for all the expected state changes to occur.
 
@@ -92,10 +103,7 @@ class StateChangeWaiter:
             # have occurred in the event tracer (NOTE: it ignores instead
             # the usual point-wise check that is commonly used for
             # event tracer queries).
-            predicate=lambda _: all(
-                self._is_state_change_occurred(state_change)
-                for state_change in self.pending_state_changes
-            ),
+            predicate=lambda _: self._all_state_changes_occurred(),
             timeout=timeout,
             # NOTE: this implementation may be slightly computationally
             # inefficient, but it re-uses existing components and it is
@@ -107,7 +115,7 @@ class StateChangeWaiter:
         # exception.
         if not res:
             msg = (
-                "Not all the expected state changes occurred within "
+                "Not all the expected events occurred within "
                 f"a timeout of {timeout} seconds."
             )
 
@@ -121,11 +129,11 @@ class StateChangeWaiter:
                     not_happened_state_changes.append(str(state_change))
 
             if happened_state_changes:
-                msg += "\n\nThe following state changes occurred:\n"
+                msg += "\n\nThe following events occurred:\n"
                 msg += "\n".join(happened_state_changes)
 
             if not_happened_state_changes:
-                msg += "\n\nThe following state changes did not occur:\n"
+                msg += "\n\nThe following events did not occur:\n"
                 msg += "\n".join(not_happened_state_changes)
 
             raise TimeoutError(msg)

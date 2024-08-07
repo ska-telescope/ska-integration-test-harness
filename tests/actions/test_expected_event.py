@@ -6,8 +6,8 @@ from ska_integration_test_harness.actions.expected_event import (
     ExpectedEvent,
     ExpectedStateChange,
 )
+from tests.actions.utils.mock_device_proxy import patch_device_proxy
 from tests.actions.utils.mock_received_event import create_received_event_mock
-from tests.actions.utils.patch_device_proxy import patch_device_proxy
 
 
 class TestExpectedEvent:

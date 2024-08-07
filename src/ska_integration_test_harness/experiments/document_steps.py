@@ -1,4 +1,5 @@
 # pylint: skip-file
+# flake8: noqa
 
 import argparse
 import ast
@@ -364,19 +365,25 @@ class StepVisitor(ast.NodeVisitor):
         scenario_name = None
         if decorator.args:
             # Handle positional arguments
-            if len(decorator.args) >= 2 and isinstance(decorator.args[1], ast.Str):
+            if len(decorator.args) >= 2 and isinstance(
+                decorator.args[1], ast.Str
+            ):
                 scenario_name = decorator.args[1].s
         else:
             # Handle keyword arguments
             for keyword in decorator.keywords:
-                if keyword.arg == "scenario_name" and isinstance(keyword.value, ast.Str):
+                if keyword.arg == "scenario_name" and isinstance(
+                    keyword.value, ast.Str
+                ):
                     scenario_name = keyword.value.s
                     break
 
         if scenario_name is not None:
             self.scenarios[node.name] = scenario_name
         else:
-            print(f"Warning: Could not extract scenario name for function {node.name}")
+            print(
+                f"Warning: Could not extract scenario name for function {node.name}"
+            )
 
     def _extract_scenario_name(self, decorator: ast.Call) -> Optional[str]:
         """
@@ -391,14 +398,18 @@ class StepVisitor(ast.NodeVisitor):
         assert isinstance(decorator, ast.Call), "Decorator must be a Call"
 
         if decorator.args:
-            if len(decorator.args) >= 2 and isinstance(decorator.args[1], ast.Str):
+            if len(decorator.args) >= 2 and isinstance(
+                decorator.args[1], ast.Str
+            ):
                 return decorator.args[1].s
 
         for keyword in decorator.keywords:
             if keyword.arg == "scenario_name":
                 if isinstance(keyword.value, ast.Str):
                     return keyword.value.s
-                elif isinstance(keyword.value, ast.Constant):  # For Python 3.8+
+                elif isinstance(
+                    keyword.value, ast.Constant
+                ):  # For Python 3.8+
                     return keyword.value.value
 
         return None
@@ -435,7 +446,6 @@ class StepVisitor(ast.NodeVisitor):
 
 class FileScanner:
     """Class to scan the file and extract steps and scenarios."""
-
 
     @staticmethod
     def parse_file(filename: str) -> Tuple[List[Dict], Dict[str, str]]:

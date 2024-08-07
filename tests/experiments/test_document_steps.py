@@ -1,10 +1,11 @@
 # pylint: skip-file
+# flake8: noqa
 
 import ast
 import logging
 from datetime import datetime
 from io import StringIO
-from unittest.mock import Mock, mock_open, patch, call
+from unittest.mock import Mock, call, mock_open, patch
 
 import pytest
 from assertpy import assert_that
@@ -207,28 +208,44 @@ def function_with_error(
 
         assert_that(steps[0]).contains_entry(
             {
-                "type": "given",},{
-                "name": "the user is on the login page",},{
-                "function": "user_on_login_page",},{
+                "type": "given",
+            },
+            {
+                "name": "the user is on the login page",
+            },
+            {
+                "function": "user_on_login_page",
+            },
+            {
                 "docstring": "Ensure the user is on the login page",
-            }
+            },
         )
 
         assert_that(steps[1]).contains_entry(
             {
-                "type": "when",},{
-                "name": "the user enters valid credentials",},{
+                "type": "when",
+            },
+            {
+                "name": "the user enters valid credentials",
+            },
+            {
                 "function": "enter_valid_credentials",
-            }
+            },
         )
 
         assert_that(steps[2]).contains_entry(
             {
-                "type": "then",},{
-                "name": "the user should be logged in successfully",},{
-                "function": "verify_successful_login",},{
+                "type": "then",
+            },
+            {
+                "name": "the user should be logged in successfully",
+            },
+            {
+                "function": "verify_successful_login",
+            },
+            {
                 "docstring": "Check that the user is logged in",
-            }
+            },
         )
 
         assert_that(scenarios).contains_entry(
@@ -327,10 +344,14 @@ def regular_function():
         for i, step_type in enumerate(["given", "when", "then"]):
             assert_that(step_visitor.steps[i]).contains_entry(
                 {
-                    "type": step_type,},{
-                    "name": f"a {step_type} step",},{
+                    "type": step_type,
+                },
+                {
+                    "name": f"a {step_type} step",
+                },
+                {
                     "function": f"{step_type}_func",
-                }
+                },
             )
 
     def test__extract_step_name_with_different_structures(self, step_visitor):
@@ -371,6 +392,7 @@ def regular_function():
         assert_that(step_visitor._extract_step_name(decorator)).is_equal_to(
             "a keyword step"
         )
+
     def test__process_scenario_with_different_structures(self, step_visitor):
         # Test with positional arguments
         node = ast.FunctionDef(
@@ -524,7 +546,9 @@ class TestFileHandlers:
 
             mock_parse_file.assert_called_once_with("input.py")
             mock_generate_markdown.assert_called_once_with(
-                "../../home/giorgio/DEV/SKA/ska-integration-test-harness/tests/experiments/input.py", ["step1", "step2"], {"scenario1": "Scenario 1"}
+                "../../home/giorgio/DEV/SKA/ska-integration-test-harness/tests/experiments/input.py",
+                ["step1", "step2"],
+                {"scenario1": "Scenario 1"},
             )
             mock_write_markdown.assert_called_once_with(
                 "# Markdown Content", "output.md"
