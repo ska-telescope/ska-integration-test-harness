@@ -64,6 +64,9 @@ class TestStateChangeWaiter:
             device=device, attribute=attribute, predicate=predicate
         )
 
+    # --------------------------------------------------------------
+    # Tests
+
     def test_add_expected_state_changes_should_add_and_subscribe(
         self, mocked_event_tracer
     ) -> None:
