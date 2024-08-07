@@ -577,7 +577,7 @@ class TestFolderProcessor:
             folder_processor.process_folder("/input", "/tmp/xx")
 
             assert_that(mock_process_file.call_count).is_equal_to(3)
-            mock_create_index.assert_called_once_with("/tmp/xx")
+            mock_create_index.assert_called_once_with()
 
     def test__ensure_output_folder_exists(self, folder_processor):
         with patch("os.path.exists") as mock_exists, patch(
@@ -614,7 +614,7 @@ class TestFolderProcessor:
 class TestPostProcessor:
     @pytest.fixture
     def post_processor(self):
-        return PostProcessor()
+        return PostProcessor("/")
 
     def test_create_index_file(self):
         mock_date = datetime(2023, 1, 1, 0, 0, 0)
@@ -628,7 +628,7 @@ class TestPostProcessor:
                 ("/output/steps", [], ["step1.md", "step2.md"]),
             ]
 
-            PostProcessor.create_index_file("/output")
+            PostProcessor("/output").create_index_file()
 
             # Check if the file was opened correctly
             mock_file.assert_called_once_with("/output/index.md", "w")
@@ -644,11 +644,13 @@ class TestPostProcessor:
                 "# Test Documentation Index\n\n")
             expected_content_suffix = ( # let's skip the date
                 "## Feature Files\n\n"
-                "- [feature1.md](features/feature1.md)\n"
-                "- [feature2.md](features/feature2.md)\n\n"
+                "- features/\n"
+                "  - [feature1.md](features/feature1.md)\n"
+                "  - [feature2.md](features/feature2.md)\n\n"
                 "## Step Files\n\n"
-                "- [step1.md](steps/step1.md)\n"
-                "- [step2.md](steps/step2.md)\n"
+                "- steps/\n"
+                "  - [step1.md](steps/step1.md)\n"
+                "  - [step2.md](steps/step2.md)\n"
             )
             # assert_that(handle.write.call_args[0][0]).is_equal_to(expected_content)
             assert_that(handle.write.call_args[0][0]).contains(expected_content_prefix).contains(expected_content_suffix)
@@ -660,7 +662,7 @@ class TestPostProcessor:
             "steps/step1.md",
             "steps/subfolder/step2.md",
         ]
-        result = PostProcessor._generate_nested_list(files, "root")
+        result = PostProcessor("/")._generate_nested_list(files, "root")
         assert_that(result).contains(
             "- [scenario1.md](features/scenario1.md)", "- subfolder/", "  - [scenario2.md](features/subfolder/scenario2.md)"
         )
@@ -673,7 +675,7 @@ class TestPostProcessor:
             },
             "file3.md": "path/to/file3.md",
         }
-        result = PostProcessor._dict_to_md_list(nested_dict, 0, "root")
+        result = PostProcessor("/")._dict_to_md_list(nested_dict, 0, "root")
         assert_that(result).contains(
             "- folder1/",
             "  - [file1.md](path/to/file1.md)",

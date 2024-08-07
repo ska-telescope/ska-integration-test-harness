@@ -546,7 +546,7 @@ class FolderProcessor:
             for filename in files:
                 self._process_file(root, filename, output_folder, repo_root)
 
-        PostProcessor.create_index_file(output_folder)
+        PostProcessor(output_folder).create_index_file()
 
     @staticmethod
     def _ensure_output_folder_exists(output_folder: str) -> None:
@@ -573,19 +573,41 @@ class FolderProcessor:
                 input_path, output_path, repo_root
             )
 
-
 class PostProcessor:
     """Class to post-process generated markdown files and create an index."""
 
-    @staticmethod
-    def create_index_file(output_folder: str) -> None:
+    def __init__(self, output_folder: str):
+        """
+        Initialize the PostProcessor.
+
+        Pre-conditions:
+        - output_folder is a string representing a valid directory path
+
+        Post-conditions:
+        - self.output_folder is set to the provided output_folder
+        """
+        self.output_folder = output_folder
+
+    def create_index_file(self) -> None:
+        """
+        Create an index file for the generated markdown files.
+
+        Pre-conditions:
+        - self.output_folder exists and is writable
+        - self.output_folder contains markdown files in 'features' and/or 'steps' subdirectories
+
+        Post-conditions:
+        - An 'index.md' file is created in self.output_folder
+        - The index file contains links to all markdown files in 'features' and 'steps' subdirectories
+        - The index file preserves the directory structure of the markdown files
+        """
         feature_files = []
         step_files = []
 
-        for root, _, files in os.walk(output_folder):
+        for root, _, files in os.walk(self.output_folder):
             for file in files:
                 if file.endswith(".md") and file != "index.md":
-                    rel_path = os.path.relpath(os.path.join(root, file), output_folder)
+                    rel_path = os.path.relpath(os.path.join(root, file), self.output_folder)
                     if rel_path.startswith("features"):
                         feature_files.append(rel_path)
                     elif rel_path.startswith("steps"):
@@ -596,45 +618,61 @@ class PostProcessor:
 
         if feature_files:
             content += "## Feature Files\n\n"
-            for file in sorted(feature_files):
-                content += f"- [{os.path.basename(file)}]({file})\n"
+            content += self._generate_nested_list(feature_files, "features")
             content += "\n"
 
         if step_files:
             content += "## Step Files\n\n"
-            for file in sorted(step_files):
-                content += f"- [{os.path.basename(file)}]({file})\n"
+            content += self._generate_nested_list(step_files, "steps")
 
-        with open(os.path.join(output_folder, "index.md"), "w") as index_file:
+        with open(os.path.join(self.output_folder, "index.md"), "w") as index_file:
             index_file.write(content)
 
-    @staticmethod
-    def _generate_nested_list(files: List[str], root_folder: str) -> str:
-        """Generate a nested list of files, preserving folder structure."""
+    def _generate_nested_list(self, files: List[str], root_folder: str) -> str:
+        """
+        Generate a nested list of files, preserving folder structure.
+
+        Pre-conditions:
+        - files is a non-empty list of strings representing file paths
+        - root_folder is a string representing the base folder for these files
+
+        Post-conditions:
+        - Returns a string containing a nested markdown list of the files
+        - The returned list preserves the folder structure of the input files
+        """
         nested_dict = {}
         for file in files:
             parts = file.split(os.sep)
             current_dict = nested_dict
-            for part in parts[1:-1]:  # Skip root folder and filename
+            for part in parts[:-1]:  # Exclude the filename
                 if part not in current_dict:
                     current_dict[part] = {}
                 current_dict = current_dict[part]
-            current_dict[parts[-1]] = file
+            current_dict[parts[-1]] = file  # Use the full relative path as the value
 
-        return PostProcessor._dict_to_md_list(nested_dict, 0, root_folder)
+        return self._dict_to_md_list(nested_dict, 0, root_folder)
 
-    @staticmethod
-    def _dict_to_md_list(d: Dict, level: int, root_folder: str) -> str:
-        """Recursively convert nested dictionary to Markdown list."""
+    def _dict_to_md_list(self, d: Dict, level: int, root_folder: str) -> str:
+        """
+        Recursively convert nested dictionary to Markdown list.
+
+        Pre-conditions:
+        - d is a dictionary representing the nested file structure
+        - level is a non-negative integer representing the current indentation level
+        - root_folder is a string representing the base folder for these files
+
+        Post-conditions:
+        - Returns a string containing a markdown-formatted nested list
+        - The returned list reflects the structure of the input dictionary
+        """
         result = ""
         indent = "  " * level
         for key, value in d.items():
             if isinstance(value, dict):
                 result += f"{indent}- {key}/\n"
-                result += PostProcessor._dict_to_md_list(
-                    value, level + 1, root_folder
-                )
+                result += self._dict_to_md_list(value, level + 1, os.path.join(root_folder, key))
             else:
+                # Use the full relative path in the link, but keep the filename as the link text
                 result += f"{indent}- [{key}]({value})\n"
         return result
 
