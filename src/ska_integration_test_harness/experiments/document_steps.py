@@ -126,10 +126,138 @@ from typing import Dict, List, Optional, Tuple
 
 #
 
-
 class MarkdownFormatter:
     """Class for managing the output and MD formatting."""
 
+    @staticmethod
+    def format_feature_file(content: str) -> str:
+        """
+        Format feature file content as Markdown.
+
+        Pre-conditions:
+        - content is a non-empty string containing feature file content
+
+        Post-conditions:
+        - Returns a formatted Markdown string representing the feature file content
+        """
+        markdown = "# Feature\n\n"
+        lines = content.split("\n")
+        scenario_data = {"in_scenario": False, "in_example": False, "example_table": []}
+
+        for line in lines:
+            stripped_line = line.strip()
+            markdown += MarkdownFormatter._process_line(stripped_line, scenario_data)
+
+        # Handle case where file ends with an example table
+        if scenario_data["example_table"]:
+            markdown += MarkdownFormatter._format_example_table(scenario_data["example_table"])
+
+        return markdown
+
+    @staticmethod
+    def _process_line(line: str, scenario_data: dict) -> str:
+        """
+        Process a single line of the feature file.
+
+        Pre-conditions:
+        - line is a non-empty string
+        - scenario_data is a dictionary containing the current parsing state
+
+        Post-conditions:
+        - Returns a formatted Markdown string for the given line
+        - Updates the scenario_data dictionary as needed
+        """
+        if line.startswith("Feature:"):
+            return f"## {line}\n\n"
+        elif line.startswith("Scenario:") or line.startswith("Scenario Outline:"):
+            return MarkdownFormatter._process_scenario_start(line, scenario_data)
+        elif line.startswith(("Given ", "When ", "Then ", "And ", "But ")):
+            return f"- {line}\n"
+        elif line.startswith("Examples:"):
+            scenario_data["in_example"] = True
+            return f"#### {line}\n\n"
+        elif scenario_data["in_example"] and "|" in line:
+            scenario_data["example_table"].append(line)
+            return ""
+        elif line == "" and scenario_data["in_scenario"]:
+            return MarkdownFormatter._process_scenario_end(scenario_data)
+        else:
+            return f"{line}\n"
+
+    @staticmethod
+    def _process_scenario_start(line: str, scenario_data: dict) -> str:
+        """
+        Process the start of a new scenario.
+
+        Pre-conditions:
+        - line is a string starting with "Scenario:" or "Scenario Outline:"
+        - scenario_data is a dictionary containing the current parsing state
+
+        Post-conditions:
+        - Returns a formatted Markdown string for the scenario start
+        - Updates the scenario_data dictionary
+        """
+        markdown = ""
+        if scenario_data["in_example"]:
+            markdown += MarkdownFormatter._format_example_table(scenario_data["example_table"])
+            scenario_data["example_table"] = []
+            scenario_data["in_example"] = False
+        scenario_data["in_scenario"] = True
+        return markdown + f"### {line}\n\n"
+
+    @staticmethod
+    def _process_scenario_end(scenario_data: dict) -> str:
+        """
+        Process the end of a scenario.
+
+        Pre-conditions:
+        - scenario_data is a dictionary containing the current parsing state
+
+        Post-conditions:
+        - Returns a formatted Markdown string for the scenario end
+        - Updates the scenario_data dictionary
+        """
+        markdown = ""
+        if scenario_data["in_example"]:
+            markdown += MarkdownFormatter._format_example_table(scenario_data["example_table"])
+            scenario_data["example_table"] = []
+            scenario_data["in_example"] = False
+        scenario_data["in_scenario"] = False
+        return markdown + "\n"
+
+    @staticmethod
+    def _format_example_table(table_lines: List[str]) -> str:
+        """
+        Format an example table in Markdown.
+
+        Pre-conditions:
+        - table_lines is a non-empty list of strings, each representing a row in the table
+
+        Post-conditions:
+        - Returns a formatted Markdown string representing the table
+        """
+        if not table_lines:
+            return ""
+
+        # Strip leading and trailing pipes and spaces
+        cleaned_lines = [line.strip().strip("|").strip() for line in table_lines]
+
+        # Split each line into cells
+        table_data = [line.split("|") for line in cleaned_lines]
+
+        # Strip spaces from each cell
+        table_data = [[cell.strip() for cell in row] for row in table_data]
+
+        # Find the maximum width for each column
+        col_widths = [max(len(cell) for cell in col) for col in zip(*table_data)]
+
+        # Generate the formatted table
+        formatted_table = "| " + " | ".join(cell.ljust(width) for cell, width in zip(table_data[0], col_widths)) + " |\n"
+        formatted_table += "| " + " | ".join("-" * width for width in col_widths) + " |\n"
+        for row in table_data[1:]:
+            formatted_table += "| " + " | ".join(cell.ljust(width) for cell, width in zip(row, col_widths)) + " |\n"
+
+        return formatted_table + "\n"
     @staticmethod
     def generate_markdown(
         filepath: str, steps: List[Dict], scenarios: Dict[str, str]
@@ -228,50 +356,6 @@ class MarkdownFormatter:
 
         return markdown
 
-    @staticmethod
-    def _format_example_table(table_lines: List[str]) -> str:
-        """Format an example table in Markdown."""
-        if not table_lines:
-            return ""
-
-        # Strip leading and trailing pipes and spaces
-        cleaned_lines = [
-            line.strip().strip("|").strip() for line in table_lines
-        ]
-
-        # Split each line into cells
-        table_data = [line.split("|") for line in cleaned_lines]
-
-        # Strip spaces from each cell
-        table_data = [[cell.strip() for cell in row] for row in table_data]
-
-        # Find the maximum width for each column
-        col_widths = [
-            max(len(cell) for cell in col) for col in zip(*table_data)
-        ]
-
-        # Generate the formatted table
-        formatted_table = (
-            "| "
-            + " | ".join(
-                cell.ljust(width)
-                for cell, width in zip(table_data[0], col_widths)
-            )
-            + " |\n"
-        )
-        formatted_table += (
-            "| " + " | ".join("-" * width for width in col_widths) + " |\n"
-        )
-        for row in table_data[1:]:
-            formatted_table += (
-                "| "
-                + " | ".join(
-                    cell.ljust(width) for cell, width in zip(row, col_widths)
-                )
-                + " |\n"
-            )
-
-        return formatted_table + "\n"
 
 
 class StepVisitor(ast.NodeVisitor):
