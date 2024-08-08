@@ -9,6 +9,7 @@ from ska_integration_test_harness.actions.expected_event import ExpectedEvent
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
 )
+from tests.actions.test_telescope_action_sequence import MockStateChangeWaiter
 from tests.actions.utils.mock_device_proxy import create_device_proxy_mock
 
 # Mock classes to avoid using actual Tango Controls API
@@ -28,26 +29,6 @@ class MockTelescopeWrapper:
         )
 
 
-class MockStateChangeWaiter:
-    """A mock state change waiter for testing purposes."""
-
-    def __init__(self):
-        """Initialize the state change waiter."""
-        self.expected_state_changes = []
-
-    def reset(self):
-        """Reset the state change waiter."""
-        self.expected_state_changes = []
-
-    def add_expected_state_changes(self, state_changes):
-        """Add expected state changes to the waiter."""
-        self.expected_state_changes.extend(state_changes)
-
-    def wait_all(self, timeout):
-        """Wait for all expected state changes to occur."""
-        # In a real scenario, this would wait for state changes
-
-
 class SimpleAction(TelescopeAction[bool]):
     """A simple action that does nothing but log."""
 
@@ -62,18 +43,14 @@ class SimpleAction(TelescopeAction[bool]):
 class TestTelescopeAction:
     """Unit tests for TelescopeAction class."""
 
-    def __init__(self) -> None:
-        super().__init__()
-        self.action = None
-
-    @pytest.fixture(autouse=True)
-    def setup(self):
-        """Set up a simple action for testing."""
-        self.action = SimpleAction()
-        self.action.telescope = MockTelescopeWrapper()
-        self.action._state_change_waiter = (  # pylint: disable=protected-access disable=line-too-long # noqa E501
-            MockStateChangeWaiter()
-        )
+    @staticmethod
+    def create_simple_action() -> SimpleAction:
+        """Create a simple action for testing."""
+        action = SimpleAction()
+        action.telescope = MockTelescopeWrapper()
+        # pylint: disable=protected-access
+        action._state_change_waiter = MockStateChangeWaiter()
+        return action
 
     def test_execute_logs_itself_and_executes_action(self):
         """Execute should log the action and execute it.
@@ -84,9 +61,9 @@ class TestTelescopeAction:
         - the action should log its own execution, and
         - the action infrastructure should log the end of the action.
         """
-
-        with patch.object(self.action, "_logger") as mock_logger:
-            self.action.execute()
+        action = self.create_simple_action()
+        with patch.object(action, "_logger") as mock_logger:
+            action.execute()
             assert_that(mock_logger.info.call_count).is_equal_to(
                 3
             )  # Start, action, and end logs
@@ -101,8 +78,8 @@ class TestTelescopeAction:
             )
 
             mock_logger.reset_mock()
-            self.action.set_logging_policy(False)
-            self.action.execute()
+            action.set_logging_policy(False)
+            action.execute()
             assert_that(mock_logger.info.call_count).is_equal_to(0)
 
     def test_action_can_be_configured_timeout_term_condition_and_logging(self):
@@ -112,20 +89,22 @@ class TestTelescopeAction:
         and logging policy, an action can be configured with a different
         set of these policies.
         """
-        self.action.set_termination_condition_timeout(60)
-        assert_that(self.action.termination_condition_timeout).is_equal_to(60)
+        action = self.create_simple_action()
 
-        assert_that(self.action.wait_termination).described_as(
+        action.set_termination_condition_timeout(60)
+        assert_that(action.termination_condition_timeout).is_equal_to(60)
+
+        assert_that(action.wait_termination).described_as(
             "Default wait termination condition policy is True"
         ).is_true()
-        self.action.set_termination_condition_policy(False)
-        assert_that(self.action.wait_termination).is_false()
+        action.set_termination_condition_policy(False)
+        assert_that(action.wait_termination).is_false()
 
-        assert_that(self.action.do_logging).described_as(
+        assert_that(action.do_logging).described_as(
             "Default logging policy is True"
         ).is_true()
-        self.action.set_logging_policy(False)
-        assert_that(self.action.do_logging).is_false()
+        action.set_logging_policy(False)
+        assert_that(action.do_logging).is_false()
 
     def test_execute_raises_timeout_error_if_wait_all_fail(self):
         """Execute should raise TimeoutError if wait_all fails.
@@ -134,36 +113,40 @@ class TestTelescopeAction:
         for all expected termination conditions, a TimeoutError should
         be raised.
         """
+        action = self.create_simple_action()
 
         def mock_wait_all(timeout):
             raise TimeoutError("Simulated timeout")
 
-        self.action._state_change_waiter.wait_all = mock_wait_all  # pylint: disable=protected-access disable=line-too-long # noqa E501
+        action._state_change_waiter.wait_all = mock_wait_all  # pylint: disable=protected-access disable=line-too-long # noqa E501
         with pytest.raises(TimeoutError):
-            self.action.execute()
+            action.execute()
 
     def test_error_logging(self):
         """Error logs are generated when an exception is raised."""
+        action = self.create_simple_action()
 
         def mock_wait_all(timeout):
             """Simulate a timeout when waiting for state changes."""
             raise TimeoutError("Simulated timeout")
 
-        self.action._state_change_waiter.wait_all = mock_wait_all  # pylint: disable=protected-access disable=line-too-long # noqa E501
-        with patch.object(self.action, "_logger") as mock_logger:
+        action._state_change_waiter.wait_all = mock_wait_all  # pylint: disable=protected-access disable=line-too-long # noqa E501
+        with patch.object(action, "_logger") as mock_logger:
             with pytest.raises(TimeoutError):
-                self.action.execute()
+                action.execute()
 
             assert_that(mock_logger.error.call_count).is_equal_to(1)
 
     def test_multiple_executions(self):
         """A action can be executed multiple times."""
+        action = self.create_simple_action()
         for _ in range(3):
-            result = self.action.execute()
+            result = action.execute()
             assert_that(result).is_true()
 
     def test_termination_condition(self):
         """The term. condition is passed correctly to the events waiter."""
+        action = self.create_simple_action()
 
         class ActionWithTermination(TelescopeAction[None]):
             """An action with a termination condition."""

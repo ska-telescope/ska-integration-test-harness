@@ -1,11 +1,16 @@
 """A sequence of `TelescopeAction`s, executed in order."""
 
+from typing import TypeVar
+
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
 )
 
+# Define a generic type variable
+T = TypeVar("T", bound=object)
 
-class TelescopeActionSequence(TelescopeAction):
+
+class TelescopeActionSequence(TelescopeAction[T]):
     """A sequence of `TelescopeAction`s, executed in order.
 
     This action is used to group a sequence of actions together, so that the
