@@ -1,11 +1,9 @@
 """Invoke Assign Resource command on CentralNode."""
 
-import logging
-
 from ska_control_model import ObsState
 
-from ska_integration_test_harness.actions.telescope_action import (
-    TelescopeAction,
+from ska_integration_test_harness.actions.command_action import (
+    TelescopeCommandAction,
 )
 from ska_integration_test_harness.actions.utils.generate_eb_pb_ids import (
     generate_eb_pb_ids,
@@ -15,10 +13,8 @@ from ska_integration_test_harness.actions.utils.termination_conditions import (
 )
 from ska_integration_test_harness.inputs.json_input import JSONInput
 
-LOGGER = logging.getLogger(__name__)
 
-
-class CentralNodeAssignResources(TelescopeAction):
+class CentralNodeAssignResources(TelescopeCommandAction):
     """Invoke Assign Resource command on CentralNode."""
 
     # NOTE: this is very similar to SubarrayAssignResources
@@ -40,10 +36,10 @@ class CentralNodeAssignResources(TelescopeAction):
         # set_wait_for_obsstate = kwargs.get("set_wait_for_obsstate", True)
 
         cmd_input = generate_eb_pb_ids(self.assign_input)
+        self._log("Invoking AssignResources on CentralNode")
         result, message = self.telescope.tmc.central_node.AssignResources(
             cmd_input.get_json_string()
         )
-        LOGGER.info("Invoked AssignResources on CentralNode")
         return result, message
 
     def termination_condition(self):

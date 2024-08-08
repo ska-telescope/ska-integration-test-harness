@@ -19,7 +19,7 @@ from ska_integration_test_harness.actions.utils.termination_conditions import (
 )
 
 
-class SubarrayClearObsState(TelescopeAction):
+class SubarrayClearObsState(TelescopeAction[None]):
     """Clear TMC subarray obs state, putting it into the "EMPTY" state."""
 
     def __init__(self) -> None:

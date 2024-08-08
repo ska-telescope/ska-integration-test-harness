@@ -24,8 +24,8 @@ class SubarrayMoveToOff(TelescopeAction):
         #     "State is supposed to be ON before the action."
         # ).is_equal_to(DevState.ON)
 
+        LOGGER.info("Invoking Off on SubarrayNode")
         result, message = self.telescope.tmc.subarray_node.Off()
-        LOGGER.info("Invoked OFF on SubarrayNode")
         return (result, message)
 
     def termination_condition(self):

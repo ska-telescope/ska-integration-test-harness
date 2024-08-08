@@ -1,18 +1,17 @@
 """Subclass of Abort action that forces the abort if it failed."""
 
-import logging
-
 import tango
 from ska_control_model import ObsState
 
-from ska_integration_test_harness.actions.subarray.subarray_abort import (  # pylint: disable=line-too-long # noqa: E501
-    SubarrayAbort,
+from ska_integration_test_harness.actions.telescope_action import (
+    TelescopeAction,
+)
+from ska_integration_test_harness.actions.utils.termination_conditions import (
+    all_subarrays_have_obs_state,
 )
 
-LOGGER = logging.getLogger(__name__)
 
-
-class SubarrayForceAbort(SubarrayAbort):
+class SubarrayForceAbort(TelescopeAction[None]):
     """Invoke Abort command on subarray Node and force it if it failed."""
 
     def _devices_that_should_abort(self) -> list[tango.DeviceProxy]:
@@ -36,10 +35,11 @@ class SubarrayForceAbort(SubarrayAbort):
         return [ObsState.ABORTED, ObsState.ABORTING]
 
     def _action(self):
-        LOGGER.info("Forcing Abort on each subarray device.")
         for device in self._devices_that_should_abort():
             if device.obsState not in self._ok_states():
+                self._log(f"Forcing Abort on {device.dev_name()}")
                 device.Abort()
 
-    # (termination codition is the same as the parent class - i.e.,
-    # wait for all devices to reach ABORTED state)
+    def termination_condition(self):
+        """All subarrays must be in ABORTED state."""
+        return all_subarrays_have_obs_state(self.telescope, ObsState.ABORTED)

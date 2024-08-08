@@ -17,7 +17,7 @@ from ska_integration_test_harness.inputs.obs_state_commands_input import (
 LOGGER = logging.getLogger(__name__)
 
 
-class ForceChangeOfObsState(TelescopeAction):
+class ForceChangeOfObsState(TelescopeAction[None]):
     """Force the change of the ObsState in Subarray to a target state.
 
     This action is used to force the change of the ObsState in TMC Subarray,

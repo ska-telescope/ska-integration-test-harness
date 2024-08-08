@@ -25,6 +25,7 @@ class SubarrayMoveToOn(TelescopeAction):
                 "FAILED ASSUMPTION: Subarray state is not either ON or OFF"
             ).is_equal_to(DevState.OFF)
 
+            LOGGER.info("Invoking On on SubarrayNode")
             result, message = self.telescope.tmc.subarray_node.On()
             LOGGER.info("Invoked ON on SubarrayNode")
             return (result, message)

@@ -1,12 +1,12 @@
 """Execute provided command on CentralNode."""
 
-from ska_integration_test_harness.actions.telescope_action import (
-    TelescopeAction,
+from ska_integration_test_harness.actions.command_action import (
+    TelescopeCommandAction,
 )
 from ska_integration_test_harness.inputs.json_input import JSONInput
 
 
-class CentralNodePerformAction(TelescopeAction):
+class CentralNodePerformAction(TelescopeCommandAction):
     """A class for performing actions on the CentralNode."""
 
     def __init__(self, command_name: str, command_input: JSONInput):
@@ -15,6 +15,7 @@ class CentralNodePerformAction(TelescopeAction):
         self.command_input = command_input
 
     def _action(self):
+        self._log(f"Invoking {self.command_name} on CentralNode")
         result, message = self.telescope.tmc.central_node.command_inout(
             self.command_name, self.command_input.get_json_string()
         )

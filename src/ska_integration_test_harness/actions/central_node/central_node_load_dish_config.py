@@ -1,13 +1,13 @@
 """Invoke LoadDishCfg command on CentralNode."""
 
-from ska_integration_test_harness.actions.expected_event import ExpectedEvent
-from ska_integration_test_harness.actions.telescope_action import (
-    TelescopeAction,
+from ska_integration_test_harness.actions.command_action import (
+    TelescopeCommandAction,
 )
+from ska_integration_test_harness.actions.expected_event import ExpectedEvent
 from ska_integration_test_harness.inputs.json_input import JSONInput
 
 
-class CentralNodeLoadDishConfig(TelescopeAction):
+class CentralNodeLoadDishConfig(TelescopeCommandAction):
     """Invoke LoadDishCfg command on CentralNode."""
 
     def __init__(self, dish_vcc_config: JSONInput):
@@ -16,6 +16,7 @@ class CentralNodeLoadDishConfig(TelescopeAction):
 
     def _action(self):
         # AttributeError: LoadDishConfig. Did you mean: 'LoadDishCfg'?
+        self._log("Invoking LoadDishCfg on CentralNode")
         result, message = self.telescope.tmc.central_node.LoadDishCfg(
             self.dish_vcc_config.get_json_string()
         )

@@ -1,18 +1,15 @@
 """Execute provided command on subarray Node."""
 
 import enum
-import logging
 
 from ska_control_model import ObsState
 
-from ska_integration_test_harness.actions.telescope_action import (
-    TelescopeAction,
+from ska_integration_test_harness.actions.command_action import (
+    TelescopeCommandAction,
 )
 from ska_integration_test_harness.actions.utils.termination_conditions import (
     all_subarrays_have_obs_state,
 )
-
-LOGGER = logging.getLogger(__name__)
 
 
 class TelescopeCommand(enum.Enum):
@@ -24,8 +21,19 @@ class TelescopeCommand(enum.Enum):
     ABORT = "Abort"
 
 
-class SubarrayExecuteTransition(TelescopeAction):
-    """Execute provided command on subarray Node."""
+class SubarrayExecuteTransition(TelescopeCommandAction):
+    """Execute provided command on subarray Node.
+
+    TODO: this class is a generic command executor, while refactoring
+    I put here some synchronization conditions for waiting transient
+    states, but I think they should be moved in their specific classes.
+
+    E.g., SubarrayAssignResources, SubarrayConfigure, SubarrayScan and
+    SubarrayAbort have an additional parameter that permits to specify
+    if you want to synchronize on the transient state or in the final
+    quiescent state. This parameter could also be moved in a special
+    super-class, for example called SubarrayCommandToTransientState.
+    """
 
     COMMAND_OUTCOME_MAP = {
         TelescopeCommand.ASSIGN_RESOURCES: ObsState.RESOURCING,
@@ -40,18 +48,11 @@ class SubarrayExecuteTransition(TelescopeAction):
         self.argin = argin
 
     def _action(self):
-        if self.command_name is not None:
-            result, message = self.telescope.tmc.subarray_node.command_inout(
-                self.command_name, self.argin
-            )
-            LOGGER.info("Invoked %s on SubarrayNode", self.command_name)
-            return (
-                result,
-                message,
-            )
-        # pylint says inconsistent-return-statements,
-        # what should be returned here?
-        return None
+        self._log(f"Invoking {self.command_name} on TMC SubarrayNode")
+        result, message = self.telescope.tmc.subarray_node.command_inout(
+            self.command_name, self.argin
+        )
+        return result, message
 
     def termination_condition(self):
         if (

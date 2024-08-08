@@ -15,7 +15,7 @@ from ska_integration_test_harness.actions.telescope_action import (
 from ska_integration_test_harness.inputs.json_input import JSONInput
 
 
-class SubarrayFivePointCalibrationScan(TelescopeAction):
+class SubarrayFivePointCalibrationScan(TelescopeAction[None]):
     """Perform a five point calibration scan on Subarray Node using the
     partial configuration jsons and scan jsons provided as inputs.
     """

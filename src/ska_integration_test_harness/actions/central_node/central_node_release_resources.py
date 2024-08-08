@@ -1,7 +1,5 @@
 """Invoke ReleaseResources on the CentralNode."""
 
-import logging
-
 from ska_control_model import ObsState
 
 from ska_integration_test_harness.actions.telescope_action import (
@@ -13,8 +11,6 @@ from ska_integration_test_harness.actions.utils.termination_conditions import (
 )
 from ska_integration_test_harness.inputs.json_input import JSONInput
 
-LOGGER = logging.getLogger(__name__)
-
 
 class CentralNodeReleaseResources(TelescopeAction):
     """A class for releasing resources on the CentralNode."""
@@ -24,6 +20,7 @@ class CentralNodeReleaseResources(TelescopeAction):
         self.release_input = release_input
 
     def _action(self):
+        self._log("Invoking ReleaseResources on CentralNode")
         result, message = self.telescope.tmc.central_node.ReleaseResources(
             self.release_input.get_json_string()
         )

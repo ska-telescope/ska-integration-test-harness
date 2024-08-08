@@ -1,7 +1,5 @@
 """An action to move the central node to OFF State."""
 
-import logging
-
 from tango import DevState
 
 from ska_integration_test_harness.actions.telescope_action import (
@@ -13,15 +11,12 @@ from ska_integration_test_harness.actions.utils.termination_conditions import (
 )
 from ska_integration_test_harness.inputs.dish_mode import DishMode
 
-LOGGER = logging.getLogger(__name__)
 
-
-class MoveToOff(TelescopeAction):
+class MoveToOff(TelescopeAction[None]):
     """An action to move the central node to off."""
 
     def _action(self):
-        LOGGER.info("Moving the central node to OFF state")
-
+        self._log("Moving the central node to OFF state")
         self.telescope.tmc.central_node.TelescopeOff()
         self.telescope.csp.move_to_off()
 

@@ -18,12 +18,11 @@ from ska_integration_test_harness.inputs.dish_mode import DishMode
 LOGGER = logging.getLogger(__name__)
 
 
-class SetStandby(TelescopeAction):
+class SetStandby(TelescopeAction[None]):
     """An action to set the central node to STANDBY State."""
 
     def _action(self):
-        LOGGER.info("Setting the central node to STANDBY state")
-
+        self._log("Setting the central node to STANDBY state")
         self.telescope.tmc.central_node.TelescopeStandby()
         self.telescope.csp.move_to_off()
 

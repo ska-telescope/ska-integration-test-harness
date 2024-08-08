@@ -18,7 +18,7 @@ from ska_integration_test_harness.config.hardcoded_values import (
 from ska_integration_test_harness.inputs.json_input import JSONInput
 
 
-class SubarraySimulateReceiveAddresses(TelescopeAction):
+class SubarraySimulateReceiveAddresses(TelescopeAction[None]):
     """Sets the receive addresses attribute on SDP Subarray so an event can
     be simulated for Subarray Node to process.
     """
