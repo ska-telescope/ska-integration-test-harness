@@ -16,19 +16,21 @@ class EmulationConfiguration:
     is emulated. If ``False``, the component is a production one.
     """
 
+    tmc: bool = False
+
     csp: bool = False
     sdp: bool = False
     dish: bool = False
 
     def all_emulated(self) -> bool:
-        """Check if all components are emulated.
+        """Check if all components are emulated (TMC is ignored).
 
         return: ``True`` when all components are emulated, ``False`` otherwise.
         """
         return self.csp and self.sdp and self.dish
 
     def all_production(self) -> bool:
-        """Check if all components are production ones.
+        """Check if all components are production ones (TMC is ignored).
 
         return: ``True`` when all components are production ones,
             ``False`` otherwise.

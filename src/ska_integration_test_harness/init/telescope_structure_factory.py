@@ -1,7 +1,7 @@
 """Create a telescope test structure according to the current configuration."""
 
-from ska_integration_test_harness.config.configuration_factory import (
-    TestHarnessConfigurationFactory,
+from ska_integration_test_harness.config.config_reader import (
+    TMCMIDConfigurationReader,
 )
 from ska_integration_test_harness.emulated.csp_devices import (
     EmulatedCSPDevices,
@@ -68,13 +68,13 @@ class TelescopeStructureFactory:
         :param default_vcc_config_input: The default VCC config input. It
             will be used to reset the VCC config.
         """
-        self.config_factory = TestHarnessConfigurationFactory()
+        self.config_factory = TMCMIDConfigurationReader()
         self.default_commands_input = default_commands_input
         self.default_vcc_config_input = default_vcc_config_input
 
     @property
     def _emulation_config(self):
-        return self.config_factory.emulation_configuration
+        return self.config_factory.get_emulation_configuration()
 
     def init_telescope_test_structure(self) -> TelescopeWrapper:
         """Initialize the telescope test structure.
@@ -138,7 +138,7 @@ class TelescopeStructureFactory:
 
         return ProductionCSPDevices(
             csp_configuration=self.config_factory.get_csp_configuration(),
-            all_production=self._emulation_config.all_production,
+            all_production=self._emulation_config.all_production(),
         )
 
     def create_dishes_wrapper(self) -> DishesDevices:

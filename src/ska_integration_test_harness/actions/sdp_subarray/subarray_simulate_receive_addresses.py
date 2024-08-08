@@ -9,8 +9,8 @@ from tango import DeviceProxy
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
 )
-from ska_integration_test_harness.config.configuration_factory import (  # pylint: disable=line-too-long # noqa: E501
-    TestHarnessConfigurationFactory,
+from ska_integration_test_harness.config.config_reader import (  # pylint: disable=line-too-long # noqa: E501
+    TMCMIDConfigurationReader,
 )
 from ska_integration_test_harness.config.hardcoded_values import (
     HardcodedValues,
@@ -40,7 +40,7 @@ class SubarraySimulateReceiveAddresses(TelescopeAction[None]):
 
         # Setting pointing offsets after encoding the data.
         sdp_qc = DeviceProxy(
-            TestHarnessConfigurationFactory()
+            TMCMIDConfigurationReader()
             .get_other_configurations()
             .sdp_queue_connector
         )
