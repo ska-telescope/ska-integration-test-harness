@@ -1,6 +1,6 @@
 """A sequence of `TelescopeAction`s, executed in order."""
 
-from typing import TypeVar
+from typing import Generic, TypeVar
 
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
@@ -10,7 +10,7 @@ from ska_integration_test_harness.actions.telescope_action import (
 T = TypeVar("T", bound=object)
 
 
-class TelescopeActionSequence(TelescopeAction[T]):
+class TelescopeActionSequence(TelescopeAction[T], Generic[T]):
     """A sequence of `TelescopeAction`s, executed in order.
 
     This action is used to group a sequence of actions together, so that the
@@ -45,7 +45,7 @@ class TelescopeActionSequence(TelescopeAction[T]):
         super().__init__()
         self.steps = steps
 
-    def _action(self):
+    def _action(self) -> T:
         """Execute the sequence of actions.
 
         The steps are executed in order. The synchronization is done after

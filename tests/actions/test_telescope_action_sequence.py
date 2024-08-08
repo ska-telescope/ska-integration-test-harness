@@ -48,18 +48,16 @@ class TestTelescopeActionSequence:
         # pylint: disable=protected-access
         self.action2._state_change_waiter = MockStateChangeWaiter()
 
-    def create_action_sequence(self) -> TelescopeActionSequence:
+    def create_action_sequence(self) -> TelescopeActionSequence[bool]:
         """Create a sequence action with two steps.
 
         :return: The sequence action with two steps.
         """
-        return TelescopeActionSequence([self.action1, self.action2])
+        return TelescopeActionSequence[bool]([self.action1, self.action2])
 
     def test_initialization(self):
         """Initialization of sequence action with correct steps."""
-        sequence_action: TelescopeActionSequence = (
-            self.create_action_sequence()
-        )
+        sequence_action = self.create_action_sequence()
         assert_that(sequence_action.steps).is_equal_to(
             [self.action1, self.action2]
         )
