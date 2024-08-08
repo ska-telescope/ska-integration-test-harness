@@ -29,7 +29,11 @@ class SimpleAction(TelescopeAction[bool]):
 
 
 class TestTelescopeActionSequence:
-    """Unit tests for the TelescopeActionSequence class."""
+    """Unit tests for the TelescopeActionSequence class.
+    
+    TODO: for some reason pytest is not detecting coverage
+    for this test class. Find a way to fix this.
+    """
 
     def __init__(self) -> None:
         self.action1 = None
