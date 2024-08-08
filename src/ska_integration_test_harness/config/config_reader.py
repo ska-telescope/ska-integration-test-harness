@@ -158,16 +158,16 @@ class TMCMIDConfigurationReader(ConfigurationReader):
         """Get the configuration for the CSP."""
         return CSPConfiguration(
             is_emulated=self.get_emulation_configuration().csp,
-            csp_master_name="ska_mid/tm_leaf_node/csp_master",
-            csp_subarray1_name="ska_mid/tm_leaf_node/csp_subarray01",
+            csp_master_name="mid-csp/control/0",
+            csp_subarray1_name="mid-csp/subarray/01",
         )
 
     def get_sdp_configuration(self):
         """Get the configuration for the SDP."""
         return SDPConfiguration(
             is_emulated=self.get_emulation_configuration().sdp,
-            sdp_master_name="ska_mid/tm_leaf_node/sdp_master",
-            sdp_subarray1_name="ska_mid/tm_leaf_node/sdp_subarray01",
+            sdp_master_name="mid-sdp/control/0",
+            sdp_subarray1_name="mid-sdp/subarray/01",
         )
 
     def get_dish_configuration(self):
