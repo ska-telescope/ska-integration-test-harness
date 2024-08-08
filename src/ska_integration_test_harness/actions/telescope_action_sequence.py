@@ -41,14 +41,33 @@ class TelescopeActionSequence(TelescopeAction):
         self.steps = steps
 
     def _action(self):
-        """Execute the sequence of actions."""
-        for step in self.steps:
+        """Execute the sequence of actions.
+
+        The steps are executed in order. The synchronization is done after
+        each step. The result of the last step is returned.
+
+        :return: The result of the last step."""
+        for step in self.steps[:-1]:
             step.execute()
 
+        return self.steps[-1].execute()
+
     def termination_condition(self):
+        """The sequence by itself does not have a termination condition.
+
+        The termination condition is handled by the steps. If configured,
+        the termination condition of the last step will be used.
+
+        :return: An empty list.
+        """
         return []
 
     def set_termination_condition_timeout(self, timeout: int | float) -> None:
+        """Propagate a new timeout value to each of the steps.
+
+        :param timeout: The new timeout value.
+        """
+
         for step in self.steps:
             step.set_termination_condition_timeout(timeout)
 
@@ -58,6 +77,15 @@ class TelescopeActionSequence(TelescopeAction):
         super().set_termination_condition_timeout(timeout)
 
     def set_termination_condition_policy(self, wait: bool) -> None:
+        """Set the termination condition policy for the steps as follows.
+
+        - set to True: all the steps will wait for the termination condition.
+        - set to False: the last step will not wait for the
+            termination condition.
+
+        :param wait: The new policy value.
+        """
+
         if wait:
             # make all the steps to wait for the termination condition
             for step in self.steps:
@@ -71,3 +99,16 @@ class TelescopeActionSequence(TelescopeAction):
         # we don't need to do anything else. We still call super()
         # through to keep track of the policy value.
         super().set_termination_condition_policy(wait)
+
+    def set_logging_policy(self, do_logging: bool) -> None:
+        """Propagate a new logging policy to each of the steps.
+
+        :param do_logging: The new logging policy value.
+        """
+
+        # logging policy is propagated to all the steps
+        for step in self.steps:
+            step.set_logging_policy(do_logging)
+
+        # self itself uses the new logging policy
+        super().set_logging_policy(do_logging)
