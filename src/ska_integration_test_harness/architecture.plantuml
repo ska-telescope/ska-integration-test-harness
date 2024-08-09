@@ -93,7 +93,9 @@ package "Actions" {
         + expected_value: Any
     }
 
-    class CommandInput {
+    class CommandInputBuilder {
+        + build_command_input()
+        + read_input_data_from_file()
     }
 
     class SubarrayConfigure
@@ -114,8 +116,7 @@ package "Actions" {
 ' Stacking packages vertically
 Facades -[hidden]down- "Wrappers"
 Facades ..down..> "Wrappers"
-"Wrappers" ..[hidden]down.......> Actions
-"Wrappers" ..down..> Actions
+"Wrappers" ..down....> Actions
 
 skinparam class {
     ProductionTMCDevices BackgroundColor LightBlue
