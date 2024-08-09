@@ -231,7 +231,7 @@ class BasicConfigurationValidator(SubsystemConfigurationValidator):
         :return: True if the device responds as an emulator, False otherwise.
         """
         try:
-            dev_proxy.resetDelay()
+            # dev_proxy.resetDelay()
             dev_proxy.commandCallInfo()
             return True
         except tango.DevFailed:
