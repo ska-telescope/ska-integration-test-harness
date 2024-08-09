@@ -1,0 +1,162 @@
+@startuml
+
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+' Enforce vertical layout
+top to bottom direction
+
+' Configuration class to the left of Facades
+class Configuration {
+}
+
+' Facades at the top
+package "Facades" {
+    class TMCSubarrayFacade {
+        + subarray_node: DeviceProxy {property}
+        + dish_leaf_node_dict: Dict[str, DeviceProxy] {property}
+        + csp_subarray_leaf_node: DeviceProxy {property}
+        + sdp_subarray_leaf_node: DeviceProxy {property}
+        + set_subarray_id(id)
+        + configure(input_string)
+        + end_observation()
+    }
+
+    class CSPFacade {
+        + csp_master: DeviceProxy {property}
+        + csp_subarray: DeviceProxy {property}
+        + method_1()
+    }
+
+    class SDPFacade {
+        + sdp_master: DeviceProxy {property}
+        + sdp_subarray: DeviceProxy {property}
+        + method_1()
+    }
+
+    class DishesFacade {
+        + dish_master_dict: Dict[str, DeviceProxy] {property}
+        + method_1()
+    }
+}
+
+Configuration -[hidden]right- Facades
+
+' Wrappers and Devices in the middle
+package "Wrappers and Devices" {
+    class TelescopeWrapper {
+    }
+
+    abstract class TMCDevices
+    class ProductionTMCDevices
+    abstract class CSPDevices
+    class EmulatedCSPDevices
+    class ProductionCSPDevices
+    abstract class SDPDevices
+    class EmulatedSDPDevices
+    class ProductionSDPDevices
+    abstract class DishesDevices
+    class EmulatedDishesDevices
+    class ProductionDishesDevices
+
+    ProductionTMCDevices -up-|> TMCDevices
+    EmulatedCSPDevices -up-|> CSPDevices
+    ProductionCSPDevices -up-|> CSPDevices
+    EmulatedSDPDevices -up-|> SDPDevices
+    ProductionSDPDevices -up-|> SDPDevices
+    EmulatedDishesDevices -up-|> DishesDevices
+    ProductionDishesDevices -up-|> DishesDevices
+
+    TelescopeWrapper "1" *-- "1" TMCDevices
+    TelescopeWrapper "1" *-- "1" CSPDevices
+    TelescopeWrapper "1" *-- "1" SDPDevices
+    TelescopeWrapper "1" *-- "1" DishesDevices
+}
+
+' CommandInput class to the left of Actions
+class CommandInput {
+}
+
+' Actions at the bottom
+package "Actions" {
+    abstract class TelescopeAction {
+        + timeout: int | float = (some default value)
+        + execute()
+        - _action() {abstract}
+        + synchronize_on_events(): list[ExpectedStateChange] {abstract}
+    }
+
+    class ExpectedStateChange {
+        + device: DeviceProxy | str
+        + attribute: str
+        + expected_value: Any
+    }
+
+    class SubarrayConfigure
+    class SubarrayEndObservation
+    class MoveToOn
+    class Etc
+
+    SubarrayConfigure -up-|> TelescopeAction
+    SubarrayEndObservation -up-|> TelescopeAction
+    MoveToOn -up-|> TelescopeAction
+    Etc -up-|> TelescopeAction
+
+    TelescopeAction ..> ExpectedStateChange
+}
+
+CommandInput -[hidden]right- Actions
+
+' Stacking packages vertically
+Facades -[hidden]down- "Wrappers and Devices"
+"Wrappers and Devices" -[hidden]down- Actions
+"Wrappers and Devices" -[hidden]down- CommandInput
+
+' Relationships between packages
+Facades ..down..> "Wrappers and Devices"
+"Wrappers and Devices" ..down..> Actions
+TelescopeWrapper "1" *-- "1" TelescopeAction
+
+skinparam class {
+    ProductionTMCDevices BackgroundColor LightBlue
+    ProductionCSPDevices BackgroundColor LightBlue
+    ProductionSDPDevices BackgroundColor LightBlue
+    ProductionDishesDevices BackgroundColor LightBlue
+    ExpectedStateChange BackgroundColor LightBlue
+}
+
+skinparam class {
+    EmulatedCSPDevices BackgroundColor LightGreen
+    EmulatedSDPDevices BackgroundColor LightGreen
+    EmulatedDishesDevices BackgroundColor LightGreen
+}
+
+skinparam class {
+    TMCDevices BackgroundColor Wheat
+    CSPDevices BackgroundColor Wheat
+    SDPDevices BackgroundColor Wheat
+    DishesDevices BackgroundColor Wheat
+    TelescopeAction BackgroundColor Wheat
+    SubarrayConfigure BackgroundColor Wheat
+    SubarrayEndObservation BackgroundColor Wheat
+    MoveToOn BackgroundColor Wheat
+    Etc BackgroundColor Wheat
+}
+
+skinparam class {
+    TMCSubarrayFacade BackgroundColor PaleGreen
+    CSPFacade BackgroundColor PaleGreen
+    SDPFacade BackgroundColor PaleGreen
+    DishesFacade BackgroundColor PaleGreen
+}
+skinparam class {
+    Configuration BackgroundColor Yellow
+    CommandInput BackgroundColor Yellow
+}
+
+' Position emulated devices slightly lower
+EmulatedCSPDevices -[hidden]down- ProductionCSPDevices
+EmulatedSDPDevices -[hidden]down- ProductionSDPDevices
+EmulatedDishesDevices -[hidden]down- ProductionDishesDevices
+
+@enduml
