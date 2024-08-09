@@ -1,3 +1,5 @@
+"""A builder class for configuring and building a test harness."""
+
 import logging
 from typing import Any, List
 
@@ -56,7 +58,11 @@ class TestHarnessBuilder:
     and the inputs. Potentially, you can inject your own tools to customize
     the behavior of the builder. Potentially, you can also subclass this
     builder to customize its behavior.
+
+    TODO: refactor and uniform the style
     """
+
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self):
         """Initialize the TestHarnessBuilder with default configurations."""
@@ -205,6 +211,7 @@ class TestHarnessBuilder:
                 raise ValueError(f"The default input '{attr}' is missing.")
 
             # get attribute expected type
+            # pylint: disable=no-member
             expected_type = self.default_inputs.__annotations__[attr]
             if not isinstance(attr_value, expected_type):
                 raise ValueError(
@@ -223,8 +230,7 @@ class TestHarnessBuilder:
                         f"The default input '{attr}' is not a "
                         "valid JSON input because it looks impossible to "
                         "extract an object from it. "
-                        f"Error: {e}"
-                    )
+                    ) from e
 
         self._log_info("All default inputs are valid.")
         self._default_inputs_validated = True

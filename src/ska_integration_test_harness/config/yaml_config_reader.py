@@ -14,6 +14,9 @@ from ska_integration_test_harness.config.config_reader import (
 from ska_integration_test_harness.config.emulation_config import (
     EmulationConfiguration,
 )
+from ska_integration_test_harness.config.other_config import (
+    OtherDevicesConfigurations,
+)
 
 
 class YAMLConfigurationReader(ConfigurationReader):
@@ -179,6 +182,8 @@ class YAMLConfigurationReader(ConfigurationReader):
             dish_master4_name=dish.get("dish_master4_name"),
         )
 
+    # TODO: consider remove the following
+
     def get_emulation_configuration(self):
         """Get the emulation configuration.
 
@@ -192,3 +197,10 @@ class YAMLConfigurationReader(ConfigurationReader):
             sdp=self.get_sdp_configuration().is_emulated,
             dish=self.get_dish_configuration().is_emulated,
         )
+
+    def get_other_configurations(self) -> OtherDevicesConfigurations:
+        """Get the other configurations for the telescope.
+
+        return: The other configurations.
+        """
+        return OtherDevicesConfigurations()

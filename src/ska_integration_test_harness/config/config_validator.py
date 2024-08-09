@@ -1,3 +1,5 @@
+"""A validator for a subsystem configuration."""
+
 import abc
 
 import tango
@@ -14,6 +16,8 @@ class SubsystemConfigurationValidator(abc.ABC):
     https://refactoring.guru/design-patterns/visitor
     design pattern.
     """
+
+    # pylint: disable=too-few-public-methods
 
     @abc.abstractmethod
     def validate(
@@ -168,10 +172,10 @@ class BasicConfigurationValidator(SubsystemConfigurationValidator):
                 self._add_error(f"Device '{dev_name}' connection failed: {cf}")
             except tango.DevError as de:
                 self._add_error(f"Device '{dev_name}' returned an error: {de}")
-            except Exception as e:
-                self._add_error(
-                    f"Device '{dev_name}' raised an exception: {e}"
-                )
+            # except Exception as e:
+            #     self._add_error(
+            #         f"Device '{dev_name}' raised an exception: {e}"
+            #     )
 
     def check_emulation(self, config: SubsystemConfiguration) -> None:
         """Check that the devices are emulators or production devices.
@@ -229,6 +233,7 @@ class BasicConfigurationValidator(SubsystemConfigurationValidator):
         try:
             dev_proxy.resetDelay()
             dev_proxy.commandCallInfo()
+            return True
         except tango.DevFailed:
             # if the device is not an emulator, it will raise an exception
             return False

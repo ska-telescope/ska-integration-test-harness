@@ -28,6 +28,9 @@ from ska_integration_test_harness.production.dishes_devices import (
 from ska_integration_test_harness.production.sdp_devices import (
     ProductionSDPDevices,
 )
+from ska_integration_test_harness.production.tmc_devices import (
+    ProductionTMCDevices,
+)
 from ska_integration_test_harness.structure.csp_devices import CSPDevices
 from ska_integration_test_harness.structure.dishes_devices import DishesDevices
 from ska_integration_test_harness.structure.sdp_devices import SDPDevices
@@ -55,8 +58,8 @@ class SubsystemsFactory:
 
         :return: The TMC wrapper.
         """
-        return TMCDevices(
-            tmc_config=tmc_config,
+        return ProductionTMCDevices(
+            tmc_configuration=tmc_config,
             default_commands_input=default_commands_input,
             default_vcc_config_input=default_vcc_config_input,
         )

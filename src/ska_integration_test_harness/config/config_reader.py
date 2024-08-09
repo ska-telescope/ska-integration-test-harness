@@ -63,6 +63,8 @@ class ConfigurationReader(abc.ABC):
         return: The dishes configuration.
         """
 
+    # TODO: consider remove the following
+
     @abc.abstractmethod
     def get_other_configurations(self) -> OtherDevicesConfigurations:
         """Get the other configurations for the telescope.
