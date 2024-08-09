@@ -77,87 +77,51 @@ By carefully writing assertions though, and through the use of
 it is possible to write tests that can be run with real devices and
 emulators without knowing it. See below for examples.
 
+## Architecture
+
+![UML class diagram](architecture.png "Logical architecture of the test harness")
+(the source code is in `architecture.plantuml` and can be updated with `java -jar plantuml.jar architecture.plantuml`)
+
 ## Conventions
 
 The test harness files have this layout:
 
-To ensure the directory tree is displayed correctly in Markdown, you need to use a combination of spaces and backticks to preserve the formatting. Here is the revised tree:
 
 ```plaintext
 .
 ├── common_utils
 ├── emulated
-│   ├── csp_devices.py
-│   ├── dishes_devices.py
-│   ├── sdp_devices.py
-│   └── utils
-│       └── teardown_helper.py
 ├── production
-│   ├── csp_devices.py
-│   ├── dishes_devices.py
-│   ├── sdp_devices.py
-│   └── tmc_devices.py
 ├── README.md
 ├── actions
 │   ├── central_node
 │   │   ├── central_node_assign_resources.py
-│   │   ├── central_node_load_dish_config.py
-│   │   ├── central_node_perform_action.py
-│   │   ├── central_node_release_resources.py
-│   │   ├── move_to_off.py
-│   │   ├── move_to_on.py
-│   │   └── set_standby.py
+│   │   └── ...
 │   ├── expected_event.py
 │   ├── sdp_subarray
 │   │   └── subarray_simulate_receive_addresses.py
 │   ├── state_change_waiter.py
 │   ├── subarray
 │   │   ├── force_change_of_obs_state.py
-│   │   ├── obs_state_resetter_factory.py
-│   │   ├── subarray_abort.py
-│   │   ├── subarray_assign_resources.py
-│   │   ├── subarray_clear_obs_state.py
-│   │   ├── subarray_configure.py
-│   │   ├── subarray_end_observation.py
-│   │   ├── subarray_end_scan.py
-│   │   ├── subarray_execute_transition.py
-│   │   ├── subarray_five_point_calibration_scan.py
-│   │   ├── subarray_force_abort.py
-│   │   ├── subarray_move_to_off.py
-│   │   ├── subarray_move_to_on.py
-│   │   ├── subarray_release_all_resources.py
-│   │   ├── subarray_restart.py
-│   │   └── subarray_scan.py
+│   │   ├── ...
 │   ├── telescope_action.py
 │   ├── telescope_action_sequence.py
 │   └── utils
 │       └── generate_eb_pb_ids.py
 ├── config
 │   ├── components_config.py
-│   ├── configuration_factory.py
-│   ├── emulation_config.py
-│   ├── hardcoded_values.py
-│   └── other_config.py
+│   └── ...
 ├── facades
 │   ├── csp_facade.py
-│   ├── dishes_facade.py
-│   ├── sdp_facade.py
-│   ├── tmc_central_node_facade.py
-│   └── tmc_subarray_node_facade.py
+│   └── ...
 ├── init
 │   └── telescope_structure_factory.py
 ├── inputs
 │   ├── dict_json_input.py
-│   ├── dish_mode.py
-│   ├── json_input.py
-│   ├── obs_state_commands_input.py
-│   └── pointing_state.py
+│   ├── ...
 └── structure
     ├── csp_devices.py
-    ├── dishes_devices.py
-    ├── sdp_devices.py
-    ├── telescope_wrapper.py
-    └── tmc_devices.py
+    ├── ...
 ```
 
 * Facades have to be added in the `facades` folder
@@ -174,7 +138,7 @@ To ensure the directory tree is displayed correctly in Markdown, you need to use
 
 ## Design decisions
 
-### Why use facades?
+### Why using facades?
 As mentioned above we want to insulate test scripts from the details
 of the SUT. 
 
@@ -255,7 +219,7 @@ This way multiple facades and actions can share the same
 and without the need to pass it around.
 
 
-### Why using argument factories?
+### Why using JON data builder?
 
 Some actions over the telescope (such as the *scan*, *configure*, *assign resources*, etc. commands) require an input argument that is a JSON string.
 Some *reset* procedures too require default arguments to be used to call
@@ -280,7 +244,7 @@ and [BUILDER](https://refactoring.guru/design-patterns/builder).
 In `inputs` folder you can find some examples of JSON input classes, but also
 other input-output related classes.
 
-### Why using configuration-classes?
+### Why using configuration classes?
 
 These are mechanisms that collect configuration data from files or
 runtime flags, represent them in objects, and support fixtures to setup the
@@ -334,7 +298,7 @@ To use this test harness you need to:
   - *Since this test harness is focused on TMC, most if not all of the actions
     are done by calling commands on TMC central node or TMC subarray node.*
 
-### How to extend this test harness (withing the current limitations)
+### How to extend this test harness (within the current limitations)
 
 Within the current limitations, your main ways to extend this test harness
 are
