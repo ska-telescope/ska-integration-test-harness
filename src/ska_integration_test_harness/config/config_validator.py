@@ -232,7 +232,7 @@ class BasicConfigurationValidator(SubsystemConfigurationValidator):
         """
         try:
             dev_proxy.resetDelay()
-            dev_proxy.commandCallInfo()
+            _ = dev_proxy.commandCallInfo
             return True
         except AttributeError:
             # if the device is not an emulator, it will raise an exception
