@@ -36,7 +36,13 @@ from ska_integration_test_harness.facades.tmc_central_node_facade import (
 )
 ```
 
+TODO describe here also what needs to be done by fixtures to initialize the harness
+- what config options are available?
+- how can they be specified?
+- 
+
 ## Architecture overview
 
 For an overview of the architecture of the test harness and the principles behind it, see the [architecture document](src/ska_integration_test_harness/README.md).
+
 
