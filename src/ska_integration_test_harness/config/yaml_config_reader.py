@@ -55,8 +55,8 @@ class YAMLConfigurationReader(ConfigurationReader):
             is_emulated: true # Supported false too, default is true
 
             # Expected device names (Required)
-            sdp_master_name: "mid-sdp/elt/master"
-            sdp_subarray1_name: "mid-sdp/elt/subarray01"
+            sdp_master_name: "mid-sdp/control/0"
+            sdp_subarray1_name: "mid-sdp/subarray/01"
 
         dishes:
             is_emulated: true # Supported false too, default is true

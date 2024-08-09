@@ -167,11 +167,15 @@ class BasicConfigurationValidator(SubsystemConfigurationValidator):
                 dev_proxy = tango.DeviceProxy(dev_name)
                 dev_proxy.ping()
             except tango.DevFailed as df:
-                self._add_error(f"Device '{dev_name}' is unreachable: {df}")
+                self._add_error(f"Device '{dev_name}' is unreachable: {df}\n")
             except tango.ConnectionFailed as cf:
-                self._add_error(f"Device '{dev_name}' connection failed: {cf}")
+                self._add_error(
+                    f"Device '{dev_name}' connection failed: {cf}\n"
+                )
             except tango.DevError as de:
-                self._add_error(f"Device '{dev_name}' returned an error: {de}")
+                self._add_error(
+                    f"Device '{dev_name}' returned an error: {de}\n"
+                )
             # except Exception as e:
             #     self._add_error(
             #         f"Device '{dev_name}' raised an exception: {e}"
@@ -221,11 +225,9 @@ class BasicConfigurationValidator(SubsystemConfigurationValidator):
         """Check if a device responds as an emulator.
 
         Check if a device responds as an emulator. This is a heuristic
-        check, that tries to execute some operations on the device that
-        - in theory - only emulators should support. The operations are:
-
-        - resetDelay()
-        - commandCallInfo()
+        check, that verifies if the device has some commands and attributes
+        that are typical of an emulator (i.e., the ``resetDelay()`` command
+        and the ``commandCallInfo`` attribute).
 
         :param dev_proxy: The device proxy to check.
         :return: True if the device responds as an emulator, False otherwise.
