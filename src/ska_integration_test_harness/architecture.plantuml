@@ -6,8 +6,12 @@ skinparam linetype ortho
 ' Enforce vertical layout
 top to bottom direction
 
-' Configuration class to the left of Facades
-class Configuration {
+package "Configurations" {
+    ' Configuration class to the left of Facades
+    class Configuration {
+    }
+    class Validator {}
+    class ConfigurationFileReader {}
 }
 
 ' Facades at the top
@@ -43,7 +47,7 @@ package "Facades" {
 Configuration -[hidden]right- Facades
 
 ' Wrappers and Devices in the middle
-package "Wrappers and Devices" {
+package "Wrappers" {
     class TelescopeWrapper {
     }
 
@@ -73,11 +77,8 @@ package "Wrappers and Devices" {
     TelescopeWrapper "1" *-- "1" DishesDevices
 }
 
-' CommandInput class to the left of Actions
-class CommandInput {
-}
 
-' Actions at the bottom
+
 package "Actions" {
     abstract class TelescopeAction {
         + timeout: int | float = (some default value)
@@ -92,6 +93,9 @@ package "Actions" {
         + expected_value: Any
     }
 
+    class CommandInput {
+    }
+
     class SubarrayConfigure
     class SubarrayEndObservation
     class MoveToOn
@@ -104,18 +108,14 @@ package "Actions" {
 
     TelescopeAction ..> ExpectedStateChange
 }
-
-CommandInput -[hidden]right- Actions
+' ensure Actions are below Wrappers
+"Wrappers" -[hidden]down--- Actions
 
 ' Stacking packages vertically
-Facades -[hidden]down- "Wrappers and Devices"
-"Wrappers and Devices" -[hidden]down- Actions
-"Wrappers and Devices" -[hidden]down- CommandInput
-
-' Relationships between packages
-Facades ..down..> "Wrappers and Devices"
-"Wrappers and Devices" ..down..> Actions
-TelescopeWrapper "1" *-- "1" TelescopeAction
+Facades -[hidden]down- "Wrappers"
+Facades ..down..> "Wrappers"
+"Wrappers" ..[hidden]down.......> Actions
+"Wrappers" ..down..> Actions
 
 skinparam class {
     ProductionTMCDevices BackgroundColor LightBlue
@@ -149,6 +149,7 @@ skinparam class {
     SDPFacade BackgroundColor PaleGreen
     DishesFacade BackgroundColor PaleGreen
 }
+
 skinparam class {
     Configuration BackgroundColor Yellow
     CommandInput BackgroundColor Yellow
