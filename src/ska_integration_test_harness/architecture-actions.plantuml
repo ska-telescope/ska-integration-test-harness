@@ -1,0 +1,100 @@
+@startuml
+
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+' Enforce vertical layout
+top to bottom direction
+
+package "Configurations" {
+
+}
+
+' Facades at the top
+package "Facades" {
+
+}
+
+Configurations .right.> Facades
+Configurations .right.> Wrappers
+Configurations .right.> Actions
+
+' Wrappers and Devices in the middle
+package "Wrappers" {
+    class TelescopeWrapper {
+    }
+
+    abstract class TMCDevices
+    class ProductionTMCDevices
+    abstract class CSPDevices
+    class EmulatedCSPDevices
+    class ProductionCSPDevices
+    abstract class SDPDevices
+    class EmulatedSDPDevices
+    class ProductionSDPDevices
+    abstract class DishesDevices
+    class EmulatedDishesDevices
+    class ProductionDishesDevices
+
+    ProductionTMCDevices -up-|> TMCDevices
+    EmulatedCSPDevices -up-|> CSPDevices
+    ProductionCSPDevices -up-|> CSPDevices
+    EmulatedSDPDevices -up-|> SDPDevices
+    ProductionSDPDevices -up-|> SDPDevices
+    EmulatedDishesDevices -up-|> DishesDevices
+    ProductionDishesDevices -up-|> DishesDevices
+
+    TelescopeWrapper "1" *-- "1" TMCDevices
+    TelescopeWrapper "1" *-- "1" CSPDevices
+    TelescopeWrapper "1" *-- "1" SDPDevices
+    TelescopeWrapper "1" *-- "1" DishesDevices
+}
+
+
+
+package "Actions" {
+    abstract class TelescopeAction {
+        + timeout: int | float = (some default value)
+        + execute()
+        - _action() {abstract}
+        + synchronize_on_events(): list[ExpectedStateChange] {abstract}
+    }
+
+    class ExpectedStateChange {
+        + device: DeviceProxy | str
+        + attribute: str
+        + expected_value: Any
+    }
+
+    class CommandInputBuilder {
+        + build_command_input()
+        + read_input_data_from_file()
+    }
+
+    class SubarrayConfigure
+    class SubarrayEndObservation
+    class MoveToOn
+    class Etc
+
+    SubarrayConfigure -up-|> TelescopeAction
+    SubarrayEndObservation -up-|> TelescopeAction
+    MoveToOn -up-|> TelescopeAction
+    Etc -up-|> TelescopeAction
+
+    TelescopeAction ..> ExpectedStateChange
+}
+' ensure Actions are below Wrappers
+"Wrappers" -[hidden]down--- Actions
+
+' Stacking packages vertically
+Facades -[hidden]down- "Wrappers"
+Facades ..down..> "Wrappers"
+"Actions" ..up....> Wrappers
+
+
+' Position emulated devices slightly lower
+EmulatedCSPDevices -[hidden]down- ProductionCSPDevices
+EmulatedSDPDevices -[hidden]down- ProductionSDPDevices
+EmulatedDishesDevices -[hidden]down- ProductionDishesDevices
+
+@enduml

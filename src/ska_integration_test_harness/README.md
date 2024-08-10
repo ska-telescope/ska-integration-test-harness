@@ -79,8 +79,10 @@ emulators without knowing it. See below for examples.
 
 ## Architecture
 
-![UML class diagram](architecture.png "Logical architecture of the test harness")
-(the source code is in `architecture.plantuml` and can be updated with `java -jar plantuml.jar architecture.plantuml`)
+![configurations, facades and wrappers](architecture-facades.png "Logical architecture of the test harness (part 1)")
+(the source code is in `architecture-facades.plantuml` and can be updated with `java -jar plantuml.jar architecture.plantuml`)
+
+![wrappers and actions](architecture-actions.png "Logical architecture of the test harness (part 2")
 
 ## Conventions
 
@@ -164,7 +166,7 @@ In this case the complex system is the test harness itself, with the wrappers
 that represent the SUT and the actions that act over the wrappers.
 
 
-### Why use actions?
+### Why using actions?
 
 A test script has to interact with the SUT and send it operations to perform.
 These operations are complex and require multiple steps, possibly involving

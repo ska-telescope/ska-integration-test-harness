@@ -14,6 +14,7 @@ package "Configurations" {
     class ConfigurationFileReader {}
 }
 
+
 ' Facades at the top
 package "Facades" {
     class TMCSubarrayFacade {
@@ -80,81 +81,17 @@ package "Wrappers" {
 
 
 package "Actions" {
-    abstract class TelescopeAction {
-        + timeout: int | float = (some default value)
-        + execute()
-        - _action() {abstract}
-        + synchronize_on_events(): list[ExpectedStateChange] {abstract}
-    }
 
-    class ExpectedStateChange {
-        + device: DeviceProxy | str
-        + attribute: str
-        + expected_value: Any
-    }
-
-    class CommandInputBuilder {
-        + build_command_input()
-        + read_input_data_from_file()
-    }
-
-    class SubarrayConfigure
-    class SubarrayEndObservation
-    class MoveToOn
-    class Etc
-
-    SubarrayConfigure -up-|> TelescopeAction
-    SubarrayEndObservation -up-|> TelescopeAction
-    MoveToOn -up-|> TelescopeAction
-    Etc -up-|> TelescopeAction
-
-    TelescopeAction ..> ExpectedStateChange
 }
 ' ensure Actions are below Wrappers
 "Wrappers" -[hidden]down--- Actions
+Actions ..up..> Wrappers
+"Facades" ..down..> Actions
+"Configurations" ..down..> Actions
 
 ' Stacking packages vertically
 Facades -[hidden]down- "Wrappers"
 Facades ..down..> "Wrappers"
-"Wrappers" ..down....> Actions
-
-skinparam class {
-    ProductionTMCDevices BackgroundColor LightBlue
-    ProductionCSPDevices BackgroundColor LightBlue
-    ProductionSDPDevices BackgroundColor LightBlue
-    ProductionDishesDevices BackgroundColor LightBlue
-    ExpectedStateChange BackgroundColor LightBlue
-}
-
-skinparam class {
-    EmulatedCSPDevices BackgroundColor LightGreen
-    EmulatedSDPDevices BackgroundColor LightGreen
-    EmulatedDishesDevices BackgroundColor LightGreen
-}
-
-skinparam class {
-    TMCDevices BackgroundColor Wheat
-    CSPDevices BackgroundColor Wheat
-    SDPDevices BackgroundColor Wheat
-    DishesDevices BackgroundColor Wheat
-    TelescopeAction BackgroundColor Wheat
-    SubarrayConfigure BackgroundColor Wheat
-    SubarrayEndObservation BackgroundColor Wheat
-    MoveToOn BackgroundColor Wheat
-    Etc BackgroundColor Wheat
-}
-
-skinparam class {
-    TMCSubarrayFacade BackgroundColor PaleGreen
-    CSPFacade BackgroundColor PaleGreen
-    SDPFacade BackgroundColor PaleGreen
-    DishesFacade BackgroundColor PaleGreen
-}
-
-skinparam class {
-    Configuration BackgroundColor Yellow
-    CommandInput BackgroundColor Yellow
-}
 
 ' Position emulated devices slightly lower
 EmulatedCSPDevices -[hidden]down- ProductionCSPDevices
