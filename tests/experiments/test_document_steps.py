@@ -5,7 +5,7 @@ import ast
 import logging
 from datetime import datetime
 from io import StringIO
-from unittest.mock import Mock, call, mock_open, patch
+from unittest.mock import Mock, call, mock_open, patch, ANY
 
 import pytest
 from assertpy import assert_that
@@ -551,7 +551,7 @@ class TestFileHandlers:
 
             mock_parse_file.assert_called_once_with("input.py")
             mock_generate_markdown.assert_called_once_with(
-                "../../home/giorgio/DEV/SKA/ska-integration-test-harness/tests/experiments/input.py",
+                ANY,
                 ["step1", "step2"],
                 {"scenario1": "Scenario 1"},
             )
