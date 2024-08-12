@@ -54,6 +54,8 @@ This test harness comprises:
 Test scripts should know as little as possible about the test environments
 so that the same test, with different configurations, can be run in different
 environments (like the cloud, an ITF, a PSI). 
+As a consequence a test script should interact only with facades and with wrappers: 
+no actions, no inputs, no configurations. Interaction with wrappers is needed to write meaningful assertions. 
 
 ### RULE 2: Tests are agnostic to the SUT ecosystem
 
