@@ -53,6 +53,7 @@ Actions .left.> Wrappers
 "Facades" ..left..> Actions
 "Configurations" ..> Actions
 "Configurations" ..> Facades
+"Configurations" ..> Wrappers
 
 ' Stacking packages vertically
 'Facades -[hidden]down- "Wrappers"
