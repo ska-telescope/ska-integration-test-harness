@@ -1,10 +1,12 @@
 @startuml
 
-skinparam packageStyle rectangle
+mainframe part 3
+'skinparam packageStyle rectangle
 skinparam linetype ortho
 
+title Actions and Wrappers are used to interact with the telescope
 ' Enforce vertical layout
-top to bottom direction
+'top to bottom direction
 
 package "Configurations" {
 
@@ -15,7 +17,7 @@ package "Facades" {
 
 }
 
-Configurations .right.> Facades
+'Configurations .right.> Facades
 Configurations .right.> Wrappers
 Configurations .right.> Actions
 
@@ -23,6 +25,13 @@ Configurations .right.> Actions
 package "Wrappers" {
     class TelescopeWrapper {
     }
+
+    note right
+    A wrapper is an adapter to a specific device of set of devices.
+    Wrappers belong to subsystems.
+    It can be emulated or production type.
+
+    end note
 
     abstract class TMCDevices
     class ProductionTMCDevices
@@ -60,6 +69,15 @@ package "Actions" {
         + synchronize_on_events(): list[ExpectedStateChange] {abstract}
     }
 
+    note right
+    An action encapsulates an operation that has to be done on a telescope
+    wrapper.
+    It includes commands and their arguments as well as
+    possible termination conditions (aka synchronization conditions).
+
+    Builders are used to provide inputs to commands.
+    end note
+
     class ExpectedStateChange {
         + device: DeviceProxy | str
         + attribute: str
@@ -84,12 +102,12 @@ package "Actions" {
     TelescopeAction ..> ExpectedStateChange
 }
 ' ensure Actions are below Wrappers
-"Wrappers" -[hidden]down--- Actions
+'"Wrappers" -down--- Actions
 
 ' Stacking packages vertically
-Facades -[hidden]down- "Wrappers"
-Facades ..down..> "Wrappers"
-"Actions" ..up....> Wrappers
+Facades ...> "Wrappers"
+Facades ...> "Actions"
+"Actions" ......> Wrappers
 
 
 ' Position emulated devices slightly lower

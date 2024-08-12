@@ -79,10 +79,13 @@ emulators without knowing it. See below for examples.
 
 ## Architecture
 
-![configurations, facades and wrappers](architecture-facades.png "Logical architecture of the test harness (part 1)")
-(the source code is in `architecture-facades.plantuml` and can be updated with `java -jar plantuml.jar architecture.plantuml`)
+![configurations](architecture-config.png "Logical architecture of the test harness (configurations)")
+![configurations, facades and wrappers](architecture-facades.png "Logical architecture of the test harness (facades)")
+![configurations, facades and wrappers](architecture-actions.png "Logical architecture of the test harness (actions and wrappers)")
 
-![wrappers and actions](architecture-actions.png "Logical architecture of the test harness (part 2")
+
+(the source code is in `architecture-facades.plantuml` and can be updated with `java -jar plantuml.jar architecture.plantuml`; likewise for the other diagrams)
+
 
 ## Conventions
 

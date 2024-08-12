@@ -1,17 +1,14 @@
 @startuml
-
-skinparam packageStyle rectangle
+mainframe part 2
+'skinparam packageStyle rectangle
 skinparam linetype ortho
+
+title Facades are used by test scripts
 
 ' Enforce vertical layout
 top to bottom direction
 
 package "Configurations" {
-    ' Configuration class to the left of Facades
-    class Configuration {
-    }
-    class Validator {}
-    class ConfigurationFileReader {}
 }
 
 
@@ -26,6 +23,13 @@ package "Facades" {
         + configure(input_string)
         + end_observation()
     }
+
+    note top
+    Facades are used by test script to access the components of the SUT
+    and to issue commands.
+    Each facade is a particular 'view' on the telescope.
+    They depend on Wrappers and Actions
+    end note
 
     class CSPFacade {
         + csp_master: DeviceProxy {property}
@@ -45,37 +49,10 @@ package "Facades" {
     }
 }
 
-Configuration -[hidden]right- Facades
+'Configuration -[hidden]right- Facades
 
 ' Wrappers and Devices in the middle
 package "Wrappers" {
-    class TelescopeWrapper {
-    }
-
-    abstract class TMCDevices
-    class ProductionTMCDevices
-    abstract class CSPDevices
-    class EmulatedCSPDevices
-    class ProductionCSPDevices
-    abstract class SDPDevices
-    class EmulatedSDPDevices
-    class ProductionSDPDevices
-    abstract class DishesDevices
-    class EmulatedDishesDevices
-    class ProductionDishesDevices
-
-    ProductionTMCDevices -up-|> TMCDevices
-    EmulatedCSPDevices -up-|> CSPDevices
-    ProductionCSPDevices -up-|> CSPDevices
-    EmulatedSDPDevices -up-|> SDPDevices
-    ProductionSDPDevices -up-|> SDPDevices
-    EmulatedDishesDevices -up-|> DishesDevices
-    ProductionDishesDevices -up-|> DishesDevices
-
-    TelescopeWrapper "1" *-- "1" TMCDevices
-    TelescopeWrapper "1" *-- "1" CSPDevices
-    TelescopeWrapper "1" *-- "1" SDPDevices
-    TelescopeWrapper "1" *-- "1" DishesDevices
 }
 
 
@@ -84,18 +61,13 @@ package "Actions" {
 
 }
 ' ensure Actions are below Wrappers
-"Wrappers" -[hidden]down--- Actions
-Actions ..up..> Wrappers
-"Facades" ..down..> Actions
-"Configurations" ..down..> Actions
+Actions ..right..> Wrappers
+"Facades" ..> Actions
+Configurations ..> Facades
 
 ' Stacking packages vertically
 Facades -[hidden]down- "Wrappers"
 Facades ..down..> "Wrappers"
 
-' Position emulated devices slightly lower
-EmulatedCSPDevices -[hidden]down- ProductionCSPDevices
-EmulatedSDPDevices -[hidden]down- ProductionSDPDevices
-EmulatedDishesDevices -[hidden]down- ProductionDishesDevices
 
 @enduml
