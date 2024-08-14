@@ -43,9 +43,9 @@ This test harness comprises:
 * **emulators**, which are real tango devices whose behaviour is programmed
   to simulate in a very simple way the behaviour of real devices.
   The are needed to ensure that SUT is embedded in the environment
-  that it expects. 
-  <!--TODO: are emulators part of this test harness? -->
-
+  that it expects.
+  - for now, emulators are the ones that are used in the TMC-MID integration
+    tests ([Code](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common/-/tree/master/src/ska_tmc_common/test_helpers?ref_type=heads), [Documentation](https://developer.skao.int/projects/ska-tmc-common/en/latest/HelperDevices/TangoHelperDevices.html))
 
 ## RULES
 
@@ -253,14 +253,14 @@ other input-output related classes.
 
 ### Why using configuration classes?
 
-These are mechanisms that collect configuration data from files or
-runtime flags, represent them in objects, and support fixtures to setup the
-proper instances of the classes that represent the structure of the SUT
+These are mechanisms that collect configuration data from files or 
+runtime flags, represent them in objects, and support fixtures to setup 
+the proper instances of the classes that represent the structure of the SUT
 and the facades.
 
-There are a number of classes that represent the default configuration
-of the structure of the SUT. For example, the class `TMCConfiguration`
-contains the names of the devices that are part of the TMC. The class
+There are a number of classes that represent the default configuration of 
+the structure of the SUT. For example, the class `TMCConfiguration` contains
+ the names of the devices that are part of the TMC. The class
 `CSPConfiguration` contains the names of the devices that are part of the CSP.
 The directive to use the emulated or the production devices is another
 example of configuration data (very important for the initialization of the
@@ -271,7 +271,8 @@ hardcoded values, files, etc.) and since it's easy to loose track of them an
 object-oriented approach is used to represent them in a structured way and
 to provide a consistent interface to them. To avoid inconsistencies, a 
 *factory* class (for now not abstract, but it could be) is used to create
-all the instances of those configurations. This way, the test harness initialization procedure or any other part of the
+all the instances of those configurations. This way, the test harness 
+initialization procedure or any other part of the
 code can access the same configurations.
 
 ## How to use and extend this harness
@@ -286,15 +287,23 @@ SDP or the Dishes), always in MID.
 To use this test harness you need to:
 
 - Import the library `ska_integration_test_harness` in your test script.
-- In your test setup, init once the wrappers using the appropriate factory
+  Right now, the library is not yet published as a package, but you can
+  import it from the git source code (see repository `README.md`).
+- In your test setup, init once the wrappers using the appropriate builders
   you can find in the `init` module.
   - *A good place to do this may be a `pytest.fixture`.For how `pytest` fixtures
     work, a good way you can use to execute the *teardown* method after 
     your test are finished is to*:
-    - *create an instance using the appropriate factory,*
+    - *create an instance using the appropriate builder,*
     - *`yield` it to the test function,*
     - *and then call the `teardown` method on the instance, which will
       be executed after the test is finished.*
+  - The builder will ask you to load and validate some configuration files.
+    The main one is a YAML file, that foreach subsystem it contains:
+    - a flag to tell if the device is emulated or production,
+    - the names of the devices that are part of the subsystem.
+  - The builder will also ask you to provide some JSON inputs for various
+    commands (mostly needed for the `teardown` procedures).
 - The same way, init the facades you need (just creating instances of them
   and passing your wrapper instance to them).
 - In your tests, use the facades methods to interact with the SUT and the
@@ -305,14 +314,16 @@ To use this test harness you need to:
   - *Since this test harness is focused on TMC, most if not all of the actions
     are done by calling commands on TMC central node or TMC subarray node.*
 
+For a more detailed example, see the `README.md` in the repository.
+
 ### How to extend this test harness (within the current limitations)
 
 Within the current limitations, your main ways to extend this test harness
 are
 
-- **Add new actions**: you can add new actions by subclassing the
-  `TelescopeAction` class and implementing the abstract methods.
-  You can also create a sequence of actions by subclassing the
+- **Add new actions**: you can add new actions by sub-classing 
+  the `TelescopeAction` class and implementing the abstract methods. 
+  You can also create a sequence of actions by sub-classing the 
   `TelescopeActionSequence` class and implementing the abstract methods.
 - **Add new facades**: you can create new facades that access the telescope
   wrappers and the actions, hiding the implementation details for the tester.
