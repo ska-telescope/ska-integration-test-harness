@@ -223,3 +223,77 @@ def dishes(telescope_wrapper: TelescopeWrapper):
 Then, in your test script you can use the facades to access the devices
 and interact with them. 
 
+```python
+
+"""Simple demonstration of how to use the test harness to write a test script.
+
+NOTE: this is not a complete test script, but just a demonstration of how to
+use the test harness to make actions over the SUT and access the devices
+to make event subscriptions and assertions.
+This also is not necessarily a good example of how to write a test script. 
+"""
+
+from assertpy import assert_that
+from pytest_bdd import given, when, then, scenario
+from ska_integration_test_harness.facades.tmc_central_node_facade import (
+    TMCCentralNodeFacade,
+)
+from ska_tango_testing.integration import TangoEventTracer
+from tango import DevState
+
+@given("the telescope is in ON state")
+def given_the_telescope_is_in_on_state(
+    central_node_facade: TMCCentralNodeFacade,
+):
+    """An example of a Gherkin step to set the telescope in the ON state,
+    implemented interacting with the TMC central node facade.
+    """
+    # NOTE: the ``wait_termination=True`` flag is used to make the action
+    # synchronous, i.e. the call will block until all the synchronizations
+    # conditions are met (explore the method and the action implementation
+    # for more details). In theory, I could avoid the flag,
+    # since the default value is True
+    central_node_facade.move_to_on(wait_termination=True)
+
+
+@when("the MoveToOff command is issued")
+def when_the_movetooff_command_is_issued(
+    central_node_facade: TMCCentralNodeFacade,
+    csp: CSPFacade,
+    event_tracer: TangoEventTracer,
+):
+    """An example of a Gherkin step where a command is issued to the TMC,
+    just after the ``TangoEventTracer`` is subscribed to capture the events.
+
+    NOTE: the ``wait_termination=False`` flag is used to not block the call,
+    so the tracer can be used separately to check the events.
+    """
+    # through the facades, I can access the device proxies and subscribe to the devices
+    event_tracer.subscribe_event(
+        central_node_facade.central_node, "telescopeState"
+    )
+    event_tracer.subscribe_event(csp.csp_master, "State")
+    # (etc.)
+
+    # Then I can issue the command, explicitly telling the call to
+    # not wait for the synchronization conditions to be met
+    central_node_facade.move_to_off(wait_termination=False)
+
+@then("the telescope is in OFF state")
+def then_the_telescope_is_in_off_state(
+    central_node_facade: TMCCentralNodeFacade,
+    csp: CSPFacade,
+    event_tracer: TangoEventTracer,
+):
+    """An example of a Gherkin step to check the state of the telescope,
+    implemented always accessing the facades devices to write assertions.
+    """
+    assert_that(event_tracer).described_as(
+        "TMC and CSP should have reached the OFF state within 60 seconds."
+    ).within_timeout(60).has_change_event_occurred(
+        central_node_facade.central_node, "telescopeState", DevState.OFF
+    ).has_change_event_occurred(
+        csp.csp_master, "State", DevState.OFF
+    )
+
+```

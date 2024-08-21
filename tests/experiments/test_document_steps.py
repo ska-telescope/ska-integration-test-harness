@@ -5,7 +5,7 @@ import ast
 import logging
 from datetime import datetime
 from io import StringIO
-from unittest.mock import Mock, call, mock_open, patch, ANY
+from unittest.mock import ANY, Mock, call, mock_open, patch
 
 import pytest
 from assertpy import assert_that
