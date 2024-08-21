@@ -235,6 +235,7 @@ class BasicConfigurationValidator(SubsystemConfigurationValidator):
         try:
             dev_proxy.resetDelay()
             _ = dev_proxy.commandCallInfo
+            # TODO: for SDP emulator it fails, why?
             return True
         except AttributeError:
             # if the device is not an emulator, it will raise an exception

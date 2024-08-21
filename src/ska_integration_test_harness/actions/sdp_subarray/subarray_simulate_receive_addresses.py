@@ -12,7 +12,7 @@ from ska_integration_test_harness.actions.telescope_action import (
 from ska_integration_test_harness.config.config_reader import (  # pylint: disable=line-too-long # noqa: E501
     TMCMIDConfigurationReader,
 )
-from ska_integration_test_harness.config.hardcoded_values import (
+from ska_integration_test_harness.inputs.hardcoded_values import (
     HardcodedValues,
 )
 from ska_integration_test_harness.inputs.json_input import JSONInput
