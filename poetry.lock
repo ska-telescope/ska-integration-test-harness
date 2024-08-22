@@ -1367,16 +1367,17 @@ reference = "PyPI-public"
 
 [[package]]
 name = "ska-control-model"
-version = "0.3.4"
+version = "1.0.0"
 description = "The SKA control model"
 optional = false
 python-versions = ">=3.10,<4.0"
 files = [
-    {file = "ska_control_model-0.3.4-py3-none-any.whl", hash = "sha256:61513b3ae3e9c41178daba2c83127054376f5ccb267f66ad2141ce4961944139"},
-    {file = "ska_control_model-0.3.4.tar.gz", hash = "sha256:d5e2e5a4d54cc46ca1259a1259614d4f56bcb8507c0fb674b4d5e8da8d001603"},
+    {file = "ska_control_model-1.0.0-py3-none-any.whl", hash = "sha256:b5573317eb1b18308634d6d88c187310877222bef397a025ad47d01ff2f57d7f"},
+    {file = "ska_control_model-1.0.0.tar.gz", hash = "sha256:8434af88da664d5a74ed4f93e96f498bfa9a70325d1caa39dad5578d9f53c4cf"},
 ]
 
 [package.dependencies]
+pytango = ">=9.4.2,<10.0.0"
 transitions = ">=0.9.0,<0.10.0"
 
 [package.source]
@@ -1804,4 +1805,4 @@ reference = "PyPI-public"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "fb700aec2e6e0c670961b7bd79928d4de886129d3d06c3e86ef81ab3535bea2c"
+content-hash = "76623f506cd8392ca6cbd1e1247fce96d956d1ef5a53e8eb26a100aadef338ea"
