@@ -226,14 +226,14 @@ class BasicConfigurationValidator(SubsystemConfigurationValidator):
 
         Check if a device responds as an emulator. This is a heuristic
         check, that verifies if the device has some commands and attributes
-        that are typical of an emulator (i.e., the ``resetDelay()`` command
+        that are typical of an emulator (i.e., the ``ResetDelayInfo()`` command
         and the ``commandCallInfo`` attribute).
 
         :param dev_proxy: The device proxy to check.
         :return: True if the device responds as an emulator, False otherwise.
         """
         try:
-            dev_proxy.resetDelay()
+            dev_proxy.ResetDelayInfo()
             _ = dev_proxy.commandCallInfo
             # TODO: for SDP emulator it fails, why?
             return True

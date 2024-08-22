@@ -19,7 +19,7 @@ class EmulatedTeardownHelper:
     def reset_delay(devices: list[DeviceProxy]) -> None:
         """Reset the delay of the given devices."""
         for device in devices:
-            device.ResetDelay()
+            device.ResetDelayInfo()
 
     @staticmethod
     def reset_health_state(devices: list[DeviceProxy]) -> None:
