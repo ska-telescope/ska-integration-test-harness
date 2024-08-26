@@ -14,7 +14,7 @@ package "Configurations" {
 
 ' Facades at the top
 package "Facades" {
-    class TMCSubarrayFacade {
+    class TMCSubarrayNodeFacade {
         + subarray_node: DeviceProxy {property}
         + dish_leaf_node_dict: Dict[str, DeviceProxy] {property}
         + csp_subarray_leaf_node: DeviceProxy {property}
@@ -45,6 +45,11 @@ package "Facades" {
 
     class DishesFacade {
         + dish_master_dict: Dict[str, DeviceProxy] {property}
+        + method_1()
+    }
+
+    class TMCCentralNodeFacade {
+        + central_node: DeviceProxy {property}
         + method_1()
     }
 }

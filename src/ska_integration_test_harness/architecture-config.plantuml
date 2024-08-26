@@ -10,10 +10,12 @@ title Configurations are used to initialize the harness
 package "Configurations" {
     ' Configuration class to the left of Facades
 
-    class Configuration {
+    class ComponentsConfig {
     }
-    class Initializer {
+    class EmulationConfig {}
+    class ConfigReader {
     }
+    class YamlConfigReader {}
     note top
 Configurations depend on everything else
 and are used to
@@ -23,8 +25,7 @@ and are used to
 - initialize the harness
 end note
 
-    class Validator {}
-    class ConfigurationFileReader {}
+    class ConfigValidator {}
 
 }
 

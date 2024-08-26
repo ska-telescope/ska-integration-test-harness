@@ -22,7 +22,7 @@ Configurations .right.> Wrappers
 Configurations .right.> Actions
 
 ' Wrappers and Devices in the middle
-package "Wrappers" {
+package "Structural Wrappers" {
     class TelescopeWrapper {
     }
 
@@ -84,7 +84,7 @@ package "Actions" {
         + expected_value: Any
     }
 
-    class CommandInputBuilder {
+    class ObsStateCommandsInput {
         + build_command_input()
         + read_input_data_from_file()
     }
