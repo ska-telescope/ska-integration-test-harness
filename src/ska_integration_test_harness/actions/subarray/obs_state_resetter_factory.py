@@ -156,8 +156,7 @@ class SubarrayObsStateResetterFactory:
         return TelescopeActionSequence(
             [
                 self.create_action_to_reset_subarray_to_idle(),
-                # TODO: manage wait_added_for_skb372()
-                WaitAddedForSkb372(),
+                # WaitAddedForSkb372(),
                 SubarrayExecuteTransition(
                     "Configure",
                     argin=self.commands_inputs.get_configure_input.get_json_string(),  # pylint: disable=line-too-long # noqa: E501
@@ -174,8 +173,7 @@ class SubarrayObsStateResetterFactory:
         return TelescopeActionSequence(
             [
                 self.create_action_to_reset_subarray_to_idle(),
-                # TODO: manage wait_added_for_skb372()
-                WaitAddedForSkb372(),
+                # WaitAddedForSkb372(),
                 SubarrayConfigure(self.commands_inputs.get_configure_input),
             ],
         )
