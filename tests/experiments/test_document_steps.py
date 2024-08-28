@@ -10,17 +10,20 @@ from unittest.mock import ANY, Mock, call, mock_open, patch
 import pytest
 from assertpy import assert_that
 
-from ska_integration_test_harness.experiments.document_steps import (
-    FeatureFileHandler,
-    FileScanner,
-    FolderProcessor,
-    MarkdownFormatter,
-    PostProcessor,
-    PythonFileHandler,
-    StepVisitor,
+# from ska_integration_test_harness.experiments.document_steps import (
+#     FeatureFileHandler,
+#     FileScanner,
+#     FolderProcessor,
+#     MarkdownFormatter,
+#     PostProcessor,
+#     PythonFileHandler,
+#     StepVisitor,
+# )
+
+
+@pytest.mark.skip(
+    reason="Right now the document steps code is separated from the main codebase"
 )
-
-
 @pytest.mark.experiments
 class TestMarkdownFormatter:
     @pytest.fixture
@@ -273,6 +276,7 @@ def function_with_error(
 
         assert_that(steps).is_empty()
         assert_that(scenarios).is_empty()
+
     #
     # @patch("ska_integration_test_harness.experiments.document_steps.StepVisitor")
     # def test_parse_file_correct_extraction(self, mock_step_visitor):
