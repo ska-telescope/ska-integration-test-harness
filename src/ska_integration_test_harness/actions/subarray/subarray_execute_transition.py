@@ -59,9 +59,17 @@ class SubarrayExecuteTransition(TelescopeCommandAction):
             self.command_name
             not in self.COMMAND_OUTCOME_MAP.keys()  # pylint: disable=consider-iterating-dictionary disable=line-too-long # noqa: E501
         ):
+            self._log(
+                "Skipping termination condition for "
+                f"{self.command_name} command"
+            )
             return []
 
         expected_command_output = self.COMMAND_OUTCOME_MAP[self.command_name]
+        self._log(
+            f"Awaiting {str(ObsState.RESOURCING)} from "
+            f"{self.command_name} command"
+        )
         return all_subarrays_have_obs_state(
             self.telescope, expected_command_output
         )
