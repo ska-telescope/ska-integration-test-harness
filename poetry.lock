@@ -1423,13 +1423,13 @@ reference = "skao"
 
 [[package]]
 name = "ska-tango-testing"
-version = "0.7.1"
+version = "0.7.2"
 description = "Test harness for testing SKA Tango devices"
 optional = false
 python-versions = ">=3.10,<4.0"
 files = [
-    {file = "ska_tango_testing-0.7.1-py3-none-any.whl", hash = "sha256:7bf348cbbcb3e5c188651be532aefdd7e64dee7cfd4e5baef96f6d33111ad3e1"},
-    {file = "ska_tango_testing-0.7.1.tar.gz", hash = "sha256:323f3a054e30053a89e3b9af3a4a89370aa29015377191b9c4bec099ef2d4542"},
+    {file = "ska_tango_testing-0.7.2-py3-none-any.whl", hash = "sha256:39ff0d0deea6ad18d1d71e351b4f9ea76713aaf6663c2724e8469fe7b228490c"},
+    {file = "ska_tango_testing-0.7.2.tar.gz", hash = "sha256:f8914d7e8c1defdbab1f846253855e84e663da424fc1a99cbaac6c5b6f12aef8"},
 ]
 
 [package.dependencies]
@@ -1805,4 +1805,4 @@ reference = "PyPI-public"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "76623f506cd8392ca6cbd1e1247fce96d956d1ef5a53e8eb26a100aadef338ea"
+content-hash = "5af23e8e9b202cd130b86fc4c973372ee7384753be059ca88bee1f99ff41c7cd"

@@ -25,7 +25,7 @@ python = "^3.10"
 assertpy = "^1.1"
 pytango = "^9.4.2"
 ska-control-model=">=1.0.0,<2.0.0"
-ska-tango-testing = "^0.7.1"
+ska-tango-testing = "^0.7.2"
 ska-ser-logging = "^0.4.1"
 msgpack-numpy = "^0.4.8"
 
