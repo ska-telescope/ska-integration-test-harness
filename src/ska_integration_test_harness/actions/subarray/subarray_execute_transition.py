@@ -1,7 +1,5 @@
 """Execute provided command on subarray Node."""
 
-import enum
-
 from ska_control_model import ObsState
 
 from ska_integration_test_harness.actions.command_action import (
@@ -10,15 +8,6 @@ from ska_integration_test_harness.actions.command_action import (
 from ska_integration_test_harness.actions.utils.termination_conditions import (
     all_subarrays_have_obs_state,
 )
-
-
-class TelescopeCommand(enum.Enum):
-    """A list of commands that can be executed on the telescope."""
-
-    ASSIGN_RESOURCES = "AssignResources"
-    CONFIGURE = "Configure"
-    SCAN = "Scan"
-    ABORT = "Abort"
 
 
 class SubarrayExecuteTransition(TelescopeCommandAction):
@@ -36,10 +25,10 @@ class SubarrayExecuteTransition(TelescopeCommandAction):
     """
 
     COMMAND_OUTCOME_MAP = {
-        TelescopeCommand.ASSIGN_RESOURCES: ObsState.RESOURCING,
-        TelescopeCommand.CONFIGURE: ObsState.CONFIGURING,
-        TelescopeCommand.SCAN: ObsState.SCANNING,
-        TelescopeCommand.ABORT: ObsState.ABORTING,
+        "AssignResources": ObsState.RESOURCING,
+        "Configure": ObsState.CONFIGURING,
+        "Scan": ObsState.SCANNING,
+        "Abort": ObsState.ABORTING,
     }
 
     def __init__(self, command_name: str, argin=None):
@@ -55,21 +44,11 @@ class SubarrayExecuteTransition(TelescopeCommandAction):
         return result, message
 
     def termination_condition(self):
-        if (
-            self.command_name
-            not in self.COMMAND_OUTCOME_MAP.keys()  # pylint: disable=consider-iterating-dictionary disable=line-too-long # noqa: E501
-        ):
-            self._log(
-                "Skipping termination condition for "
-                f"{self.command_name} command"
-            )
+        # get the expected outcome of the command
+        if self.command_name not in self.COMMAND_OUTCOME_MAP:
             return []
 
         expected_command_output = self.COMMAND_OUTCOME_MAP[self.command_name]
-        self._log(
-            f"Awaiting {str(ObsState.RESOURCING)} from "
-            f"{self.command_name} command"
-        )
         return all_subarrays_have_obs_state(
             self.telescope, expected_command_output
         )
