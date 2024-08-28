@@ -5,9 +5,10 @@ import logging
 from ska_control_model import ObsState
 
 from ska_integration_test_harness.actions.command_action import (
-    TelescopeCommandAction,
+    TransientQuiescentCommandAction,
 )
 from ska_integration_test_harness.actions.expected_event import (
+    ExpectedEvent,
     ExpectedStateChange,
 )
 from ska_integration_test_harness.actions.utils.termination_conditions import (
@@ -18,8 +19,12 @@ from ska_integration_test_harness.inputs.json_input import JSONInput
 from ska_integration_test_harness.inputs.pointing_state import PointingState
 
 
-class SubarrayConfigure(TelescopeCommandAction):
-    """Invoke configure command on subarray Node."""
+class SubarrayConfigure(TransientQuiescentCommandAction):
+    """Invoke configure command on subarray Node.
+
+    This action is expected to move the subarray to the CONFIGURING state
+    (transient) and then to the READY state (quiescent and stable).
+    """
 
     def __init__(self, configure_input: JSONInput):
         super().__init__()
@@ -32,14 +37,11 @@ class SubarrayConfigure(TelescopeCommandAction):
         )
         return result, message
 
-    def termination_condition(self):
-        # TODO: should add this too?
-        # if Resource(device_dict.get("tmc_subarraynode")) == "READY":
-        #         invoked_from_ready = True
-        # if invoked_from_ready:
-        #         the_waiter.set_wait_for_configuring()
+    def termination_condition_for_quiescent_state(self) -> list[ExpectedEvent]:
+        """All subarrays must reach the READY state.
 
-        # all SA must be in READY state
+        Also, all dishes must be in OPERATE dishMode and TRACK pointingState.
+        """
         res = all_subarrays_have_obs_state(self.telescope, ObsState.READY)
 
         for device in self.telescope.dishes.dish_master_list:
@@ -53,3 +55,9 @@ class SubarrayConfigure(TelescopeCommandAction):
             )
 
         return res
+
+    def termination_condition_for_transient_state(self) -> list[ExpectedEvent]:
+        """All subarrays must reach the CONFIGURING state."""
+        return all_subarrays_have_obs_state(
+            self.telescope, ObsState.CONFIGURING
+        )

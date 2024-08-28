@@ -1,6 +1,5 @@
 """Create a `TelescopeAction` to reset the subarray in a certain obs state."""
 
-import time
 from typing import Callable
 
 from ska_control_model import ObsState
@@ -17,9 +16,6 @@ from ska_integration_test_harness.actions.subarray.subarray_clear_obs_state impo
 from ska_integration_test_harness.actions.subarray.subarray_configure import (  # pylint: disable=line-too-long # noqa: E501
     SubarrayConfigure,
 )
-from ska_integration_test_harness.actions.subarray.subarray_execute_transition import (  # pylint: disable=line-too-long # noqa: E501
-    SubarrayExecuteTransition,
-)
 from ska_integration_test_harness.actions.subarray.subarray_scan import (  # pylint: disable=line-too-long # noqa: E501
     SubarrayScan,
 )
@@ -35,16 +31,6 @@ from ska_integration_test_harness.inputs.obs_state_commands_input import (  # py
 from ska_integration_test_harness.structure.telescope_wrapper import (  # pylint: disable=line-too-long # noqa: E501
     TelescopeWrapper,
 )
-
-
-class WaitAddedForSkb372(TelescopeAction):
-    """Wait added for SKB-372. TODO: remove this class."""
-
-    def _action(self):
-        time.sleep(5)
-
-    def termination_condition(self):
-        return []
 
 
 class SubarrayObsStateResetterFactory:
@@ -96,13 +82,15 @@ class SubarrayObsStateResetterFactory:
         :return: A `TelescopeAction` to reset the subarray to the
             `ObsState.RESOURCING` state.
         """
+        assign_resources_action = SubarrayAssignResources(
+            self.commands_inputs.get_assign_input
+        )
+        assign_resources_action.set_synchronize_on_transient_state(True)
+
         return TelescopeActionSequence(
             [
                 self.create_action_to_reset_subarray_to_empty(),
-                SubarrayExecuteTransition(
-                    "AssignResources",
-                    argin=self.commands_inputs.get_assign_input.get_json_string(),  # pylint: disable=line-too-long # noqa: E501
-                ),
+                assign_resources_action,
             ],
         )
 
@@ -125,10 +113,13 @@ class SubarrayObsStateResetterFactory:
         :return: A `TelescopeAction` to reset the subarray to
             the `ObsState.ABORTING` state.
         """
+        abort_action = SubarrayAbort()
+        abort_action.set_synchronize_on_transient_state(True)
+
         return TelescopeActionSequence(
             [
                 self.create_action_to_reset_subarray_to_idle(),
-                SubarrayExecuteTransition("Abort", argin=None),
+                abort_action,
             ],
         )
 
@@ -153,14 +144,15 @@ class SubarrayObsStateResetterFactory:
         :return: A `TelescopeAction` to reset the subarray to
             the `ObsState.CONFIGURING` state.
         """
+        configure_action = SubarrayConfigure(
+            self.commands_inputs.get_configure_input
+        )
+        configure_action.set_synchronize_on_transient_state(True)
+
         return TelescopeActionSequence(
             [
                 self.create_action_to_reset_subarray_to_idle(),
-                # WaitAddedForSkb372(),
-                SubarrayExecuteTransition(
-                    "Configure",
-                    argin=self.commands_inputs.get_configure_input.get_json_string(),  # pylint: disable=line-too-long # noqa: E501
-                ),
+                configure_action,
             ],
         )
 
@@ -173,7 +165,6 @@ class SubarrayObsStateResetterFactory:
         return TelescopeActionSequence(
             [
                 self.create_action_to_reset_subarray_to_idle(),
-                # WaitAddedForSkb372(),
                 SubarrayConfigure(self.commands_inputs.get_configure_input),
             ],
         )
