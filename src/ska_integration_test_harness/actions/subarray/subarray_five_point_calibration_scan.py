@@ -57,7 +57,8 @@ class SubarrayFivePointCalibrationScan(TelescopeAction[None]):
 
             # Partial configure
             SubarrayExecuteTransition(
-                "Configure", self.partial_configure_inputs[i]
+                "Configure",
+                command_input=self.partial_configure_inputs[i],
             ).execute()
             assert_that(event_tracer).described_as(
                 f"In scan {i+1} Subarray obsState should reach CONFIGURING"
@@ -76,7 +77,10 @@ class SubarrayFivePointCalibrationScan(TelescopeAction[None]):
             )
 
             # Scan
-            SubarrayExecuteTransition("Scan", self.scan_inputs[i]).execute()
+            SubarrayExecuteTransition(
+                "Scan",
+                command_input=self.scan_inputs[i],
+            ).execute()
             assert_that(event_tracer).described_as(
                 f"In scan {i+1} Subarray obsState should reach SCANNING"
             ).within_timeout(self.TRACER_TIMEOUT).has_change_event_occurred(

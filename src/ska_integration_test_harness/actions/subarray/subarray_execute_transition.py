@@ -26,7 +26,7 @@ class SubarrayExecuteTransition(TelescopeCommandAction):
     The command target is the TMC SubarrayNode.
     """
 
-    # TODO: unit test
+    # TODO: unit test (and possibly see where it is appropriate to use)
 
     def __init__(
         self,

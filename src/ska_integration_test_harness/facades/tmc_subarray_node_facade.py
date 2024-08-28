@@ -276,22 +276,25 @@ class TMCSubarrayNodeFacade:
     def execute_transition(
         self,
         command_name: str,
-        argin=None,
-        wait_termination: bool = True,
+        command_input: JSONInput | None = None,
+        expected_obs_state: ObsState | None = None,
     ):
         """Execute provided command on subarray
 
         :param command_name: Name of command to execute
-        :param argin: Input argument for command (as the data type you
-            would expect to pass to the Tango command)
-        :param wait_termination: set to False if you don't want to
-            wait for the termination condition. By default the termination
-            condition is waited.
+        :param command_input: JSON input for the command. By default None.
+        :param expected_obs_state: Expected obsState after command execution.
+            By default no expected obsState (=> no waiting for termination
+            condition).
 
         :return: result, message
         """
-        action = SubarrayExecuteTransition(command_name, argin)
-        action.set_termination_condition_policy(wait_termination)
+        action = SubarrayExecuteTransition(
+            command_name,
+            command_input=command_input,
+            expected_obs_state=expected_obs_state,
+        )
+        action.set_termination_condition_policy(expected_obs_state is not None)
         return action.execute()
 
     def force_change_of_obs_state(
