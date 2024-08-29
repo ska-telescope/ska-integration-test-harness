@@ -244,6 +244,6 @@ class EmulationConsistencyValidator(SubsystemConfigurationValidator):
         :return: True if the device responds as an emulator, False otherwise.
         """
         attributes = [
-            str(attr.name).lower() for attr in dev_proxy.get_attribute_list()
+            str(attr).lower() for attr in dev_proxy.get_attribute_list()
         ]
         return "commandCallInfo".lower() in attributes

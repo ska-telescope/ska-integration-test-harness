@@ -187,15 +187,9 @@ class TestEmulationConsistencyValidator:
         """Create a mock device with the specified emulation status."""
         device = MagicMock()
 
-        attributes_names = ["attrName"]
+        attributes = ["attrName"]
         if is_emulated:
-            attributes_names.append("commandCallInfo")
-
-        attributes = []
-        for attr in attributes_names:
-            attribute = MagicMock()
-            attribute.name = attr
-            attributes.append(attribute)
+            attributes.append("commandCallInfo")
 
         device.get_attribute_list.return_value = attributes
 
