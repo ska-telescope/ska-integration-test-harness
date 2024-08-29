@@ -7,10 +7,13 @@ from ska_integration_test_harness.config.components_config import (
     CSPConfiguration,
     DishesConfiguration,
     SDPConfiguration,
+    SubsystemConfiguration,
     TMCConfiguration,
 )
 from ska_integration_test_harness.config.config_validator import (
-    BasicConfigurationValidator,
+    DeviceNamesValidator,
+    EmulationConsistencyValidator,
+    RequiredFieldsValidator,
     SubsystemConfigurationValidator,
 )
 from ska_integration_test_harness.config.yaml_config_reader import (
@@ -78,11 +81,13 @@ class TestHarnessBuilder:
         # --------------------------------------------------------------
         # internal tools
         # TODO:
-        self.validator: SubsystemConfigurationValidator = (
-            BasicConfigurationValidator()
-        )
-        self.subsystems_factory = SubsystemsFactory()
         self._logger: logging.Logger = logging.getLogger(__name__)
+        self.validators = [
+            RequiredFieldsValidator(self._logger),
+            DeviceNamesValidator(self._logger),
+            EmulationConsistencyValidator(self._logger),
+        ]
+        self.subsystems_factory = SubsystemsFactory()
 
         # TODO: find a way to toggle them to False every time something change
         self._configs_validated = False
@@ -125,6 +130,41 @@ class TestHarnessBuilder:
         self._log_info("Configurations read successfully.")
         return self
 
+    def _configurations(self) -> List[SubsystemConfiguration]:
+        """Return a list of all subsystem configurations."""
+        return [
+            self.tmc_config,
+            self.csp_config,
+            self.sdp_config,
+            self.dishes_config,
+        ]
+
+    def _apply_validator(
+        self, validator: SubsystemConfigurationValidator
+    ) -> None:
+        """Apply a validator to all subsystem configurations.
+
+        :param validator: The validator to apply.
+        """
+        self._log_info(
+            f"Applying {validator.__class__.__name__} on "
+            "all subsystems configurations."
+        )
+
+        validator.reset()
+        for config in self._configurations():
+            validator.validate(config)
+
+        if not validator.is_valid():
+            raise ValueError(
+                "Configuration validation "
+                f"using {validator.__class__.__name__} "
+                "failed with the following critical errors:\n"
+                + "\n".join(
+                    [str(error) for error in validator.get_critical_errors()]
+                )
+            )
+
     def validate_configurations(self) -> "TestHarnessBuilder":
         """Validate all subsystem configurations.
 
@@ -138,38 +178,8 @@ class TestHarnessBuilder:
         :raises ValueError: If any configuration is invalid,
             with the details of the errors.
         """
-        self._log_info(
-            "Validating configurations with "
-            f"{self.validator.__class__.__name__}."
-        )
-        is_valid = True
-        errors: List[str] = []
-
-        # Validate each configuration
-        for config in [
-            self.tmc_config,
-            self.csp_config,
-            self.sdp_config,
-            self.dishes_config,
-        ]:
-            valid, validation_errors = self.validator.validate(config)
-            if not valid:
-                is_valid = False
-            errors.extend(validation_errors)
-
-        # Log all errors and warnings
-        for error in errors:
-            if error.startswith("ERROR"):
-                self._logger.error(error)
-            else:
-                self._logger.warning(error)
-
-        if not is_valid:
-            # Raise ValueError with all errors included
-            raise ValueError(
-                "Configuration validation failed with the following errors:\n"
-                + "\n".join(errors)
-            )
+        for validator in self.validators:
+            self._apply_validator(validator)
 
         self._log_info("All configurations are valid.")
         self._configs_validated = True
