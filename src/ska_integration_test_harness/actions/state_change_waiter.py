@@ -1,11 +1,12 @@
 """A tool to wait a set of state changes from multiple Tango devices."""
 
+from assertpy import assert_that
 from ska_control_model import ObsState
+from ska_tango_testing.integration.tracer import TangoEventTracer
 
 from ska_integration_test_harness.actions.expected_event import ExpectedEvent
-from ska_integration_test_harness.common_utils.typed_tracer import (
-    TypedTangoEventTracer,
-)
+from ska_integration_test_harness.inputs.dish_mode import DishMode
+from ska_integration_test_harness.inputs.pointing_state import PointingState
 
 # from ska_tango_testing.integration.tracer import TangoEventTracer
 
@@ -35,13 +36,14 @@ class StateChangeWaiter:
     """
 
     def __init__(self) -> None:
-        self.event_tracer = TypedTangoEventTracer()
-        self.event_tracer.associate_attribute_to_enum("obsState", ObsState)
-        self.event_tracer.associate_attribute_to_enum(
-            "cspSubarrayObsState", ObsState
-        )
-        self.event_tracer.associate_attribute_to_enum(
-            "sdpSubarrayObsState", ObsState
+        self.event_tracer = TangoEventTracer(
+            {
+                "obsState": ObsState,
+                "cspSubarrayObsState": ObsState,
+                "sdpSubarrayObsState": ObsState,
+                "dishMode": DishMode,
+                "pointingState": PointingState,
+            }
         )
         self.pending_state_changes: list[ExpectedEvent] = []
 
@@ -60,30 +62,20 @@ class StateChangeWaiter:
                 expected_state_change.attribute,
             )
 
-    def _is_state_change_occurred(
-        self,
-        state_change: ExpectedEvent,
-    ) -> bool:
-        """Check if a state change has already occurred in the event tracer.
+    def _is_state_change_occurred(self, state_change: ExpectedEvent) -> bool:
+        """Check if a state change occurred.
 
-        :param state_change: The expected state change to check.
-        :return: True if the state change has occurred, False otherwise.
+        :param state_change: The state change to check.
+
+        :return: True if the state change occurred, False otherwise.
         """
-        for event in self.event_tracer.events:
-            if state_change.event_matches(event):
-                return True
-
-        return False
-
-    def _all_state_changes_occurred(self) -> bool:
-        """Check if all the expected state changes have occurred.
-
-        :return: True if all the expected state changes have occurred,
-            False otherwise.
-        """
-        return all(
-            self._is_state_change_occurred(state_change)
-            for state_change in self.pending_state_changes
+        return (
+            len(
+                self.event_tracer.query_events(
+                    predicate=state_change.event_matches
+                )
+            )
+            > 0
         )
 
     def wait_all(self, timeout: int | float):
@@ -98,22 +90,20 @@ class StateChangeWaiter:
         if not self.pending_state_changes:
             return
 
-        res = self.event_tracer.query_events(
-            # build a predicate that checks if all the state changes
-            # have occurred in the event tracer (NOTE: it ignores instead
-            # the usual point-wise check that is commonly used for
-            # event tracer queries).
-            predicate=lambda _: self._all_state_changes_occurred(),
-            timeout=timeout,
-            # NOTE: this implementation may be slightly computationally
-            # inefficient, but it re-uses existing components and it is
-            # very readable and easy to understand.
-        )
+        try:
 
-        # if no event matches the predicate (i.e., at least one of the
-        # state changes has not occurred within the timeout), raise an
-        # exception.
-        if not res:
+            shared_timeout_context = assert_that(
+                self.event_tracer
+            ).within_timeout(timeout)
+
+            for state_change in self.pending_state_changes:
+                shared_timeout_context = (
+                    shared_timeout_context.has_change_event_occurred(
+                        custom_matcher=state_change.event_matches,
+                    )
+                )
+
+        except AssertionError as assertion_error:
             msg = (
                 "Not all the expected events occurred within "
                 f"a timeout of {timeout} seconds."
@@ -136,16 +126,8 @@ class StateChangeWaiter:
                 msg += "\n\nThe following events did not occur:\n"
                 msg += "\n".join(not_happened_state_changes)
 
-            raise TimeoutError(msg)
-
-        # logging.info(
-        #     "All the expected state changes occurred. Report:"
-        #     "\n"
-        #     + "\n".join(
-        #         str(state_change)
-        #         for state_change in self.pending_state_changes
-        #     )
-        # )
+            # raise TimeoutError with the message and the assertion error
+            raise TimeoutError(msg) from assertion_error
 
     def reset(self):
         """Clear the list of expected state changes."""
