@@ -84,22 +84,16 @@ class TestStateChangeWaiter:
         assert_that(state_change_waiter.pending_state_changes).described_as(
             "The expected events should be added to the pending state changes."
         ).contains(expected_event)
+
+        # the tracer should have received the subscription call
         state_change_waiter.event_tracer.subscribe_event.assert_called_once_with(  # pylint: disable=line-too-long # noqa: E501
             expected_event.device, expected_event.attribute
         )
 
-        # NOTE: when there is a subscription, we mock the event tracer
-        # instead of the DeviceProxy, since the event tracer for technical
-        # reasons (https://gitlab.com/tango-controls/pytango/-/issues/459)
-
     def test_wait_all_succeeds_if_all_state_changes_occurred(
         self, real_event_tracer
     ) -> None:
-        """All state changes occurred should return True if all occurred.
-
-        NOTE: An event occurred if and only if in the EventTracer events list
-        there is an event that matches the expected event.
-        """
+        """If all state changes occur, wait all succeeds without errors."""
         state_change_waiter = self.create_state_change_waiter(
             real_event_tracer
         )
@@ -122,14 +116,10 @@ class TestStateChangeWaiter:
         # wait all succeeds without errors
         state_change_waiter.wait_all(2)
 
-    def test_wait_all_succeeds_if_some_event_didnt_occur(
+    def test_wait_all_fails_if_not_all_state_changes_occurred(
         self, real_event_tracer
     ) -> None:
-        """All state changes occurred should return False if some didn't occur.
-
-        NOTE: An event occurred if and only if in the EventTracer events list
-        there is an event that matches the expected event.
-        """
+        """If not all state changes occurs, wait all raises a TimeoutError."""
         state_change_waiter = self.create_state_change_waiter(
             real_event_tracer
         )
