@@ -18,7 +18,7 @@ class CentralNodeLoadDishConfig(TelescopeCommandAction):
         # AttributeError: LoadDishConfig. Did you mean: 'LoadDishCfg'?
         self._log("Invoking LoadDishCfg on CentralNode")
         result, message = self.telescope.tmc.central_node.LoadDishCfg(
-            self.dish_vcc_config.get_json_string()
+            self.dish_vcc_config.as_str()
         )
         return result, message
 

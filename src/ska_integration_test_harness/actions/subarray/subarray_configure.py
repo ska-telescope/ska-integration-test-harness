@@ -33,7 +33,7 @@ class SubarrayConfigure(TransientQuiescentCommandAction):
     def _action(self):
         logging.info("Invoking Configure on TMC SubarrayNode")
         result, message = self.telescope.tmc.subarray_node.Configure(
-            self.configure_input.get_json_string()
+            self.configure_input.as_str()
         )
         return result, message
 

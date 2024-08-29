@@ -147,8 +147,8 @@ class TestHarnessBuilder:
         :param validator: The validator to apply.
         """
         self._log_info(
-            f"Applying {validator.__class__.__name__} on "
-            "all subsystems configurations."
+            "Validating all all subsystems configurations "
+            f"using {validator.__class__.__name__}."
         )
 
         validator.reset()
@@ -164,6 +164,11 @@ class TestHarnessBuilder:
                     [str(error) for error in validator.get_critical_errors()]
                 )
             )
+
+        self._log_info(
+            f"Configuration validation using {validator.__class__.__name__} "
+            "succeeded."
+        )
 
     def validate_configurations(self) -> "TestHarnessBuilder":
         """Validate all subsystem configurations.
@@ -234,7 +239,7 @@ class TestHarnessBuilder:
             if expected_type is JSONInput:
                 attr_value: JSONInput = attr_value
                 try:
-                    attr_value.get_json_dict()
+                    attr_value.as_dict()
                 except Exception as e:
                     raise ValueError(
                         f"The default input '{attr}' is not a "

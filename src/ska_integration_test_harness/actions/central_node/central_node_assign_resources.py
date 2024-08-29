@@ -38,7 +38,7 @@ class CentralNodeAssignResources(TelescopeCommandAction):
         cmd_input = generate_eb_pb_ids(self.assign_input)
         self._log("Invoking AssignResources on CentralNode")
         result, message = self.telescope.tmc.central_node.AssignResources(
-            cmd_input.get_json_string()
+            cmd_input.as_str()
         )
         return result, message
 

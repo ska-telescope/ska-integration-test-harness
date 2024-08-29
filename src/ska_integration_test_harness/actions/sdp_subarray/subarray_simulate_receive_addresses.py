@@ -35,7 +35,7 @@ class SubarraySimulateReceiveAddresses(TelescopeAction[None]):
     def _action(self):
         # TODO: change with a ref to some SDP device
         self.sdp_sim.SetDirectreceiveAddresses(
-            self.receive_addresses_input.get_json_string()
+            self.receive_addresses_input.as_str()
         )
 
         # Setting pointing offsets after encoding the data.

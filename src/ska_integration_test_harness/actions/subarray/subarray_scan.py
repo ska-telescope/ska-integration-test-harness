@@ -23,7 +23,7 @@ class SubarrayScan(TelescopeAction):
     def _action(self):
         self._log("Invoking Scan on TMC SubarrayNode")
         result, message = self.telescope.tmc.subarray_node.Scan(
-            self.scan_input.get_json_string()
+            self.scan_input.as_str()
         )
         return result, message
 

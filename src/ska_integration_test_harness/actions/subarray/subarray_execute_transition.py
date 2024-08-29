@@ -60,7 +60,7 @@ class SubarrayExecuteTransition(TelescopeCommandAction):
     def _action(self):
         self._log(f"Invoking {self.command_name} on TMC SubarrayNode")
         result, message = self.telescope.tmc.subarray_node.command_inout(
-            self.command_name, self.command_input.get_json_string()
+            self.command_name, self.command_input.as_str()
         )
         return result, message
 

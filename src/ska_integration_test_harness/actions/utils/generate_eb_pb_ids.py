@@ -6,8 +6,10 @@ from datetime import datetime
 
 from ska_ser_logging import configure_logging
 
-from ska_integration_test_harness.inputs.dict_json_input import DictJSONInput
-from ska_integration_test_harness.inputs.json_input import JSONInput
+from ska_integration_test_harness.inputs.json_input import (
+    DictJSONInput,
+    JSONInput,
+)
 
 configure_logging(logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
@@ -53,7 +55,7 @@ def generate_eb_pb_ids(input_json: JSONInput) -> JSONInput:
 
     :return: the input JSON with the EB and PB IDs updated.
     """
-    input_as_dict = input_json.get_json_dict()
+    input_as_dict = input_json.as_dict()
     input_as_dict["sdp"]["execution_block"]["eb_id"] = generate_id(
         "eb-mvp01-********-*****"
     )

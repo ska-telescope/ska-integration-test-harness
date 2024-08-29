@@ -22,7 +22,7 @@ class CentralNodeReleaseResources(TelescopeAction):
     def _action(self):
         self._log("Invoking ReleaseResources on CentralNode")
         result, message = self.telescope.tmc.central_node.ReleaseResources(
-            self.release_input.get_json_string()
+            self.release_input.as_str()
         )
         return result, message
 

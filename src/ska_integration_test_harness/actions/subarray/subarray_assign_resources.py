@@ -32,7 +32,7 @@ class SubarrayAssignResources(TransientQuiescentCommandAction):
         cmd_input = generate_eb_pb_ids(self.assign_input)
         self._log("Invoking AssignResources on TMC SubarrayNode")
         result, message = self.telescope.tmc.subarray_node.AssignResources(
-            cmd_input.get_json_string()
+            cmd_input.as_str()
         )
         return result, message
 
