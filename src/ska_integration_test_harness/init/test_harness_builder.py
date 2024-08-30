@@ -1,23 +1,17 @@
 """A builder class for configuring and building a test harness."""
 
 import logging
-from typing import Any, List
+from typing import Any
 
-from ska_integration_test_harness.config.components_config import (
-    CSPConfiguration,
-    DishesConfiguration,
-    SDPConfiguration,
-    SubsystemConfiguration,
-    TMCConfiguration,
-)
 from ska_integration_test_harness.config.reader.yaml_config_reader import (
     YAMLConfigurationReader,
 )
-from ska_integration_test_harness.config.validation.subsys_config_validator import (  # pylint: disable=line-too-long # noqa: E501
-    DeviceNamesValidator,
-    EmulationConsistencyValidator,
-    RequiredFieldsValidator,
-    SubsystemConfigurationValidator,
+from ska_integration_test_harness.config.test_harness_config import (
+    TestHarnessConfiguration,
+)
+from ska_integration_test_harness.config.validation.config_validator import (
+    BasicConfigurationValidator,
+    ConfigurationValidator,
 )
 from ska_integration_test_harness.init.susystems_factory import (
     SubsystemsFactory,
@@ -71,22 +65,27 @@ class TestHarnessBuilder:
         """Initialize the TestHarnessBuilder with default configurations."""
         # --------------------------------------------------------------
         # inputs and configurations
-        self.tmc_config: TMCConfiguration = TMCConfiguration()
-        self.csp_config: CSPConfiguration = CSPConfiguration()
-        self.sdp_config: SDPConfiguration = SDPConfiguration()
-        self.dishes_config: DishesConfiguration = DishesConfiguration()
+
+        self.config: TestHarnessConfiguration = TestHarnessConfiguration()
+        """The configuration used to build the test harness."""
 
         self.default_inputs: DefaultInputs = DefaultInputs()
+        """The default inputs used to build the test harness."""
 
         # --------------------------------------------------------------
         # internal tools
-        # TODO:
         self._logger: logging.Logger = logging.getLogger(__name__)
-        self.validators = [
-            RequiredFieldsValidator(self._logger),
-            DeviceNamesValidator(self._logger),
-            EmulationConsistencyValidator(self._logger),
-        ]
+
+        self.config_reader: YAMLConfigurationReader = YAMLConfigurationReader()
+        """The tool used to read the configurations."""
+
+        self.config_validator: ConfigurationValidator = (
+            BasicConfigurationValidator(self._logger)
+        )
+        """The tool used to validate the configurations."""
+
+        # TODO: add a separate tool to validate the default inputs
+
         self.subsystems_factory = SubsystemsFactory()
 
         # TODO: find a way to toggle them to False every time something change
@@ -121,56 +120,11 @@ class TestHarnessBuilder:
 
         self._log_info(f"Reading configurations from file: {filepath}")
 
-        config_reader = YAMLConfigurationReader()
-        config_reader.read_configuration_file(filepath)
-
-        self.tmc_config = config_reader.get_tmc_configuration()
-        self.csp_config = config_reader.get_csp_configuration()
-        self.sdp_config = config_reader.get_sdp_configuration()
-        self.dishes_config = config_reader.get_dish_configuration()
+        self.config_reader.read_configuration_file(filepath)
+        self.config = self.config_reader.get_test_harness_configuration()
 
         self._log_info("Configurations read successfully.")
         return self
-
-    def _configurations(self) -> List[SubsystemConfiguration]:
-        """Return a list of all subsystem configurations."""
-        return [
-            self.tmc_config,
-            self.csp_config,
-            self.sdp_config,
-            self.dishes_config,
-        ]
-
-    def _apply_validator(
-        self, validator: SubsystemConfigurationValidator
-    ) -> None:
-        """Apply a validator to all subsystem configurations.
-
-        :param validator: The validator to apply.
-        """
-        self._log_info(
-            "Validating all all subsystems configurations "
-            f"using {validator.__class__.__name__}."
-        )
-
-        validator.reset()
-        for config in self._configurations():
-            validator.validate(config)
-
-        if not validator.is_valid():
-            raise ValueError(
-                "Configuration validation "
-                f"using {validator.__class__.__name__} "
-                "failed with the following critical errors:\n"
-                + "\n".join(
-                    [str(error) for error in validator.get_critical_errors()]
-                )
-            )
-
-        self._log_info(
-            f"Configuration validation using {validator.__class__.__name__} "
-            "succeeded."
-        )
 
     def validate_configurations(self) -> "TestHarnessBuilder":
         """Validate all subsystem configurations.
@@ -185,12 +139,11 @@ class TestHarnessBuilder:
         :raises ValueError: If any configuration is invalid,
             with the details of the errors.
         """
-        for validator in self.validators:
-            self._apply_validator(validator)
+        self._configs_validated = False
+        self.config_validator.validate_subsystems_presence(self.config)
+        self.config_validator.validate_subsystems_configurations(self.config)
 
-        self._log_info("All configurations are valid.")
         self._configs_validated = True
-
         return self
 
     def add_default_input(
@@ -280,7 +233,7 @@ class TestHarnessBuilder:
         )
 
         tmc = self.subsystems_factory.create_tmc_wrapper(
-            tmc_config=self.tmc_config,
+            tmc_config=self.config.tmc_config,
             default_commands_input=ObsStateCommandsInput(
                 assign_input=self.default_inputs.assign_input,
                 configure_input=self.default_inputs.configure_input,
@@ -290,31 +243,20 @@ class TestHarnessBuilder:
             default_vcc_config_input=self.default_inputs.default_vcc_config_input,  # pylint: disable=line-too-long # noqa: E501
         )
         csp = self.subsystems_factory.create_csp_wrapper(
-            csp_config=self.csp_config,
-            all_production=self._all_subsystems_are_in_production(),
+            csp_config=self.config.csp_config,
+            all_production=self.config.all_production(),
         )
         sdp = self.subsystems_factory.create_sdp_wrapper(
-            sdp_config=self.sdp_config,
+            sdp_config=self.config.sdp_config,
         )
         dishes = self.subsystems_factory.create_dishes_wrapper(
-            dish_config=self.dishes_config,
+            dish_config=self.config.dishes_config,
         )
 
         telescope.set_up(tmc=tmc, csp=csp, sdp=sdp, dishes=dishes)
 
         self._log_info("Telescope wrapper and subsystems set up successfully.")
         return telescope
-
-    def _all_subsystems_are_in_production(self) -> bool:
-        """Check if all subsystems are in production mode."""
-        return all(
-            [
-                not self.tmc_config.is_emulated,
-                not self.csp_config.is_emulated,
-                not self.sdp_config.is_emulated,
-                not self.dishes_config.is_emulated,
-            ]
-        )
 
 
 # Example usage:
