@@ -16,9 +16,12 @@ from ska_integration_test_harness.config.validation.config_validator import (
 from ska_integration_test_harness.init.susystems_factory import (
     SubsystemsFactory,
 )
-from ska_integration_test_harness.inputs.json_input import JSONInput
 from ska_integration_test_harness.inputs.test_harness_inputs import (
     TestHarnessInputs,
+)
+from ska_integration_test_harness.inputs.validation.input_validator import (
+    BasicInputValidator,
+    InputValidator,
 )
 from ska_integration_test_harness.structure.telescope_wrapper import (
     TelescopeWrapper,
@@ -84,10 +87,17 @@ class TestHarnessBuilder:
         )
         """The tool used to validate the configurations."""
 
+        self.input_validator: InputValidator = BasicInputValidator(
+            self._logger
+        )
+        """The tool used to validate the inputs."""
+
         self.subsystems_factory: SubsystemsFactory = SubsystemsFactory()
         """The factory used to create the subsystems."""
 
-        # TODO: find a way to toggle them to False every time something change
+        # --------------------------------------------------------------
+        # flags to track the validation status
+
         self._configs_validated = False
         self._default_inputs_validated = False
 
@@ -171,39 +181,11 @@ class TestHarnessBuilder:
 
         :raises ValueError: if some input is missing.
         """
-        self._log_info("Validating default inputs.")
+        self._default_inputs_validated = False
+        self.input_validator.validate_inputs_presence(self.default_inputs)
+        self.input_validator.validate_inputs_correctness(self.default_inputs)
 
-        # TODO: refactor this
-        for attr in TestHarnessInputs.InputName:
-            attr_value = self.default_inputs.get_input(attr)
-
-            # get attribute expected type
-            # pylint: disable=no-member
-            expected_type = self.default_inputs.__annotations__[
-                attr.value + "_input"
-            ]
-            if not isinstance(attr_value, expected_type):
-                raise ValueError(
-                    f"The default input '{attr}' is not of the "
-                    f"expected type '{expected_type}'. "
-                    f"Instead, it is of type '{type(attr_value)}'."
-                )
-            # for JSON types, ensure they are valid JSON and that they can
-            # return a string
-            if expected_type is JSONInput:
-                attr_value: JSONInput = attr_value
-                try:
-                    attr_value.as_dict()
-                except Exception as e:
-                    raise ValueError(
-                        f"The default input '{attr}' is not a "
-                        "valid JSON input because it looks impossible to "
-                        "extract an object from it. "
-                    ) from e
-
-        self._log_info("All default inputs are valid.")
         self._default_inputs_validated = True
-
         return self
 
     def build(self) -> TelescopeWrapper:
