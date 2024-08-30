@@ -182,7 +182,9 @@ class TestHarnessBuilder:
 
             # get attribute expected type
             # pylint: disable=no-member
-            expected_type = self.default_inputs.__annotations__[attr.value + "_input"]
+            expected_type = self.default_inputs.__annotations__[
+                attr.value + "_input"
+            ]
             if not isinstance(attr_value, expected_type):
                 raise ValueError(
                     f"The default input '{attr}' is not of the "
