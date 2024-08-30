@@ -1,6 +1,7 @@
 """A wrapper to all the configurations needed to setup the test harness."""
 
 from dataclasses import dataclass
+from enum import Enum
 
 from ska_integration_test_harness.config.components_config import (
     CSPConfiguration,
@@ -9,6 +10,19 @@ from ska_integration_test_harness.config.components_config import (
     SubsystemConfiguration,
     TMCConfiguration,
 )
+
+
+class SubsystemName(Enum):
+    """An enumeration of the possible subsystems names.
+
+    An enumeration of the possible subsystems that could be included in the
+    the test harness configuration.
+    """
+
+    TMC = "tmc"
+    CSP = "csp"
+    SDP = "sdp"
+    DISHES = "dishes"
 
 
 @dataclass
@@ -43,6 +57,23 @@ class TestHarnessConfiguration:
             if isinstance(config, SubsystemConfiguration)
             and config is not None
         ]
+
+    def get_subsystem_config(
+        self, subsystem_name: SubsystemName
+    ) -> SubsystemConfiguration:
+        """Get the configuration for a specific subsystem.
+
+        :param subsystem_name: The name of the subsystem you want to get the
+            configuration for.
+
+        :return: The configuration for the specified subsystem.
+        :raises ValueError: If the specified subsystem is not included in the
+            configuration.
+        """
+        config = self.__dict__.get(f"{subsystem_name.value}_config")
+        if config is None:
+            raise ValueError(f"Configuration for {subsystem_name} is missing.")
+        return config
 
     def all_emulated(self) -> bool:
         """Check if, among the included subsystems, all are emulated.
