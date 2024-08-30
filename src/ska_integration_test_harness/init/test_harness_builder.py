@@ -121,7 +121,9 @@ class TestHarnessBuilder:
 
         self._log_info(f"Reading configurations from file: {filepath}")
 
-        config_reader = YAMLConfigurationReader(filepath)
+        config_reader = YAMLConfigurationReader()
+        config_reader.read_configuration_file(filepath)
+
         self.tmc_config = config_reader.get_tmc_configuration()
         self.csp_config = config_reader.get_csp_configuration()
         self.sdp_config = config_reader.get_sdp_configuration()

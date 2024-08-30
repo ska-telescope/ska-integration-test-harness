@@ -67,30 +67,38 @@ class YAMLConfigurationReader(ConfigurationReader):
             dish_master3_name: "ska063/elt/master"
             dish_master4_name: "ska100/elt/master"
 
+    IMPORTANT NOTE: for now, the required fields and sections are hardcoded,
+    but in the future, we may want to make them optional and elastic to permit
+    the user to define the configuration only for the subsystems they need.
+    This could be the starting point to make all the subsystem to be
+    potentially optional and elastic.
     """  # pylint: disable=line-too-long # noqa: E501
 
-    def __init__(self, filename: str) -> None:
-        """Create a new YAMLConfigurationReader.
+    def __init__(self) -> None:
+        super().__init__()
+        self.filename: str | None = None
+        """The path to the YAML file you read."""
+
+        self.config_as_dict: dict = {}
+        """The content of the YAML file as a dictionary."""
+
+    # -------------------------------------------------------------------------
+    # File and dict-structure reading methods
+
+    def read_configuration_file(self, filename: str) -> None:
+        """Read the YAML file and store the content as a dictionary.
+
+        Read the YAML file and store the content as a dictionary in the
+        ``config_as_dict`` attribute. Run this method before calling any
+        other method that generates configurations.
 
         :param filename: The path to the YAML file you want to read
-
         :raises FileNotFoundError: If the file doesn't exist.
         :raises yaml.YAMLError: If the file is not a valid YAML file.
         """
-
-        super().__init__()
         self.filename = filename
-        self.config_as_dict = self._read_file()
-
-    def _read_file(self) -> dict:
-        """Read the YAML file and return the content as a dictionary.
-
-        :return: The content of the YAML file as a dictionary.
-        :raises FileNotFoundError: If the file doesn't exist.
-        :raises yaml.YAMLError: If the file is not a valid YAML file.
-        """
-        with open(self.filename, "r", encoding="utf-8") as stream:
-            return yaml.safe_load(stream)
+        with open(filename, "r", encoding="utf-8") as stream:
+            self.config_as_dict = yaml.safe_load(stream)
 
     def _get_subsystem_dict(self, subsystem: str) -> dict:
         """Get the configuration for a subsystem.
@@ -107,6 +115,9 @@ class YAMLConfigurationReader(ConfigurationReader):
                 "it isn't a dictionary."
             )
         return subsystem_dict
+
+    # -------------------------------------------------------------------------
+    # Subsystems configuration readers
 
     def get_tmc_configuration(self) -> TMCConfiguration:
         """Get the configuration for the TMC.
@@ -182,6 +193,7 @@ class YAMLConfigurationReader(ConfigurationReader):
             dish_master4_name=dish.get("dish_master4_name"),
         )
 
+    # -------------------------------------------------------------------------
     # TODO: consider remove the following
 
     def get_emulation_configuration(self):

@@ -15,6 +15,9 @@ from ska_integration_test_harness.config.emulation_config import (
 from ska_integration_test_harness.config.other_config import (
     OtherDevicesConfigurations,
 )
+from ska_integration_test_harness.config.test_harness_config import (
+    TestHarnessConfiguration,
+)
 
 
 class ConfigurationReader(abc.ABC):
@@ -34,6 +37,25 @@ class ConfigurationReader(abc.ABC):
     from different sources, such as environment variables and configuration
     files.
     """
+
+    # -------------------------------------------------------------------------
+    # Main access point (that can be used to read all the configurations)
+
+    def get_test_harness_configuration(self) -> TestHarnessConfiguration:
+        """Get all the configurations needed for the test harness.
+
+        return: A collection of all the test harness configurations that
+            have been found by the reader.
+        """
+        return TestHarnessConfiguration(
+            tmc_config=self.get_tmc_configuration(),
+            csp_config=self.get_csp_configuration(),
+            sdp_config=self.get_sdp_configuration(),
+            dishes_config=self.get_dish_configuration(),
+        )
+
+    # -------------------------------------------------------------------------
+    # Subsystems configuration readers
 
     @abc.abstractmethod
     def get_tmc_configuration(self) -> TMCConfiguration:

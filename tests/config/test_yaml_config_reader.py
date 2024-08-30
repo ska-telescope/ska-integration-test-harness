@@ -51,13 +51,15 @@ class TestYAMLConfigurationReader:
 
         :param valid_yaml_path: Path to the valid YAML configuration file.
         """
-        reader = YAMLConfigurationReader(valid_yaml_path)
+        reader = YAMLConfigurationReader()
+        reader.read_configuration_file(valid_yaml_path)
         assert_that(reader).is_not_none()
 
     def test_constructor_raises_file_not_found_error(self) -> None:
         """When the file does not exist, a FileNotFoundError is raised."""
+        reader = YAMLConfigurationReader()
         with pytest.raises(FileNotFoundError):
-            YAMLConfigurationReader("non_existent_file.yaml")
+            reader.read_configuration_file("non_existent_file")
 
     def test_constructor_raises_yaml_error(
         self, invalid_yaml_path: str
@@ -66,8 +68,9 @@ class TestYAMLConfigurationReader:
 
         :param invalid_yaml_path: Path to the invalid YAML configuration file.
         """
+        reader = YAMLConfigurationReader()
         with pytest.raises(yaml.YAMLError):
-            YAMLConfigurationReader(invalid_yaml_path)
+            reader.read_configuration_file(invalid_yaml_path)
 
     def test_get_tmc_configuration_loads_correctly(
         self, valid_yaml_path: str
@@ -76,8 +79,11 @@ class TestYAMLConfigurationReader:
 
         :param valid_yaml_path: Path to the valid YAML configuration file.
         """
-        reader = YAMLConfigurationReader(valid_yaml_path)
+        reader = YAMLConfigurationReader()
+        reader.read_configuration_file(valid_yaml_path)
+
         tmc_config = reader.get_tmc_configuration()
+
         assert_that(tmc_config.is_emulated).is_false()
         assert_that(tmc_config.centralnode_name).is_equal_to(
             "ska_mid/tm_central/central_node"
@@ -117,8 +123,11 @@ class TestYAMLConfigurationReader:
 
         :param valid_yaml_path: Path to the valid YAML configuration file.
         """
-        reader = YAMLConfigurationReader(valid_yaml_path)
+        reader = YAMLConfigurationReader()
+        reader.read_configuration_file(valid_yaml_path)
+
         csp_config = reader.get_csp_configuration()
+
         assert_that(csp_config.is_emulated).is_false()
         assert_that(csp_config.csp_master_name).is_equal_to(
             "mid-csp/control/0"
@@ -134,8 +143,11 @@ class TestYAMLConfigurationReader:
 
         :param valid_yaml_path: Path to the valid YAML configuration file.
         """
-        reader = YAMLConfigurationReader(valid_yaml_path)
+        reader = YAMLConfigurationReader()
+        reader.read_configuration_file(valid_yaml_path)
+
         sdp_config = reader.get_sdp_configuration()
+
         assert_that(sdp_config.is_emulated).is_true()
         assert_that(sdp_config.sdp_master_name).is_equal_to(
             "mid-sdp/control/0"
@@ -151,8 +163,11 @@ class TestYAMLConfigurationReader:
 
         :param valid_yaml_path: Path to the valid YAML configuration file.
         """
-        reader = YAMLConfigurationReader(valid_yaml_path)
+        reader = YAMLConfigurationReader()
+        reader.read_configuration_file(valid_yaml_path)
+
         dishes_config = reader.get_dish_configuration()
+
         assert_that(dishes_config.is_emulated).is_true()
         assert_that(dishes_config.dish_master1_name).is_equal_to(
             "ska001/elt/master"
@@ -175,9 +190,8 @@ class TestYAMLConfigurationReader:
         :param missing_tmc_centralnode_name_yaml_path: Path to the YAML
             configuration file with a missing required field.
         """
-        reader = YAMLConfigurationReader(
-            missing_tmc_centralnode_name_yaml_path
-        )
+        reader = YAMLConfigurationReader()
+        reader.read_configuration_file(missing_tmc_centralnode_name_yaml_path)
         tmc_config = reader.get_tmc_configuration()
 
         # Verify that the missing field is set to None
@@ -191,6 +205,8 @@ class TestYAMLConfigurationReader:
         :param missing_tmc_section_yaml_path: Path to the YAML configuration
             file with a missing TMC section.
         """
-        reader = YAMLConfigurationReader(missing_tmc_section_yaml_path)
+        reader = YAMLConfigurationReader()
+        reader.read_configuration_file(missing_tmc_section_yaml_path)
+
         with pytest.raises(ValueError):
             reader.get_tmc_configuration()
