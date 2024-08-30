@@ -16,7 +16,7 @@ from ska_integration_test_harness.config.config_validator import (
     RequiredFieldsValidator,
     SubsystemConfigurationValidator,
 )
-from ska_integration_test_harness.config.yaml_config_reader import (
+from ska_integration_test_harness.config.reader.yaml_config_reader import (
     YAMLConfigurationReader,
 )
 from ska_integration_test_harness.init.susystems_factory import (

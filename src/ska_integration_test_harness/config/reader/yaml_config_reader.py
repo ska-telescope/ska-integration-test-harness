@@ -8,14 +8,14 @@ from ska_integration_test_harness.config.components_config import (
     SDPConfiguration,
     TMCConfiguration,
 )
-from ska_integration_test_harness.config.config_reader import (
-    ConfigurationReader,
-)
 from ska_integration_test_harness.config.emulation_config import (
     EmulationConfiguration,
 )
 from ska_integration_test_harness.config.other_config import (
     OtherDevicesConfigurations,
+)
+from ska_integration_test_harness.config.reader.config_reader import (
+    ConfigurationReader,
 )
 
 

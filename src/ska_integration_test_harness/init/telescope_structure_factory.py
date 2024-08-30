@@ -1,6 +1,6 @@
 """Create a telescope test structure according to the current configuration."""
 
-from ska_integration_test_harness.config.config_reader import (
+from ska_integration_test_harness.config.reader.config_reader import (
     TMCMIDConfigurationReader,
 )
 from ska_integration_test_harness.emulated.csp_devices import (

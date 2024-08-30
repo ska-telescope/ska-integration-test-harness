@@ -9,7 +9,7 @@ from tango import DeviceProxy
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
 )
-from ska_integration_test_harness.config.config_reader import (  # pylint: disable=line-too-long # noqa: E501
+from ska_integration_test_harness.config.reader.config_reader import (  # pylint: disable=line-too-long # noqa: E501
     TMCMIDConfigurationReader,
 )
 from ska_integration_test_harness.inputs.hardcoded_values import (

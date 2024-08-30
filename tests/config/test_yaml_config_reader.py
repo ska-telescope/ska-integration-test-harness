@@ -4,7 +4,7 @@ import pytest
 import yaml
 from assertpy import assert_that
 
-from ska_integration_test_harness.config.yaml_config_reader import (
+from ska_integration_test_harness.config.reader.yaml_config_reader import (
     YAMLConfigurationReader,
 )
 
