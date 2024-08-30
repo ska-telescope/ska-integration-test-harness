@@ -4,7 +4,6 @@ import abc
 import logging
 
 from ska_integration_test_harness.config.test_harness_config import (
-    SubsystemName,
     TestHarnessConfiguration,
 )
 from ska_integration_test_harness.config.validation.subsys_config_validator import (  # pylint: disable=line-too-long # noqa: E501
@@ -91,10 +90,10 @@ class BasicConfigurationValidator(ConfigurationValidator):
         super().__init__(logger)
 
         self.required_subsystems = [
-            SubsystemName.TMC,
-            SubsystemName.CSP,
-            SubsystemName.SDP,
-            SubsystemName.DISHES,
+            TestHarnessConfiguration.SubsystemName.TMC,
+            TestHarnessConfiguration.SubsystemName.CSP,
+            TestHarnessConfiguration.SubsystemName.SDP,
+            TestHarnessConfiguration.SubsystemName.DISHES,
         ]
         """Required subsystems."""
 
@@ -127,7 +126,7 @@ class BasicConfigurationValidator(ConfigurationValidator):
         """Validate each individual subsystem configuration."""
         self._log_info(
             "Validating the individual subsystem configurations contents."
-            )
+        )
 
         for validator in self.subsystem_validators:
             self._apply_subsystem_validator(validator, config)

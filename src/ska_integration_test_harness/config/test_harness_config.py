@@ -12,19 +12,6 @@ from ska_integration_test_harness.config.components_config import (
 )
 
 
-class SubsystemName(Enum):
-    """An enumeration of the possible subsystems names.
-
-    An enumeration of the possible subsystems that could be included in the
-    the test harness configuration.
-    """
-
-    TMC = "tmc"
-    CSP = "csp"
-    SDP = "sdp"
-    DISHES = "dishes"
-
-
 @dataclass
 class TestHarnessConfiguration:
     """A wrapper to all the configurations needed to setup the test harness.
@@ -39,7 +26,22 @@ class TestHarnessConfiguration:
     is strictly built for TMC-MID integration tests. In the future, we may
     support an elastic choice of which subsystems to include, so this
     configuration may be useful to select only the needed subsystems.
+
+    A support enum is provided to specify the subsystems names, and
+    permit to access in a parametric way the configurations.
     """
+
+    class SubsystemName(Enum):
+        """An enumeration of the possible subsystems names.
+
+        An enumeration of the possible subsystems that could be included in the
+        the test harness configuration.
+        """
+
+        TMC = "tmc"
+        CSP = "csp"
+        SDP = "sdp"
+        DISHES = "dishes"
 
     tmc_config: TMCConfiguration | None = None
     csp_config: CSPConfiguration | None = None
@@ -70,10 +72,7 @@ class TestHarnessConfiguration:
         :raises ValueError: If the specified subsystem is not included in the
             configuration.
         """
-        config = self.__dict__.get(f"{subsystem_name.value}_config")
-        if config is None:
-            raise ValueError(f"Configuration for {subsystem_name} is missing.")
-        return config
+        return self.__dict__.get(f"{subsystem_name.value}_config")
 
     def all_emulated(self) -> bool:
         """Check if, among the included subsystems, all are emulated.

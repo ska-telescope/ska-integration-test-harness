@@ -16,10 +16,12 @@ from ska_integration_test_harness.config.validation.config_validator import (
 from ska_integration_test_harness.init.susystems_factory import (
     SubsystemsFactory,
 )
-from ska_integration_test_harness.inputs.default_inputs import DefaultInputs
 from ska_integration_test_harness.inputs.json_input import JSONInput
 from ska_integration_test_harness.inputs.obs_state_commands_input import (
     ObsStateCommandsInput,
+)
+from ska_integration_test_harness.inputs.test_harness_inputs import (
+    TestHarnessInputs,
 )
 from ska_integration_test_harness.structure.telescope_wrapper import (
     TelescopeWrapper,
@@ -69,11 +71,12 @@ class TestHarnessBuilder:
         self.config: TestHarnessConfiguration = TestHarnessConfiguration()
         """The configuration used to build the test harness."""
 
-        self.default_inputs: DefaultInputs = DefaultInputs()
+        self.default_inputs: TestHarnessInputs = TestHarnessInputs()
         """The default inputs used to build the test harness."""
 
         # --------------------------------------------------------------
         # internal tools
+
         self._logger: logging.Logger = logging.getLogger(__name__)
 
         self.config_reader: YAMLConfigurationReader = YAMLConfigurationReader()
@@ -84,9 +87,8 @@ class TestHarnessBuilder:
         )
         """The tool used to validate the configurations."""
 
-        # TODO: add a separate tool to validate the default inputs
-
-        self.subsystems_factory = SubsystemsFactory()
+        self.subsystems_factory: SubsystemsFactory = SubsystemsFactory()
+        """The factory used to create the subsystems."""
 
         # TODO: find a way to toggle them to False every time something change
         self._configs_validated = False
@@ -175,10 +177,8 @@ class TestHarnessBuilder:
         self._log_info("Validating default inputs.")
 
         # TODO: refactor this
-        for attr in self.default_inputs.mandatory_attributes():
-            attr_value = getattr(self.default_inputs, attr)
-            if not attr_value:
-                raise ValueError(f"The default input '{attr}' is missing.")
+        for attr in TestHarnessInputs.InputName:
+            attr_value = self.default_inputs.get_input(attr)
 
             # get attribute expected type
             # pylint: disable=no-member

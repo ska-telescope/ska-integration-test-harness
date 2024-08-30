@@ -105,3 +105,27 @@ class TestTestHarnessConfiguration:
         included_subsystems = config.get_included_subsystems()
 
         assert_that(included_subsystems).is_empty()
+
+    @staticmethod
+    def test_get_config_returns_correct_config() -> None:
+        """Returns the correct subsystem configuration."""
+        tmc_config = TMCConfiguration()
+        csp_config = CSPConfiguration()
+        config = TestHarnessConfiguration(tmc_config, csp_config)
+
+        result = config.get_subsystem_config(
+            TestHarnessConfiguration.SubsystemName.TMC
+        )
+
+        assert_that(result).is_equal_to(tmc_config)
+
+    @staticmethod
+    def test_get_config_returns_none_for_missing_config() -> None:
+        """Returns None when the requested config is missing."""
+        config = TestHarnessConfiguration()
+
+        result = config.get_subsystem_config(
+            TestHarnessConfiguration.SubsystemName.TMC
+        )
+
+        assert_that(result).is_none()
