@@ -8,14 +8,14 @@ import tango
 from ska_integration_test_harness.config.components_config import (
     SubsystemConfiguration,
 )
-from ska_integration_test_harness.config.config_issue import (
+from ska_integration_test_harness.config.validation.config_issue import (
     ConfigurationIssue,
     create_configuration_issue,
 )
 
 
 class SubsystemConfigurationValidator(abc.ABC):
-    """A validator for a subsystem configuration.
+    """A generic validator for a subsystem configuration.
 
     This is an abstraction of a class that can be used to validate one or more
     subsystem configurations. The idea is that you can implement your own

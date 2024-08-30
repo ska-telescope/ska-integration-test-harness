@@ -4,7 +4,7 @@ import logging
 
 from assertpy import assert_that
 
-from ska_integration_test_harness.config.config_issue import (
+from ska_integration_test_harness.config.validation.config_issue import (
     ConfigurationError,
     ConfigurationWarning,
     create_configuration_issue,

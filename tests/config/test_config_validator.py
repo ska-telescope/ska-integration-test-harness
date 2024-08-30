@@ -5,11 +5,11 @@ from unittest.mock import MagicMock, Mock, patch
 import tango
 from assertpy import assert_that
 
-from ska_integration_test_harness.config.config_issue import (
+from ska_integration_test_harness.config.validation.config_issue import (
     ConfigurationError,
     ConfigurationWarning,
 )
-from ska_integration_test_harness.config.config_validator import (
+from ska_integration_test_harness.config.validation.subsys_config_validator import (  # pylint: disable=line-too-long # noqa: E501
     DeviceNamesValidator,
     EmulationConsistencyValidator,
     RequiredFieldsValidator,

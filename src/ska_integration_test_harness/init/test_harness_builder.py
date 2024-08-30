@@ -10,14 +10,14 @@ from ska_integration_test_harness.config.components_config import (
     SubsystemConfiguration,
     TMCConfiguration,
 )
-from ska_integration_test_harness.config.config_validator import (
+from ska_integration_test_harness.config.reader.yaml_config_reader import (
+    YAMLConfigurationReader,
+)
+from ska_integration_test_harness.config.validation.subsys_config_validator import (  # pylint: disable=line-too-long # noqa: E501
     DeviceNamesValidator,
     EmulationConsistencyValidator,
     RequiredFieldsValidator,
     SubsystemConfigurationValidator,
-)
-from ska_integration_test_harness.config.reader.yaml_config_reader import (
-    YAMLConfigurationReader,
 )
 from ska_integration_test_harness.init.susystems_factory import (
     SubsystemsFactory,
