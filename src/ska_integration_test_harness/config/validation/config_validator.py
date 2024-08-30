@@ -115,8 +115,9 @@ class BasicConfigurationValidator(ConfigurationValidator):
                 raise ValueError(
                     "The configuration for the subsystem "
                     f"'{subsystem}' is missing which instead is required. "
+                    f"Required subsystems: {self.required_subsystems}"
                 )
-            self._log_info("Required configuration for " f"'{subsystem}': OK.")
+            self._log_info(f"Required configuration for '{subsystem}': OK.")
 
         self._log_info("All the required subsystems are present.")
 
