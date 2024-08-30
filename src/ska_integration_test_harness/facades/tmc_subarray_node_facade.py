@@ -45,8 +45,8 @@ from ska_integration_test_harness.actions.subarray.subarray_scan import (  # pyl
     SubarrayScan,
 )
 from ska_integration_test_harness.inputs.json_input import JSONInput
-from ska_integration_test_harness.inputs.obs_state_commands_input import (  # pylint: disable=line-too-long # noqa: E501
-    ObsStateCommandsInput,
+from ska_integration_test_harness.inputs.test_harness_inputs import (
+    TestHarnessInputs,
 )
 from ska_integration_test_harness.structure.telescope_wrapper import (  # pylint: disable=line-too-long # noqa: E501
     TelescopeWrapper,
@@ -300,7 +300,7 @@ class TMCSubarrayNodeFacade:
     def force_change_of_obs_state(
         self,
         dest_state_name: ObsState,
-        commands_inputs: ObsStateCommandsInput,
+        commands_inputs: TestHarnessInputs,
         wait_termination: bool = True,
     ) -> None:
         """Force SubarrayNode obsState to provided obsState.

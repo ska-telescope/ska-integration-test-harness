@@ -13,8 +13,8 @@ from ska_integration_test_harness.emulated.sdp_devices import (
     EmulatedSDPDevices,
 )
 from ska_integration_test_harness.inputs.json_input import JSONInput
-from ska_integration_test_harness.inputs.obs_state_commands_input import (
-    ObsStateCommandsInput,
+from ska_integration_test_harness.inputs.test_harness_inputs import (
+    TestHarnessInputs,
 )
 from ska_integration_test_harness.production.csp_devices import (
     ProductionCSPDevices,
@@ -56,7 +56,7 @@ class TelescopeStructureFactory:
 
     def __init__(
         self,
-        default_commands_input: ObsStateCommandsInput,
+        default_commands_input: TestHarnessInputs,
         default_vcc_config_input: JSONInput,
     ):
         """Initialize the factory.

@@ -25,8 +25,8 @@ from ska_integration_test_harness.actions.telescope_action import (  # pylint: d
 from ska_integration_test_harness.actions.telescope_action_sequence import (  # pylint: disable=line-too-long # noqa: E501
     TelescopeActionSequence,
 )
-from ska_integration_test_harness.inputs.obs_state_commands_input import (  # pylint: disable=line-too-long # noqa: E501
-    ObsStateCommandsInput,
+from ska_integration_test_harness.inputs.test_harness_inputs import (
+    TestHarnessInputs,
 )
 from ska_integration_test_harness.structure.telescope_wrapper import (  # pylint: disable=line-too-long # noqa: E501
     TelescopeWrapper,
@@ -54,7 +54,7 @@ class SubarrayObsStateResetterFactory:
     `EMPTY` state first and then move to the target state.
     """
 
-    def __init__(self, commands_inputs: ObsStateCommandsInput) -> None:
+    def __init__(self, commands_inputs: TestHarnessInputs) -> None:
         """Initialize with the telescope and the JSON inputs.
 
         :param commands_inputs: The JSON inputs for the commands to bring
@@ -83,7 +83,9 @@ class SubarrayObsStateResetterFactory:
             `ObsState.RESOURCING` state.
         """
         assign_resources_action = SubarrayAssignResources(
-            self.commands_inputs.get_assign_input
+            self.commands_inputs.get_input(
+                TestHarnessInputs.InputName.ASSIGN, fail_if_missing=True
+            )
         )
         assign_resources_action.set_synchronize_on_transient_state(True)
 
@@ -103,7 +105,12 @@ class SubarrayObsStateResetterFactory:
         return TelescopeActionSequence(
             [
                 self.create_action_to_reset_subarray_to_empty(),
-                SubarrayAssignResources(self.commands_inputs.get_assign_input),
+                SubarrayAssignResources(
+                    self.commands_inputs.get_input(
+                        TestHarnessInputs.InputName.ASSIGN,
+                        fail_if_missing=True,
+                    )
+                ),
             ],
         )
 
@@ -145,7 +152,9 @@ class SubarrayObsStateResetterFactory:
             the `ObsState.CONFIGURING` state.
         """
         configure_action = SubarrayConfigure(
-            self.commands_inputs.get_configure_input
+            self.commands_inputs.get_input(
+                TestHarnessInputs.InputName.CONFIGURE, fail_if_missing=True
+            )
         )
         configure_action.set_synchronize_on_transient_state(True)
 
@@ -165,7 +174,12 @@ class SubarrayObsStateResetterFactory:
         return TelescopeActionSequence(
             [
                 self.create_action_to_reset_subarray_to_idle(),
-                SubarrayConfigure(self.commands_inputs.get_configure_input),
+                SubarrayConfigure(
+                    self.commands_inputs.get_input(
+                        TestHarnessInputs.InputName.CONFIGURE,
+                        fail_if_missing=True,
+                    )
+                ),
             ],
         )
 
@@ -178,7 +192,11 @@ class SubarrayObsStateResetterFactory:
         return TelescopeActionSequence(
             [
                 self.create_action_to_reset_subarray_to_ready(),
-                SubarrayScan(self.commands_inputs.get_scan_input),
+                SubarrayScan(
+                    self.commands_inputs.get_input(
+                        TestHarnessInputs.InputName.SCAN, fail_if_missing=True
+                    )
+                ),
             ],
         )
 

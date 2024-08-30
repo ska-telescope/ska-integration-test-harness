@@ -17,9 +17,6 @@ from ska_integration_test_harness.init.susystems_factory import (
     SubsystemsFactory,
 )
 from ska_integration_test_harness.inputs.json_input import JSONInput
-from ska_integration_test_harness.inputs.obs_state_commands_input import (
-    ObsStateCommandsInput,
-)
 from ska_integration_test_harness.inputs.test_harness_inputs import (
     TestHarnessInputs,
 )
@@ -236,12 +233,7 @@ class TestHarnessBuilder:
 
         tmc = self.subsystems_factory.create_tmc_wrapper(
             tmc_config=self.config.tmc_config,
-            default_commands_input=ObsStateCommandsInput(
-                assign_input=self.default_inputs.assign_input,
-                configure_input=self.default_inputs.configure_input,
-                scan_input=self.default_inputs.scan_input,
-                release_input=self.default_inputs.release_input,
-            ),
+            default_commands_input=self.default_inputs,
             default_vcc_config_input=self.default_inputs.default_vcc_config_input,  # pylint: disable=line-too-long # noqa: E501
         )
         csp = self.subsystems_factory.create_csp_wrapper(

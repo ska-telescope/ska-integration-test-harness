@@ -22,8 +22,8 @@ from ska_integration_test_harness.actions.subarray.subarray_move_to_off import (
     SubarrayMoveToOff,
 )
 from ska_integration_test_harness.inputs.json_input import JSONInput
-from ska_integration_test_harness.inputs.obs_state_commands_input import (  # pylint: disable=line-too-long # noqa: E501
-    ObsStateCommandsInput,
+from ska_integration_test_harness.inputs.test_harness_inputs import (
+    TestHarnessInputs,
 )
 from ska_integration_test_harness.structure.tmc_devices import TMCDevices
 
@@ -37,7 +37,7 @@ class ProductionTMCDevices(TMCDevices):
     def __init__(
         self,
         tmc_configuration,
-        default_commands_input: ObsStateCommandsInput,
+        default_commands_input: TestHarnessInputs,
         default_vcc_config_input: JSONInput,
     ):
         """Initialise the TMC wrapper.
@@ -65,7 +65,9 @@ class ProductionTMCDevices(TMCDevices):
         if self.subarray_node.obsState == ObsState.IDLE:
             LOGGER.info("Calling Release Resource on centralnode")
             CentralNodeReleaseResources(
-                self.default_commands_input.get_release_input
+                self.default_commands_input.get_input(
+                    TestHarnessInputs.InputName.RELEASE, fail_if_missing=True
+                )
             ).execute()
 
         ForceChangeOfObsState(

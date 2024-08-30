@@ -10,8 +10,8 @@ from ska_integration_test_harness.actions.subarray.obs_state_resetter_factory im
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
 )
-from ska_integration_test_harness.inputs.obs_state_commands_input import (
-    ObsStateCommandsInput,
+from ska_integration_test_harness.inputs.test_harness_inputs import (
+    TestHarnessInputs,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ class ForceChangeOfObsState(TelescopeAction[None]):
     def __init__(
         self,
         dest_state_name: ObsState,
-        commands_input: ObsStateCommandsInput,
+        commands_input: TestHarnessInputs,
     ):
         """Initialize the action with the target state and the JSON inputs.
 

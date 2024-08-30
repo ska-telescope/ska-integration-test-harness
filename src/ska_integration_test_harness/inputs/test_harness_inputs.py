@@ -84,3 +84,20 @@ class TestHarnessInputs:
             for input_name in self.InputName
             if isinstance(self.get_input(input_name), JSONInput)
         }
+
+    def __str__(self) -> str:
+        """Return the JSON string representation of the inputs."""
+        return str(self.get_non_none_json_inputs())
+
+    def __repr__(self) -> str:
+        """Return the JSON string representation of the inputs."""
+        return str(self.get_non_none_json_inputs())
+
+    def __eq__(self, other: object) -> bool:
+        """Check if two ObsStateCommandsInput are equal."""
+        if not isinstance(other, TestHarnessInputs):
+            return False
+
+        return (
+            self.get_non_none_json_inputs() == other.get_non_none_json_inputs()
+        )
