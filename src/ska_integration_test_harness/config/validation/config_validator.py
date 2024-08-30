@@ -44,7 +44,8 @@ class ConfigurationValidator(abc.ABC):
     ) -> None:
         """Validate the presence of the required subsystems.
 
-        A given configuration mus
+        A given configuration must contain a valid subset of subsystems
+        (i,e., there must be all the needed dependencies to run the tests).
 
         If the logger is set, all the errors and warnings are logged.
 
@@ -124,8 +125,16 @@ class BasicConfigurationValidator(ConfigurationValidator):
         self, config: TestHarnessConfiguration
     ) -> None:
         """Validate each individual subsystem configuration."""
+        self._log_info(
+            "Validating the individual subsystem configurations contents."
+            )
+
         for validator in self.subsystem_validators:
             self._apply_subsystem_validator(validator, config)
+
+        self._log_info(
+            "All the individual subsystem configurations are valid."
+        )
 
     def _apply_subsystem_validator(
         self,
@@ -157,5 +166,5 @@ class BasicConfigurationValidator(ConfigurationValidator):
 
         self._log_info(
             f"Configuration validation using {validator.__class__.__name__} "
-            "succeeded."
+            "succeeded on all subsystems."
         )
