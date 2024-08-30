@@ -100,32 +100,23 @@ class YAMLConfigurationReader(ConfigurationReader):
         with open(filename, "r", encoding="utf-8") as stream:
             self.config_as_dict = yaml.safe_load(stream)
 
-    def _get_subsystem_dict(self, subsystem: str) -> dict:
+    def _get_subsystem_dict(self, subsystem: str) -> dict | None:
         """Get the configuration for a subsystem.
 
         :param subsystem: The name of the subsystem.
-        :return: The configuration for the subsystem.
-        :raises ValueError: If the configuration is missing or invalid.
+        :return: The configuration for the subsystem if it exists,
+            otherwise None.
         """
-        subsystem_dict = self.config_as_dict.get(subsystem)
-        if not isinstance(subsystem_dict, dict):
-            raise ValueError(
-                f"In the given YAML file '{self.filename}', "
-                f"the '{subsystem}' section is missing or "
-                "it isn't a dictionary."
-            )
-        return subsystem_dict
+        return self.config_as_dict.get(subsystem, None)
 
     # -------------------------------------------------------------------------
     # Subsystems configuration readers
 
-    def get_tmc_configuration(self) -> TMCConfiguration:
-        """Get the configuration for the TMC.
-
-        :return: The TMC configuration
-        :raises ValueError: If the configuration is missing or invalid.
-        """
+    def get_tmc_configuration(self) -> TMCConfiguration | None:
         tmc = self._get_subsystem_dict("tmc")
+
+        if tmc is None:
+            return None
 
         return TMCConfiguration(
             is_emulated=tmc.get("is_emulated", False),
@@ -149,13 +140,11 @@ class YAMLConfigurationReader(ConfigurationReader):
             tmc_dish_leaf_node4_name=tmc.get("tmc_dish_leaf_node4_name"),
         )
 
-    def get_csp_configuration(self):
-        """Get the configuration for the CSP.
-
-        :return: The CSP configuration
-        :raises ValueError: If the configuration is missing or invalid.
-        """
+    def get_csp_configuration(self) -> CSPConfiguration | None:
         csp = self._get_subsystem_dict("csp")
+
+        if csp is None:
+            return None
 
         return CSPConfiguration(
             is_emulated=csp.get("is_emulated", True),
@@ -163,13 +152,11 @@ class YAMLConfigurationReader(ConfigurationReader):
             csp_subarray1_name=csp.get("csp_subarray1_name"),
         )
 
-    def get_sdp_configuration(self):
-        """Get the configuration for the SDP.
-
-        :return: The SDP configuration
-        :raises ValueError: If the configuration is missing or invalid.
-        """
+    def get_sdp_configuration(self) -> SDPConfiguration | None:
         sdp = self._get_subsystem_dict("sdp")
+
+        if sdp is None:
+            return None
 
         return SDPConfiguration(
             is_emulated=sdp.get("is_emulated", True),
@@ -177,13 +164,11 @@ class YAMLConfigurationReader(ConfigurationReader):
             sdp_subarray1_name=sdp.get("sdp_subarray1_name"),
         )
 
-    def get_dish_configuration(self):
-        """Get the configuration for the Dish.
-
-        :return: The Dish configuration
-        :raises ValueError: If the configuration is missing or invalid.
-        """
+    def get_dish_configuration(self) -> DishesConfiguration | None:
         dish = self._get_subsystem_dict("dishes")
+
+        if dish is None:
+            return None
 
         return DishesConfiguration(
             is_emulated=dish.get("is_emulated", True),
@@ -200,8 +185,6 @@ class YAMLConfigurationReader(ConfigurationReader):
         """Get the emulation configuration.
 
         :return: The emulation configuration
-        :raises ValueError: If the configuration of TMC, CSP, SDP or Dish
-            is missing or invalid.
         """
         return EmulationConfiguration(
             tmc=self.get_tmc_configuration().is_emulated,

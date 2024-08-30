@@ -197,16 +197,16 @@ class TestYAMLConfigurationReader:
         # Verify that the missing field is set to None
         assert_that(tmc_config.centralnode_name).is_none()
 
-    def test_get_tmc_configuration_raises_value_error_when_section_missing(
+    def test_get_tmc_configuration_returns_none_when_missing_section(
         self, missing_tmc_section_yaml_path: str
     ) -> None:
-        """Load TMC config when a section is missing raises a ValueError.
+        """Load TMC config when the TMC section is missing returns None.
 
         :param missing_tmc_section_yaml_path: Path to the YAML configuration
             file with a missing TMC section.
         """
         reader = YAMLConfigurationReader()
         reader.read_configuration_file(missing_tmc_section_yaml_path)
+        tmc_config = reader.get_tmc_configuration()
 
-        with pytest.raises(ValueError):
-            reader.get_tmc_configuration()
+        assert_that(tmc_config).is_none()

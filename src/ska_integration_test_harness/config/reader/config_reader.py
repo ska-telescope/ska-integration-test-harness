@@ -24,14 +24,21 @@ class ConfigurationReader(abc.ABC):
     """A factory that reads from somewhere the test harness configuration.
 
     This abstract class defines the interface of a configuration reader
-    that is able to generate configurations for the various test harness
-    components, such as:
+    that is able to collect subsystem configurations and create a
+    TestHarnessConfiguration object.
+
+    For now, the supported subsystems are:
 
     - TMC
     - CSP
     - SDP
     - the dishes
     - the emulation configuration
+
+    None of those configurations are mandatory and the correctness of the
+    configuration is not checked by this class, since it is delegated to
+    a separate validator that can make its own checks according to the
+    testing context.
 
     The concrete implementations of this class may read the configuration
     from different sources, such as environment variables and configuration
@@ -58,31 +65,31 @@ class ConfigurationReader(abc.ABC):
     # Subsystems configuration readers
 
     @abc.abstractmethod
-    def get_tmc_configuration(self) -> TMCConfiguration:
+    def get_tmc_configuration(self) -> TMCConfiguration | None:
         """Get the configuration for the TMC.
 
-        return: The TMC configuration.
+        return: The TMC configuration (if any).
         """
 
     @abc.abstractmethod
-    def get_csp_configuration(self) -> CSPConfiguration:
+    def get_csp_configuration(self) -> CSPConfiguration | None:
         """Get the configuration for the CSP.
 
-        return: The CSP configuration.
+        return: The CSP configuration (if any).
         """
 
     @abc.abstractmethod
-    def get_sdp_configuration(self) -> SDPConfiguration:
+    def get_sdp_configuration(self) -> SDPConfiguration | None:
         """Get the configuration for the SDP.
 
-        return: The SDP configuration.
+        return: The SDP configuration (if any).
         """
 
     @abc.abstractmethod
-    def get_dish_configuration(self) -> DishesConfiguration:
+    def get_dish_configuration(self) -> DishesConfiguration | None:
         """Get the configuration for the dishes.
 
-        return: The dishes configuration.
+        return: The dishes configuration (if any).
         """
 
     # TODO: consider remove the following
