@@ -1,11 +1,9 @@
 """A wrapper for TMC and all integration tests sub-components."""
 
-import logging
 from typing import Tuple
 
 import tango
 from ska_control_model import ResultCode
-from ska_ser_logging import configure_logging
 
 from ska_integration_test_harness.actions.central_node.central_node_assign_resources import (  # pylint: disable=line-too-long # noqa E501
     CentralNodeAssignResources,
@@ -32,9 +30,6 @@ from ska_integration_test_harness.inputs.json_input import JSONInput
 from ska_integration_test_harness.structure.telescope_wrapper import (
     TelescopeWrapper,
 )
-
-configure_logging(logging.DEBUG)
-LOGGER = logging.getLogger(__name__)
 
 
 class TMCCentralNodeFacade:

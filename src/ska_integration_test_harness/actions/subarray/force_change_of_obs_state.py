@@ -1,7 +1,5 @@
 """Force the change of the ObsState in Subarray."""
 
-import logging
-
 from ska_control_model import ObsState
 
 from ska_integration_test_harness.actions.subarray.obs_state_resetter_factory import (  # pylint: disable=line-too-long # noqa: E501
@@ -13,8 +11,6 @@ from ska_integration_test_harness.actions.telescope_action import (
 from ska_integration_test_harness.inputs.test_harness_inputs import (
     TestHarnessInputs,
 )
-
-LOGGER = logging.getLogger(__name__)
 
 
 class ForceChangeOfObsState(TelescopeAction[None]):
@@ -59,12 +55,21 @@ class ForceChangeOfObsState(TelescopeAction[None]):
         self.commands_input = commands_input
 
     def _action(self):
-        LOGGER.info("Forcing the change of ObsState in Subarray")
+        current_state = ObsState(self.telescope.tmc.subarray_node.obsState)
+        self._log(
+            "Using a sequence of actions to force the change of the "
+            f"ObsState in Subarray from {str(current_state)} to "
+            f"{str(self.dest_state_name)}."
+        )
 
+        # create a sequence of actions to reset the subarray to the
+        # given target state
         obs_state_resetter_action = SubarrayObsStateResetterFactory(
             self.commands_input
         ).create_action_to_reset_subarray_to_state(self.dest_state_name)
 
+        # propagate the termination condition timeout and policy to the
+        # sequence of actions
         obs_state_resetter_action.set_termination_condition_timeout(
             self.termination_condition_timeout
         )
@@ -72,7 +77,15 @@ class ForceChangeOfObsState(TelescopeAction[None]):
             self.wait_termination
         )
 
+        # execute the sequence of actions
         obs_state_resetter_action.execute()
+
+        current_state = ObsState(self.telescope.tmc.subarray_node.obsState)
+        self._log(
+            "After running a sequence of actions, the ObsState in Subarray is "
+            f"{str(current_state)} (expected: {str(self.dest_state_name)}). "
+            "Clearing command call in emulators. "
+        )
 
         self.telescope.clear_command_call()
 

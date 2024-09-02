@@ -1,12 +1,8 @@
 """Invoke MoveToOff command on subarray Node."""
 
-import logging
-
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
 )
-
-LOGGER = logging.getLogger(__name__)
 
 
 class SubarrayMoveToOff(TelescopeAction):
@@ -24,7 +20,7 @@ class SubarrayMoveToOff(TelescopeAction):
         #     "State is supposed to be ON before the action."
         # ).is_equal_to(DevState.ON)
 
-        LOGGER.info("Invoking Off on SubarrayNode")
+        self._log("Invoking Off on SubarrayNode")
         result, message = self.telescope.tmc.subarray_node.Off()
         return (result, message)
 

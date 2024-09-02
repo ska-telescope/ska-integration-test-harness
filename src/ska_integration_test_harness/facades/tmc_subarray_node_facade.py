@@ -1,9 +1,6 @@
 """Wrapper for subarray node."""
 
-import logging
-
 from ska_control_model import ObsState
-from ska_ser_logging import configure_logging
 
 from ska_integration_test_harness.actions.subarray.force_change_of_obs_state import (  # pylint: disable=line-too-long # noqa: E501
     ForceChangeOfObsState,
@@ -48,9 +45,6 @@ from ska_integration_test_harness.inputs.test_harness_inputs import (
 from ska_integration_test_harness.structure.telescope_wrapper import (  # pylint: disable=line-too-long # noqa: E501
     TelescopeWrapper,
 )
-
-configure_logging(logging.DEBUG)
-LOGGER = logging.getLogger(__name__)
 
 
 class TMCSubarrayNodeFacade:

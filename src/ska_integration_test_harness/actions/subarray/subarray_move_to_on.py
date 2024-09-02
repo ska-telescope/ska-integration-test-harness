@@ -1,16 +1,11 @@
 """Invoke MoveToOn command on subarray Node."""
 
-import logging
-
 from assertpy import assert_that
 from tango import DevState
 
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
 )
-
-# TODO: logging should not belong here
-LOGGER = logging.getLogger(__name__)
 
 
 class SubarrayMoveToOn(TelescopeAction):
@@ -25,9 +20,8 @@ class SubarrayMoveToOn(TelescopeAction):
                 "FAILED ASSUMPTION: Subarray state is not either ON or OFF"
             ).is_equal_to(DevState.OFF)
 
-            LOGGER.info("Invoking On on SubarrayNode")
+            self._log("Invoking On on SubarrayNode")
             result, message = self.telescope.tmc.subarray_node.On()
-            LOGGER.info("Invoked ON on SubarrayNode")
             return (result, message)
         # pylint says inconsistent-return-statements,
         # what should be returned here?

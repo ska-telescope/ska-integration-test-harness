@@ -1,7 +1,5 @@
 """An action to set the central node to STANDBY State."""
 
-import logging
-
 from tango import DevState
 
 from ska_integration_test_harness.actions.expected_event import (
@@ -14,8 +12,6 @@ from ska_integration_test_harness.actions.utils.termination_conditions import (
     dishes_have_dish_mode,
 )
 from ska_integration_test_harness.inputs.dish_mode import DishMode
-
-LOGGER = logging.getLogger(__name__)
 
 
 class SetStandby(TelescopeAction[None]):

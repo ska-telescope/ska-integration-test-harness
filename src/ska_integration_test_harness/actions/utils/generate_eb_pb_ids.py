@@ -1,18 +1,13 @@
 """Given a JSON input, generate the EB and PB IDs for the subarray."""
 
-import logging
 import re
 from datetime import datetime
-
-from ska_ser_logging import configure_logging
 
 from ska_integration_test_harness.inputs.json_input import (
     DictJSONInput,
     JSONInput,
 )
 
-configure_logging(logging.DEBUG)
-LOGGER = logging.getLogger(__name__)
 EB_PB_ID_LENGTH = 15
 
 
@@ -32,7 +27,6 @@ def generate_id(id_pattern: str) -> str:
     id_pattern = re.findall(r"(?=\*)[\*-]*(?<=\*)", id_pattern)[0]
     length = id_pattern.count("*")
     assert length <= EB_PB_ID_LENGTH
-    LOGGER.info("<SB or PB ID >Length: %s", length)
     timestamp = str(datetime.now().timestamp()).replace(".", "")
     sections = id_pattern.split("-")
     unique_id = ""
