@@ -20,7 +20,6 @@ from ska_integration_test_harness.actions.subarray.force_change_of_obs_state imp
 from ska_integration_test_harness.actions.subarray.subarray_move_to_off import (  # pylint: disable=line-too-long # noqa E501
     SubarrayMoveToOff,
 )
-from ska_integration_test_harness.inputs.json_input import JSONInput
 from ska_integration_test_harness.inputs.test_harness_inputs import (
     TestHarnessInputs,
 )
@@ -34,7 +33,6 @@ class ProductionTMCWrapper(TMCWrapper):
         self,
         tmc_configuration,
         default_commands_input: TestHarnessInputs,
-        default_vcc_config_input: JSONInput,
     ):
         """Initialise the TMC wrapper.
 
@@ -43,14 +41,11 @@ class ProductionTMCWrapper(TMCWrapper):
             will be used to reset the TMC devices. Fill it with all
             the inputs with suitable default values. If you don't some
             steps of the tear down procedure may fail.
-        :param default_vcc_config_input: The default VCC config input. It
-            will be used to reset the VCC config.
         """
         super().__init__(tmc_configuration)
 
         # set some default command inputs (needed for tear down)
         self.default_commands_input = default_commands_input
-        self.default_vcc_config_input = default_vcc_config_input
 
         # configure logging (used also in tear down)
         self.logger = logging.getLogger(__name__)
@@ -83,12 +78,15 @@ class ProductionTMCWrapper(TMCWrapper):
         # dish vcc then load default dish vcc config
         # CSP_SIMULATION_ENABLED condition will be removed after testing
         # with real csp
+        expected_vcc_config = (
+            self.default_commands_input.default_vcc_config_input
+        )
         if (
             not self.csp_master_leaf_node.sourceDishVccConfig
-            or not self.default_vcc_config_input.is_equal_to_json(
+            or not expected_vcc_config.is_equal_to_json(
                 self.csp_master_leaf_node.sourceDishVccConfig
             )
         ):
-            CentralNodeLoadDishConfig(self.default_vcc_config_input).execute()
+            CentralNodeLoadDishConfig(expected_vcc_config).execute()
 
         self.logger.info("TMC tear down completed.")

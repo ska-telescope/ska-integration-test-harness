@@ -106,10 +106,7 @@ class TestHarnessFactory:
         return ProductionTMCWrapper(
             tmc_configuration=self.config.tmc_config,
             default_commands_input=self.default_inputs,
-            default_vcc_config_input=self.default_inputs.default_vcc_config_input,  # pylint: disable=line-too-long # noqa: E501
         )
-        # TODO: do not pass the third parameter, if it is already included
-        # in the second one.
 
     def create_csp_wrapper(self) -> CSPWrapper:
         """Create a CSP wrapper with the given configuration.
