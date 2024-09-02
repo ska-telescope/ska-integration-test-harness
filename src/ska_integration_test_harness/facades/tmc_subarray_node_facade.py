@@ -26,9 +26,6 @@ from ska_integration_test_harness.actions.subarray.subarray_end_scan import (  #
 from ska_integration_test_harness.actions.subarray.subarray_execute_transition import (  # pylint: disable=line-too-long # noqa: E501
     SubarrayExecuteTransition,
 )
-from ska_integration_test_harness.actions.subarray.subarray_five_point_calibration_scan import (  # pylint: disable=line-too-long # noqa: E501
-    SubarrayFivePointCalibrationScan,
-)
 from ska_integration_test_harness.actions.subarray.subarray_move_to_off import (  # pylint: disable=line-too-long # noqa: E501
     SubarrayMoveToOff,
 )
@@ -320,26 +317,5 @@ class TMCSubarrayNodeFacade:
             condition is waited.
         """
         action = ForceChangeOfObsState(dest_state_name, commands_inputs)
-        action.set_termination_condition_policy(wait_termination)
-        action.execute()
-
-    def execute_five_point_calibration_scan(
-        self,
-        partial_configure_inputs: list[JSONInput],
-        scan_inputs: list[JSONInput],
-        wait_termination: bool = True,
-    ) -> None:
-        """Perform a five point calibration scan on Subarray Node using the
-        partial configuration jsons and scan jsons provided as inputs.
-
-        :param partial_configure_inputs: Partial Configure json inputs.
-        :param scan_jsons: Partial Scan json inputs.
-        :param wait_termination: set to False if you don't want to
-            wait for the termination condition. By default the termination
-            condition is waited.
-        """
-        action = SubarrayFivePointCalibrationScan(
-            partial_configure_inputs, scan_inputs
-        )
         action.set_termination_condition_policy(wait_termination)
         action.execute()
