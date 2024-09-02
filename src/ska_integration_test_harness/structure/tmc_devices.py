@@ -2,7 +2,7 @@
 
 import abc
 
-from tango import DeviceProxy
+import tango
 
 from ska_integration_test_harness.config.components_config import (
     TMCConfiguration,
@@ -20,28 +20,30 @@ class TMCDevices(abc.ABC):
         Args:
             tmc_configuration: The TMC configuration.
         """
-        self.central_node = DeviceProxy(tmc_configuration.centralnode_name)
+        self.central_node = tango.DeviceProxy(
+            tmc_configuration.centralnode_name
+        )
         self.central_node.set_timeout_millis(5000)
 
-        self.subarray_node = DeviceProxy(
+        self.subarray_node = tango.DeviceProxy(
             tmc_configuration.tmc_subarraynode1_name
         )
         self.subarray_node.set_timeout_millis(5000)
 
-        self.csp_master_leaf_node = DeviceProxy(
+        self.csp_master_leaf_node = tango.DeviceProxy(
             tmc_configuration.tmc_csp_master_leaf_node_name
         )
-        self.sdp_master_leaf_node = DeviceProxy(
+        self.sdp_master_leaf_node = tango.DeviceProxy(
             tmc_configuration.tmc_sdp_master_leaf_node_name
         )
 
         # NOTE: not so much used EXTERNALLY, internally just on this
         # constructor. So what is the sense of this list?
         self.dish_leaf_node_list = [  # Those instead are inside TMC
-            DeviceProxy(tmc_configuration.tmc_dish_leaf_node1_name),
-            DeviceProxy(tmc_configuration.tmc_dish_leaf_node2_name),
-            DeviceProxy(tmc_configuration.tmc_dish_leaf_node3_name),
-            DeviceProxy(tmc_configuration.tmc_dish_leaf_node4_name),
+            tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node1_name),
+            tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node2_name),
+            tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node3_name),
+            tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node4_name),
         ]
 
         for dish_leaf_node in self.dish_leaf_node_list:
@@ -49,13 +51,13 @@ class TMCDevices(abc.ABC):
 
         # Create Dish1 leaf node admin device proxy
         self.dish1_leaf_admin_dev_name = self.dish_leaf_node_list[0].adm_name()
-        self.dish1_leaf_admin_dev_proxy = DeviceProxy(
+        self.dish1_leaf_admin_dev_proxy = tango.DeviceProxy(
             self.dish1_leaf_admin_dev_name
         )
 
         # Create (but not initialize) the subarray leaf nodes
-        self.csp_subarray_leaf_node: DeviceProxy | None = None
-        self.sdp_subarray_leaf_node: DeviceProxy | None = None
+        self.csp_subarray_leaf_node: tango.DeviceProxy | None = None
+        self.sdp_subarray_leaf_node: tango.DeviceProxy | None = None
 
     # -----------------------------------------------------------
     # CentralNode properties
@@ -80,17 +82,17 @@ class TMCDevices(abc.ABC):
     def set_subarray_id(self, subarray_id: int):
         """Set subarray ID"""
 
-        self.subarray_node = DeviceProxy(
+        self.subarray_node = tango.DeviceProxy(
             f"ska_mid/tm_subarray_node/{subarray_id}"
         )
 
         # NOTE: why zfill(2) after the first DeviceProxy creation?
         subarray_id = str(subarray_id).zfill(2)
 
-        self.csp_subarray_leaf_node = DeviceProxy(
+        self.csp_subarray_leaf_node = tango.DeviceProxy(
             f"ska_mid/tm_leaf_node/csp_subarray{subarray_id}"
         )
-        self.sdp_subarray_leaf_node = DeviceProxy(
+        self.sdp_subarray_leaf_node = tango.DeviceProxy(
             f"ska_mid/tm_leaf_node/sdp_subarray{subarray_id}"
         )
 

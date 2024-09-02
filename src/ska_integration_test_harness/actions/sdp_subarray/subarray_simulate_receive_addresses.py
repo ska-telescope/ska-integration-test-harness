@@ -4,7 +4,7 @@ be simulated for Subarray Node to process.
 
 import msgpack
 import msgpack_numpy
-from tango import DeviceProxy
+import tango
 
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
@@ -39,7 +39,7 @@ class SubarraySimulateReceiveAddresses(TelescopeAction[None]):
         )
 
         # Setting pointing offsets after encoding the data.
-        sdp_qc = DeviceProxy(
+        sdp_qc = tango.DeviceProxy(
             TMCMIDConfigurationReader()
             .get_other_configurations()
             .sdp_queue_connector

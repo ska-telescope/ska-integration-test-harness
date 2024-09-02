@@ -2,7 +2,7 @@
 
 import abc
 
-from tango import DeviceProxy
+import tango
 
 from ska_integration_test_harness.config.components_config import (
     DishesConfiguration,
@@ -20,15 +20,25 @@ class DishesDevices(abc.ABC):
 
         # NOTE: currently dishes are fixed, may they be dynamic in future?
         self.dish_master_dict = {
-            "dish_001": DeviceProxy(dishes_configuration.dish_master1_name),
-            "dish_036": DeviceProxy(dishes_configuration.dish_master2_name),
-            "dish_063": DeviceProxy(dishes_configuration.dish_master3_name),
-            "dish_100": DeviceProxy(dishes_configuration.dish_master4_name),
+            "dish_001": tango.DeviceProxy(
+                dishes_configuration.dish_master1_name
+            ),
+            "dish_036": tango.DeviceProxy(
+                dishes_configuration.dish_master2_name
+            ),
+            "dish_063": tango.DeviceProxy(
+                dishes_configuration.dish_master3_name
+            ),
+            "dish_100": tango.DeviceProxy(
+                dishes_configuration.dish_master4_name
+            ),
         }
 
         # Create Dish1 admin device proxy
         self.dish1_admin_dev_name = self.dish_master_list[0].adm_name()
-        self.dish1_admin_dev_proxy = DeviceProxy(self.dish1_admin_dev_name)
+        self.dish1_admin_dev_proxy = tango.DeviceProxy(
+            self.dish1_admin_dev_name
+        )
 
     @abc.abstractmethod
     def _pre_init_dish_names(
@@ -40,7 +50,7 @@ class DishesDevices(abc.ABC):
         """
 
     @property
-    def dish_master_list(self) -> list[DeviceProxy]:
+    def dish_master_list(self) -> list[tango.DeviceProxy]:
         """Dish Master device proxies as a list (sorted by key)."""
         return [
             self.dish_master_dict[key]

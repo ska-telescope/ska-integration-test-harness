@@ -2,7 +2,7 @@
 
 import abc
 
-from tango import DeviceProxy
+import tango
 
 from ska_integration_test_harness.config.components_config import (
     CSPConfiguration,
@@ -14,8 +14,10 @@ class CSPDevices(abc.ABC):
 
     def __init__(self, csp_configuration: CSPConfiguration):
         """Initialize the CSP wrapper."""
-        self.csp_master = DeviceProxy(csp_configuration.csp_master_name)
-        self.csp_subarray = DeviceProxy(csp_configuration.csp_subarray1_name)
+        self.csp_master = tango.DeviceProxy(csp_configuration.csp_master_name)
+        self.csp_subarray = tango.DeviceProxy(
+            csp_configuration.csp_subarray1_name
+        )
 
     # NOTE: this is not that much a real "move_to_on" command, instead
     # it seems to be "an action that must be done when on TMC central node
@@ -41,4 +43,6 @@ class CSPDevices(abc.ABC):
     def set_subarray_id(self, subarray_id: str) -> None:
         """Set the subarray ID on the CSP subarray."""
         subarray_id = str(subarray_id).zfill(2)
-        self.csp_subarray = DeviceProxy(f"mid-csp/subarray/{subarray_id}")
+        self.csp_subarray = tango.DeviceProxy(
+            f"mid-csp/subarray/{subarray_id}"
+        )

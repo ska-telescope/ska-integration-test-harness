@@ -39,7 +39,7 @@ dishes:
   dish_master4_name: "ska100/elt/master"
 
   # Expected devices (when production)
-  # dish_master1_name: "ska001/elt/master"
-  # dish_master2_name: "ska036/elt/master"
-  # dish_master3_name: "ska063/elt/master"
-  # dish_master4_name: "ska100/elt/master"
+  # dish_master1_name: "tango://tango-databaseds.dish-lmc-1.svc.cluster.local:10000/mid-dish/dish-manager/SKA001"
+  # dish_master2_name: "tango://tango-databaseds.dish-lmc-2.svc.cluster.local:10000/mid-dish/dish-manager/SKA036"
+  # dish_master3_name: "tango://tango-databaseds.dish-lmc-3.svc.cluster.local:10000/mid-dish/dish-manager/SKA063"
+  # dish_master4_name: "tango://tango-databaseds.dish-lmc-4.svc.cluster.local:10000/mid-dish/dish-manager/SKA100"

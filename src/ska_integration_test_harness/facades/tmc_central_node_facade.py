@@ -3,9 +3,9 @@
 import logging
 from typing import Tuple
 
+import tango
 from ska_control_model import ResultCode
 from ska_ser_logging import configure_logging
-from tango import DeviceProxy
 
 from ska_integration_test_harness.actions.central_node.central_node_assign_resources import (  # pylint: disable=line-too-long # noqa E501
     CentralNodeAssignResources,
@@ -58,17 +58,17 @@ class TMCCentralNodeFacade:
     # CENTRAL NODE DEVICES
 
     @property
-    def central_node(self) -> DeviceProxy:
+    def central_node(self) -> tango.DeviceProxy:
         """The central node Tango device proxy."""
         return self._telescope.tmc.central_node
 
     @property
-    def csp_master_leaf_node(self) -> DeviceProxy:
+    def csp_master_leaf_node(self) -> tango.DeviceProxy:
         """The CSP master leaf node Tango device proxy."""
         return self._telescope.tmc.csp_master_leaf_node
 
     @property
-    def sdp_master_leaf_node(self) -> DeviceProxy:
+    def sdp_master_leaf_node(self) -> tango.DeviceProxy:
         """The SDP master leaf node Tango device proxy."""
         return self._telescope.tmc.sdp_master_leaf_node
 

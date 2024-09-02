@@ -1,6 +1,6 @@
 """A wrapper for production dishes."""
 
-from tango.db import Database
+import tango
 
 from ska_integration_test_harness.config.components_config import (
     DishesConfiguration,
@@ -19,13 +19,13 @@ class ProductionDishesDevices(DishesDevices):
         :param dishes_configuration: The dishes configuration.
         """
         # Create database object for TMC TANGO DB
-        self.db = Database()
+        self.db = tango.db.Database()
 
         # Create database object for Dish1 TANGO DB
         dish1_tango_host = dishes_configuration.dish_master1_name.split("/")[2]
         dish1_host = dish1_tango_host.split(":")[0]
         dish1_port = dish1_tango_host.split(":")[1]
-        self.dish1_db = Database(dish1_host, dish1_port)
+        self.dish1_db = tango.db.Database(dish1_host, dish1_port)
 
         # Get the Dish1 device class and server
         dish1_info = self.dish1_db.get_device_info(

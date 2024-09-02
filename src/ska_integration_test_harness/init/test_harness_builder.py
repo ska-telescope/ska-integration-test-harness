@@ -13,8 +13,8 @@ from ska_integration_test_harness.config.validation.config_validator import (
     BasicConfigurationValidator,
     ConfigurationValidator,
 )
-from ska_integration_test_harness.init.susystems_factory import (
-    SubsystemsFactory,
+from ska_integration_test_harness.init.test_harness_factory import (
+    TestHarnessFactory,
 )
 from ska_integration_test_harness.inputs.test_harness_inputs import (
     TestHarnessInputs,
@@ -92,8 +92,12 @@ class TestHarnessBuilder:
         )
         """The tool used to validate the inputs."""
 
-        self.subsystems_factory: SubsystemsFactory = SubsystemsFactory()
-        """The factory used to create the subsystems."""
+        self.test_harness_factory: TestHarnessFactory = TestHarnessFactory(
+            self.config, self.default_inputs
+        )
+        """The factory used to create the subsystems and the
+        overall telescope wrapper.
+        """
 
         # --------------------------------------------------------------
         # flags to track the validation status
@@ -212,22 +216,13 @@ class TestHarnessBuilder:
         self._log_info(
             "Setting up the telescope wrapper with the various subsystems."
         )
+        self.test_harness_factory.set_config(self.config)
+        self.test_harness_factory.set_default_inputs(self.default_inputs)
 
-        tmc = self.subsystems_factory.create_tmc_wrapper(
-            tmc_config=self.config.tmc_config,
-            default_commands_input=self.default_inputs,
-            default_vcc_config_input=self.default_inputs.default_vcc_config_input,  # pylint: disable=line-too-long # noqa: E501
-        )
-        csp = self.subsystems_factory.create_csp_wrapper(
-            csp_config=self.config.csp_config,
-            all_production=self.config.all_production(),
-        )
-        sdp = self.subsystems_factory.create_sdp_wrapper(
-            sdp_config=self.config.sdp_config,
-        )
-        dishes = self.subsystems_factory.create_dishes_wrapper(
-            dish_config=self.config.dishes_config,
-        )
+        tmc = self.test_harness_factory.create_tmc_wrapper()
+        csp = self.test_harness_factory.create_csp_wrapper()
+        sdp = self.test_harness_factory.create_sdp_wrapper()
+        dishes = self.test_harness_factory.create_dishes_wrapper()
 
         telescope.set_up(tmc=tmc, csp=csp, sdp=sdp, dishes=dishes)
 
@@ -238,6 +233,7 @@ class TestHarnessBuilder:
 # Example usage:
 # builder = TestHarnessBuilder()
 # try:
-#     builder.read_from_file("path/to/config.yaml").validate_configurations().build()
+#     builder.read_from_file("path/to/config.yaml").
+# validate_configurations().build()
 # except ValueError as e:
 #     print(f"Validation failed: {e}")
