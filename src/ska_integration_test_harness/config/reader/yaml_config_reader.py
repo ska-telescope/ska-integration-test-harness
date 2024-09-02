@@ -8,12 +8,6 @@ from ska_integration_test_harness.config.components_config import (
     SDPConfiguration,
     TMCConfiguration,
 )
-from ska_integration_test_harness.config.emulation_config import (
-    EmulationConfiguration,
-)
-from ska_integration_test_harness.config.other_config import (
-    OtherDevicesConfigurations,
-)
 from ska_integration_test_harness.config.reader.config_reader import (
     ConfigurationReader,
 )
@@ -177,25 +171,3 @@ class YAMLConfigurationReader(ConfigurationReader):
             dish_master3_name=dish.get("dish_master3_name"),
             dish_master4_name=dish.get("dish_master4_name"),
         )
-
-    # -------------------------------------------------------------------------
-    # TODO: consider remove the following
-
-    def get_emulation_configuration(self):
-        """Get the emulation configuration.
-
-        :return: The emulation configuration
-        """
-        return EmulationConfiguration(
-            tmc=self.get_tmc_configuration().is_emulated,
-            csp=self.get_csp_configuration().is_emulated,
-            sdp=self.get_sdp_configuration().is_emulated,
-            dish=self.get_dish_configuration().is_emulated,
-        )
-
-    def get_other_configurations(self) -> OtherDevicesConfigurations:
-        """Get the other configurations for the telescope.
-
-        return: The other configurations.
-        """
-        return OtherDevicesConfigurations()
