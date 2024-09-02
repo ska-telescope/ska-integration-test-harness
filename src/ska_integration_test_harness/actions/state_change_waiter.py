@@ -78,7 +78,63 @@ class StateChangeWaiter:
             > 0
         )
 
-    def wait_all(self, timeout: int | float):
+    def _assert_that_sync_occurred(self, timeout: int | float) -> None:
+        """Assert that the given synchronization events occurred.
+
+        Using TangoEventTracer assertions, this method waits for the
+        synchronization events to occur and raises an exception if
+        they do not occur within the timeout. An assertion error is
+        raised if the synchronization events do not occur within the
+        timeout.
+
+        :param timeout: The maximum time (in seconds) to wait for
+            the synchronization events.
+        :raises AssertionError: If the synchronization events do not
+            occur within the timeout.
+        """
+        shared_timeout_context = assert_that(self.event_tracer).within_timeout(
+            timeout
+        )
+
+        # make a chain of has_change_event_occurred assertions
+        # (one for each state change) to wait for all the state
+        for state_change in self.pending_state_changes:
+            shared_timeout_context = (
+                shared_timeout_context.has_change_event_occurred(
+                    custom_matcher=state_change.event_matches,
+                )
+            )
+
+    def _report_happened_and_not_happened_state_changes(self) -> str:
+        """Report the state changes that occurred and that did not occur.
+
+        :return: A string with the state changes that occurred and that
+            did not occur.
+        """
+        # collect string representations of happened and not happened
+        # state changes to include in the error message
+        happened_state_changes = []
+        not_happened_state_changes = []
+        for state_change in self.pending_state_changes:
+            if self._is_state_change_occurred(state_change):
+                happened_state_changes.append(str(state_change))
+            else:
+                not_happened_state_changes.append(str(state_change))
+
+        # generate a recap of the state changes that occurred and that
+        # did not occur
+        msg = ""
+        if happened_state_changes:
+            msg += "\n\nThe following events occurred:\n"
+            msg += "\n".join(happened_state_changes)
+
+        if not_happened_state_changes:
+            msg += "\n\nThe following events did not occur:\n"
+            msg += "\n".join(not_happened_state_changes)
+
+        return msg
+
+    def wait_all(self, timeout: int | float) -> None:
         """Wait for all the expected state changes to occur.
 
         :param timeout: The maximum time (in seconds) to wait for
@@ -91,43 +147,13 @@ class StateChangeWaiter:
             return
 
         try:
-
-            shared_timeout_context = assert_that(
-                self.event_tracer
-            ).within_timeout(timeout)
-
-            for state_change in self.pending_state_changes:
-                shared_timeout_context = (
-                    shared_timeout_context.has_change_event_occurred(
-                        custom_matcher=state_change.event_matches,
-                    )
-                )
-
+            self._assert_that_sync_occurred(timeout)
         except AssertionError as assertion_error:
-            msg = (
+            raise TimeoutError(
                 "Not all the expected events occurred within "
-                f"a timeout of {timeout} seconds."
-            )
-
-            happened_state_changes = []
-            not_happened_state_changes = []
-
-            for state_change in self.pending_state_changes:
-                if self._is_state_change_occurred(state_change):
-                    happened_state_changes.append(str(state_change))
-                else:
-                    not_happened_state_changes.append(str(state_change))
-
-            if happened_state_changes:
-                msg += "\n\nThe following events occurred:\n"
-                msg += "\n".join(happened_state_changes)
-
-            if not_happened_state_changes:
-                msg += "\n\nThe following events did not occur:\n"
-                msg += "\n".join(not_happened_state_changes)
-
-            # raise TimeoutError with the message and the assertion error
-            raise TimeoutError(msg) from assertion_error
+                f"a timeout of {timeout} seconds. "
+                f"{self._report_happened_and_not_happened_state_changes()}"
+            ) from assertion_error
 
     def reset(self):
         """Clear the list of expected state changes."""
