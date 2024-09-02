@@ -4,37 +4,37 @@ from ska_integration_test_harness.config.reader.config_reader import (
     TMCMIDConfigurationReader,
 )
 from ska_integration_test_harness.emulated.csp_wrapper import (
-    EmulatedCSPDevices,
+    EmulatedCSPWrapper,
 )
 from ska_integration_test_harness.emulated.dishes_wrapper import (
-    EmulatedDishesDevices,
+    EmulatedDishesWrapper,
 )
 from ska_integration_test_harness.emulated.sdp_wrapper import (
-    EmulatedSDPDevices,
+    EmulatedSDPWrapper,
 )
 from ska_integration_test_harness.inputs.json_input import JSONInput
 from ska_integration_test_harness.inputs.test_harness_inputs import (
     TestHarnessInputs,
 )
 from ska_integration_test_harness.production.csp_wrapper import (
-    ProductionCSPDevices,
+    ProductionCSPWrapper,
 )
 from ska_integration_test_harness.production.dishes_wrapper import (
-    ProductionDishesDevices,
+    ProductionDishesWrapper,
 )
 from ska_integration_test_harness.production.sdp_wrapper import (
-    ProductionSDPDevices,
+    ProductionSDPWrapper,
 )
 from ska_integration_test_harness.production.tmc_wrapper import (
-    ProductionTMCDevices,
+    ProductionTMCWrapper,
 )
-from ska_integration_test_harness.structure.csp_wrapper import CSPDevices
-from ska_integration_test_harness.structure.dishes_wapper import DishesDevices
-from ska_integration_test_harness.structure.sdp_wrapper import SDPDevices
+from ska_integration_test_harness.structure.csp_wrapper import CSPWrapper
+from ska_integration_test_harness.structure.dishes_wapper import DishesWrapper
+from ska_integration_test_harness.structure.sdp_wrapper import SDPWrapper
 from ska_integration_test_harness.structure.telescope_wrapper import (
     TelescopeWrapper,
 )
-from ska_integration_test_harness.structure.tmc_wrapper import TMCDevices
+from ska_integration_test_harness.structure.tmc_wrapper import TMCWrapper
 
 
 class TelescopeStructureFactory:
@@ -101,56 +101,56 @@ class TelescopeStructureFactory:
         )
         return telescope
 
-    def create_tmc_wrapper(self) -> TMCDevices:
+    def create_tmc_wrapper(self) -> TMCWrapper:
         """Create a TMC wrapper.
 
         return: A TMC wrapper instance.
         """
-        return ProductionTMCDevices(
+        return ProductionTMCWrapper(
             self.config_factory.get_tmc_configuration(),
             self.default_commands_input,
             self.default_vcc_config_input,
         )
 
-    def create_sdp_wrapper(self) -> SDPDevices:
+    def create_sdp_wrapper(self) -> SDPWrapper:
         """Create a SDP wrapper.
 
         return: A SDP wrapper instance.
         """
         if self._emulation_config.sdp:
-            return EmulatedSDPDevices(
+            return EmulatedSDPWrapper(
                 self.config_factory.get_sdp_configuration()
             )
 
-        return ProductionSDPDevices(
+        return ProductionSDPWrapper(
             self.config_factory.get_sdp_configuration()
         )
 
-    def create_csp_wrapper(self) -> CSPDevices:
+    def create_csp_wrapper(self) -> CSPWrapper:
         """Create a CSP wrapper.
 
         return: A CSP wrapper instance.
         """
         if self._emulation_config.csp:
-            return EmulatedCSPDevices(
+            return EmulatedCSPWrapper(
                 self.config_factory.get_csp_configuration()
             )
 
-        return ProductionCSPDevices(
+        return ProductionCSPWrapper(
             csp_configuration=self.config_factory.get_csp_configuration(),
             all_production=self._emulation_config.all_production(),
         )
 
-    def create_dishes_wrapper(self) -> DishesDevices:
+    def create_dishes_wrapper(self) -> DishesWrapper:
         """Create a dishes wrapper.
 
         return: A dishes wrapper instance.
         """
         if self._emulation_config.dish:
-            return EmulatedDishesDevices(
+            return EmulatedDishesWrapper(
                 self.config_factory.get_dish_configuration()
             )
 
-        return ProductionDishesDevices(
+        return ProductionDishesWrapper(
             self.config_factory.get_dish_configuration()
         )

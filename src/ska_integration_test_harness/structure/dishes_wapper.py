@@ -10,7 +10,7 @@ from ska_integration_test_harness.config.components_config import (
 
 
 # NOTE: in future, may some dishes be emulated and some real?
-class DishesDevices(abc.ABC):
+class DishesWrapper(abc.ABC):
     """A test wrapper for the dishes."""
 
     def __init__(self, dishes_configuration: DishesConfiguration):

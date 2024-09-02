@@ -6,11 +6,11 @@ from ska_integration_test_harness.emulated.utils.teardown_helper import (  # pyl
     EmulatedTeardownHelper,
 )
 from ska_integration_test_harness.structure.csp_wrapper import (  # pylint: disable=line-too-long # noqa: E501
-    CSPDevices,
+    CSPWrapper,
 )
 
 
-class EmulatedCSPDevices(CSPDevices):
+class EmulatedCSPWrapper(CSPWrapper):
     """A wrapper for an emulated CSP."""
 
     def move_to_on(self) -> None:

@@ -4,36 +4,36 @@ from ska_integration_test_harness.config.test_harness_config import (
     TestHarnessConfiguration,
 )
 from ska_integration_test_harness.emulated.csp_wrapper import (
-    EmulatedCSPDevices,
+    EmulatedCSPWrapper,
 )
 from ska_integration_test_harness.emulated.dishes_wrapper import (
-    EmulatedDishesDevices,
+    EmulatedDishesWrapper,
 )
 from ska_integration_test_harness.emulated.sdp_wrapper import (
-    EmulatedSDPDevices,
+    EmulatedSDPWrapper,
 )
 from ska_integration_test_harness.inputs.test_harness_inputs import (
     TestHarnessInputs,
 )
 from ska_integration_test_harness.production.csp_wrapper import (
-    ProductionCSPDevices,
+    ProductionCSPWrapper,
 )
 from ska_integration_test_harness.production.dishes_wrapper import (
-    ProductionDishesDevices,
+    ProductionDishesWrapper,
 )
 from ska_integration_test_harness.production.sdp_wrapper import (
-    ProductionSDPDevices,
+    ProductionSDPWrapper,
 )
 from ska_integration_test_harness.production.tmc_wrapper import (
-    ProductionTMCDevices,
+    ProductionTMCWrapper,
 )
-from ska_integration_test_harness.structure.csp_wrapper import CSPDevices
-from ska_integration_test_harness.structure.dishes_wapper import DishesDevices
-from ska_integration_test_harness.structure.sdp_wrapper import SDPDevices
+from ska_integration_test_harness.structure.csp_wrapper import CSPWrapper
+from ska_integration_test_harness.structure.dishes_wapper import DishesWrapper
+from ska_integration_test_harness.structure.sdp_wrapper import SDPWrapper
 from ska_integration_test_harness.structure.telescope_wrapper import (
     TelescopeWrapper,
 )
-from ska_integration_test_harness.structure.tmc_wrapper import TMCDevices
+from ska_integration_test_harness.structure.tmc_wrapper import TMCWrapper
 
 
 class TestHarnessFactory:
@@ -98,12 +98,12 @@ class TestHarnessFactory:
     # --------------------------------------------------------------
     # Subsystems wrappers creation
 
-    def create_tmc_wrapper(self) -> TMCDevices:
+    def create_tmc_wrapper(self) -> TMCWrapper:
         """Create a TMC wrapper with the given configuration.
 
         :return: The TMC wrapper.
         """
-        return ProductionTMCDevices(
+        return ProductionTMCWrapper(
             tmc_configuration=self.config.tmc_config,
             default_commands_input=self.default_inputs,
             default_vcc_config_input=self.default_inputs.default_vcc_config_input,  # pylint: disable=line-too-long # noqa: E501
@@ -111,37 +111,37 @@ class TestHarnessFactory:
         # TODO: do not pass the third parameter, if it is already included
         # in the second one.
 
-    def create_csp_wrapper(self) -> CSPDevices:
+    def create_csp_wrapper(self) -> CSPWrapper:
         """Create a CSP wrapper with the given configuration.
 
         :return: The CSP wrapper.
         """
         csp_config = self.config.csp_config
         if csp_config.is_emulated:
-            return EmulatedCSPDevices(csp_config)
+            return EmulatedCSPWrapper(csp_config)
 
-        return ProductionCSPDevices(
+        return ProductionCSPWrapper(
             csp_configuration=csp_config,
             all_production=self.config.all_production(),
         )
 
-    def create_sdp_wrapper(self) -> SDPDevices:
+    def create_sdp_wrapper(self) -> SDPWrapper:
         """Create a SDP wrapper with the given configuration.
 
         :return: The SDP wrapper.
         """
         sdp_config = self.config.sdp_config
         if sdp_config.is_emulated:
-            return EmulatedSDPDevices(sdp_config)
-        return ProductionSDPDevices(sdp_config)
+            return EmulatedSDPWrapper(sdp_config)
+        return ProductionSDPWrapper(sdp_config)
 
-    def create_dishes_wrapper(self) -> DishesDevices:
+    def create_dishes_wrapper(self) -> DishesWrapper:
         """Create a dishes wrapper with the given configuration.
 
         :return: The dishes wrapper.
         """
         dish_config = self.config.dishes_config
         if dish_config.is_emulated:
-            return EmulatedDishesDevices(dish_config)
+            return EmulatedDishesWrapper(dish_config)
 
-        return ProductionDishesDevices(dish_config)
+        return ProductionDishesWrapper(dish_config)

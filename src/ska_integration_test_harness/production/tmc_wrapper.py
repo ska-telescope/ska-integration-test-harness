@@ -25,13 +25,13 @@ from ska_integration_test_harness.inputs.json_input import JSONInput
 from ska_integration_test_harness.inputs.test_harness_inputs import (
     TestHarnessInputs,
 )
-from ska_integration_test_harness.structure.tmc_wrapper import TMCDevices
+from ska_integration_test_harness.structure.tmc_wrapper import TMCWrapper
 
 configure_logging(logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
 
 
-class ProductionTMCDevices(TMCDevices):
+class ProductionTMCWrapper(TMCWrapper):
     """Production wrapper for TMC devices."""
 
     def __init__(

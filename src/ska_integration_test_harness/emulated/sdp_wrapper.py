@@ -3,10 +3,10 @@
 from ska_integration_test_harness.emulated.utils.teardown_helper import (
     EmulatedTeardownHelper,
 )
-from ska_integration_test_harness.structure.sdp_wrapper import SDPDevices
+from ska_integration_test_harness.structure.sdp_wrapper import SDPWrapper
 
 
-class EmulatedSDPDevices(SDPDevices):
+class EmulatedSDPWrapper(SDPWrapper):
     """A wrapper for an emulated SDP."""
 
     def __init__(self, *args, **kwargs) -> None:

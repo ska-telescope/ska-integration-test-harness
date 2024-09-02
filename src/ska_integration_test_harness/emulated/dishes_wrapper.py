@@ -9,10 +9,10 @@ from ska_integration_test_harness.emulated.utils.teardown_helper import (  # pyl
     EmulatedTeardownHelper,
 )
 from ska_integration_test_harness.inputs.dish_mode import DishMode
-from ska_integration_test_harness.structure.dishes_wapper import DishesDevices
+from ska_integration_test_harness.structure.dishes_wapper import DishesWrapper
 
 
-class EmulatedDishesDevices(DishesDevices):
+class EmulatedDishesWrapper(DishesWrapper):
     """A wrapper for emulated dishes."""
 
     def __init__(self, dishes_configuration: DishesConfiguration):

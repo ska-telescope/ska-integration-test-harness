@@ -1,9 +1,9 @@
 """A wrapper for a production SDP."""
 
-from ska_integration_test_harness.structure.sdp_wrapper import SDPDevices
+from ska_integration_test_harness.structure.sdp_wrapper import SDPWrapper
 
 
-class ProductionSDPDevices(SDPDevices):
+class ProductionSDPWrapper(SDPWrapper):
     """A wrapper for a production SDP."""
 
     def tear_down(self) -> None:

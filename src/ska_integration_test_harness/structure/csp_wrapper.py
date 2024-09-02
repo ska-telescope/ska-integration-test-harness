@@ -9,7 +9,7 @@ from ska_integration_test_harness.config.components_config import (
 )
 
 
-class CSPDevices(abc.ABC):
+class CSPWrapper(abc.ABC):
     """A test wrapper for the CSP."""
 
     def __init__(self, csp_configuration: CSPConfiguration):

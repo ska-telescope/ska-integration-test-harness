@@ -9,7 +9,7 @@ from ska_integration_test_harness.config.components_config import (
 )
 
 
-class TMCDevices(abc.ABC):
+class TMCWrapper(abc.ABC):
     """A wrapper for the TMC component."""
 
     # pylint: disable=too-many-instance-attributes

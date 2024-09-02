@@ -4,10 +4,10 @@ from assertpy import assert_that
 from ska_control_model import ObsState
 from ska_tango_testing.integration import TangoEventTracer
 
-from ska_integration_test_harness.structure.csp_wrapper import CSPDevices
-from ska_integration_test_harness.structure.dishes_wapper import DishesDevices
-from ska_integration_test_harness.structure.sdp_wrapper import SDPDevices
-from ska_integration_test_harness.structure.tmc_wrapper import TMCDevices
+from ska_integration_test_harness.structure.csp_wrapper import CSPWrapper
+from ska_integration_test_harness.structure.dishes_wapper import DishesWrapper
+from ska_integration_test_harness.structure.sdp_wrapper import SDPWrapper
+from ska_integration_test_harness.structure.tmc_wrapper import TMCWrapper
 
 
 class TelescopeWrapper:
@@ -64,10 +64,10 @@ class TelescopeWrapper:
 
     _instance = None
 
-    _tmc: TMCDevices | None = None
-    _sdp: SDPDevices | None = None
-    _csp: CSPDevices | None = None
-    _dishes: DishesDevices | None = None
+    _tmc: TMCWrapper | None = None
+    _sdp: SDPWrapper | None = None
+    _csp: CSPWrapper | None = None
+    _dishes: DishesWrapper | None = None
 
     def __new__(cls):
         if cls._instance is None:
@@ -78,7 +78,7 @@ class TelescopeWrapper:
     # Subsystem access points
 
     @property
-    def tmc(self) -> TMCDevices:
+    def tmc(self) -> TMCWrapper:
         """A wrapper for the TMC sub-system and its devices.
 
         :return: The TMCDevices instance.
@@ -89,7 +89,7 @@ class TelescopeWrapper:
         return self._tmc
 
     @property
-    def sdp(self) -> SDPDevices:
+    def sdp(self) -> SDPWrapper:
         """A wrapper for the SDP sub-system and its devices.
 
         :raises ValueError: If one or more sub-systems are missing.
@@ -98,7 +98,7 @@ class TelescopeWrapper:
         return self._sdp
 
     @property
-    def csp(self) -> CSPDevices:
+    def csp(self) -> CSPWrapper:
         """A wrapper for the CSP sub-system and its devices.
 
         :raises ValueError: If one or more sub-systems are missing.
@@ -107,7 +107,7 @@ class TelescopeWrapper:
         return self._csp
 
     @property
-    def dishes(self) -> DishesDevices:
+    def dishes(self) -> DishesWrapper:
         """A wrapper for the dishes sub-system and its devices.
 
         :return: The DishesDevices instance.
@@ -122,10 +122,10 @@ class TelescopeWrapper:
 
     def set_up(
         self,
-        tmc: TMCDevices,
-        sdp: SDPDevices,
-        csp: CSPDevices,
-        dishes: DishesDevices,
+        tmc: TMCWrapper,
+        sdp: SDPWrapper,
+        csp: CSPWrapper,
+        dishes: DishesWrapper,
     ) -> None:
         """Initialize the telescope test structure with the given devices."""
         self._tmc = tmc

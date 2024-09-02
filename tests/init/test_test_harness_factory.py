@@ -12,13 +12,13 @@ from ska_integration_test_harness.config.test_harness_config import (
     TestHarnessConfiguration,
 )
 from ska_integration_test_harness.emulated.csp_wrapper import (
-    EmulatedCSPDevices,
+    EmulatedCSPWrapper,
 )
 from ska_integration_test_harness.emulated.dishes_wrapper import (
-    EmulatedDishesDevices,
+    EmulatedDishesWrapper,
 )
 from ska_integration_test_harness.emulated.sdp_wrapper import (
-    EmulatedSDPDevices,
+    EmulatedSDPWrapper,
 )
 from ska_integration_test_harness.init.test_harness_factory import (
     TestHarnessFactory,
@@ -27,16 +27,16 @@ from ska_integration_test_harness.inputs.test_harness_inputs import (
     TestHarnessInputs,
 )
 from ska_integration_test_harness.production.csp_wrapper import (
-    ProductionCSPDevices,
+    ProductionCSPWrapper,
 )
 from ska_integration_test_harness.production.dishes_wrapper import (
-    ProductionDishesDevices,
+    ProductionDishesWrapper,
 )
 from ska_integration_test_harness.production.sdp_wrapper import (
-    ProductionSDPDevices,
+    ProductionSDPWrapper,
 )
 from ska_integration_test_harness.production.tmc_wrapper import (
-    ProductionTMCDevices,
+    ProductionTMCWrapper,
 )
 from ska_integration_test_harness.structure.telescope_wrapper import (
     TelescopeWrapper,
@@ -68,7 +68,7 @@ class TestTestHarnessFactory:
         with patch("tango.DeviceProxy", MagicMock()) as mock_device_proxy:
             tmc_wrapper = factory.create_tmc_wrapper()
 
-        assert_that(tmc_wrapper).is_instance_of(ProductionTMCDevices)
+        assert_that(tmc_wrapper).is_instance_of(ProductionTMCWrapper)
         mock_device_proxy.assert_called()
 
     def test_create_csp_wrapper_with_emulated_config(
@@ -82,7 +82,7 @@ class TestTestHarnessFactory:
         with patch("tango.DeviceProxy", MagicMock()) as mock_device_proxy:
             csp_wrapper = factory.create_csp_wrapper()
 
-        assert_that(csp_wrapper).is_instance_of(EmulatedCSPDevices)
+        assert_that(csp_wrapper).is_instance_of(EmulatedCSPWrapper)
         mock_device_proxy.assert_called()  # Emulated should call DeviceProxy
 
     def test_create_csp_wrapper_with_production_config(
@@ -96,7 +96,7 @@ class TestTestHarnessFactory:
         with patch("tango.DeviceProxy", MagicMock()) as mock_device_proxy:
             csp_wrapper = factory.create_csp_wrapper()
 
-        assert_that(csp_wrapper).is_instance_of(ProductionCSPDevices)
+        assert_that(csp_wrapper).is_instance_of(ProductionCSPWrapper)
         mock_device_proxy.assert_called()
 
     def test_create_sdp_wrapper_with_emulated_config(
@@ -110,7 +110,7 @@ class TestTestHarnessFactory:
         with patch("tango.DeviceProxy", MagicMock()) as mock_device_proxy:
             sdp_wrapper = factory.create_sdp_wrapper()
 
-        assert_that(sdp_wrapper).is_instance_of(EmulatedSDPDevices)
+        assert_that(sdp_wrapper).is_instance_of(EmulatedSDPWrapper)
         mock_device_proxy.assert_called()  # Emulated should call DeviceProxy
 
     def test_create_sdp_wrapper_with_production_config(
@@ -124,7 +124,7 @@ class TestTestHarnessFactory:
         with patch("tango.DeviceProxy", MagicMock()) as mock_device_proxy:
             sdp_wrapper = factory.create_sdp_wrapper()
 
-        assert_that(sdp_wrapper).is_instance_of(ProductionSDPDevices)
+        assert_that(sdp_wrapper).is_instance_of(ProductionSDPWrapper)
         mock_device_proxy.assert_called()
 
     def test_create_dishes_wrapper_with_emulated_config(
@@ -138,7 +138,7 @@ class TestTestHarnessFactory:
         with patch("tango.DeviceProxy", MagicMock()) as mock_device_proxy:
             dishes_wrapper = factory.create_dishes_wrapper()
 
-        assert_that(dishes_wrapper).is_instance_of(EmulatedDishesDevices)
+        assert_that(dishes_wrapper).is_instance_of(EmulatedDishesWrapper)
         mock_device_proxy.assert_called()  # Emulated should call DeviceProxy
 
     @staticmethod
@@ -165,7 +165,7 @@ class TestTestHarnessFactory:
         ) as mock_device_proxy, patch("tango.db.Database", MagicMock()):
             dishes_wrapper = factory.create_dishes_wrapper()
 
-        assert_that(dishes_wrapper).is_instance_of(ProductionDishesDevices)
+        assert_that(dishes_wrapper).is_instance_of(ProductionDishesWrapper)
         mock_device_proxy.assert_called()
 
     def test_create_telescope_wrapper(self, config: TestHarnessConfiguration):
@@ -184,11 +184,11 @@ class TestTestHarnessFactory:
             telescope_wrapper = factory.create_telescope_wrapper()
 
         assert_that(telescope_wrapper).is_instance_of(TelescopeWrapper)
-        assert_that(telescope_wrapper.tmc).is_instance_of(ProductionTMCDevices)
-        assert_that(telescope_wrapper.csp).is_instance_of(ProductionCSPDevices)
-        assert_that(telescope_wrapper.sdp).is_instance_of(EmulatedSDPDevices)
+        assert_that(telescope_wrapper.tmc).is_instance_of(ProductionTMCWrapper)
+        assert_that(telescope_wrapper.csp).is_instance_of(ProductionCSPWrapper)
+        assert_that(telescope_wrapper.sdp).is_instance_of(EmulatedSDPWrapper)
         assert_that(telescope_wrapper.dishes).is_instance_of(
-            EmulatedDishesDevices
+            EmulatedDishesWrapper
         )
         mock_device_proxy.assert_called()
 

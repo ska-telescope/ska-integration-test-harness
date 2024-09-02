@@ -9,7 +9,7 @@ from ska_integration_test_harness.config.components_config import (
 )
 
 
-class SDPDevices(abc.ABC):
+class SDPWrapper(abc.ABC):
     """A test wrapper for the SDP."""
 
     def __init__(self, sdp_configuration: SDPConfiguration):

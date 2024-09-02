@@ -7,10 +7,10 @@ from tango import DevState
 from ska_integration_test_harness.config.components_config import (
     CSPConfiguration,
 )
-from ska_integration_test_harness.structure.csp_wrapper import CSPDevices
+from ska_integration_test_harness.structure.csp_wrapper import CSPWrapper
 
 
-class ProductionCSPDevices(CSPDevices):
+class ProductionCSPWrapper(CSPWrapper):
     """A wrapper for a production CSP.
 
     TODO: describe differences.
