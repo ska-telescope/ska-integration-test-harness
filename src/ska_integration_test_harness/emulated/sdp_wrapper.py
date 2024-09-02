@@ -3,7 +3,7 @@
 from ska_integration_test_harness.emulated.utils.teardown_helper import (
     EmulatedTeardownHelper,
 )
-from ska_integration_test_harness.structure.sdp_devices import SDPDevices
+from ska_integration_test_harness.structure.sdp_wrapper import SDPDevices
 
 
 class EmulatedSDPDevices(SDPDevices):

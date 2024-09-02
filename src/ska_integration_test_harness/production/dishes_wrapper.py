@@ -5,7 +5,7 @@ import tango
 from ska_integration_test_harness.config.components_config import (
     DishesConfiguration,
 )
-from ska_integration_test_harness.structure.dishes_devices import DishesDevices
+from ska_integration_test_harness.structure.dishes_wapper import DishesDevices
 
 
 class ProductionDishesDevices(DishesDevices):

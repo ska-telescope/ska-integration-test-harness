@@ -25,7 +25,7 @@ from ska_integration_test_harness.inputs.json_input import JSONInput
 from ska_integration_test_harness.inputs.test_harness_inputs import (
     TestHarnessInputs,
 )
-from ska_integration_test_harness.structure.tmc_devices import TMCDevices
+from ska_integration_test_harness.structure.tmc_wrapper import TMCDevices
 
 configure_logging(logging.DEBUG)
 LOGGER = logging.getLogger(__name__)

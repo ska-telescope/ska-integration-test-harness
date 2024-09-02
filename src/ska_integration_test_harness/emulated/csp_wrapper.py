@@ -5,7 +5,7 @@ from tango import DevState
 from ska_integration_test_harness.emulated.utils.teardown_helper import (  # pylint: disable=line-too-long # noqa: E501
     EmulatedTeardownHelper,
 )
-from ska_integration_test_harness.structure.csp_devices import (  # pylint: disable=line-too-long # noqa: E501
+from ska_integration_test_harness.structure.csp_wrapper import (  # pylint: disable=line-too-long # noqa: E501
     CSPDevices,
 )
 

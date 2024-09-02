@@ -7,7 +7,7 @@ from tango import DevState
 from ska_integration_test_harness.config.components_config import (
     CSPConfiguration,
 )
-from ska_integration_test_harness.structure.csp_devices import CSPDevices
+from ska_integration_test_harness.structure.csp_wrapper import CSPDevices
 
 
 class ProductionCSPDevices(CSPDevices):

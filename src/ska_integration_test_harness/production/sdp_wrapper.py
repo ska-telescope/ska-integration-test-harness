@@ -1,6 +1,6 @@
 """A wrapper for a production SDP."""
 
-from ska_integration_test_harness.structure.sdp_devices import SDPDevices
+from ska_integration_test_harness.structure.sdp_wrapper import SDPDevices
 
 
 class ProductionSDPDevices(SDPDevices):

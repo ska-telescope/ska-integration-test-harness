@@ -4,10 +4,10 @@ from assertpy import assert_that
 from ska_control_model import ObsState
 from ska_tango_testing.integration import TangoEventTracer
 
-from ska_integration_test_harness.structure.csp_devices import CSPDevices
-from ska_integration_test_harness.structure.dishes_devices import DishesDevices
-from ska_integration_test_harness.structure.sdp_devices import SDPDevices
-from ska_integration_test_harness.structure.tmc_devices import TMCDevices
+from ska_integration_test_harness.structure.csp_wrapper import CSPDevices
+from ska_integration_test_harness.structure.dishes_wapper import DishesDevices
+from ska_integration_test_harness.structure.sdp_wrapper import SDPDevices
+from ska_integration_test_harness.structure.tmc_wrapper import TMCDevices
 
 
 class TelescopeWrapper:

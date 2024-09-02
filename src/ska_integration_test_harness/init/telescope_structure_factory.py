@@ -3,38 +3,38 @@
 from ska_integration_test_harness.config.reader.config_reader import (
     TMCMIDConfigurationReader,
 )
-from ska_integration_test_harness.emulated.csp_devices import (
+from ska_integration_test_harness.emulated.csp_wrapper import (
     EmulatedCSPDevices,
 )
-from ska_integration_test_harness.emulated.dishes_devices import (
+from ska_integration_test_harness.emulated.dishes_wrapper import (
     EmulatedDishesDevices,
 )
-from ska_integration_test_harness.emulated.sdp_devices import (
+from ska_integration_test_harness.emulated.sdp_wrapper import (
     EmulatedSDPDevices,
 )
 from ska_integration_test_harness.inputs.json_input import JSONInput
 from ska_integration_test_harness.inputs.test_harness_inputs import (
     TestHarnessInputs,
 )
-from ska_integration_test_harness.production.csp_devices import (
+from ska_integration_test_harness.production.csp_wrapper import (
     ProductionCSPDevices,
 )
-from ska_integration_test_harness.production.dishes_devices import (
+from ska_integration_test_harness.production.dishes_wrapper import (
     ProductionDishesDevices,
 )
-from ska_integration_test_harness.production.sdp_devices import (
+from ska_integration_test_harness.production.sdp_wrapper import (
     ProductionSDPDevices,
 )
-from ska_integration_test_harness.production.tmc_devices import (
+from ska_integration_test_harness.production.tmc_wrapper import (
     ProductionTMCDevices,
 )
-from ska_integration_test_harness.structure.csp_devices import CSPDevices
-from ska_integration_test_harness.structure.dishes_devices import DishesDevices
-from ska_integration_test_harness.structure.sdp_devices import SDPDevices
+from ska_integration_test_harness.structure.csp_wrapper import CSPDevices
+from ska_integration_test_harness.structure.dishes_wapper import DishesDevices
+from ska_integration_test_harness.structure.sdp_wrapper import SDPDevices
 from ska_integration_test_harness.structure.telescope_wrapper import (
     TelescopeWrapper,
 )
-from ska_integration_test_harness.structure.tmc_devices import TMCDevices
+from ska_integration_test_harness.structure.tmc_wrapper import TMCDevices
 
 
 class TelescopeStructureFactory:
