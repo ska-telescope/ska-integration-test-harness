@@ -44,7 +44,7 @@ class ProductionCSPWrapper(CSPWrapper):
             if self.csp_master.adminMode != 0:
                 self.csp_master.adminMode = 0
 
-            # wait_csp_master_off()
+            # wait for the CSP master to be in OFF state
             assert_that(event_tracer).described_as(
                 "FAIL IN MoveToOn PROCEDURE: "
                 f"CSP master ({self.csp_master.dev_name()}) "

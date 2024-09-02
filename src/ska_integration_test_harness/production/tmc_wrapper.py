@@ -73,13 +73,10 @@ class ProductionTMCWrapper(TMCWrapper):
             ObsState.EMPTY, self.default_commands_input
         ).execute()
 
-        # NOTE: temporarily moved here because of synchronization
         if self.central_node.telescopeState != DevState.OFF:
             MoveToOff().execute()
 
-        # reset subarray too
-        # TODO: maybe TMCCentralNode and TMCSubarrayNode should be
-        # two different classes (?).
+        # NOTE: is it really needed?
         SubarrayMoveToOff().execute()
 
         # if source dish vcc config is empty or not matching with default

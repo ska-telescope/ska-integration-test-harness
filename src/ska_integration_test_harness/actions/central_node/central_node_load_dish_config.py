@@ -24,21 +24,15 @@ class CentralNodeLoadDishConfig(TelescopeCommandAction):
 
     def termination_condition(self):
         def _is_source_dish_cfg_changed(event):
-            # if not current_value and future_value:
-            #     return False
-            # return json.loads(current_value) == json.loads(future_value)
+            """Check if sourceDishVccConfig attribute contains new JSON."""
             return not self.dish_vcc_config.is_equal_to_json(
                 event.attribute_value
             )
 
-        # TODO: be careful about this wait
         return [
             ExpectedEvent(
                 device=self.telescope.tmc.csp_master_leaf_node,
                 attribute="sourceDishVccConfig",
-                # predicate=lambda event: _is_source_dish_cfg_changed(
-                #     event.attribute_value, self.dish_vcc_config
-                # ),
                 predicate=_is_source_dish_cfg_changed,
             )
         ]

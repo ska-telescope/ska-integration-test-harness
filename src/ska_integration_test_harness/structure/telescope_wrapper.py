@@ -132,7 +132,7 @@ class TelescopeWrapper:
         self._sdp = sdp
         self._csp = csp
         self._dishes = dishes
-        # TODO: Add here "health checks" (?)
+        # TODO: Add here some "health checks" (?)
 
     TEARDOWN_TIMEOUT = 50
 

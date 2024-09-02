@@ -17,24 +17,11 @@ from ska_integration_test_harness.inputs.json_input import JSONInput
 class CentralNodeAssignResources(TelescopeCommandAction):
     """Invoke Assign Resource command on CentralNode."""
 
-    # NOTE: this is very similar to SubarrayAssignResources
-
     def __init__(self, assign_input: JSONInput):
         super().__init__()
         self.assign_input = assign_input
 
     def _action(self):
-        # NOTE: should I do this?
-        # device = DeviceUtils(
-        #     obs_state_device_names=[
-        #         device_dict.get("csp_subarray"),
-        #         device_dict.get("sdp_subarray"),
-        #         device_dict.get("tmc_subarraynode"),
-        #     ]
-        # )
-        # device.check_devices_obsState("EMPTY")
-        # set_wait_for_obsstate = kwargs.get("set_wait_for_obsstate", True)
-
         cmd_input = generate_eb_pb_ids(self.assign_input)
         self._log("Invoking AssignResources on CentralNode")
         result, message = self.telescope.tmc.central_node.AssignResources(

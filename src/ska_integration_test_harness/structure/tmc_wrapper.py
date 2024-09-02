@@ -37,8 +37,6 @@ class TMCWrapper(abc.ABC):
             tmc_configuration.tmc_sdp_master_leaf_node_name
         )
 
-        # NOTE: not so much used EXTERNALLY, internally just on this
-        # constructor. So what is the sense of this list?
         self.dish_leaf_node_list = [  # Those instead are inside TMC
             tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node1_name),
             tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node2_name),

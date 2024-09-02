@@ -12,9 +12,6 @@ class SubarrayMoveToOn(TelescopeAction):
     """Invoke MoveToOn command on subarray Node."""
 
     def _action(self):
-        # TODO: why are we using strings instead of state enums?
-        # which is the point where it's done a mapping between the two?
-        # if self.telescope.tmc.subarray_state != "ON":
         if self.telescope.tmc.subarray_node.State != DevState.ON:
             assert_that(self.telescope.tmc.subarray_node.State).described_as(
                 "FAILED ASSUMPTION: Subarray state is not either ON or OFF"
@@ -23,8 +20,7 @@ class SubarrayMoveToOn(TelescopeAction):
             self._log("Invoking On on SubarrayNode")
             result, message = self.telescope.tmc.subarray_node.On()
             return (result, message)
-        # pylint says inconsistent-return-statements,
-        # what should be returned here?
+        # TODO: This if-then-else block is weird, why we have this?
         return None
 
     def termination_condition(self):
