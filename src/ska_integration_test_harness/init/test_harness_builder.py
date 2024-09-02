@@ -1,7 +1,6 @@
 """A builder class for configuring and building a test harness."""
 
 import logging
-from typing import Any
 
 from ska_integration_test_harness.config.reader.yaml_config_reader import (
     YAMLConfigurationReader,
@@ -77,19 +76,17 @@ class TestHarnessBuilder:
         # --------------------------------------------------------------
         # internal tools
 
-        self._logger: logging.Logger = logging.getLogger(__name__)
+        self.logger: logging.Logger = logging.getLogger(__name__)
 
         self.config_reader: YAMLConfigurationReader = YAMLConfigurationReader()
         """The tool used to read the configurations."""
 
         self.config_validator: ConfigurationValidator = (
-            BasicConfigurationValidator(self._logger)
+            BasicConfigurationValidator(self.logger)
         )
         """The tool used to validate the configurations."""
 
-        self.input_validator: InputValidator = BasicInputValidator(
-            self._logger
-        )
+        self.input_validator: InputValidator = BasicInputValidator(self.logger)
         """The tool used to validate the inputs."""
 
         self.test_harness_factory: TestHarnessFactory = TestHarnessFactory(
@@ -107,15 +104,15 @@ class TestHarnessBuilder:
 
     def _log_info(self, message):
         """Log an informational message."""
-        self._logger.info("TestHarnessBuilder: %s", message)
+        self.logger.info("TestHarnessBuilder: %s", message)
 
     def _log_warning(self, message):
         """Log a warning message."""
-        self._logger.warning("TestHarnessBuilder: %s", message)
+        self.logger.warning("TestHarnessBuilder: %s", message)
 
     def _log_error(self, message):
         """Log an error message."""
-        self._logger.error("TestHarnessBuilder: %s", message)
+        self.logger.error("TestHarnessBuilder: %s", message)
 
     def read_from_file(self, filepath: str) -> "TestHarnessBuilder":
         """
@@ -159,20 +156,23 @@ class TestHarnessBuilder:
         self._configs_validated = True
         return self
 
-    def add_default_input(
-        self, name: str, input_data: Any
+    def set_default_inputs(
+        self, inputs: TestHarnessInputs
     ) -> "TestHarnessBuilder":
-        """Add a default input.
+        """Set the default inputs for the test harness.
 
-        :param purpose: The purpose for which the input is intended.
-        :param input_data: The input data to be used as default.
+        NOTE: all the defaults input specified by the ``TestHarnessInputs``
+        class are required, since they are used in test harness tear down
+        procedures.
+
+        :param inputs: The default inputs to be used.
         :returns: The current instance of TestHarnessBuilder with
-            the default input set.
+            the default inputs set.
         """
         self._default_inputs_validated = False
 
-        self._log_info(f'Adding default input "{name}".')
-        self.default_inputs[name] = input_data
+        self._log_info("Setting default inputs.")
+        self.default_inputs = inputs
         return self
 
     def validate_default_inputs(self) -> "TestHarnessBuilder":
@@ -192,18 +192,26 @@ class TestHarnessBuilder:
         self._default_inputs_validated = True
         return self
 
+    def is_config_validated(self) -> bool:
+        """Check if the configurations have been validated."""
+        return self._configs_validated
+
+    def are_default_inputs_validated(self) -> bool:
+        """Check if the default inputs have been validated."""
+        return self._default_inputs_validated
+
     def build(self) -> TelescopeWrapper:
         """Build the test harness.
 
         :returns: a wrapper for the telescope and its subsystems.
         """
-        if not self._configs_validated:
+        if not self.is_config_validated():
             self._log_warning(
                 "You are building a test harness without "
                 "validating the configurations. We strongly suggest to call "
                 "validate_configurations() before building the test harness."
             )
-        if not self._default_inputs_validated:
+        if not self.are_default_inputs_validated():
             self._log_warning(
                 "You are building a test harness without "
                 "validating the default inputs. We strongly suggest to call "
