@@ -30,6 +30,9 @@ from ska_integration_test_harness.production.tmc_devices import (
 from ska_integration_test_harness.structure.csp_devices import CSPDevices
 from ska_integration_test_harness.structure.dishes_devices import DishesDevices
 from ska_integration_test_harness.structure.sdp_devices import SDPDevices
+from ska_integration_test_harness.structure.telescope_wrapper import (
+    TelescopeWrapper,
+)
 from ska_integration_test_harness.structure.tmc_devices import TMCDevices
 
 
@@ -74,6 +77,23 @@ class TestHarnessFactory:
         :param default_inputs: The new default inputs.
         """
         self.default_inputs = default_inputs
+
+    # --------------------------------------------------------------
+    # Subsystems wrappers creation
+
+    def create_telescope_wrapper(self) -> TelescopeWrapper:
+        """Create a telescope wrapper with the given configuration.
+
+        :return: The telescope wrapper.
+        """
+        telescope = TelescopeWrapper()
+        telescope.set_up(
+            tmc=self.create_tmc_wrapper(),
+            csp=self.create_csp_wrapper(),
+            sdp=self.create_sdp_wrapper(),
+            dishes=self.create_dishes_wrapper(),
+        )
+        return telescope
 
     # --------------------------------------------------------------
     # Subsystems wrappers creation

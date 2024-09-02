@@ -38,6 +38,9 @@ from ska_integration_test_harness.production.sdp_devices import (
 from ska_integration_test_harness.production.tmc_devices import (
     ProductionTMCDevices,
 )
+from ska_integration_test_harness.structure.telescope_wrapper import (
+    TelescopeWrapper,
+)
 
 
 class TestTestHarnessFactory:
@@ -164,3 +167,31 @@ class TestTestHarnessFactory:
 
         assert_that(dishes_wrapper).is_instance_of(ProductionDishesDevices)
         mock_device_proxy.assert_called()
+
+    def test_create_telescope_wrapper(self, config: TestHarnessConfiguration):
+        """Creates a telescope wrapper set up for TMC-CSP MID testing.
+
+        The call is expected to create a TelescopeWrapper with:
+        - production TMC and CSP
+        - emulated SDP and Dishes
+        """
+        inputs = TestHarnessInputs()
+        factory = TestHarnessFactory(config, inputs)
+
+        with patch(
+            "tango.DeviceProxy", MagicMock()
+        ) as mock_device_proxy, patch("tango.db.Database", MagicMock()):
+            telescope_wrapper = factory.create_telescope_wrapper()
+
+        assert_that(telescope_wrapper).is_instance_of(TelescopeWrapper)
+        assert_that(telescope_wrapper.tmc).is_instance_of(ProductionTMCDevices)
+        assert_that(telescope_wrapper.csp).is_instance_of(ProductionCSPDevices)
+        assert_that(telescope_wrapper.sdp).is_instance_of(EmulatedSDPDevices)
+        assert_that(telescope_wrapper.dishes).is_instance_of(
+            EmulatedDishesDevices
+        )
+        mock_device_proxy.assert_called()
+
+        # Telescope is set up and it is not expected to fail when
+        # calling this method
+        telescope_wrapper.fail_if_not_set_up()

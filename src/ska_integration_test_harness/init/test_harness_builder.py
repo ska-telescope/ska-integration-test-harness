@@ -218,13 +218,7 @@ class TestHarnessBuilder:
         )
         self.test_harness_factory.set_config(self.config)
         self.test_harness_factory.set_default_inputs(self.default_inputs)
-
-        tmc = self.test_harness_factory.create_tmc_wrapper()
-        csp = self.test_harness_factory.create_csp_wrapper()
-        sdp = self.test_harness_factory.create_sdp_wrapper()
-        dishes = self.test_harness_factory.create_dishes_wrapper()
-
-        telescope.set_up(tmc=tmc, csp=csp, sdp=sdp, dishes=dishes)
+        telescope = self.test_harness_factory.create_telescope_wrapper()
 
         self._log_info("Telescope wrapper and subsystems set up successfully.")
         return telescope
