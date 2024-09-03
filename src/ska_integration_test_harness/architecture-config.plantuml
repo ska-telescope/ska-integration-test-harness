@@ -14,8 +14,9 @@ package "init" {
     class TestHarnessBuilder {
     }
     note top
-    Test scrit can use TestHarnessBuilder to read configurations
-    and to create the test harness. Facades are independent and
+    Test scrit can use TestHarnessBuilder to read a configuration,
+    to validate it and to use it to create and initialize the test harness.
+    Facades are independent and
     they will attach to an existing structure.
     end note
 
