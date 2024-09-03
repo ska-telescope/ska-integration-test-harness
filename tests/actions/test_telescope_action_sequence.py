@@ -41,7 +41,7 @@ class TestTelescopeActionSequence:
 
     @pytest.fixture(autouse=True)
     def init_sequence_steps_actions(self):
-        """Create the two actions that will made the sequence."""
+        """Create the two actions that will make the sequence."""
         self.action1 = SimpleAction()
         self.action1.telescope = MagicMock()
         # pylint: disable=protected-access
@@ -117,12 +117,13 @@ class TestTelescopeActionSequence:
         assert_that(self.action2.wait_termination).is_true()
 
         sequence_action.set_termination_condition_policy(False)
-        assert_that(
-            self.action1.wait_termination
-        ).is_true()  # Check no change for previous policy
-        assert_that(
-            self.action2.wait_termination
-        ).is_false()  # Last step policy set to False
+        assert_that(self.action1.wait_termination).described_as(
+            "The first action should always wait for termination."
+        ).is_true()
+        assert_that(self.action2.wait_termination).described_as(
+            "The second action should not wait for termination"
+            "after the policy is set to False."
+        ).is_false()
 
     def test_set_logging_policy_propagate_to_steps(self):
         """Applying logging policy correctly to each step."""

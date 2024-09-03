@@ -190,7 +190,7 @@ This way multiple facades and actions can share the same
 and without the need to pass it around.
 
 
-### Why using JON data builder?
+### Why using JSON data builder?
 
 Some actions over the telescope (such as the *scan*, *configure*, *assign resources* commands) require an input argument that is a JSON string.
 Also some *reset* procedures require default arguments to be used to call
