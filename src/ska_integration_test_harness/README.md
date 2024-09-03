@@ -9,11 +9,11 @@ Since the test harness is still in development, both the code and the design
 may change in the future. The overall principles, however, will likely remain
 the same.
 
-This document is updated the last time on July-August 2024.
+This document is updated the last time on September 3rd 2024.
 
 ## Architecture of the test harness
 
-This test harness is code that glues integration test scripts to the SUT. 
+This test harness is code that glues integration test scripts to the SUT.
 It is designed to provide a consistent interface for all tests,
 to be **powerful** (allowing for complex tests), to be **flexible**
 (extensible to meet the needs of different SUTs and different tests),
@@ -105,7 +105,9 @@ The test harness files are organized in the following way:
 * The `init` folder contains all the factories needed to initialize
   the test harness. 
 
-The top-level ```tests``` folder contains the unit tests for the harness itself.
+The top-level `tests` folder contains the unit tests for the harness itself.
+
+A further folder called `experiments` contains some un-related test support code, which is not strictly part of the test harness itself, but can be used as utilities to enhance a test repository.
 
 ## Design decisions
 
@@ -158,11 +160,20 @@ the action. This method will perform the operation, wait for its termination
 and return a result. The details of how to execute an action (for example,
 what Tango Command to send to a device) are hidden from the test script.
 
-The test scripts invokes a facade method called `scan()`, which instantiates
-an action called `SubarrayScan`, adds to it the necessary arguments and then
-calls its `execute` method. The `execute` method gathers the necessary
-device proxies, sends the `scan` command to the appropriate device and waits
-for the set of events listed in the action to occur.
+For example, let's consider a test script that wants to send a scan command
+to the TMC Subarray Node and synchronize on the end of the scan:
+
+- the test script has (somehow - *see main README.md*) access to a facade
+  of the TMC Subarray Node;
+- the facade exposes a `scan()` method, which can be called by the tests;
+- the `scan()` method which instantiates
+  an action called `SubarrayScan`, adds to it the necessary arguments and 
+  then calls its `execute` method;
+- who implemented the class, defined all the related logic to send the scan
+  command and - *optionally* - synchronize on the end of the scan operation
+  in the same place (implementing two abstract methods);
+- the actions interact with the correct wrappers (and consequently to the
+  Tango devices) to perform the operation.
 
 Actions are based on the
 [COMMAND](https://refactoring.guru/design-patterns/command),
@@ -171,7 +182,14 @@ Actions are based on the
 design patterns. 
 
 To implement an action, one has to extend the
-`TelescopeAction` base class and override the abstract methods (to define the *procedure* that implements the action and the *synchronization condition* that defines when the action is completed).
+`TelescopeAction` base class and override the abstract methods
+(to define the *procedure* that implements the action and the
+*synchronization condition* that defines when the action is completed).
+Note also that actions can be composed in sequences,
+to perform more complex operations.(see `TelescopeActionSequence`). Note also
+that actions can also be defined as a complex inheritance hierarchy, to
+define common behaviours and to specialize them (give a look to the
+existing actions to see how they are implemented).
 
 
 ### Why using wrappers?
@@ -179,20 +197,34 @@ To implement an action, one has to extend the
 Wrappers embed the parts of the SUT that the test script needs
 to interact with. In the current version of the harness, wrappers wrap Tango
 Device Proxies. 
-Their responsibility is to hold and hide the details about how to interact
-to such devices (i.e. names of commands, format of their input,
-attribute names and values, etc.).
+Their responsibilities are to:
 
-The main access point to the wrappers (`TelescopeWrapper`) is intended to be a [SINGLETON](https://refactoring.guru/design-patterns/singleton), so once it's initialized,
+- define the structure of the SUT (i.e. which subsystems are part of it and
+  which devices are part of each subsystem);
+- hold and hide some technical details about the interaction with such devices,
+  that may differ between emulated and production devices;
+- implement teardown procedures that are needed to reset the SUT to a known
+  state after the execution of a test.
+
+The main access point to the wrappers (`TelescopeWrapper`)
+is intended to be a
+[SINGLETON](https://refactoring.guru/design-patterns/singleton),
+so once it's initialized,
 you can access it from everywhere in the code just by accessing its instance. 
 This way multiple facades and actions can share the same 
 (already configured) instance of the wrapper without being aware of it
 and without the need to pass it around.
 
+> NOTE: while the abstract and/or generic classes contained in the `structure`
+> package never point to `actions` (to avoid cyclic dependencies), their
+> concrete implementations in the `emulated` and `production` packages
+> may need to point to actions to perform the operations.
+
 
 ### Why using JSON data builder?
 
-Some actions over the telescope (such as the *scan*, *configure*, *assign resources* commands) require an input argument that is a JSON string.
+Some actions over the telescope (such as the *scan*, *configure*,
+*assign resources* commands) require an input argument that is a JSON string.
 Also some *reset* procedures require default arguments to be used to call
 the various commands. 
 
@@ -202,10 +234,23 @@ explicit file reading, etc.) and so less readable. The idea of argument
 factories is to provide a structured object-oriented way to represent those
 arguments.
 
-An abstract base class (`JSONInput`) defines what is expected from a JSON input (return a string or a dictionary, create a copy of itself with some
+An abstract base class (`JSONInput`) defines what is expected from a JSON input
+(return a string or a dictionary, create a copy of itself with some
 values changed, etc.). Through a concrete implementation of this class, 
-one can specify how to generate this JSON (e.g., accessing your own test data folders, associating keywords to each or your specific input, 
-through a hardcoded dictionary, etc.).
+one can specify how to generate this JSON (e.g., accessing your own test 
+data folders, associating keywords to each or your specific input, 
+through a hardcoded dictionary, etc.). A few ready-to-use implementations
+are provided in the `inputs` folder.
+
+We chose to use this infrastructure because a JSON input, normally,
+can be represented in many ways (a string, a dictionary, a reference to a 
+file, etc.) and we want a consistent way to represent it in the test harness
+context. Moreover, sometimes we want to be able to deal with guaranteed and
+validated input (e.g., when we set the initial default inputs),
+sometimes we want to explicitly handle the case of un-valid
+input (e.g., for un-happy paths tests) and sometimes we want to just ignore
+that (an action that just sends a commands wants to deal the same way with
+valid and invalid inputs).
 
 This solution is inspired by various creational design patterns, such as
 [FACTORY METHOD](https://refactoring.guru/design-patterns/factory-method),
@@ -213,7 +258,12 @@ This solution is inspired by various creational design patterns, such as
 and [BUILDER](https://refactoring.guru/design-patterns/builder).
 
 In `inputs` folder you can find some examples of JSON input classes, but also
-other input-output related classes.
+other input-output related classes. One of the most important is the
+`TestHarnessInputs` class, which is a structured representation of the
+input data needed to initialize the test harness (and sometimes to do
+other operations). This class is used by the initialization procedures
+to load and validate the JSON inputs for the commands used in the teardown
+procedures.
 
 ### Why using configuration classes?
 
@@ -227,71 +277,112 @@ the structure of the SUT. For example, the class `TMCConfiguration` contains
 `CSPConfiguration` contains the names of the devices that are part of the CSP.
 The directive to use the emulated or the production devices is another
 example of configuration data (very important for the initialization of the
-test harness).
+test harness). 
+
+All the needed configurations are collected in a single
+class called `TestHarnessConfigurations`, which represents the configuration
+used to initialize the test harness. The initialization procedure refers to
+this class (and to a few readers and validators) to load and validate the
+configuration files and use them to set up the test harness.
 
 Since the configuration may come from different sources (environment variables,
 hardcoded values, files, etc.) and since it's easy to loose track of them an
 object-oriented approach is used to represent them in a structured way and
 to provide a consistent interface to them. To avoid inconsistencies, a 
 *factory* class is used to create
-all the instances of those configurations. This way, the test harness 
-initialization procedure or any other part of the
-code can access the same configurations.
+all the instances of those configurations (see `config.reader` module).
+Configurations may be also subject to validation, to ensure that the
+configuration is correct and consistent to what is deployed
+(see `config.validator` module).
+
+For now, the main way to represent the configuration is through YAML files. An
+example of valid configuration file is provided in 
+[this file used in unit tests](../../tests/config_examples/valid_test_harness_config.yaml).
+
+### Why having an initialization procedure?
+
+TODO: describe briefly the initialization procedure
 
 ## How to use and extend this harness
 
-At the moment (August 2024) this harness has no well-defined
+At the moment (September 2024) this harness has no well-defined
 extension points yet and it is pretty specific to the TMC-CSP integration tests 
 in MID. Based on feedback and on the evolution of the project, the harness will be extended to be more flexible and to support more use cases. 
 
-### How to use this test harness
+### How to use this test harness right now as is
 
-To use this test harness you need to:
+To use this test harness *as is*, you can follow the instructions in the
+main [README.md](../../README.md) file.
 
-- Import the library `ska_integration_test_harness` in your test script.
-  Right now, the library is not yet published as a package, but you can
-  import it from the git source code (see the top-level `README.md` file).
-- In your test setup, initialize once the wrappers using the appropriate builders
-  you can find in the `init` module.
-  - *A good place to do this may be a `pytest.fixture`. For how `pytest` fixtures
-    work, a good way you can use to execute the *teardown* method after 
-    your test are finished is to*:
-    - *create an instance using the appropriate builder,*
-    - *`yield` it to the test function,*
-    - *and then call the `teardown` method on the instance, which will
-      be executed after the test is finished.*
-  - The builder will ask you to load and validate some configuration files.
-    The main one is a YAML file, that for each subsystem it contains:
-    - a flag to tell if the device is emulated or production,
-    - the names of the devices that are part of the subsystem.
-  - The builder will also ask you to provide some JSON inputs for various
-    commands (mostly needed for the `teardown` procedures).
-- The same way, initialize the facades you need (just creating instances of them
-  and passing your wrapper instance to them).
-- In your tests, use the facade methods to interact with the SUT and the
-  facade properties to access directly the (already configured) device
-  proxies.
-  - *Remember: each facade represent a subsytem, so if you want to access a
-    certain device, ask yourself: which subsystem does it belong to?*
-  - *Since this test harness is focused on TMC, most if not all of the actions
-    are done by calling commands on TMC central node or TMC subarray node.*
+### How to extend this test harness (within the current limitations)
 
-For a more detailed example, see the top-level `README.md` in this repository.
+Right now (September 2024) the test harness is designed for integration
+tests of the TMC with CSP in MID. Probably, it is still capable of
+supporting TMC-X in MID integrations tests. 
 
-Within the current limitations, your main ways to extend this test harness
-are
+Even if it is not yet generic, it still supports some level of customization.
+Within the current limitations, your main ways to extend and/or customize
+this test harness are:
 
 - **Add new actions**: you can add new actions by sub-classing 
   the `TelescopeAction` class and implementing the abstract methods. 
   You can also create a sequence of actions by sub-classing the 
   `TelescopeActionSequence` class and implementing the abstract methods.
-- **Add new facades**: you can create new facades that access the telescope
-  wrappers and the actions, hiding the implementation details for the tester.
-- **Add new input classes**: you can create new input classes that generate
-  the JSON input for the actions in your own ways (e.g., accessing your own
-  test data folders, etc.).
+  The actions can then be called from your tests, or also from new facades
+  you may create.
 
-If you wish to do more, you may copy this structure and adapt it to your needs.
+  > **Use case example**: you want to send a particular command to some
+  > SUT device and wait for some device to reach a particular state $\to$
+  > *you create a new action that sends the command and specifies the
+  > expected state as a termination condition.*
+
+  > **Use case example**: you want to encode a complex procedure that requires
+  > multiple steps and synchronization points $\to$ *you use the composite
+  > action mechanism to create a sequence of actions that perform the
+  > procedure. If there is the need of using if-then-else constructs or similar
+  > you can create a new action that acts as an orchestrator of other actions.*
+
+- **Add new facades**: you can create new facades that access the telescope
+  wrappers and the actions. If you need to change just some behaviours or you
+  want to extend an existing facade, you can do that by sub-classing it and
+  using it instead of the original one.
+
+  > **Use case example**: you want to expose your new action from a facade
+  > that is already used in your tests $\to$ *you sub-class the facade and
+  > add the new method that calls the new action. Now you will use your
+  > new extended version instead of the base one.*
+
+- **Add new input classes**: you can create new input classes that generate
+  the JSON input for the actions in your own ways.
+
+  > **Use case example**: you have a collection of JSON files in a your
+  > test data folder and you want to use them as inputs $\to$ *you sub-class
+  > the file-based input class, you encode the way to access your test data
+  > and you permit to access one of those files just specifying a keyword
+  > in the constructor of the input class (e.g., `MyFileJsonInput('scan')`).*
+
+- **Customize the init procedure (and the wrappers)**: 
+  the initialization procedure explained
+  in the main README.md file can be customized:
+  - sub-classing various configuration, validation, reader and factory classes
+  and injecting them in the builder, so they will be used instead of the
+  original one;
+  - creating an overall new initialization procedure (maybe sub-classing
+  the existing one, maybe creating a new one from scratch).
+
+  Customizing the initialization procedure may be a necessary step if you
+  want to replace, modify and/or extend what makes the test harness
+  `structure` (the `TelescopeWrapper`, the subsystems wrappers, etc.).
+
+  > **Use case example**: you want to implement a your own wrapper, which
+  > should be activated only if a new configuration flag is used $\to$ 
+  > *you add the needed parameters
+  > in the YAML file and you extend the configuration classes and the
+  > reader to support it, (optionally) you subclass the input validator and you
+  > inject it into the initialization builder, you subclass the wrapper
+  > of the subsystem you want to replace and to use it in your test harness
+  > you subclass the factory that produces the wrappers and override the
+  > method that creates the wrapper for that subsystem.*
 
 
 ### How you will be able to extend this test harness in the future
@@ -299,8 +390,13 @@ If you wish to do more, you may copy this structure and adapt it to your needs.
 In the future, the test harness will be more flexible and will not be centered
 strictly on the TMC-X integration tests in MID. 
 
+Probably, there will be a generic *core*, made by an elastic infrastructure,
+the action mechanism, some generic and parametric actions, the input classes
+and a generic and flexible configuration and initialization mechanism. Then,
+partially through extension, partially through configuration, you will be able
+to adapt the test harness to your needs.
 
-Please reach out to the developers of this test harness because the end goal
-is to transform this code into a platform that is separate from its customizations. 
-Understanding where to put the boundary between the two is important and can only be done
-by understanding the needs of the users.
+Please reach out *Emanuele Lena*, *Giorgio Brajnik* and/or *Verity Allan*
+if you think this test harness can be useful for your tests, if you have
+any questions, proposals or feedback. Of course, you are more than welcome
+also if you want to contribute to the development of this test harness.
