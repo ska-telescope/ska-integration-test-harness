@@ -70,7 +70,7 @@ class TestTestHarnessBuilder:
         """
         builder = TestHarnessBuilder()
 
-        builder.read_from_file(config_file)
+        builder.read_config_file(config_file)
 
         with patch("tango.DeviceProxy", MagicMock()):
             builder.validate_configurations()
@@ -84,7 +84,7 @@ class TestTestHarnessBuilder:
         the validation raises a ValueError."""
         builder = TestHarnessBuilder()
 
-        builder.read_from_file(missing_section_config_file)
+        builder.read_config_file(missing_section_config_file)
 
         with pytest.raises(ValueError):
             builder.validate_configurations()
@@ -97,7 +97,7 @@ class TestTestHarnessBuilder:
         the validation raises a ValueError."""
         builder = TestHarnessBuilder()
 
-        builder.read_from_file(missing_key_config_file)
+        builder.read_config_file(missing_key_config_file)
 
         with pytest.raises(ValueError):
             builder.validate_configurations()
@@ -203,7 +203,7 @@ class TestTestHarnessBuilder:
 
         builder = TestHarnessBuilder()
 
-        builder.read_from_file(config_file)
+        builder.read_config_file(config_file)
         builder.validate_configurations()
         builder.set_default_inputs(
             TestHarnessInputs(
@@ -235,7 +235,7 @@ class TestTestHarnessBuilder:
         mock_logger = MagicMock()
         builder.logger = mock_logger
 
-        builder.read_from_file(config_file)
+        builder.read_config_file(config_file)
         # builder.validate_configurations()
         builder.set_default_inputs(
             TestHarnessInputs(
@@ -277,6 +277,6 @@ class TestTestHarnessBuilder:
 
         builder = TestHarnessBuilder()
 
-        builder.read_from_file(missing_section_config_file)
+        builder.read_config_file(missing_section_config_file)
         with pytest.raises(AttributeError):
             builder.build()

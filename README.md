@@ -37,15 +37,16 @@ For an overview of the architecture of the test harness and the principles behin
 
 
 Here it follows an example of how to initialize the test harness through
-opportune fixtures in a `pytest` test script. We assume you created 
-a ``FileJSONInput`` class, which is a subclass of the ``JSONInput`` class
-that reads the string from a file in a certain folder in your own test data
-folder). We assume also that you have a `test_harness_config.yaml` file.
+opportune fixtures in a `pytest` test script. We assume you have available
+a `test_harness_config.yaml` file
+(see [example](tests/config_examples/valid_test_harness_config.yaml)
+and also a set of JSON files for the various required inputs.
 
-The YAML file may look like this:
+Your YAML file may look like this:
+
 
 ```yaml
-# A configuration file for the TMC-CSP integration tests in MID
+# An example of a valid test harness configuration file
 
 tmc:
   is_emulated: false # Not supported otherwise, default is false
@@ -86,16 +87,25 @@ dishes:
   dish_master4_name: "ska100/elt/master"
 
   # Expected devices (when production)
-  # dish_master1_name: "ska001/elt/master"
-  # dish_master2_name: "ska036/elt/master"
-  # dish_master3_name: "ska063/elt/master"
-  # dish_master4_name: "ska100/elt/master"
+  # dish_master1_name: "tango://tango-databaseds.dish-lmc-1.svc.cluster.local:10000/mid-dish/dish-manager/SKA001"
+  # dish_master2_name: "tango://tango-databaseds.dish-lmc-2.svc.cluster.local:10000/mid-dish/dish-manager/SKA036"
+  # dish_master3_name: "tango://tango-databaseds.dish-lmc-3.svc.cluster.local:10000/mid-dish/dish-manager/SKA063"
+  # dish_master4_name: "tango://tango-databaseds.dish-lmc-4.svc.cluster.local:10000/mid-dish/dish-manager/SKA100"
 
 ```
 
-The fixture to initialize the test harness may look like this:
+To initialize the test harness, you need to create a `TelescopeWrapper` object, 
+set it up with the various configured subsystems and then create your facades.
+To initialize the test harness you can use the `TestHarnessBuilder` class.
+
+Your fixtures code may look like this:
 
 ```python
+"""Your fixtures to use the test harness.
+
+(Probably defined in a ``conftest.py`` file)
+"""
+
 import pytest
 from ska_integration_test_harness.facades.csp_facade import CSPFacade
 from ska_integration_test_harness.facades.dishes_facade import DishesFacade
@@ -109,83 +119,73 @@ from ska_integration_test_harness.facades.tmc_subarray_node_facade import (
 from ska_integration_test_harness.init.test_harness_builder import (
     TestHarnessBuilder,
 )
-from ska_integration_test_harness.inputs.obs_state_commands_input import (
-    ObsStateCommandsInput,
+from ska_integration_test_harness.inputs.json_input import FileJSONInput
+from ska_integration_test_harness.inputs.test_harness_inputs import (
+    TestHarnessInputs,
 )
 from ska_integration_test_harness.structure.telescope_wrapper import (
     TelescopeWrapper,
 )
-from <your path>.file_json_input import FileJSONInput
 
-# how to initialize the wrappers
+# -----------------------------------------------------------
+# Set up the test harness
+
 @pytest.fixture
-def telescope_wrapper() -> TelescopeWrapper:
-    """Create an unique test harness with proxies to all devices."""
+def default_commands_inputs() -> TestHarnessInputs:
+    """Default JSON inputs for TMC commands."""
+    return TestHarnessInputs(
+        # assign and release, right now, are called on central node
+        assign_input=FileJSONInput(
+            "json-inputs/centralnode/assign_resources.json"
+        ),
+        release_input=FileJSONInput(
+            "json-inputs/centralnode/release_resources.json"
+        ),
 
+        # configure and scan are called on subarray node
+        configure_input=FileJSONInput("json-inputs/subarray/configure.json"),
+        scan_input=FileJSONInput("json-inputs/subarray/scan.json"),
+
+        default_vcc_config_input=FileJSONInput(
+            "json-inputs/default_vcc_config.json"
+        ),
+    )
+
+
+@pytest.fixture
+def telescope_wrapper(
+    default_commands_inputs: TestHarnessInputs,
+) -> TelescopeWrapper:
+    """Create an unique test harness with proxies to all devices."""
     test_harness_builder = TestHarnessBuilder()
 
-    # read a configuration file and validate it
-    test_harness_builder.read_from_file(
+    # import from a configuration file device names and emulation directives
+    # for TMC, CSP, SDP and the Dishes
+    test_harness_builder.read_config_file(
         "tests/tmc_csp_refactor3/test_harness_config.yaml"
     )
     test_harness_builder.validate_configurations()
 
-    # set some JSON inputs for the teardown procedures
-    test_harness_builder.default_inputs.assign_input = FileJSONInput(
-        "centralnode", "assign_resources_mid"
-    )
-    test_harness_builder.default_inputs.configure_input = FileJSONInput(
-        "subarray", "configure_mid"
-    )
-    test_harness_builder.default_inputs.scan_input = FileJSONInput(
-        "subarray", "scan_mid"
-    )
-    test_harness_builder.default_inputs.release_input = FileJSONInput(
-        "centralnode", "release_resources_mid"
-    )
-    # an alternative in-line way to provide the JSON input
-    test_harness_builder.default_inputs.default_vcc_config_input = DictJSONInput(
-        {
-            "interface": "https://schema.skao.int/ska-mid-cbf-initsysparam/1.0",
-            "tm_data_sources": [
-                "car://gitlab.com/ska-telescope/ska-telmodel-data?"
-                + "ska-sdp-tmlite-repository-1.0.0#tmdata"
-            ],
-            "tm_data_filepath": (
-                "instrument/ska1_mid_psi/ska-mid-cbf-system-parameters.json",
-            ),
-        }
-    )
+    # set the default inputs for the TMC commands,
+    # which will be used for teardown procedures
+    test_harness_builder.set_default_inputs(default_commands_inputs)
     test_harness_builder.validate_default_inputs()
 
-    # create the telescope wrapper
+    # build the wrapper of the telescope and it's sub-systems
     telescope = test_harness_builder.build()
     yield telescope
 
-    # reset it after the test are finished
+    # after a test is completed, reset the telescope to its initial state
+    # (obsState=READY, telescopeState=OFF, no resources assigned)
+    telescope.tear_down()
+
     # NOTE: As the code is organized now, I cannot anticipate the
     # teardown of the telescope structure. To run reset now I should
     # init subarray node (with SetSubarrayId), but to do that I need
     # to know subarray_id, which is a parameter of the Gherkin steps.
-    telescope.tear_down()
 
-```
-
-The fixtures to initialize the facades instead may look like those:
-
-```python
-import pytest
-from ska_integration_test_harness.facades.csp_facade import CSPFacade
-from ska_integration_test_harness.facades.dishes_facade import DishesFacade
-from ska_integration_test_harness.facades.sdp_facade import SDPFacade
-from ska_integration_test_harness.facades.tmc_central_node_facade import (
-    TMCCentralNodeFacade,
-)
-from ska_integration_test_harness.facades.tmc_subarray_node_facade import (
-    TMCSubarrayNodeFacade,
-)
-
-# (given a telescope_wrapper fixture)
+# -----------------------------------------------------------
+# Facades to access the devices
 
 @pytest.fixture
 def central_node_facade(telescope_wrapper: TelescopeWrapper):
@@ -217,8 +217,8 @@ def sdp(telescope_wrapper: TelescopeWrapper):
 def dishes(telescope_wrapper: TelescopeWrapper):
     """Create a facade to dishes devices."""
     return DishesFacade(telescope_wrapper)
-
 ```
+
 
 Then, in your test script you can use the facades to access the devices
 and interact with them. 

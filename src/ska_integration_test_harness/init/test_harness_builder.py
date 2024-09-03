@@ -114,7 +114,7 @@ class TestHarnessBuilder:
         """Log an error message."""
         self.logger.error("TestHarnessBuilder: %s", message)
 
-    def read_from_file(self, filepath: str) -> "TestHarnessBuilder":
+    def read_config_file(self, filepath: str) -> "TestHarnessBuilder":
         """
         Read the configuration from a YAML file and set the configurations
             accordingly.
@@ -235,7 +235,7 @@ class TestHarnessBuilder:
 # Example usage:
 # builder = TestHarnessBuilder()
 # try:
-#     builder.read_from_file("path/to/config.yaml").
+#     builder.read_config_file("path/to/config.yaml").
 # validate_configurations().build()
 # except ValueError as e:
 #     print(f"Validation failed: {e}")
