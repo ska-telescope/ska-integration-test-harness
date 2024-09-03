@@ -61,7 +61,7 @@ class YAMLConfigurationReader(ConfigurationReader):
             dish_master3_name: "ska063/elt/master"
             dish_master4_name: "ska100/elt/master"
 
-    IMPORTANT NOTE: for now, the required fields and sections are hardcoded,
+    IMPORTANT NOTE: currently, the required fields and sections are hardcoded,
     but in the future, we may want to make them optional and elastic to permit
     the user to define the configuration only for the subsystems they need.
     This could be the starting point to make all the subsystem to be

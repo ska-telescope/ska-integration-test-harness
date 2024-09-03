@@ -19,7 +19,7 @@ class ForceChangeOfObsState(TelescopeAction[None]):
     This action is used to force the change of the ObsState in TMC Subarray,
     regardless of the current state of the Subarray.
     The action will move the state machine to the target state, by executing
-    the necessary steps to reach it (e.g. assign, configure, scan) in a
+    the necessary steps to reach it (e.g., assign, configure, scan) in a
     correct and consistent way.
 
     This action has no termination condition, but you can customize:

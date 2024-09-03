@@ -2,7 +2,7 @@
 
 ## Overview
 
-For now, a test harness for TMC-CSP integration tests. In future,
+Currently, a test harness for TMC-CSP integration tests. In future,
 a generic test harness integration testing an arbitrary combination
 of production or emulated SKA subsystems.
 
@@ -11,9 +11,9 @@ More information will be added here as the project progresses.
 
 ## Installation
 
-For now, the harness is not yet packaged for installation. To use it,
-you can still import it through `poetry`, adding to your `pyproject.toml`
-the following dependency:
+Currently, the harness is not yet packaged for installation. To use it,
+import it via `poetry` by adding the following dependency
+to your `pyproject.toml` file:
 
 ```toml
 [tool.poetry.dependencies]
@@ -21,11 +21,15 @@ the following dependency:
 ska-integration-test-harness = { git = "https://gitlab.com/ska-telescope/ska-integration-test-harness.git" }
 ```
 
-Then , you can run `poetry lock --no-update` to update the `poetry.lock` file with the new dependency and `poetry install` to install it.
+Then, you can run `poetry lock --no-update` to update the
+`poetry.lock` file with the new dependency and `poetry install` to install it.
 
-If you wish, you can also specify a branch, e.g. `ska-integration-test-harness = { git = "https://gitlab.com/ska-telescope/ska-integration-test-harness.git", branch = "main" }`.
+If you wish, you can also specify a branch, e.g.,  
+`ska-integration-test-harness = { git = "https://gitlab.com/ska-telescope/ska-integration-test-harness.git", branch = "main" }`.
 
-If you change something in your code and want to have it updated in your project, you can run `poetry update ska-integration-test-harness && poetry install`.
+If you make changes to your code and want them reflected in your project,
+you can run 
+`poetry update ska-integration-test-harness && poetry install`.
 
 
 ## Architecture overview
@@ -35,37 +39,36 @@ For an overview of the architecture of the test harness and the principles behin
 
 ## Usage
 
-
-### Prerequisites
-
-To use this test harness, first of all, you need a kubernetes cluster with
-all the production and emulated devices running. Right now this part is not
-covered by this project, which in fact assumes an environment equivalent
-to what is used in the test repository
-[SKA TMC-MID Integration](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/)
-([docs](https://developer.skao.int/projects/ska-tmc-mid-integration/en/latest/getting_started/getting_started.html)).
-
-Since some of the devices are emulators, you may give a look also to
-[this](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common/-/tree/master/src/ska_tmc_common/test_helpers?ref_type=heads) 
-and 
-[this](https://developer.skao.int/projects/ska-tmc-common/en/latest/HelperDevices/TangoHelperDevices.html).
-
-### Prerequisites
-
-Here it follows an example of how to initialise the test harness through
+Below is an example of how to initialise the test harness through
 opportune fixtures in a `pytest` test script. We assume you have available
 a `test_harness_config.yaml` file
 (see [example](tests/config_examples/valid_test_harness_config.yaml)
 and also a set of JSON files for the various required inputs.
 
+### Prerequisites
+
+To use this test harness, first of all, you need a Kubernetes cluster with
+all the production and emulated devices running. This part is not
+covered by this project, which in fact assumes an environment equivalent
+to what is used in the test repository
+[SKA TMC-MID Integration](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/)
+([docs](https://developer.skao.int/projects/ska-tmc-mid-integration/en/latest/getting_started/getting_started.html)).
+
+Since some of the devices are emulators, you might also want to check 
+[this](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common/-/tree/master/src/ska_tmc_common/test_helpers?ref_type=heads) 
+and 
+[this](https://developer.skao.int/projects/ska-tmc-common/en/latest/HelperDevices/TangoHelperDevices.html).
+
+
 
 ### Configuration 
 
-To configure the test harness using the default way, you need to create a YAML file such as the following:
+To configure the test harness using the default method,
+you need to create a YAML file such as the following:
 
 
 ```yaml
-# An example of a valid test harness configuration file
+# Example of a valid test harness configuration file
 
 tmc:
   is_emulated: false # Not supported otherwise, default is false
@@ -115,7 +118,7 @@ dishes:
 
 ### Fixtures and facades
 
-To initialise the test harness, you need to create a `TelescopeWrapper` object, 
+To initialise the test harness, create a `TelescopeWrapper` object, 
 set it up with the various configured subsystems and then create your facades.
 To initialise the test harness you can use the `TestHarnessBuilder` class.
 
@@ -192,7 +195,7 @@ def telescope_wrapper(
     test_harness_builder.set_default_inputs(default_commands_inputs)
     test_harness_builder.validate_default_inputs()
 
-    # build the wrapper of the telescope and it's sub-systems
+    # build the wrapper of the telescope and its sub-systems
     telescope = test_harness_builder.build()
     yield telescope
 
@@ -242,7 +245,7 @@ def dishes(telescope_wrapper: TelescopeWrapper):
 
 ### Interact with the test harness
 
-Then, in your test script you can use the facades to access the devices
+In your test script, use the facades to access the devices
 and interact with them like in this simplified example:
 
 ```python
@@ -267,7 +270,7 @@ from tango import DevState
 def given_the_telescope_is_in_on_state(
     central_node_facade: TMCCentralNodeFacade,
 ):
-    """An example of a Gherkin step to set the telescope in the ON state,
+    """Example of a Gherkin step to set the telescope in the ON state,
     implemented interacting with the TMC central node facade.
     """
     # NOTE: the ``wait_termination=True`` flag is used to make the action
@@ -284,13 +287,14 @@ def when_the_movetooff_command_is_issued(
     csp: CSPFacade,
     event_tracer: TangoEventTracer,
 ):
-    """An example of a Gherkin step where a command is issued to the TMC,
+    """Example of a Gherkin step where a command is issued to the TMC,
     just after the ``TangoEventTracer`` is subscribed to capture the events.
 
     NOTE: the ``wait_termination=False`` flag is used to not block the call,
     so the tracer can be used separately to check the events.
     """
-    # through the facades, I can access the device proxies and subscribe to the devices
+    # using the facades, I can access the
+    # device proxies and subscribe to the devices
     event_tracer.subscribe_event(
         central_node_facade.central_node, "telescopeState"
     )
@@ -307,7 +311,7 @@ def then_the_telescope_is_in_off_state(
     csp: CSPFacade,
     event_tracer: TangoEventTracer,
 ):
-    """An example of a Gherkin step to check the state of the telescope,
+    """Example of a Gherkin step to check the state of the telescope,
     implemented always accessing the facades devices to write assertions.
     """
     assert_that(event_tracer).described_as(

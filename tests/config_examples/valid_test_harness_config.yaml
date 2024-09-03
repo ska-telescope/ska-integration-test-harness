@@ -1,4 +1,4 @@
-# An example of a valid test harness configuration file
+# Example of a valid test harness configuration file
 
 tmc:
   is_emulated: false # Not supported otherwise, default is false

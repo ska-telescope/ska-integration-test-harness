@@ -44,7 +44,7 @@ This test harness comprises:
   to simulate in a very simple way the behaviour of real devices.
   They are needed to ensure that SUT is embedded in the environment
   that it expects.
-  - For now, emulators are those used in the TMC-MID integration
+  - Currently, emulators are those used in the TMC-MID integration
     tests ([Code](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common/-/tree/master/src/ska_tmc_common/test_helpers?ref_type=heads), [Documentation](https://developer.skao.int/projects/ska-tmc-common/en/latest/HelperDevices/TangoHelperDevices.html)). To use this test harness you have to
     deploy them in your environment and configure the test harness
     with the right device names.
@@ -296,7 +296,7 @@ Configurations may be also subject to validation, to ensure that the
 configuration is correct and consistent to what is deployed
 (see `config.validator` module).
 
-For now, the main representation of the configuration is through YAML files. An
+Currently, the main representation of the configuration is through YAML files. An
 example of valid configuration file is provided in 
 [this file used in unit tests](../../tests/config_examples/valid_test_harness_config.yaml).
 

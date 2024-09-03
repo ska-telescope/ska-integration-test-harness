@@ -20,7 +20,7 @@ class ConfigurationReader(abc.ABC):
     that is able to collect subsystem configurations and create a
     TestHarnessConfiguration object.
 
-    For now, the supported subsystems are:
+    Currently, the supported subsystems are:
 
     - TMC
     - CSP
