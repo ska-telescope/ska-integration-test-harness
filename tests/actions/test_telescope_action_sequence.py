@@ -35,6 +35,9 @@ class TestTelescopeActionSequence:
     for this test class. Find a way to fix this.
     """
 
+    action1 = None
+    action2 = None
+
     @pytest.fixture(autouse=True)
     def init_sequence_steps_actions(self):
         """Create the two actions that will make the sequence."""

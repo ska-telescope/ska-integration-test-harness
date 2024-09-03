@@ -44,8 +44,10 @@ This test harness comprises:
   to simulate in a very simple way the behaviour of real devices.
   They are needed to ensure that SUT is embedded in the environment
   that it expects.
-  - for now, emulators are those used in the TMC-MID integration
-    tests ([Code](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common/-/tree/master/src/ska_tmc_common/test_helpers?ref_type=heads), [Documentation](https://developer.skao.int/projects/ska-tmc-common/en/latest/HelperDevices/TangoHelperDevices.html))
+  - For now, emulators are those used in the TMC-MID integration
+    tests ([Code](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common/-/tree/master/src/ska_tmc_common/test_helpers?ref_type=heads), [Documentation](https://developer.skao.int/projects/ska-tmc-common/en/latest/HelperDevices/TangoHelperDevices.html)). To use this test harness you have to
+    deploy them in your environment and configure the test harness
+    with the right device names.
 
 ## RULES
 
@@ -106,8 +108,6 @@ The test harness files are organized in the following way:
   the test harness. 
 
 The top-level `tests` folder contains the unit tests for the harness itself.
-
-A further folder called `experiments` contains some un-related test support code, which is not strictly part of the test harness itself, but can be used as utilities to enhance a test repository.
 
 ## Design decisions
 
@@ -252,10 +252,11 @@ input (e.g., for un-happy paths tests) and sometimes we want to just ignore
 that (an action that just sends a commands wants to deal the same way with
 valid and invalid inputs).
 
-This solution is inspired by various creational design patterns, such as
+The main inspiration behind this mechanism is the
 [FACTORY METHOD](https://refactoring.guru/design-patterns/factory-method),
 [ABSTRACT FACTORY](https://refactoring.guru/design-patterns/abstract-factory)
-and [BUILDER](https://refactoring.guru/design-patterns/builder).
+and [BUILDER](https://refactoring.guru/design-patterns/builder) are indirect
+inspirations too.
 
 In `inputs` folder you can find some examples of JSON input classes, but also
 other input-output related classes. One of the most important is the
@@ -301,7 +302,29 @@ example of valid configuration file is provided in
 
 ### Why having an initialization procedure?
 
-TODO: describe briefly the initialization procedure
+A complete test harness can be - potentially - set up just by creating a
+`TelescopeWrapper` and initializing it with sub-systems wrappers (properly
+initialized with configuration classes and inputs. Since this can be quite
+complex, a default initialization procedure is encoded in a builder class,
+which:
+
+- reads the configuration from a YAML file;
+- validates it (checking all required fields and sections are set, that the
+  device names point to existing and reachable Tango devices, etc.);
+- collects the default inputs;
+- validates them;
+- uses the input and the configuration to create the instances of the
+  wrappers.
+
+To do each of those steps, the builder uses a set of classes that potentially
+can be extended to support custom initialization procedures.
+
+The initialization procedure makes heavy use of the
+[ABSTRACT FACTORY](https://refactoring.guru/design-patterns/abstract-factory)
+and [BUILDER](https://refactoring.guru/design-patterns/builder) design patterns.
+In a certain sense, then the various internal tools are
+[STRATEGIES](https://refactoring.guru/design-patterns/strategy) used by
+the builder to compose the test harness.
 
 ## How to use and extend this harness
 

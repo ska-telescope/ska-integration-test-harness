@@ -58,10 +58,10 @@ class TestHarnessBuilder:
     builder to customize its behavior.
     """
 
+    # pylint: disable=too-many-instance-attributes
+
     # (this is not a pytest test class)
     __test__ = False
-
-    # pylint: disable=too-many-instance-attributes
 
     def __init__(self):
         """Initialize the TestHarnessBuilder with default configurations."""

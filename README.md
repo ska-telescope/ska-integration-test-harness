@@ -36,13 +36,32 @@ For an overview of the architecture of the test harness and the principles behin
 ## Usage
 
 
+### Prerequisites
+
+To use this test harness, first of all, you need a kubernetes cluster with
+all the production and emulated devices running. Right now this part is not
+covered by this project, which in fact assumes an environment equivalent
+to what is used in the test repository
+[SKA TMC-MID Integration](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/)
+([docs](https://developer.skao.int/projects/ska-tmc-mid-integration/en/latest/getting_started/getting_started.html)).
+
+Since some of the devices are emulators, you may give a look also to
+[this](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common/-/tree/master/src/ska_tmc_common/test_helpers?ref_type=heads) 
+and 
+[this](https://developer.skao.int/projects/ska-tmc-common/en/latest/HelperDevices/TangoHelperDevices.html).
+
+### Prerequisites
+
 Here it follows an example of how to initialize the test harness through
 opportune fixtures in a `pytest` test script. We assume you have available
 a `test_harness_config.yaml` file
 (see [example](tests/config_examples/valid_test_harness_config.yaml)
 and also a set of JSON files for the various required inputs.
 
-Your YAML file may look like this:
+
+### Configuration 
+
+To configure the test harness using the default way, you need to create a YAML file such as the following:
 
 
 ```yaml
@@ -93,6 +112,8 @@ dishes:
   # dish_master4_name: "tango://tango-databaseds.dish-lmc-4.svc.cluster.local:10000/mid-dish/dish-manager/SKA100"
 
 ```
+
+### Fixtures and facades
 
 To initialize the test harness, you need to create a `TelescopeWrapper` object, 
 set it up with the various configured subsystems and then create your facades.
@@ -219,9 +240,10 @@ def dishes(telescope_wrapper: TelescopeWrapper):
     return DishesFacade(telescope_wrapper)
 ```
 
+### Interact with the test harness
 
 Then, in your test script you can use the facades to access the devices
-and interact with them. 
+and interact with them like in this simplified example:
 
 ```python
 
