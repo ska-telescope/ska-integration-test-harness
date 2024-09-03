@@ -21,7 +21,7 @@ to be **easy to use** (so that tests can be written quickly),
 to be **easy to maintain** (so that tests can be updated quickly)
 and **reliable** (so that tests can be trusted).
 
-As of August 2024 the test harness is designed to work with Tango Devices,
+As of September 2024 the test harness is designed to work with Tango Devices,
 and specifically to support tests for integration of TMC with CSP in MID,
 but it can be extended to work with other types of components.
 
