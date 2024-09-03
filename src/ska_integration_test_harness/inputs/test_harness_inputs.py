@@ -29,6 +29,9 @@ class TestHarnessInputs:
     permit to access in a parametric way the inputs.
     """
 
+    # (this is not a pytest test class)
+    __test__ = False
+
     class InputName(Enum):
         """An enumeration of the possible input names.
 

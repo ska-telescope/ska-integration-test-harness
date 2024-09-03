@@ -56,9 +56,10 @@ class TestHarnessBuilder:
     and the inputs. Potentially, you can inject your own tools to customize
     the behavior of the builder. Potentially, you can also subclass this
     builder to customize its behavior.
-
-    TODO: refactor and uniform the style
     """
+
+    # (this is not a pytest test class)
+    __test__ = False
 
     # pylint: disable=too-many-instance-attributes
 

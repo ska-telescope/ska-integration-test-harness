@@ -51,6 +51,9 @@ class TestHarnessFactory:
     - create_dishes_wrapper: Create a wrapper for the Dishes subsystem.
     """
 
+    # (this is not a pytest test class)
+    __test__ = False
+
     def __init__(
         self,
         config: TestHarnessConfiguration,

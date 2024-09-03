@@ -31,6 +31,9 @@ class TestHarnessConfiguration:
     permit to access in a parametric way the configurations.
     """
 
+    # (this is not a pytest test class)
+    __test__ = False
+
     class SubsystemName(Enum):
         """An enumeration of the possible subsystems names.
 

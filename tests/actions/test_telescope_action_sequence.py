@@ -35,10 +35,6 @@ class TestTelescopeActionSequence:
     for this test class. Find a way to fix this.
     """
 
-    def __init__(self) -> None:
-        self.action1 = None
-        self.action2 = None
-
     @pytest.fixture(autouse=True)
     def init_sequence_steps_actions(self):
         """Create the two actions that will make the sequence."""
@@ -69,7 +65,6 @@ class TestTelescopeActionSequence:
     def test_execute_sequence_in_right_order(self):
         """Execution of steps in correct order."""
         sequence_action = self.create_action_sequence()
-
         with patch.object(
             self.action1, "execute"
         ) as mock_action1, patch.object(
@@ -78,9 +73,11 @@ class TestTelescopeActionSequence:
             sequence_action.execute()
             assert_that(mock_action1.call_count).is_equal_to(1)
             assert_that(mock_action2.call_count).is_equal_to(1)
-            assert_that(mock_action1.call_args_list).is_less_than(
-                mock_action2.call_args_list
-            )
+
+        assert_that(sequence_action.execute()).described_as(
+            "The actions should be executed in the right order "
+            "(the second action result should be returned)."
+        ).is_true()
 
     def test_execute_returns_the_last_step_result(self):
         """Execution of sequence returns the result of the last step."""
