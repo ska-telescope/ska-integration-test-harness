@@ -8,12 +8,12 @@ title Facades are used by test scripts
 ' Enforce vertical layout
 top to bottom direction
 
-package "Configurations" {
+class TestScript {
+    + test_subarray_configure()
 }
 
-
-' Facades at the top
-package "Facades" {
+' facades at the top
+package "facades" {
     class TMCSubarrayNodeFacade {
         + subarray_node: DeviceProxy {property}
         + dish_leaf_node_dict: Dict[str, DeviceProxy] {property}
@@ -25,10 +25,10 @@ package "Facades" {
     }
 
     note top
-    Facades are used by test script to access the components of the SUT
+    facades are used by test script to access the components of the SUT
     and to issue commands.
     Each facade is a particular 'view' on the telescope.
-    They depend on Wrappers and Actions
+    They depend on structure and actions
     end note
 
     class CSPFacade {
@@ -54,25 +54,27 @@ package "Facades" {
     }
 }
 
-'Configuration -[hidden]right- Facades
+package "structure" {
 
-' Wrappers and Devices in the middle
-package "Wrappers" {
+    class TelescopeWrapper
 }
 
 
 
-package "Actions" {
-
+package "actions" {
+    class SubarrayConfigure
+    class Etc
 }
-' ensure Actions are below Wrappers
-Actions ..right..> Wrappers
-"Facades" ..> Actions
-Configurations ..> Facades
+
+
+TestScript --> TMCSubarrayNodeFacade : subarray_node_facade
+actions .down.> structure
+facades .right.> actions
+facades ....> structure
+
 
 ' Stacking packages vertically
-Facades -[hidden]down- "Wrappers"
-Facades ..down..> "Wrappers"
-
+facades -[hidden]down- "structure"
+facades -[hidden]down- "actions"
 
 @enduml

@@ -7,58 +7,44 @@ top to bottom direction
 
 title Configurations are used to initialize the harness
 
-package "Configurations" {
-    ' Configuration class to the left of Facades
+package "init" {
 
-    class ComponentsConfig {
+    class TestHarnessBuilder {
     }
-    class EmulationConfig {}
-    class ConfigReader {
+
+    class TestHarnessFactory {
     }
-    class YamlConfigReader {}
-    note top
-Configurations depend on everything else
-and are used to
-- read the configuration data from files or env var
-- validate it
-- do a sanity check on existing devices
-- initialize the harness
-end note
+}
 
-    class ConfigValidator {}
+package "config" {
 
+    class TestHarnessConfiguration {
+    }
+
+    class YamlConfigurationReader {}
+
+    class ConfigurationValidator {}
 }
 
 
-' Facades at the top
-package "Facades" {
-
-
-}
-
-'Configuration -[hidden]right- Facades
-
-' Wrappers and Devices in the middle
-package "Wrappers" {
-
+package "facades" {
 }
 
 
-
-package "Actions" {
+package "structure" {
 
 }
-' ensure Actions are below Wrappers
-'"Wrappers" -[hidden]down--- Actions
-Actions .left.> Wrappers
-"Facades" ..left..> Actions
-"Configurations" ..> Actions
-"Configurations" ..> Facades
-"Configurations" ..> Wrappers
 
-' Stacking packages vertically
-'Facades -[hidden]down- "Wrappers"
-Facades ..right..> "Wrappers"
+package "actions" {
 
+}
+
+actions ..> structure
+facades ..> actions
+facades ..> structure
+
+structure ..> config
+init ..> config
+init ..> structure
 
 @enduml
