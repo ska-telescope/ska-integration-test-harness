@@ -423,3 +423,10 @@ Please reach out *Emanuele Lena*, *Giorgio Brajnik* and/or *Verity Allan*
 if you think this test harness can be useful for your tests, if you have
 any questions, proposals or feedback. Of course, you are more than welcome
 also if you want to contribute to the development of this test harness.
+
+## Applications
+
+Right now, this test harness is used for the new set of 
+[TMC-CSP MID integration tests](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/-/merge_requests/234), which use the test harness
+to test the subarray-related operations over the TMC (with a production
+CSP and emulated SDP and Dishes).
