@@ -55,7 +55,7 @@ class SubarrayObsStateResetterFactory:
     """
 
     def __init__(self, commands_inputs: TestHarnessInputs) -> None:
-        """Initialize with the telescope and the JSON inputs.
+        """Initialise with the telescope and the JSON inputs.
 
         :param commands_inputs: The JSON inputs for the commands to bring
             the subarray in a certain obs state. You can pass just the

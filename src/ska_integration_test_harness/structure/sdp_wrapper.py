@@ -13,7 +13,7 @@ class SDPWrapper(abc.ABC):
     """A test wrapper for the SDP."""
 
     def __init__(self, sdp_configuration: SDPConfiguration):
-        """Initialize the SDP wrapper."""
+        """Initialise the SDP wrapper."""
         self.sdp_master = tango.DeviceProxy(sdp_configuration.sdp_master_name)
         self.sdp_subarray = tango.DeviceProxy(
             sdp_configuration.sdp_subarray1_name

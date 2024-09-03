@@ -14,7 +14,7 @@ class DishesWrapper(abc.ABC):
     """A test wrapper for the dishes."""
 
     def __init__(self, dishes_configuration: DishesConfiguration):
-        """Initialize the dishes wrapper."""
+        """Initialise the dishes wrapper."""
 
         self._pre_init_dish_names(dishes_configuration)
 

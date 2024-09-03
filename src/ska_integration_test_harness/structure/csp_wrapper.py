@@ -13,7 +13,7 @@ class CSPWrapper(abc.ABC):
     """A test wrapper for the CSP."""
 
     def __init__(self, csp_configuration: CSPConfiguration):
-        """Initialize the CSP wrapper."""
+        """Initialise the CSP wrapper."""
         self.csp_master = tango.DeviceProxy(csp_configuration.csp_master_name)
         self.csp_subarray = tango.DeviceProxy(
             csp_configuration.csp_subarray1_name

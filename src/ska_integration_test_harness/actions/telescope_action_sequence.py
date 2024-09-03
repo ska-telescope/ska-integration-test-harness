@@ -38,7 +38,7 @@ class TelescopeActionSequence(TelescopeAction[T], Generic[T]):
         self,
         steps: list[TelescopeAction],
     ) -> None:
-        """Initialize the action with the telescope and the steps.
+        """Initialise the action with the telescope and the steps.
 
         :param steps: The list of sub-actions to be executed.
         """

@@ -14,7 +14,7 @@ class ProductionDishesWrapper(DishesWrapper):
     def _pre_init_dish_names(
         self, dishes_configuration: DishesConfiguration
     ) -> None:
-        """Initialize real dishes in a Tango database.
+        """Initialise real dishes in a Tango database.
 
         :param dishes_configuration: The dishes configuration.
         """

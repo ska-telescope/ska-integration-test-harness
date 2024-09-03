@@ -34,7 +34,7 @@ class SubarrayExecuteTransition(TelescopeCommandAction):
         expected_obs_state: ObsState | None = None,
         command_input: JSONInput | None = None,
     ):
-        """Initialize with the command name and the expected obsState.
+        """Initialise with the command name and the expected obsState.
 
         :param command_name: The name of the command to be executed.
         :param expected_obs_state: The expected obsState after

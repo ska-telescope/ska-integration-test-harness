@@ -37,8 +37,8 @@ def all_subarrays_have_obs_state(
         ),
     ]
 
-    # csp subarray leaf node may not be yet initialized
-    if telescope.tmc.is_subarray_initialized():
+    # csp subarray leaf node may not be yet initialised
+    if telescope.tmc.is_subarray_initialised():
         res.extend(
             [
                 ExpectedStateChange(

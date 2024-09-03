@@ -54,8 +54,8 @@ class TestTelescopeActionSequence:
         """
         return TelescopeActionSequence[bool]([self.action1, self.action2])
 
-    def test_initialization(self):
-        """Initialization of sequence action with correct steps."""
+    def test_initialisation(self):
+        """Initialisation of sequence action with correct steps."""
         sequence_action = self.create_action_sequence()
         assert_that(sequence_action.steps).is_equal_to(
             [self.action1, self.action2]

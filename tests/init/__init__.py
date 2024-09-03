@@ -1,1 +1,1 @@
-"""Test Harness Initialization procedure unit tests."""
+"""Test Harness Initialisation procedure unit tests."""

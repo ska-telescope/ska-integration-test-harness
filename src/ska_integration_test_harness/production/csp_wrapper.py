@@ -19,7 +19,7 @@ class ProductionCSPWrapper(CSPWrapper):
     def __init__(
         self, csp_configuration: CSPConfiguration, all_production: bool = False
     ):
-        """Initialize the production CSP wrapper.
+        """Initialise the production CSP wrapper.
 
         :param csp_configuration: the CSP configuration.
         :param all_production: a flag that tell whether all components

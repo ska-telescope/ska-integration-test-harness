@@ -53,7 +53,7 @@ class TMCWrapper(abc.ABC):
             self.dish1_leaf_admin_dev_name
         )
 
-        # Create (but not initialize) the subarray leaf nodes
+        # Create (but not initialise) the subarray leaf nodes
         self.csp_subarray_leaf_node: tango.DeviceProxy | None = None
         self.sdp_subarray_leaf_node: tango.DeviceProxy | None = None
 
@@ -73,8 +73,8 @@ class TMCWrapper(abc.ABC):
     # -----------------------------------------------------------
     # Subarray init methods
 
-    def is_subarray_initialized(self) -> bool:
-        """Check if the subarray is initialized"""
+    def is_subarray_initialised(self) -> bool:
+        """Check if the subarray is initialised"""
         return self.csp_subarray_leaf_node and self.sdp_subarray_leaf_node
 
     def set_subarray_id(self, subarray_id: int):

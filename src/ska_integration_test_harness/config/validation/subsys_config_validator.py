@@ -31,7 +31,7 @@ class SubsystemConfigurationValidator(abc.ABC):
     a new validation. After one or more runs, you can check if the validation
     was successful by calling the ``is_valid`` method.
 
-    When you initialize an instance of this class, you can pass an optional
+    When you initialise an instance of this class, you can pass an optional
     logger that will be used to log the errors and warnings found during the
     validation.
 

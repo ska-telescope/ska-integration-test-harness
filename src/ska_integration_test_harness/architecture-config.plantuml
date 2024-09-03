@@ -5,7 +5,7 @@ skinparam linetype ortho
 
 top to bottom direction
 
-title Configurations are used to initialize the harness
+title Configurations are used to initialise the harness
 
 class TestScript
 
@@ -15,7 +15,7 @@ package "init" {
     }
     note top
     Test scrit can use TestHarnessBuilder to read a configuration,
-    to validate it and to use it to create and initialize the test harness.
+    to validate it and to use it to create and initialise the test harness.
     Facades are independent and
     they will attach to an existing structure.
     end note

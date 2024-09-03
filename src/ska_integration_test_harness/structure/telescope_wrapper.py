@@ -20,18 +20,18 @@ class TelescopeWrapper:
 
     This class is a *Singleton*, so this mean that there is only one instance
     of it in the entire code. This is done to avoid the creation of multiple
-    "telescope" instances, potentially inconsistently initialized with
+    "telescope" instances, potentially inconsistently initialised with
     different sub-subsystems (which may be configured differently).
 
-    To initialize the telescope test structure, create an instance of this
+    To initialise the telescope test structure, create an instance of this
     class and call the `set_up` method with the instances of the TMC, SDP, CSP,
-    and Dishes sub-systems. After the initialization, in any point of the
+    and Dishes sub-systems. After the initialisation, in any point of the
     code you can create an instance of this class and have it already
-    initialized with the sub-systems.
+    initialised with the sub-systems.
 
     ```python
 
-        # Initialize the telescope test structure
+        # Initialise the telescope test structure
         telescope = TelescopeWrapper()
         telescope.set_up(tmc, sdp, csp, dishes)
 
@@ -118,7 +118,7 @@ class TelescopeWrapper:
         return self._dishes
 
     # -----------------------------------------------------------------
-    # Initialization and tear down methods
+    # Initialisation and tear down methods
 
     def set_up(
         self,
@@ -127,7 +127,7 @@ class TelescopeWrapper:
         csp: CSPWrapper,
         dishes: DishesWrapper,
     ) -> None:
-        """Initialize the telescope test structure with the given devices."""
+        """Initialise the telescope test structure with the given devices."""
         self._tmc = tmc
         self._sdp = sdp
         self._csp = csp

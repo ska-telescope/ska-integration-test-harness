@@ -27,15 +27,15 @@ class DummyValidator(SubsystemConfigurationValidator):
 
 # 1. Tests for SubsystemConfigurationValidator
 class TestSubsystemConfigurationValidator:
-    """Validator initializes correctly and handles errors and warnings."""
+    """Validator initialises correctly and handles errors and warnings."""
 
-    def test_initialization_with_default_logger(self):
-        """Validator initializes with no logger."""
+    def test_initialisation_with_default_logger(self):
+        """Validator initialises with no logger."""
         validator = DummyValidator()
         assert_that(validator.logger).is_none()
 
-    def test_initialization_with_custom_logger(self):
-        """Validator initializes with a provided logger."""
+    def test_initialisation_with_custom_logger(self):
+        """Validator initialises with a provided logger."""
         mock_logger = Mock()
         validator = DummyValidator(logger=mock_logger)
         assert_that(validator.logger).is_equal_to(mock_logger)

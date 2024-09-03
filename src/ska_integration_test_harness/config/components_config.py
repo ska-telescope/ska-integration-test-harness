@@ -62,7 +62,7 @@ class TMCConfiguration(SubsystemConfiguration):
     """Configuration for a TMC device.
 
     It contains the names of the various devices that make up the TMC.
-    It is initialized with default values.
+    It is initialised with default values.
     """
 
     # pylint: disable=too-many-instance-attributes
@@ -121,7 +121,7 @@ class CSPConfiguration(SubsystemConfiguration):
     """Configuration for a CSP device.
 
     It contains the names of the various devices that make up the CSP.
-    It is initialized with default values.
+    It is initialised with default values.
     """
 
     csp_master_name: str = None  # = "mid-csp/control/0"
@@ -142,7 +142,7 @@ class SDPConfiguration(SubsystemConfiguration):
     """Configuration for a SDP device.
 
     It contains the names of the various devices that make up the SDP.
-    It is initialized with default values.
+    It is initialised with default values.
     """
 
     sdp_master_name: str = None  # = "mid-sdp/control/0"
@@ -163,7 +163,7 @@ class DishesConfiguration(SubsystemConfiguration):
     """Configuration for the dishes.
 
     It contains the names of the various dishes.
-    It is initialized with default values (which are the ones you will
+    It is initialised with default values (which are the ones you will
     have when the dishes are emulated).
     """
 

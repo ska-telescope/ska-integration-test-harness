@@ -1,4 +1,4 @@
-"""A collection of default inputs, needed in the initialization phase."""
+"""A collection of default inputs, needed in the initialisation phase."""
 
 from dataclasses import dataclass
 from enum import Enum

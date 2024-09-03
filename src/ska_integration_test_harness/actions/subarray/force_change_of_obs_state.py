@@ -41,7 +41,7 @@ class ForceChangeOfObsState(TelescopeAction[None]):
         dest_state_name: ObsState,
         commands_input: TestHarnessInputs,
     ):
-        """Initialize the action with the target state and the JSON inputs.
+        """Initialise the action with the target state and the JSON inputs.
 
         :param dest_state_name: The target state to reach.
         :param commands_inputs: The JSON inputs for the commands to bring

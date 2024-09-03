@@ -44,10 +44,10 @@ class TestYAMLConfigurationReader:
         """Path to an invalid YAML config file."""
         return f"{self.CONFIG_DATA_DIR}/not_valid_yaml.yaml"
 
-    def test_constructor_initialization_does_not_crash(
+    def test_constructor_initialisation_does_not_crash(
         self, valid_yaml_path: str
     ) -> None:
-        """A reader is initialized with a valid YAML file and does not crash.
+        """A reader is initialised with a valid YAML file and does not crash.
 
         :param valid_yaml_path: Path to the valid YAML configuration file.
         """

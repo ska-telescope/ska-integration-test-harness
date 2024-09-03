@@ -59,7 +59,7 @@ class TestHarnessFactory:
         config: TestHarnessConfiguration,
         default_inputs: TestHarnessInputs,
     ):
-        """Initialize the factory with the given configuration and inputs.
+        """Initialise the factory with the given configuration and inputs.
 
         :param config: The test harness configuration.
         :param default_inputs: The default inputs for the test harness.

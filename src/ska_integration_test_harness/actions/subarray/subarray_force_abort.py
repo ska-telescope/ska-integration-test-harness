@@ -21,7 +21,7 @@ class SubarrayForceAbort(TelescopeAction[None]):
             self.telescope.sdp.sdp_subarray,
             self.telescope.tmc.subarray_node,
         ]
-        # if self.telescope.tmc.is_subarray_initialized():
+        # if self.telescope.tmc.is_subarray_initialised():
         #     devices_that_should_abort.extend(
         #         [
         #             self.telescope.tmc.csp_subarray_leaf_node,

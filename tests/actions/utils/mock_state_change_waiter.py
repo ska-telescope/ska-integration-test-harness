@@ -5,7 +5,7 @@ class MockStateChangeWaiter:
     """A mock state change waiter for testing purposes."""
 
     def __init__(self):
-        """Initialize the state change waiter."""
+        """Initialise the state change waiter."""
         self.expected_state_changes = []
 
     def reset(self):

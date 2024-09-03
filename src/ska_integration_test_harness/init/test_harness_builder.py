@@ -54,8 +54,8 @@ class TestHarnessBuilder:
 
     The class uses also a set of tools to read and validate the configurations
     and the inputs. Potentially, you can inject your own tools to customize
-    the behavior of the builder. Potentially, you can also subclass this
-    builder to customize its behavior.
+    the behaviour of the builder. Potentially, you can also subclass this
+    builder to customize its behaviour.
     """
 
     # pylint: disable=too-many-instance-attributes
@@ -64,7 +64,7 @@ class TestHarnessBuilder:
     __test__ = False
 
     def __init__(self):
-        """Initialize the TestHarnessBuilder with default configurations."""
+        """Initialise the TestHarnessBuilder with default configurations."""
         # --------------------------------------------------------------
         # inputs and configurations
 

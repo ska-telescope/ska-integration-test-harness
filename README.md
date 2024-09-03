@@ -52,7 +52,7 @@ and
 
 ### Prerequisites
 
-Here it follows an example of how to initialize the test harness through
+Here it follows an example of how to initialise the test harness through
 opportune fixtures in a `pytest` test script. We assume you have available
 a `test_harness_config.yaml` file
 (see [example](tests/config_examples/valid_test_harness_config.yaml)
@@ -115,9 +115,9 @@ dishes:
 
 ### Fixtures and facades
 
-To initialize the test harness, you need to create a `TelescopeWrapper` object, 
+To initialise the test harness, you need to create a `TelescopeWrapper` object, 
 set it up with the various configured subsystems and then create your facades.
-To initialize the test harness you can use the `TestHarnessBuilder` class.
+To initialise the test harness you can use the `TestHarnessBuilder` class.
 
 Your fixtures code may look like this:
 

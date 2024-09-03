@@ -176,7 +176,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
     """The default timeout for the termination condition (in seconds)."""
 
     def __init__(self) -> None:
-        """Initialize the action, with default configurations and tools."""
+        """Initialise the action, with default configurations and tools."""
         super().__init__()
 
         # ----------------------------------------------------------------

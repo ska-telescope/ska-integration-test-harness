@@ -271,7 +271,7 @@ class TestTestHarnessBuilder:
     ):
         """When an invalid configuration is passed, the build method is
         expected to fail. In this case, the failure is an attribute error
-        (since the initialization procedure will not be able to find
+        (since the initialisation procedure will not be able to find
         a required attribute).
         """
 

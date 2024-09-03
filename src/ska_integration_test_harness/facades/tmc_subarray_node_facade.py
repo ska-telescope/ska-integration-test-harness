@@ -55,7 +55,7 @@ class TMCSubarrayNodeFacade:
 
     - references to subarray node device,
     - references to leaf devices to interact with CSP and SDP subarrays,
-    - an action to initialize the subarray setting the subarray ID,
+    - an action to initialise the subarray setting the subarray ID,
     - actions to move the subarray to ON and OFF states,
     - actions to interact with the obs state of the subarray, making
       individual state changes (through command calls) or forcing the
@@ -103,7 +103,7 @@ class TMCSubarrayNodeFacade:
         return self._telescope.tmc.sdp_subarray_leaf_node
 
     # -----------------------------------------------------------
-    # Setter for initializing subarray
+    # Setter for initialising subarray
 
     def set_subarray_id(self, requested_subarray_id: str) -> None:
         """Create subarray devices for the requested subarray.

@@ -54,7 +54,7 @@ def patch_device_proxy(
     """Patch the DeviceProxy class to return a mock object.
 
     The mock object may contain a given name, attribute name and
-    attribute value. It they are all set, the return value is initialized
+    attribute value. It they are all set, the return value is initialised
     with these values.
 
     :param device_name: The name of the device.
