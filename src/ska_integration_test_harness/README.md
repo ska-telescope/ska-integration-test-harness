@@ -83,9 +83,9 @@ emulators without knowing which is which. See below for examples.
 
 ## Architecture
 
-![configurations](architecture-config.png "Logical architecture of the test harness (configurations)")
-![configurations, facades and wrappers](architecture-facades.png "Logical architecture of the test harness (facades)")
-![configurations, facades and wrappers](architecture-actions.png "Logical architecture of the test harness (actions and wrappers)")
+![configurations](uml-docs/architecture-config.png "Logical architecture of the test harness (configurations)")
+![configurations, facades and wrappers](uml-docs/architecture-facades.png "Logical architecture of the test harness (facades)")
+![configurations, facades and wrappers](uml-docs/architecture-actions.png "Logical architecture of the test harness (actions and wrappers)")
 
 
 (the source code of these diagrams is in `*.plantuml` and can be updated with `java -jar plantuml.jar *.plantuml`; likewise for the other diagrams, or use the attached Makefile and do ```make update-diagrams```).
@@ -272,9 +272,9 @@ These are mechanisms that collect configuration data from files or
 runtime flags, represent them in objects, and support fixtures to setup 
 the proper instances of the test harness.
 
-There are a number of classes that represent the default configuration of 
+There are a number of classes that represent the default configuration of
 the structure of the SUT. For example, the class `TMCConfiguration` contains
- the names (i.e. TRLs) of the devices that are part of the TMC. The class
+the names (i.e. TRLs) of the devices that are part of the TMC. The class
 `CSPConfiguration` contains the names of the devices that are part of the CSP.
 The directive to use the emulated or the production devices is another
 example of configuration data (very important for the initialisation of the
@@ -308,11 +308,17 @@ initialised with configuration classes and input). Since this can be quite
 complex, a default initialisation procedure is encoded in a builder class,
 which:
 
+
+
 - reads the configuration from a YAML file;
+
 - validates it (checking all required fields and sections are set, that the
   device names point to existing and reachable Tango devices, etc.);
+
 - collects the default input;
+
 - validates them;
+
 - uses the input and the configuration to create the instances of the
   wrappers.
 
@@ -426,7 +432,7 @@ also if you want to contribute to the development of this test harness.
 
 ## Applications
 
-Right now, this test harness is used for the new set of 
+Right now (September 2024), this test harness is used for the new set of 
 [TMC-CSP MID integration tests](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/-/merge_requests/234), which use the test harness
 to test the subarray-related operations over the TMC (with a production
 CSP and emulated SDP and Dishes).
