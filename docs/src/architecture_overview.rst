@@ -1,5 +1,5 @@
-Architecture Overview
-=====================
+.. Architecture Overview
+.. =====================
 
 Here it follows an overview of the architecture of the
 SKA Integration Test Harness (taken from the README file you

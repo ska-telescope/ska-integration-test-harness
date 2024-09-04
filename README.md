@@ -1,4 +1,4 @@
-# ska-integration-test-harness
+# SKA Integration Test Harness - Overview & Getting started
 
 ## Overview
 
