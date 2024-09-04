@@ -35,27 +35,29 @@ class TestHarnessBuilder:
     and build the test harness. You can/should also specify some default
     JSON inputs for various commands/purposes.
 
-    Attributes:
-        tmc_config (TMCConfiguration): Configuration for the TMC subsystem.
-        csp_config (CSPConfiguration): Configuration for the CSP subsystem.
-        sdp_config (SDPConfiguration): Configuration for the SDP subsystem.
-        dishes_config (DishesConfiguration): Configuration for the Dishes
-            subsystem.
-        default_inputs (DefaultInputs): Default inputs for various purposes.
-
-    This class exposes two validation methods that should be called before
-        building the test harness:
-
-    - validate_configurations: Validates the subsystem configurations.
-    - validate_default_inputs: Validates the default inputs.
-
-    Even if they are not compulsory, it is strongly suggested to call them
-    before building the test harness.
-
     The class uses also a set of tools to read and validate the configurations
     and the inputs. Potentially, you can inject your own tools to customize
     the behaviour of the builder. Potentially, you can also subclass this
     builder to customize its behaviour.
+
+    Usage example:
+
+    .. code-block:: python
+
+        builder = TestHarnessBuilder()
+        builder.read_config_file("configurations.yaml")
+        builder.validate_configurations()
+
+        default_inputs = TestHarnessInputs(
+            assign_input=FileJSONInput("path/to/assign.json"),
+            # ...
+        )
+        builder.set_default_inputs(default_inputs)
+        builder.validate_default_inputs()
+
+        telescope = builder.build()
+
+
     """
 
     # pylint: disable=too-many-instance-attributes
@@ -231,12 +233,3 @@ class TestHarnessBuilder:
 
         self._log_info("Telescope wrapper and subsystems set up successfully.")
         return telescope
-
-
-# Example usage:
-# builder = TestHarnessBuilder()
-# try:
-#     builder.read_config_file("path/to/config.yaml").
-# validate_configurations().build()
-# except ValueError as e:
-#     print(f"Validation failed: {e}")

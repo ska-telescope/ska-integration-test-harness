@@ -69,13 +69,10 @@ class BasicInputValidator(InputValidator):
     """A basic validator for the input data.
 
     For how it is implemented now:
-    - it checks the presence of the inputs for:
-        - default VCC config
-        - assign
-        - configure
-        - scan
-        - release
-    - it checks each of those input is a valid JSON
+
+    - it checks the presence of the inputs for: default VCC config, assign,
+      configure, scan, release;
+    - it checks each of those input is a valid JSON.
 
     Instead, it doesn't check the semantic correctness of the JSONs.
     """

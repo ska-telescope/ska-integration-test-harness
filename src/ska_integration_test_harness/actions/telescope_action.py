@@ -29,6 +29,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
     - a return type T, which is the type of the expected result
       of the action.
 
+
     This class is a template for such actions.
 
     **SUBCLASS AN ACTION**
@@ -58,6 +59,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
       If you need to log something (only if the logging policy is active),
       you can use the method :py:meth:`_log`. If for some reason you need,
       you can also access the internal configuration and the components.
+
 
     Usage example:
 
@@ -122,17 +124,19 @@ class TelescopeAction(abc.ABC, Generic[T]):
     - if the termination condition does not occur within a timeout,
       a TimeoutError is raised.
 
+
     Before calling the :py:meth:`execute` method, you can customize some
     configurations of the action:
 
     - you can change the timeout for the termination condition by calling
-        the method :py:meth:`set_termination_condition_timeout` and passing
-        the new timeout;
+      the method :py:meth:`set_termination_condition_timeout` and passing
+      the new timeout;
     - you can execute the action without waiting for the termination condition
-        by calling the method :py:meth:`set_termination_condition_policy`
-        and passing ``False`` as argument;
+      by calling the method :py:meth:`set_termination_condition_policy`
+      and passing ``False`` as argument;
     - you can deactivate the logging policy by calling the method
-        :py:meth:`set_logging_policy` and passing ``False`` as argument.
+      :py:meth:`set_logging_policy` and passing ``False`` as argument.
+
 
     **NOTE**: An already configured action can be executed multiple times.
 
@@ -262,7 +266,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
         - the termination condition is waited for until it occurs;
         - some logging is performed to report the execution beginning and end;
         - if the termination condition does not occur within a timeout,
-        a TimeoutError is raised.
+          a TimeoutError is raised.
 
         Before calling the :py:meth:`execute` method, you can customize some
         configurations of the action:

@@ -29,7 +29,7 @@ class TelescopeWrapper:
     code you can create an instance of this class and have it already
     initialised with the sub-systems.
 
-    ```python
+    .. code-block:: python
 
         # Initialise the telescope test structure
         telescope = TelescopeWrapper()
@@ -46,7 +46,7 @@ class TelescopeWrapper:
     test structure and reset it to the initial state calling the `tear_down`
     method.
 
-    ```python
+    .. code-block:: python
 
         # Tear down the telescope test structure
         telescope = TelescopeWrapper()
@@ -135,6 +135,7 @@ class TelescopeWrapper:
         # TODO: Add here some "health checks" (?)
 
     TEARDOWN_TIMEOUT = 50
+    """The timeout (in seconds) used in the teardown procedure."""
 
     def tear_down(self) -> None:
         """Tear down the entire telescope test structure.

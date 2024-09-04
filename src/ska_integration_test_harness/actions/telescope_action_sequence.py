@@ -11,7 +11,7 @@ T = TypeVar("T", bound=object)
 
 
 class TelescopeActionSequence(TelescopeAction[T], Generic[T]):
-    """A sequence of `TelescopeAction`s, executed in order.
+    """A sequence of `TelescopeAction`, executed in order.
 
     This action is used to group a sequence of actions together, so that the
     can be executed as a single action. The sub-actions are executed in
@@ -32,6 +32,26 @@ class TelescopeActionSequence(TelescopeAction[T], Generic[T]):
     make all the steps to wait for the termination condition. If you need,
     you can set the termination condition policy for each step by calling
     the method on each of them (you can access them through :py:attr:`steps`).
+
+    Usage example:
+
+    .. code-block:: python
+
+        # Create a sequence of actions
+        sequence = TelescopeActionSequence([
+            action1,
+            action2,
+            action3,
+        ])
+
+        # Execute the sequence
+        result = sequence.execute()
+
+        # (you can always access the steps, set policies, etc.)
+        sequence.steps[0].set_termination_condition_timeout(10)
+        sequence.set_logging_policy(True)
+        # ...
+
     """
 
     def __init__(
