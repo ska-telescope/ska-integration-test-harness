@@ -5,7 +5,7 @@ from ska_control_model import ObsState
 from ska_tango_testing.integration import TangoEventTracer
 
 from ska_integration_test_harness.structure.csp_wrapper import CSPWrapper
-from ska_integration_test_harness.structure.dishes_wapper import DishesWrapper
+from ska_integration_test_harness.structure.dishes_wrapper import DishesWrapper
 from ska_integration_test_harness.structure.sdp_wrapper import SDPWrapper
 from ska_integration_test_harness.structure.tmc_wrapper import TMCWrapper
 

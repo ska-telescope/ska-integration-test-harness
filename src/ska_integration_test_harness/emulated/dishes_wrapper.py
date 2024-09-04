@@ -9,7 +9,7 @@ from ska_integration_test_harness.emulated.utils.teardown_helper import (  # pyl
     EmulatedTeardownHelper,
 )
 from ska_integration_test_harness.inputs.dish_mode import DishMode
-from ska_integration_test_harness.structure.dishes_wapper import DishesWrapper
+from ska_integration_test_harness.structure.dishes_wrapper import DishesWrapper
 
 
 class EmulatedDishesWrapper(DishesWrapper):

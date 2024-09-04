@@ -28,7 +28,7 @@ from ska_integration_test_harness.production.tmc_wrapper import (
     ProductionTMCWrapper,
 )
 from ska_integration_test_harness.structure.csp_wrapper import CSPWrapper
-from ska_integration_test_harness.structure.dishes_wapper import DishesWrapper
+from ska_integration_test_harness.structure.dishes_wrapper import DishesWrapper
 from ska_integration_test_harness.structure.sdp_wrapper import SDPWrapper
 from ska_integration_test_harness.structure.telescope_wrapper import (
     TelescopeWrapper,
