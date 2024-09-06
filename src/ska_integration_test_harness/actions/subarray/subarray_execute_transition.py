@@ -1,6 +1,6 @@
 """Execute provided command on subarray Node."""
 
-from ska_control_model import ObsState
+from ska_control_model import ObsState  # pylint: disable=unused-import
 
 from ska_integration_test_harness.actions.command_action import (
     TelescopeCommandAction,
@@ -31,7 +31,7 @@ class SubarrayExecuteTransition(TelescopeCommandAction):
     def __init__(
         self,
         command_name: str,
-        expected_obs_state: ObsState | None = None,
+        expected_obs_state: "ObsState | None" = None,
         command_input: JSONInput | None = None,
     ):
         """Initialise with the command name and the expected obsState.
