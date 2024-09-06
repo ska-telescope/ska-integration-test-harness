@@ -34,7 +34,7 @@ class ExpectedEvent:
       conditions.
     """
 
-    device: tango.DeviceProxy | str
+    device: "tango.DeviceProxy | str"
     """The Tango device or its name you expect to change state."""
 
     attribute: str
@@ -89,7 +89,7 @@ class ExpectedStateChange(ExpectedEvent):
     with the value of the attribute in each event.
     """
 
-    device: tango.DeviceProxy | str
+    device: "tango.DeviceProxy | str"
     """The Tango device or its name you expect to change state."""
 
     attribute: str
@@ -100,7 +100,7 @@ class ExpectedStateChange(ExpectedEvent):
 
     def __init__(
         self,
-        device: tango.DeviceProxy | str,
+        device: "tango.DeviceProxy | str",
         attribute: str,
         expected_value: Any,
     ) -> None:

@@ -271,7 +271,7 @@ class TMCSubarrayNodeFacade:
         self,
         command_name: str,
         command_input: JSONInput | None = None,
-        expected_obs_state: ObsState | None = None,
+        expected_obs_state: "ObsState | None" = None,
     ):
         """Execute provided command on subarray
 
