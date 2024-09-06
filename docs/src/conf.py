@@ -40,7 +40,7 @@ extensions = [
 source_suffix = ['.rst', '.md']
 
 # "numpy", "tango",
-autodoc_mock_imports = ["assertpy", "tango"]
+autodoc_mock_imports = ["assertpy", "tango", "ska_control_model"]
 
 
 # Add any paths that contain templates here, relative to this directory.
