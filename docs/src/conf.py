@@ -40,7 +40,7 @@ extensions = [
 source_suffix = ['.rst', '.md']
 
 # "numpy", "tango",
-autodoc_mock_imports = ["assertpy"]
+autodoc_mock_imports = ["assertpy", "tango"]
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -97,3 +97,9 @@ def copy_images(app):
 def setup(app):
     # connect the copy_images function to the builder-inited signal
     app.connect('builder-inited', copy_images)
+
+
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3.10', None), 
+    "tango": ("https://pytango.readthedocs.io/en/v9.4.2/", None),
+}
