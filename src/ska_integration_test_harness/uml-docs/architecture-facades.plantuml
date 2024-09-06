@@ -1,0 +1,80 @@
+@startuml
+mainframe part 2
+'skinparam packageStyle rectangle
+skinparam linetype ortho
+
+title Facades are used by test scripts
+
+' Enforce vertical layout
+top to bottom direction
+
+class TestScript {
+    + test_subarray_configure()
+}
+
+' facades at the top
+package "facades" {
+    class TMCSubarrayNodeFacade {
+        + subarray_node: DeviceProxy {property}
+        + dish_leaf_node_dict: Dict[str, DeviceProxy] {property}
+        + csp_subarray_leaf_node: DeviceProxy {property}
+        + sdp_subarray_leaf_node: DeviceProxy {property}
+        + set_subarray_id(id)
+        + configure(input_string)
+        + end_observation()
+    }
+
+    note top
+    facades are used by test script to access the components of the SUT
+    and to issue commands.
+    Each facade is a particular 'view' on the telescope.
+    They depend on structure and actions
+    end note
+
+    class CSPFacade {
+        + csp_master: DeviceProxy {property}
+        + csp_subarray: DeviceProxy {property}
+        + method_1()
+    }
+
+    class SDPFacade {
+        + sdp_master: DeviceProxy {property}
+        + sdp_subarray: DeviceProxy {property}
+        + method_1()
+    }
+
+    class DishesFacade {
+        + dish_master_dict: Dict[str, DeviceProxy] {property}
+        + method_1()
+    }
+
+    class TMCCentralNodeFacade {
+        + central_node: DeviceProxy {property}
+        + method_1()
+    }
+}
+
+package "structure" {
+
+    class TelescopeWrapper
+}
+
+
+
+package "actions" {
+    class SubarrayConfigure
+    class Etc
+}
+
+
+TestScript --> TMCSubarrayNodeFacade : subarray_node_facade
+actions .down.> structure
+facades .right.> actions
+facades ....> structure
+
+
+' Stacking packages vertically
+facades -[hidden]down- "structure"
+facades -[hidden]down- "actions"
+
+@enduml

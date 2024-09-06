@@ -1,0 +1,120 @@
+@startuml
+
+mainframe part 3
+'skinparam packageStyle rectangle
+skinparam linetype ortho
+
+title actions and Wrappers are used to interact with the telescope
+
+
+package "facades" {
+
+}
+
+' Wrappers and Wrapper in the middle
+package "structure" {
+    class TelescopeWrapper {
+    }
+
+    note right
+    A wrapper is an adapter to a specific device of set of devices.
+    Wrappers belong to subsystems.
+    It can be emulated or production type.
+    end note
+
+    abstract class TMCWrapper
+    abstract class CSPWrapper
+    abstract class SDPWrapper
+    abstract class DishesWrapper
+     
+    TelescopeWrapper "1" *-- "1" TMCWrapper
+    TelescopeWrapper "1" *-- "1" CSPWrapper
+    TelescopeWrapper "1" *-- "1" SDPWrapper
+    TelescopeWrapper "1" *-- "1" DishesWrapper
+}
+
+package "producton" {
+    class ProductionTMCWrapper
+    class ProductionCSPWrapper
+    class ProductionSDPWrapper
+    class ProductionDishesWrapper
+}
+
+package "emulated" {
+    class EmulatedCSPWrapper
+    class EmulatedSDPWrapper
+    class EmulatedDishesWrapper
+}
+
+ProductionTMCWrapper -up-|> TMCWrapper
+ProductionCSPWrapper -up-|> CSPWrapper
+ProductionSDPWrapper -up-|> SDPWrapper
+ProductionDishesWrapper -up-|> DishesWrapper
+
+
+EmulatedCSPWrapper -up-|> CSPWrapper
+EmulatedSDPWrapper -up-|> SDPWrapper
+EmulatedDishesWrapper -up-|> DishesWrapper
+
+package "actions" {
+    abstract class TelescopeAction {
+        + timeout: int | float = (some default value)
+        + execute()
+        - _action() {abstract}
+        + termination_condition(): list[ExpectedEvent] {abstract}
+    }
+
+    note right
+    An action encapsulates an operation that has to be done on a telescope
+    wrapper.
+    It includes commands and their arguments as well as
+    possible termination conditions (aka synchronization conditions).
+
+    Input classes (e.g. JSONInput) are used to pass arguments to the action.
+    end note
+
+    class ExpectedEvent
+
+    class ExpectedStateChange {
+        + device: DeviceProxy | str
+        + attribute: str
+        + expected_value: Any
+    }
+
+    ExpectedStateChange -up-|> ExpectedEvent
+
+    class SubarrayConfigure
+    class SubarrayEndObservation
+    class MoveToOn
+    class Etc
+
+    SubarrayConfigure -up-|> TelescopeAction
+    SubarrayEndObservation -up-|> TelescopeAction
+    MoveToOn -up-|> TelescopeAction
+    Etc -up-|> TelescopeAction
+
+    ' TelescopeAction ...> ExpectedEvent
+}
+
+package input {
+    class JSONInput {
+        + as_str(): str
+        + as_dict(): dict
+    }
+}
+
+SubarrayConfigure ---> JSONInput : config_input
+
+' Stacking packages vertically
+facades ..> structure
+facades ..> actions
+
+actions .> structure
+
+
+' Position emulated devices slightly lower
+EmulatedCSPWrapper -[hidden]down- ProductionCSPWrapper
+EmulatedSDPWrapper -[hidden]down- ProductionSDPWrapper
+EmulatedDishesWrapper -[hidden]down- ProductionDishesWrapper
+
+@enduml

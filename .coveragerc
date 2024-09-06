@@ -1,0 +1,7 @@
+[run]
+omit =
+    */production/*
+    */emulated/*
+    */actions/subarray/*
+    */actions/central_node/*
+    */facades/*

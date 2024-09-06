@@ -1,0 +1,74 @@
+@startuml
+mainframe part 1
+'skinparam packageStyle rectangle
+skinparam linetype ortho
+
+top to bottom direction
+
+title Configurations are used to initialise the harness
+
+class TestScript
+
+package "init" {
+
+    class TestHarnessBuilder {
+    }
+    note top
+    Test scrit can use TestHarnessBuilder to read a configuration,
+    to validate it and to use it to create and initialise the test harness.
+    Facades are independent and
+    they will attach to an existing structure.
+    end note
+
+    
+    class TestHarnessFactory {
+    }
+    
+}
+
+package "config" {
+
+    class TestHarnessConfiguration {
+    }
+
+    class TMCConfiguration {
+        + is_emulated: bool
+        + centralnode_name: str
+        + tmc_subarraynode1_name: str
+        + etc
+    }
+
+    TestHarnessConfiguration "1" *-- "1" TMCConfiguration
+
+
+    class YamlConfigurationReader {}
+
+    class ConfigurationValidator {}
+}
+
+
+package "facades" {
+}
+
+
+package "structure" {
+
+}
+
+' package "actions" {
+
+' }
+
+
+TestScript ..> TestHarnessBuilder
+TestScript ..> facades
+
+' actions ..> structure
+' facades ..> actions
+facades ..> structure
+
+structure .right.> config
+init ..> config
+init ..> structure
+
+@enduml
