@@ -145,7 +145,12 @@ class TestTestHarnessFactory:
     def _decorate_config_for_production_dishes(
         config: TestHarnessConfiguration,
     ):
-        """Decorates the config with production dishes config"""
+        """Decorates the config with production dishes config.
+
+        NOTE: those device names may not be realistic according to the
+        current subsystem design, but they are aligned with what TMC-Dishes
+        integration tests are using right now.
+        """
         config.dishes_config.is_emulated = False
         config.dishes_config.dish_master1_name = "tango://tango-databaseds.dish-lmc-1.svc.cluster.local:10000/mid-dish/dish-manager/SKA001"  # pylint: disable=line-too-long # noqa: E501
         config.dishes_config.dish_master2_name = "tango://tango-databaseds.dish-lmc-2.svc.cluster.local:10000/mid-dish/dish-manager/SKA036"  # pylint: disable=line-too-long # noqa: E501
