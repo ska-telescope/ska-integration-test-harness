@@ -11,7 +11,13 @@ from ska_integration_test_harness.structure.csp_wrapper import (  # pylint: disa
 
 
 class EmulatedCSPWrapper(CSPWrapper):
-    """A wrapper for an emulated CSP."""
+    """A wrapper for an emulated CSP.
+
+    Differently from the production CSP wrapper, when a move to on or
+    move to off command is called, the CSP master is set to the desired
+    state directly. Moreover, the tear down implements the usual
+    procedure for emulated devices.
+    """
 
     def move_to_on(self) -> None:
         # NOTE: in old code this line was AFTER
@@ -23,7 +29,14 @@ class EmulatedCSPWrapper(CSPWrapper):
         self.csp_subarray.SetDirectState(DevState.OFF)
 
     def tear_down(self) -> None:
-        """Tear down the CSP."""
+        """Tear down the CSP.
+
+        The procedure is the following:
+        - Reset the health state for the CSP master and the CSP subarray.
+        - Clear the command call on the CSP subarray.
+        - Reset the transitions data for the CSP subarray.
+        - Reset the delay for the CSP subarray.
+        """
         EmulatedTeardownHelper.reset_health_state(
             [self.csp_master, self.csp_subarray]
         )
