@@ -47,3 +47,18 @@ Subarray actions
 .. automodule:: ska_integration_test_harness.actions.subarray
     :members:
     :undoc-members:
+
+Wrappers to emulated subsystems
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: ska_integration_test_harness.emulated
+    :members:
+    :undoc-members:
+
+Wrappers to production subsystems
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: ska_integration_test_harness.production
+    :members:
+    :undoc-members:
+

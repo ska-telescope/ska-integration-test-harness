@@ -1,13 +1,13 @@
 """A collection of wrapper of emulated subsystems wrappers (+ utils)."""
 
-from .csp_wrapper import CSPWrapper
-from .dishes_wrapper import DishesWrapper
-from .sdp_wrapper import SDPWrapper
+from .csp_wrapper import EmulatedCSPWrapper
+from .dishes_wrapper import EmulatedDishesWrapper
+from .sdp_wrapper import EmulatedSDPWrapper
 from .utils.teardown_helper import EmulatedTeardownHelper
 
 __all__ = [
-    "CSPWrapper",
-    "SDPWrapper",
-    "DishesWrapper",
+    "EmulatedCSPWrapper",
+    "EmulatedSDPWrapper",
+    "EmulatedDishesWrapper",
     "EmulatedTeardownHelper",
 ]
