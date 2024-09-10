@@ -1,4 +1,4 @@
-"""Create a `TelescopeAction` to reset the subarray in a certain obs state."""
+"""Create a Telescope Action to reset the subarray in a certain obs state."""
 
 from typing import Callable
 
@@ -34,9 +34,11 @@ from ska_integration_test_harness.structure.telescope_wrapper import (  # pylint
 
 
 class SubarrayObsStateResetterFactory:
-    """Factory to create `TelescopeAction`s to bring subarray in a obs state.
+    """Factory to create Telescope Actions to bring subarray in a obs state.
 
-    This factory is used to create `TelescopeAction`s to bring the subarray
+    This factory is used to create
+    :py:class:`~ska_integration_test_harness.actions.telescope_action.TelescopeAction` s
+    to bring the subarray
     in a certain obs state. The factory provides methods to create composite
     actions that can move subarray to:
 
@@ -52,7 +54,7 @@ class SubarrayObsStateResetterFactory:
     The starting state of the subarray is not considered while creating,
     because all the actions are designed to reset the subarray to
     `EMPTY` state first and then move to the target state.
-    """
+    """  # pylint: disable=line-too-long # noqa: E501
 
     def __init__(self, commands_inputs: TestHarnessInputs) -> None:
         """Initialise with the telescope and the JSON inputs.

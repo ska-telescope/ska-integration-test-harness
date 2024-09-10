@@ -7,7 +7,11 @@ from ska_integration_test_harness.structure.sdp_wrapper import SDPWrapper
 
 
 class EmulatedSDPWrapper(SDPWrapper):
-    """A wrapper for an emulated SDP."""
+    """A wrapper for an emulated SDP.
+
+    Differently from the production SDP wrapper, the tear down implements
+    the usual procedure for emulated devices.
+    """
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -19,7 +23,14 @@ class EmulatedSDPWrapper(SDPWrapper):
         # self.sdp_subarray.AddTransition('[["ABORTING", 0.5 ]]')
 
     def tear_down(self) -> None:
-        """Tear down the SDP."""
+        """Tear down the SDP.
+
+        The procedure is the following:
+        - Reset the health state for the SDP master and the SDP subarray.
+        - Clear the command call on the SDP subarray.
+        - Reset the transitions data for the SDP subarray.
+        - Reset the delay for the SDP subarray.
+        """
         EmulatedTeardownHelper.reset_health_state(
             [self.sdp_master, self.sdp_subarray]
         )

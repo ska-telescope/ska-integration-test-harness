@@ -21,7 +21,8 @@ class MoveToOn(TelescopeAction[None]):
         self.telescope.csp.move_to_on()
 
     def termination_condition(self):
-        """No expected outcome for this action."""
+        """Master and subarray devices should be in ON state, while
+        all dishes should be in STANDBY_FP mode."""
 
         # The central node, SDP subarray, SDP master, CSP subarray, CSP master
         # and all dishes should be in ON state.

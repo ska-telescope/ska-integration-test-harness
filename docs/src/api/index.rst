@@ -1,78 +1,41 @@
 API Documentation
-=================
+===================
 
-Here below are documented the core mechanisms
-of the ska-integration-test-harness. Implementation of specific
-actions and structures are currently left outside, see directly the code
-for more details.
+The following API documentation is divided into two main sections:
 
-Structure module
-----------------------------
+1. The core mechanisms of the ska-integration-test-harness.
+2. The specific actions, facades and structures that are currently implemented.
 
-.. automodule:: ska_integration_test_harness.structure
-    :members:
-    :undoc-members:
+The first section is a general overview of the core mechanisms that
+make up the ska-integration-test-harness (e.g., such as the telescope
+definition, the abstract subsystem wrappers, the extension points to create
+actions and the configuration and initialization mechanisms).
 
+The section is a sort of enumeration of the main concrete classes and
+components that are part of the ska-integration-test-harness for testing
+TMC-CSP in MID (at the time of writing).
 
-Actions module
-----------------------------
+**IMPORTANT NOTE**: A very crucial difference between the two sections 
+is that the first
+includes unit tested code, while the second, since it has been considered
+more related to the specific SUT logic than to the test harness itself,
+is not unit tested (and in a certain sense, the integration tests that
+use the test harness are the validation of the correctness of the
+implementation of the second section). **The coverage metrics of the
+test harness are calculated only on the first section** (*at the time of
+writing, the coverage on the first section is approximately 90%, while
+the overall coverage is around 60%*).
 
-.. automodule:: ska_integration_test_harness.actions
-    :members:
-    :undoc-members:
-
-
-Facades module
-----------------------------
-
-.. automodule:: ska_integration_test_harness.facades
-    :members:
-    :undoc-members:
-
-Inputs module
-----------------------------
-
-.. automodule:: ska_integration_test_harness.inputs
-    :members:
-    :undoc-members:
-
-Inputs validation
-~~~~~~~~~~~~~~~~~
-
-.. automodule:: ska_integration_test_harness.inputs.validation
-    :members:
-    :undoc-members:
+An example of tests that use what is described in the second section
+are the ones introduced in `ska-tmc-mid-integration` by this
+`merge request <https://gitlab.com/ska-telescope/ska-tmc-mid-integration/-/merge_requests/1>`_.
 
 
-Config(uration) module
-----------------------------
+.. toctree::
+   :maxdepth: 2
 
-.. automodule:: ska_integration_test_harness.config
-    :members:
-    :undoc-members:
-
-
-Config reader
-~~~~~~~~~~~~~~
-
-.. automodule:: ska_integration_test_harness.config.reader
-    :members:
-    :undoc-members:
-
-
-Config validation
-~~~~~~~~~~~~~~~~~
-
-.. automodule:: ska_integration_test_harness.config.validation
-    :members:
-    :undoc-members:
-
-Init(ialization) module
-----------------------------
-
-.. automodule:: ska_integration_test_harness.init
-    :members:
-    :undoc-members:
+   core_api
+   extension_api
 
 
 

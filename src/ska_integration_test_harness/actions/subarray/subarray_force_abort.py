@@ -12,7 +12,8 @@ from ska_integration_test_harness.actions.utils.termination_conditions import (
 
 
 class SubarrayForceAbort(TelescopeAction[None]):
-    """Invoke Abort command on subarray Node and force it if it failed."""
+    """Foreach of the individual subarray devices, force an abort if an
+    abort process is not ongoing."""
 
     def _devices_that_should_abort(self) -> list[tango.DeviceProxy]:
         """Return the list of devices that should be aborted."""

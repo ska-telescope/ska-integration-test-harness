@@ -51,7 +51,17 @@ class ProductionTMCWrapper(TMCWrapper):
         self.logger = logging.getLogger(__name__)
 
     def tear_down(self) -> None:
-        """Tear down the TMC devices."""
+        """Tear down the TMC devices.
+
+        This method will:
+
+        - Release resources from the central node
+          (if the subarray is in a IDLE state).
+        - Force the subarray state to EMPTY.
+        - Move the central node to OFF.
+        - Move the subarray to OFF.
+        - Load the default dish VCC configuration (if needed).
+        """
         self.logger.info(
             "Calling tear down for TMC (Starting subarray state: %s)",
             str(ObsState(self.subarray_node.obsState)),

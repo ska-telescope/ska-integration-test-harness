@@ -9,7 +9,11 @@ from ska_integration_test_harness.structure.dishes_wrapper import DishesWrapper
 
 
 class ProductionDishesWrapper(DishesWrapper):
-    """A wrapper for production dishes."""
+    """A wrapper for production dishes.
+
+    Different from the emulated dishes wrapper, this class initializes
+    in the Tango database the real dishes devices.
+    """
 
     def _pre_init_dish_names(
         self, dishes_configuration: DishesConfiguration

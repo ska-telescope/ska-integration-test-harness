@@ -21,6 +21,8 @@ class MoveToOff(TelescopeAction[None]):
         self.telescope.csp.move_to_off()
 
     def termination_condition(self):
+        """Master and subarray devices should be in OFF state, while
+        all dishes should be in STANDBY_LP mode."""
 
         # The central node, SDP subarray, SDP master, CSP subarray, CSP master
         # and all dishes should be in OFF state.

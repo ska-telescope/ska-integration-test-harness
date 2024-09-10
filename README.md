@@ -11,9 +11,25 @@ More information will be added here as the project progresses.
 
 ## Installation
 
-Currently, the harness is not yet packaged for installation. To use it,
-import it via `poetry` by adding the following dependency
-to your `pyproject.toml` file:
+To install this test harness you can follow two paths:
+
+1. The first is to import it via `poetry` as a classic dependency.
+   
+   ```bash
+   poetry add ska-integration-test-harness
+   ```
+   
+2. The second is to import it always via `poetry`, but pointing directly
+   to the Gitlab repository.
+
+We point out also this second approach since this test harness is
+is supposed to evolve quickly, together with the evolution of the
+subsystems and the integration tests. This second approach could be
+particularly useful in case you want to contribute to the project
+and need to apply your own changes quickly.
+
+To point directly the Gitlab repo and by-pass the semantic versioning,
+add the following to your `pyproject.toml` file:
 
 ```toml
 [tool.poetry.dependencies]
@@ -21,16 +37,18 @@ to your `pyproject.toml` file:
 ska-integration-test-harness = { git = "https://gitlab.com/ska-telescope/ska-integration-test-harness.git" }
 ```
 
-Then, you can run `poetry lock --no-update` to update the
+When you added that, you can run `poetry lock --no-update` to update the
 `poetry.lock` file with the new dependency and `poetry install` to install it.
-
-If you wish, you can also specify a branch, e.g.,  
-`ska-integration-test-harness = { git = "https://gitlab.com/ska-telescope/ska-integration-test-harness.git", branch = "main" }`.
-
 If you make changes to your code and want them reflected in your project,
-you can run 
-`poetry update ska-integration-test-harness && poetry install`.
+you can run `poetry update ska-integration-test-harness && poetry install`.
 
+If you wish, with this mode you can also point to a specific branch:
+
+```toml
+[tool.poetry.dependencies]
+... rest of your dependencies ...
+ska-integration-test-harness = { git = "https://gitlab.com/ska-telescope/ska-integration-test-harness.git", branch = "main" }
+```
 
 ## Architecture overview
 
@@ -317,3 +335,7 @@ def then_the_telescope_is_in_off_state(
     )
 
 ```
+
+A good example of tests script using this test harness is
+available in the
+[SKA TMC-MID Integration repository](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/-/merge_requests/234)

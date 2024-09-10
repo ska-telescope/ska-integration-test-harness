@@ -13,7 +13,9 @@ from ska_integration_test_harness.structure.csp_wrapper import CSPWrapper
 class ProductionCSPWrapper(CSPWrapper):
     """A wrapper for a production CSP.
 
-    TODO: describe differences.
+    Differently from the emulated CSP wrapper, when a move to on command
+    is called, the CSP master is supposed to be in OFF state, so it moves
+    to OFF state.
     """
 
     def __init__(
