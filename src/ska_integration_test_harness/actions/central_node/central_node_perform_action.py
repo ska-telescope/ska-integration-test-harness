@@ -7,7 +7,7 @@ from ska_integration_test_harness.inputs.json_input import JSONInput
 
 
 class CentralNodePerformAction(TelescopeCommandAction):
-    """A class for performing actions on the CentralNode."""
+    """Invoke a generic command on CentralNode."""
 
     def __init__(self, command_name: str, command_input: JSONInput):
         super().__init__()
@@ -22,4 +22,5 @@ class CentralNodePerformAction(TelescopeCommandAction):
         return result, message
 
     def termination_condition(self):
+        """No termination condition is provided for this action."""
         return []

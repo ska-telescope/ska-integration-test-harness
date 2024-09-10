@@ -23,6 +23,10 @@ class SetStandby(TelescopeAction[None]):
         self.telescope.csp.move_to_off()
 
     def termination_condition(self):
+        """Master devices must be in STANDBY state, while
+        subarrays must be in OFF state,
+        and all dishes should be in STANDBY_LP mode."""
+
         # subarrays must be in OFF state,
         # master devices must be in STANDBY state
         res = [

@@ -23,6 +23,8 @@ class SubarrayReleaseAllResources(TelescopeCommandAction):
         return result, message
 
     def termination_condition(self):
+        """All subarrays are in EMPTY state and resources are released."""
+
         # subarray devices are expected to be in EMPTY state
         res = all_subarrays_have_obs_state(self.telescope, ObsState.EMPTY)
 

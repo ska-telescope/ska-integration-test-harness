@@ -19,4 +19,5 @@ class SubarrayRestart(TelescopeAction):
         return result, message
 
     def termination_condition(self):
+        """All subarrays are in EMPTY state."""
         return all_subarrays_have_obs_state(self.telescope, ObsState.EMPTY)

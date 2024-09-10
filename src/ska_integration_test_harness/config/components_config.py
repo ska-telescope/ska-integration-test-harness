@@ -11,7 +11,7 @@ from dataclasses import dataclass
 
 @dataclass
 class SubsystemConfiguration(abc.ABC):
-    """Configuration for a telescope subsystem.
+    """A generic configuration for a telescope subsystem.
 
     A subsystem is a collection of devices that are logically grouped together,
     such as CSP, SDP, TMC and the Dishes. This class provides a way to

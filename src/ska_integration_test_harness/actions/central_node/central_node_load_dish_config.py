@@ -23,6 +23,8 @@ class CentralNodeLoadDishConfig(TelescopeCommandAction):
         return result, message
 
     def termination_condition(self):
+        """Check if sourceDishVccConfig attribute contains new JSON."""
+
         def _is_source_dish_cfg_changed(event):
             """Check if sourceDishVccConfig attribute contains new JSON."""
             return not self.dish_vcc_config.is_equal_to_json(
