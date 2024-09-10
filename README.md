@@ -335,3 +335,7 @@ def then_the_telescope_is_in_off_state(
     )
 
 ```
+
+A good example of tests script using this test harness is
+available in the
+[SKA TMC-MID Integration repository](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/-/merge_requests/234)
