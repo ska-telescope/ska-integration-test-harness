@@ -1,5 +1,5 @@
-API Documentation
-=================
+API Documentation (Core mechanisms)
+===================================
 
 Here below are documented the core mechanisms
 of the ska-integration-test-harness. Implementation of specific
