@@ -1,34 +1,23 @@
-"""Classes to manage info about Tango devices from ska-k8s-config-exporter."""
-
 from dataclasses import dataclass
-from typing import Iterable
+from datetime import datetime
+from typing import Iterable, Optional
 
 import requests
 
 
-class MissingTangoDeviceException(Exception):
-    """Exception raised when a Tango device is not found."""
-
-    def __init__(self, device_name: str):
-        """Initializes the exception with the name of the missing device.
-
-        :param device_name: Name of the missing device.
-        """
-        self.message = f"Tango device '{device_name}' not found."
-        super().__init__(self.message)
-
-
-class DevicesInfoNotAvailableException(Exception):
-    """Exception raised when the devices information is not available.
+class DevicesInfoServiceException(Exception):
+    """The devices information is not available or something went wrong.
 
     i.e., when the ska-k8s-config-exporter service is not available.
     """
 
     def __init__(self, message: str = ""):
         """Initializes the exception."""
-        self.message = "Devices information not available."
+        self.message = (
+            "Something went wrong when interrogating the devices information."
+        )
         if message:
-            self.message += f"Potential cause: {message}"
+            self.message += f" Potential cause: {message}"
         super().__init__(self.message)
 
 
@@ -42,12 +31,12 @@ class TangoDeviceInfo:
 
     - the name of the device (always present)
     - the version of the device (may be None)
-    """  # pylint: disable=line-too-long # noqa: E501
+    """
 
     name: str
     """Name of the device in the Tango database."""
 
-    version: str | None = None
+    version: Optional[str] = None
     """Version of the device, if available."""
 
     def get_recap(self, include_version: bool = True) -> str:
@@ -65,79 +54,21 @@ class TangoDeviceInfo:
         return res
 
     def __str__(self) -> str:
-        """String representation of the device information.
-
-        :return: The string representation.
-        """
+        """String representation of the device information."""
         return self.get_recap()
 
     def __repr__(self) -> str:
-        """String representation of the device information.
-
-        :return: The string representation.
-        """
+        """String representation of the device information."""
         return self.get_recap()
 
 
-class TelescopeDevicesInfo:
-    """Collection of devices information from ska-k8s-config-exporter.
+class DevicesInfoProvider:
+    """Provider to get info about Tango devices from ska-k8s-config-exporter.
 
-    A representation of the devices read from the
-    `ska-k8s-config-exporter <https://gitlab.com/ska-telescope/ska-k8s-config-exporter>`_
-    internal service.
-
-    The collection can be initialized with a set of devices and can be queried
-    to get the version of a device by its name.
-    """  # pylint: disable=line-too-long # noqa: E501
-
-    def __init__(self, devices: Iterable[TangoDeviceInfo]):
-        """Initializes the collection with the given devices.
-
-        :param devices: Association of device names to device information.
-        """
-
-        self.devices: dict[str, TangoDeviceInfo] = {}
-        """Association of device names to device information."""
-
-        for device_info in devices:
-            self.devices[device_info.name] = device_info
-
-    # -----------------------------------------------------------------
-    # Access to the devices information
-
-    def get_device_info(self, device_name: str) -> TangoDeviceInfo:
-        """Get the information of a device from its name.
-
-        :param device_name: Name of the device.
-        :return: Information of the device.
-        :raises MissingTangoDevice: If the device is not found.
-        """
-        if device_name not in self.devices:
-            raise MissingTangoDeviceException(device_name)
-        return self.devices[device_name]
-
-    def get_device_recap(self, device_name: str) -> str:
-        """Get a recap of the given device information.
-
-        Get a recap of the device information for the given device.
-        The recap contains the device name and its information
-        (for now, only the version). If the device is not found,
-        it is reported in the recap.
-
-        :param device_name: Name of the device you want to get the recap.
-        :return: Recap of the device information.
-        """
-        try:
-            device_info = self.get_device_info(device_name)
-            return device_info.get_recap()
-        except MissingTangoDeviceException:
-            return (
-                f"{device_name} (not found among the "
-                "k8s-config-exporter devices information)"
-            )
-
-    # -----------------------------------------------------------------
-    # Static method to read from ska-k8s-config-exporter
+    This class communicates with the ska-k8s-config-exporter service to fetch
+    and store the information about Tango devices. It also provides methods
+    to retrieve device information and recaps.
+    """
 
     DEFAULT_SERVICE_NAME = "ska-k8s-config-exporter"
     """Default name of the ska-k8s-config-exporter service."""
@@ -148,73 +79,108 @@ class TelescopeDevicesInfo:
     DEFAULT_PATH = "tango_devices"
     """Default path to interrogate the ska-k8s-config-exporter service."""
 
-    @staticmethod
-    def read_from_ska_k8s_config_exporter(
+    def __init__(
+        self,
         kube_namespace: str,
         service_name: str = DEFAULT_SERVICE_NAME,
         port: int = DEFAULT_PORT,
         path: str = DEFAULT_PATH,
-        timeout: int = 10,
-    ) -> "TelescopeDevicesInfo":
-        """Interrogate ska-k8s-config-exporter and get the devices information.
+    ):
+        """Initializes the DevicesInfoProvider with connection parameters.
 
-        Interrogate the
-        `ska-k8s-config-exporter <https://gitlab.com/ska-telescope/ska-k8s-config-exporter>`_
-        service to get the devices information. To do so, this method should
-        know:
+        :param kube_namespace: Kubernetes namespace where the service is running.
+        :param service_name: Name of the ska-k8s-config-exporter service
+            (has a default value).
+        :param port: Port where the service is listening
+            (has a default value).
+        :param path: Path to interrogate the service
+            (has a default value).
+        """
+        # -----------------------------------------------------------------
+        # details to connect to the ska-k8s-config-exporter service
 
-        - the kubernetes namespace where the service is running (mandatory)
-        - the name of the service (has a default value, usually it
-          does not need to be changed)
-        - the port where the service is listening (has a default value, usually
-          it does not need to be changed)
-        - the path to interrogate the service (has a default value, usually
-          it does not need to be changed)
+        self.kube_namespace = kube_namespace
+        """Kubernetes namespace where the service is running."""
+        self.service_name = service_name
+        """Name of the ska-k8s-config-exporter service."""
+        self.port = port
+        """Port where the service is listening."""
+        self.path = path
+        """Path to interrogate over the service to get all devices."""
 
-        If the service is not available, the method raises an exception.
+        # -----------------------------------------------------------------
+        # devices information
 
-        :param kube_namespace: Kubernetes namespace where the
-            service is running.
-        :param service_name: Name of the service.
-        :param port: Port where the service is listening.
-        :param path: Path to interrogate the service.
-        :param timeout: Timeout in seconds for the request
-            (default: 10 seconds).
+        self.last_devices_info: dict[str, TangoDeviceInfo] = {}
+        """Last devices information fetched from the service."""
+        self.last_update_time: datetime | None = None
+        """Time when the last update was done."""
 
-        :return: The devices information.
+    def get_update_service_url(self) -> str:
+        """Get the URL to update the devices information.
 
-        :raises DevicesInfoNotAvailable: If the service is not available.
-        """  # pylint: disable=line-too-long # noqa: E501
+        :return: URL to update the devices information.
+        """
+        return (
+            f"http://{self.service_name}.{self.kube_namespace}"
+            f":{self.port}/{self.path}"
+        )
 
-        url = f"http://{service_name}.{kube_namespace}:{port}/{path}"
+    def update(self, timeout: int = 10) -> None:
+        """Update the local devices information by calling the service.
+
+        Fetches the latest devices information from the ska-k8s-config-exporter
+        service and updates the internal state.
+
+        :param timeout: Timeout in seconds for the request (default: 10 seconds).
+        :raises DevicesInfoNotAvailableException: If the service is not available.
+        """
+        url = f"http://{self.service_name}.{self.kube_namespace}:{self.port}/{self.path}"
         try:
             response = requests.get(url, timeout=timeout)
             response.raise_for_status()
         except requests.exceptions.RequestException as error:
-            raise DevicesInfoNotAvailableException(
+            raise DevicesInfoServiceException(
                 f"Error when interrogating '{url}'."
             ) from error
 
         try:
             json_data: dict = response.json()
         except ValueError as error:
-            raise DevicesInfoNotAvailableException(
+            raise DevicesInfoServiceException(
                 f"Received invalid JSON data when interrogating '{url}'"
             ) from error
 
         items = json_data.get("tango_devices_info")
         if items is None or not isinstance(items, dict):
-            raise DevicesInfoNotAvailableException(
+            raise DevicesInfoServiceException(
                 f"The received JSON data (from '{url}') does not "
                 "contain the expected 'tango_devices_info' key "
                 f"or it is not a dictionary (value: {items})."
             )
 
-        return TelescopeDevicesInfo(
-            [
-                TelescopeDevicesInfo._extract_device_info(name, data)
-                for name, data in items.items()
-            ]
+        self.last_devices_info = {
+            name: self._extract_device_info(name, data)
+            for name, data in items.items()
+        }
+        self.last_update_time = datetime.now()
+
+    def get_device_recap(self, device_name: str) -> str:
+        """Get a recap of the given device information.
+
+        The recap contains the device name and its information (for now,
+        only the version). If the device is not found, it is reported
+        in the recap.
+
+        :param device_name: Name of the device to get the recap.
+        :return: Recap of the device information.
+        """
+        if device_name in self.last_devices_info:
+            return str(self.last_devices_info[device_name])
+
+        return (
+            f"{device_name} (not found among the "
+            "k8s-config-exporter devices information)"
         )
 
     @staticmethod
