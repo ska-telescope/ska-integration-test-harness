@@ -50,6 +50,34 @@ class TangoDeviceInfo:
     version: str | None = None
     """Version of the device, if available."""
 
+    def get_recap(self, include_version: bool = True) -> str:
+        """Get a recap of the device information.
+
+        Get a recap of the device information. The recap contains the device
+        name and its information (for now, only the version if available).
+
+        :param include_version: If True, the version is included in the recap.
+        :return: Recap of the device information.
+        """
+        res = f"{self.name} "
+        if include_version:
+            res += f"(version: {self.version or 'not available'})"
+        return res
+
+    def __str__(self) -> str:
+        """String representation of the device information.
+
+        :return: The string representation.
+        """
+        return self.get_recap()
+
+    def __repr__(self) -> str:
+        """String representation of the device information.
+
+        :return: The string representation.
+        """
+        return self.get_recap()
+
 
 class TelescopeDevicesInfo:
     """Collection of devices information from ska-k8s-config-exporter.
@@ -74,16 +102,42 @@ class TelescopeDevicesInfo:
         for device_info in devices:
             self.devices[device_info.name] = device_info
 
-    def get_version(self, device_name: str) -> str | None:
-        """Get the version of a device from its name.
+    # -----------------------------------------------------------------
+    # Access to the devices information
+
+    def get_device_info(self, device_name: str) -> TangoDeviceInfo:
+        """Get the information of a device from its name.
 
         :param device_name: Name of the device.
-        :return: Version of the device, if available.
+        :return: Information of the device.
         :raises MissingTangoDevice: If the device is not found.
         """
         if device_name not in self.devices:
             raise MissingTangoDeviceException(device_name)
-        return self.devices[device_name].version
+        return self.devices[device_name]
+
+    def get_device_recap(self, device_name: str) -> str:
+        """Get a recap of the given device information.
+
+        Get a recap of the device information for the given device.
+        The recap contains the device name and its information
+        (for now, only the version). If the device is not found,
+        it is reported in the recap.
+
+        :param device_name: Name of the device you want to get the recap.
+        :return: Recap of the device information.
+        """
+        try:
+            device_info = self.get_device_info(device_name)
+            return device_info.get_recap()
+        except MissingTangoDeviceException:
+            return (
+                f"{device_name} (not found among the "
+                "k8s-config-exporter devices information)"
+            )
+
+    # -----------------------------------------------------------------
+    # Static method to read from ska-k8s-config-exporter
 
     DEFAULT_SERVICE_NAME = "ska-k8s-config-exporter"
     """Default name of the ska-k8s-config-exporter service."""

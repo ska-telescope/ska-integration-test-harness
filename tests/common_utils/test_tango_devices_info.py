@@ -6,7 +6,7 @@ import pytest
 import requests
 from assertpy import assert_that
 
-from ska_integration_test_harness.config.tango_devices_info import (
+from ska_integration_test_harness.common_utils.tango_devices_info import (
     DevicesInfoNotAvailableException,
     MissingTangoDeviceException,
     TangoDeviceInfo,
@@ -15,37 +15,67 @@ from ska_integration_test_harness.config.tango_devices_info import (
 
 
 class TestTelescopeDevicesInfo:
-    """Tests for TelescopeDevicesInfo class using public methods."""
+    """Unit tests for TelescopeDevicesInfo class."""
 
-    def test_get_version_returns_version_when_device_exists(self):
-        """Returns version when the device exists in collection."""
+    def test_get_device_info_returns_info_when_device_exists(self):
+        """Returns device info when the device exists in the collection."""
         devices = [
-            TangoDeviceInfo(name="device1", version="1.0.0"),
-            TangoDeviceInfo(name="device2", version="2.0.0"),
+            TangoDeviceInfo(name="tango/device/1", version="1.0.0"),
+            TangoDeviceInfo(name="tango/device/2", version="2.0.0"),
         ]
         telescope_devices_info = TelescopeDevicesInfo(devices)
 
-        version = telescope_devices_info.get_version("device1")
+        device_info = telescope_devices_info.get_device_info("tango/device/1")
 
-        assert_that(version).is_equal_to("1.0.0")
+        assert_that(device_info.name).is_equal_to("tango/device/1")
+        assert_that(device_info.version).is_equal_to("1.0.0")
 
-    def test_get_version_raises_exception_when_device_does_not_exist(self):
+    def test_get_device_info_raises_exception_when_device_does_not_exist(self):
         """Raises MissingTangoDeviceException when device not found."""
-        devices = [TangoDeviceInfo(name="device1", version="1.0.0")]
+        devices = [TangoDeviceInfo(name="tango/device/1", version="1.0.0")]
         telescope_devices_info = TelescopeDevicesInfo(devices)
 
         with pytest.raises(MissingTangoDeviceException) as exc_info:
-            telescope_devices_info.get_version("device2")
+            telescope_devices_info.get_device_info("tango/device/2")
 
-        assert_that(str(exc_info.value)).contains("device2")
+        assert_that(str(exc_info.value)).contains("tango/device/2")
+
+    def test_get_device_recap_returns_correct_recap(self):
+        """Returns a correct recap for an existing device."""
+        devices = [
+            TangoDeviceInfo(name="tango/device/1", version="1.0.0"),
+            TangoDeviceInfo(name="tango/device/2", version=None),
+        ]
+        telescope_devices_info = TelescopeDevicesInfo(devices)
+
+        recap_device1 = telescope_devices_info.get_device_recap(
+            "tango/device/1"
+        )
+        recap_device2 = telescope_devices_info.get_device_recap(
+            "tango/device/2"
+        )
+        recap_device3 = telescope_devices_info.get_device_recap(
+            "tango/device/3"
+        )
+
+        assert_that(recap_device1).is_equal_to(
+            "tango/device/1 (version: 1.0.0)"
+        )
+        assert_that(recap_device2).is_equal_to(
+            "tango/device/2 (version: not available)"
+        )
+        assert_that(recap_device3).contains(
+            "tango/device/3 (not found among the "
+            "k8s-config-exporter devices information)"
+        )
 
     @patch("requests.get")
     def test_read_from_ska_k8s_calls_expected_url(self, mock_get):
         """Calls the expected URL to get devices information."""
         json_response = {
             "tango_devices_info": {
-                "device1": {"info": {"device_versionId": "1.0.0"}},
-                "device2": {"info": {"device_versionId": "2.0.0"}},
+                "tango/device/1": {"info": {"device_versionId": "1.0.0"}},
+                "tango/device/2": {"info": {"device_versionId": "2.0.0"}},
             }
         }
         mock_get.return_value.json.return_value = json_response
@@ -68,8 +98,8 @@ class TestTelescopeDevicesInfo:
         """Populates TelescopeDevicesInfo with devices having versions."""
         json_response = {
             "tango_devices_info": {
-                "device1": {"info": {"device_versionId": "1.0.0"}},
-                "device2": {"info": {"device_versionId": "2.0.0"}},
+                "tango/device/1": {"info": {"device_versionId": "1.0.0"}},
+                "tango/device/2": {"info": {"device_versionId": "2.0.0"}},
             }
         }
         mock_get.return_value.json.return_value = json_response
@@ -79,8 +109,12 @@ class TestTelescopeDevicesInfo:
             kube_namespace="namespace"
         )
 
-        assert_that(result.get_version("device1")).is_equal_to("1.0.0")
-        assert_that(result.get_version("device2")).is_equal_to("2.0.0")
+        assert_that(
+            result.get_device_info("tango/device/1").version
+        ).is_equal_to("1.0.0")
+        assert_that(
+            result.get_device_info("tango/device/2").version
+        ).is_equal_to("2.0.0")
 
     @patch("requests.get")
     def test_read_from_ska_k8s_returns_devices_info_with_missing_versions(
@@ -89,8 +123,8 @@ class TestTelescopeDevicesInfo:
         """Populates device info with devices having missing versions."""
         json_response = {
             "tango_devices_info": {
-                "device1": {"info": {}},  # No version provided
-                "device2": {"info": {"device_versionId": "2.0.0"}},
+                "tango/device/1": {"info": {}},  # No version provided
+                "tango/device/2": {"info": {"device_versionId": "2.0.0"}},
             }
         }
         mock_get.return_value.json.return_value = json_response
@@ -100,8 +134,10 @@ class TestTelescopeDevicesInfo:
             kube_namespace="namespace"
         )
 
-        assert_that(result.get_version("device1")).is_none()
-        assert_that(result.get_version("device2")).is_equal_to("2.0.0")
+        assert_that(result.get_device_info("tango/device/1").version).is_none()
+        assert_that(
+            result.get_device_info("tango/device/2").version
+        ).is_equal_to("2.0.0")
 
     @patch("requests.get")
     def test_read_from_ska_k8s_raises_exception_on_service_unavailability(
@@ -162,4 +198,4 @@ class TestTelescopeDevicesInfo:
         )
 
         with pytest.raises(MissingTangoDeviceException):
-            result.get_version("device1")
+            result.get_device_info("tango/device/1")
