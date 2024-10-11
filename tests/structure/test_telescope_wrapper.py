@@ -215,7 +215,7 @@ class TestTelescopeWrapper:
         assert_that(telescope2.csp).is_equal_to(csp)
         assert_that(telescope2.dishes).is_equal_to(dishes)
 
-    def test_telescope_wrapper_subsystems_recap_is_as_expected(self):
+    def test_subsystems_recap_recaps_all_subsystems(self):
         """The telescope wrapper exposes the subsystems recap."""
         telescope = TelescopeWrapper()
         tmc, sdp, csp, dishes = self.create_subsystems()
@@ -237,8 +237,8 @@ class TestTelescopeWrapper:
             "Dishes (emulated)",
         )
 
-    def test_telescope_wrapper_subsystems_recap_when_not_set_up(self):
-        """The telescope wrapper exposes the subsystems recap."""
+    def test_subsystems_recap_handles_no_subsystems_set_up(self):
+        """The recap contains a message when no subsystems are set up."""
         telescope = TelescopeWrapper()
 
         recap = telescope.get_subsystems_recap()
@@ -254,16 +254,24 @@ class TestTelescopeWrapper:
             "Dishes",
         )
 
-    def test_telescope_wrapper_subsystems_recap_is_updated_and_used(self):
-        """When the devices info is set, it is updated and used for recaps."""
-        telescope = TelescopeWrapper()
-        telescope.devices_info_provider = MagicMock(spec=DevicesInfoProvider)
+    def _mock_devices_info_provider(self) -> MagicMock:
+        """Mock a devices info provider with a get_recap method.
+
+        :return: A devices info provider mocked instance.
+        """
+        devices_info_provider = MagicMock(spec=DevicesInfoProvider)
 
         def get_recap(dev_name):
             """Return a mock recap for the given device name."""
             return f"{dev_name} (mock recap)"
 
-        telescope.devices_info_provider.get_device_recap = get_recap
+        devices_info_provider.get_device_recap = get_recap
+        return devices_info_provider
+
+    def test_subsystems_recap_when_devices_info_is_set_calls_update(self):
+        """When the devices info is set, it is updated and used for recaps."""
+        # setup a telescope with subsystems and a devices info provider
+        telescope = TelescopeWrapper()
         tmc, sdp, csp, dishes = self.create_subsystems()
         telescope.set_up(
             tmc=tmc,
@@ -271,11 +279,15 @@ class TestTelescopeWrapper:
             csp=csp,
             dishes=dishes,
         )
+        telescope.devices_info_provider = self._mock_devices_info_provider()
 
-        telescope.get_subsystems_recap(update_devices_info=True)
+        # get the recap
+        recap = telescope.get_subsystems_recap(update_devices_info=True)
 
+        # the recap method called for an update and
+        # generates the expected result
         telescope.devices_info_provider.update.assert_called_once()
-        assert_that(telescope.get_subsystems_recap()).described_as(
+        assert_that(recap).described_as(
             "The devices info provider is updated and used for recaps."
         ).contains(
             "- central_node: ska_mid/tm_central/central_node (mock recap)",
@@ -288,4 +300,29 @@ class TestTelescopeWrapper:
         ).contains(
             "- csp_subarray_leaf_node: not yet set",
             "- sdp_subarray_leaf_node: not yet set",
+        )
+
+    def test_subsystems_recap_does_not_call_update_if_specified(self):
+        """When the devices info is set, you can specify not to update it."""
+        # setup a telescope with subsystems and a devices info provider
+        telescope = TelescopeWrapper()
+        tmc, sdp, csp, dishes = self.create_subsystems()
+        telescope.set_up(
+            tmc=tmc,
+            sdp=sdp,
+            csp=csp,
+            dishes=dishes,
+        )
+        telescope.devices_info_provider = self._mock_devices_info_provider()
+
+        # get the recap
+        recap = telescope.get_subsystems_recap(update_devices_info=False)
+
+        # the recap method did not call for an update
+        telescope.devices_info_provider.update.assert_not_called()
+        assert_that(recap).described_as(
+            "The devices info provider is not updated when specified."
+        ).contains(
+            "- central_node: ska_mid/tm_central/central_node (mock recap)",
+            "- csp_master: mid-csp/elt/master (mock recap)",
         )
