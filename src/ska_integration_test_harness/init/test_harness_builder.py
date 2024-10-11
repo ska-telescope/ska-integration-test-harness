@@ -2,6 +2,9 @@
 
 import logging
 
+from ska_integration_test_harness.common_utils.tango_devices_info import (
+    DevicesInfoProvider,
+)
 from ska_integration_test_harness.config.reader.yaml_config_reader import (
     YAMLConfigurationReader,
 )
@@ -75,6 +78,16 @@ class TestHarnessBuilder:
 
         self.default_inputs: TestHarnessInputs = TestHarnessInputs()
         """The default inputs used to build the test harness."""
+
+        # TODO: move it to the configuration, but make it overridable (?)
+        # This concept of "configurable but overridable" is a bit tricky,
+        # but it may be useful in a good bunch of cases.
+        self.kube_namespace: str | None = None
+        """The Kubernetes namespace where the SUT is deployed.
+
+        It is optional, but if you set it, it will be used to connect to
+        get more information about the various subsystems devices.
+        """
 
         # --------------------------------------------------------------
         # internal tools
@@ -195,6 +208,23 @@ class TestHarnessBuilder:
         self._default_inputs_validated = True
         return self
 
+    def set_kubernetes_namespace(
+        self, kube_namespace: str
+    ) -> "TestHarnessBuilder":
+        """Set the Kubernetes namespace where the SUT is deployed.
+
+        It will help to connect to the ska-k8s-config-exporter service.
+
+        :param namespace: The Kubernetes namespace.
+        :returns: The current instance of TestHarnessBuilder with
+            the Kubernetes namespace set.
+        """
+        self._log_info(
+            f"Setting the Kubernetes namespace to: {kube_namespace}"
+        )
+        self.kube_namespace = kube_namespace
+        return self
+
     def is_config_validated(self) -> bool:
         """Check if the configurations have been validated."""
         return self._configs_validated
@@ -231,5 +261,20 @@ class TestHarnessBuilder:
         self.test_harness_factory.set_default_inputs(self.default_inputs)
         telescope = self.test_harness_factory.create_telescope_wrapper()
 
-        self._log_info("Telescope wrapper and subsystems set up successfully.")
+        if self.kube_namespace:
+            device_info_provider = DevicesInfoProvider(self.kube_namespace)
+            telescope.devices_info_provider = device_info_provider
+        else:
+            self._log_warning(
+                "You are building a test harness without setting the "
+                "Kubernetes namespace. You may miss some details about "
+                "the devices in the subsystems."
+            )
+
+        self._log_info(
+            "Telescope wrapper and subsystems set up successfully. "
+            "Now, a brief recap of the subsystems and their devices: \n"
+            f"{telescope.get_subsystems_recap()}"
+        )
+
         return telescope

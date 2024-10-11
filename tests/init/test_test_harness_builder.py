@@ -5,6 +5,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from assertpy import assert_that
 
+from ska_integration_test_harness.common_utils.tango_devices_info import (
+    DevicesInfoProvider,
+)
 from ska_integration_test_harness.init.test_harness_builder import (
     TestHarnessBuilder,
 )
@@ -30,6 +33,11 @@ class TestTestHarnessBuilder:
     but not semantically meaningful (it doesn't matter for the tests,
     since they will be needed only in teardown procedures or similar).
     """
+
+    @pytest.fixture(autouse=True)
+    def telescope_wrapper_is_not_yet_defined(self):
+        """Ensure the telescope wrapper is not yet defined."""
+        TelescopeWrapper._instance = None  # pylint: disable=protected-access
 
     CONFIG_DATA_DIR = "tests/config_examples"
 
@@ -255,12 +263,19 @@ class TestTestHarnessBuilder:
         # check that the warnings were logged
         mock_logger.warning.assert_called()
         logger_warning_calls = mock_logger.warning.call_args_list
-        assert_that(logger_warning_calls).is_length(2)
+        assert_that(len(logger_warning_calls)).described_as(
+            "Expected at least 2 warning logs, for missing validations"
+        ).is_greater_than_or_equal_to(2)
+
         # (args[1] because of log.warning("PREFIX: %s", *args) signature)
-        assert_that(logger_warning_calls[0].args[1]).contains_ignoring_case(
+        assert_that(logger_warning_calls[0].args[1]).described_as(
+            "Expected warning for missing validation of configurations"
+        ).contains_ignoring_case(
             "build", "test harness", "without validating", "configurations"
         )
-        assert_that(logger_warning_calls[1].args[1]).contains_ignoring_case(
+        assert_that(logger_warning_calls[1].args[1]).described_as(
+            "Expected warning for missing validation of default inputs"
+        ).contains_ignoring_case(
             "build", "test harness", "without validating", "default inputs"
         )
 
@@ -280,3 +295,114 @@ class TestTestHarnessBuilder:
         builder.read_config_file(missing_section_config_file)
         with pytest.raises(AttributeError):
             builder.build()
+
+    @patch("tango.DeviceProxy")
+    @patch("tango.db.Database", MagicMock())
+    def test_build_logs_a_recap_of_subsystems_and_devices(
+        self,
+        mock_device_proxy: MagicMock,
+        config_file: str,
+        valid_json_input: JSONInput,
+    ):
+        """When the build method is called, a recap of the subsystems and
+        devices is logged. This is useful for debugging purposes."""
+
+        # patch method logging.getLogger to return MagicMock
+        builder = TestHarnessBuilder()
+        mock_logger = MagicMock()
+        builder.logger = mock_logger
+        mock_device_proxy.return_value = MagicMock()
+        mock_device_proxy.return_value.dev_name.return_value = "mock/device/1"
+
+        builder.read_config_file(config_file)
+        builder.validate_configurations()
+        builder.set_default_inputs(
+            TestHarnessInputs(
+                default_vcc_config_input=valid_json_input,
+                assign_input=valid_json_input,
+                configure_input=valid_json_input,
+                release_input=valid_json_input,
+                scan_input=valid_json_input,
+            )
+        )
+        builder.validate_default_inputs()
+        builder.build()
+
+        mock_logger.info.assert_called()
+        logger_info_calls = mock_logger.info.call_args_list
+        assert_that(logger_info_calls[-1].args[1]).described_as(
+            "Expected last log to contain the recap of subsystems"
+        ).contains(
+            "recap",
+            "subsystems",
+            "devices",
+            "TMC (production). Devices:",
+            "CSP (production). Devices:",
+            "SDP (emulated). Devices:",
+            "Dishes (emulated). Devices:",
+            "- central_node: mock/device/1",
+            "- sdp_master: mock/device/1",
+            "- csp_master: mock/device/1",
+            "- dish_001: mock/device/1",
+        )
+
+    @patch("tango.DeviceProxy")
+    @patch("tango.db.Database", MagicMock())
+    @patch(
+        "ska_integration_test_harness.init."
+        "test_harness_builder.DevicesInfoProvider"
+    )
+    def test_build_uses_devices_info_provider_if_kube_namespace_is_set(
+        self,
+        mock_devices_info_provider: MagicMock,
+        mock_device_proxy: MagicMock,
+        config_file: str,
+        valid_json_input: JSONInput,
+    ):
+        """When the build method is called, it uses a DevicesInfoProvider
+        to get the devices information. This is useful for debugging purposes.
+        """
+
+        # patch method logging.getLogger to return MagicMock
+        builder = TestHarnessBuilder()
+        mock_logger = MagicMock()
+        builder.logger = mock_logger
+        mock_device_proxy.return_value = MagicMock()
+        mock_device_proxy.return_value.dev_name.return_value = "mock/device/1"
+        dev_info_provider = MagicMock(spec=DevicesInfoProvider)
+        dev_info_provider.get_device_recap = MagicMock()
+        dev_info_provider.get_device_recap.return_value = (
+            "mock/device/1 (mocked devices info recap)"
+        )
+        mock_devices_info_provider.return_value = dev_info_provider
+
+        builder.set_kubernetes_namespace("mock kube namespace")
+        builder.read_config_file(config_file)
+        builder.validate_configurations()
+        builder.set_default_inputs(
+            TestHarnessInputs(
+                default_vcc_config_input=valid_json_input,
+                assign_input=valid_json_input,
+                configure_input=valid_json_input,
+                release_input=valid_json_input,
+                scan_input=valid_json_input,
+            )
+        )
+        builder.validate_default_inputs()
+        telescope = builder.build()
+
+        assert_that(telescope.devices_info_provider).described_as(
+            "Expected the telescope wrapper to have a devices_info_provider"
+        ).is_equal_to(dev_info_provider)
+        mock_devices_info_provider.assert_called_with("mock kube namespace")
+        dev_info_provider.update.assert_called()
+        dev_info_provider.get_device_recap.assert_called_with("mock/device/1")
+        logger_info_calls = mock_logger.info.call_args_list
+        assert_that(logger_info_calls[-1].args[1]).described_as(
+            "Expected last log to contain the recap of subsystems"
+        ).contains(
+            "- central_node: mock/device/1 (mocked devices info recap)",
+            "- sdp_master: mock/device/1 (mocked devices info recap)",
+            "- csp_master: mock/device/1 (mocked devices info recap)",
+            "- dish_001: mock/device/1 (mocked devices info recap)",
+        )
