@@ -4,98 +4,86 @@ import abc
 
 import tango
 
+from ska_integration_test_harness.common_utils.tango_devices_info import (
+    DevicesInfoProvider,
+)
 from ska_integration_test_harness.config.components_config import (
     TMCConfiguration,
 )
+from ska_integration_test_harness.structure.subsystem_wrapper import (
+    SubsystemWrapper,
+)
 
 
-class TMCWrapper(abc.ABC):
+class TMCWrapper(SubsystemWrapper, abc.ABC):
     """A wrapper for the TMC component."""
-
-    # pylint: disable=too-many-instance-attributes
 
     def __init__(self, tmc_configuration: TMCConfiguration):
         """Initialise the TMC wrapper.
 
-        Args:
-            tmc_configuration: The TMC configuration.
+        :param tmc_configuration: The TMC configuration.
         """
+        super().__init__()
         self.central_node = tango.DeviceProxy(
             tmc_configuration.centralnode_name
         )
-        self.central_node.set_timeout_millis(5000)
-
         self.subarray_node = tango.DeviceProxy(
             tmc_configuration.tmc_subarraynode1_name
         )
-        self.subarray_node.set_timeout_millis(5000)
-
         self.csp_master_leaf_node = tango.DeviceProxy(
             tmc_configuration.tmc_csp_master_leaf_node_name
         )
         self.sdp_master_leaf_node = tango.DeviceProxy(
             tmc_configuration.tmc_sdp_master_leaf_node_name
         )
-
-        self.dish_leaf_node_list = [  # Those instead are inside TMC
+        self.dish_leaf_node_list = [
             tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node1_name),
             tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node2_name),
             tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node3_name),
             tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node4_name),
         ]
+        self.csp_subarray_leaf_node = None
+        self.sdp_subarray_leaf_node = None
 
-        for dish_leaf_node in self.dish_leaf_node_list:
-            dish_leaf_node.set_timeout_millis(5000)
+    # --------------------------------------------------------------
+    # Subsystem properties definition
 
-        # Create Dish1 leaf node admin device proxy
-        self.dish1_leaf_admin_dev_name = self.dish_leaf_node_list[0].adm_name()
-        self.dish1_leaf_admin_dev_proxy = tango.DeviceProxy(
-            self.dish1_leaf_admin_dev_name
-        )
+    def get_subsystem_name(self) -> str:
+        """Get the name of the subsystem."""
+        return "TMC"
 
-        # Create (but not initialise) the subarray leaf nodes
-        self.csp_subarray_leaf_node: tango.DeviceProxy | None = None
-        self.sdp_subarray_leaf_node: tango.DeviceProxy | None = None
+    def get_all_devices(self) -> dict[str, tango.DeviceProxy]:
+        """Get all the sub-system devices as a dictionary."""
+        res = {
+            "central_node": self.central_node,
+            "subarray_node": self.subarray_node,
+            "csp_master_leaf_node": self.csp_master_leaf_node,
+            "sdp_master_leaf_node": self.sdp_master_leaf_node,
+            "dish_leaf_nodes": self.dish_leaf_node_list,
+        }
 
-    # -----------------------------------------------------------
-    # CentralNode properties
+        if self.csp_subarray_leaf_node is not None:
+            res["csp_subarray_leaf_node"] = self.csp_subarray_leaf_node
 
-    @property
-    def is_dish_vcc_config_set(self):
-        """Return DishVccConfigSet flag"""
-        return self.central_node.isDishVccConfigSet
+        if self.sdp_subarray_leaf_node is not None:
+            res["sdp_subarray_leaf_node"] = self.sdp_subarray_leaf_node
 
-    @property
-    def dish_vcc_validation_status(self):
-        """Current dish vcc validation status of central node"""
-        return self.central_node.DishVccValidationStatus
+        return res
 
-    # -----------------------------------------------------------
-    # Subarray init methods
+    def get_recap(
+        self, devices_info_provider: DevicesInfoProvider | None = None
+    ) -> str:
+        recap = super().get_recap(devices_info_provider)
 
-    def is_subarray_initialised(self) -> bool:
-        """Check if the subarray is initialised"""
-        return self.csp_subarray_leaf_node and self.sdp_subarray_leaf_node
+        # if the devices are not yet set, we add a note in the recap
+        if self.csp_subarray_leaf_node is None:
+            recap += "- csp_subarray_leaf_node: not yet set\n"
 
-    def set_subarray_id(self, subarray_id: int):
-        """Set subarray ID"""
+        if self.sdp_subarray_leaf_node is None:
+            recap += "- sdp_subarray_leaf_node: not yet set\n"
 
-        self.subarray_node = tango.DeviceProxy(
-            f"ska_mid/tm_subarray_node/{subarray_id}"
-        )
-
-        # NOTE: why zfill(2) after the first DeviceProxy creation?
-        subarray_id = str(subarray_id).zfill(2)
-
-        self.csp_subarray_leaf_node = tango.DeviceProxy(
-            f"ska_mid/tm_leaf_node/csp_subarray{subarray_id}"
-        )
-        self.sdp_subarray_leaf_node = tango.DeviceProxy(
-            f"ska_mid/tm_leaf_node/sdp_subarray{subarray_id}"
-        )
-
-    # -----------------------------------------------------------
-    # Teardown actions
+    # --------------------------------------------------------------
+    # Specific TMC methods and properties
 
     @abc.abstractmethod
     def tear_down(self) -> None:

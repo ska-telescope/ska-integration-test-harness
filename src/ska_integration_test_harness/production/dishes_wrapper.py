@@ -15,6 +15,15 @@ class ProductionDishesWrapper(DishesWrapper):
     in the Tango database the real dishes devices.
     """
 
+    # --------------------------------------------------------------
+    # Subsystem properties definition
+
+    def is_emulated(self) -> bool:
+        return False
+
+    # --------------------------------------------------------------
+    # Specific Dishes methods and properties
+
     def _pre_init_dish_names(
         self, dishes_configuration: DishesConfiguration
     ) -> None:

@@ -7,17 +7,41 @@ import tango
 from ska_integration_test_harness.config.components_config import (
     SDPConfiguration,
 )
+from ska_integration_test_harness.structure.subsystem_wrapper import (
+    SubsystemWrapper,
+)
 
 
-class SDPWrapper(abc.ABC):
+class SDPWrapper(SubsystemWrapper, abc.ABC):
     """A test wrapper for the SDP."""
 
     def __init__(self, sdp_configuration: SDPConfiguration):
-        """Initialise the SDP wrapper."""
+        """Initialise the SDP wrapper.
+
+        :param sdp_configuration: The SDP configuration.
+        """
+        super().__init__()
         self.sdp_master = tango.DeviceProxy(sdp_configuration.sdp_master_name)
         self.sdp_subarray = tango.DeviceProxy(
             sdp_configuration.sdp_subarray1_name
         )
+
+    # --------------------------------------------------------------
+    # Subsystem properties definition
+
+    def get_subsystem_name(self) -> str:
+        """Get the name of the subsystem."""
+        return "SDP"
+
+    def get_all_devices(self) -> dict[str, tango.DeviceProxy]:
+        """Get all the sub-system devices as a dictionary."""
+        return {
+            "sdp_master": self.sdp_master,
+            "sdp_subarray": self.sdp_subarray,
+        }
+
+    # --------------------------------------------------------------
+    # Specific SDP methods and properties
 
     def set_subarray_id(self, subarray_id: str) -> None:
         """Set the subarray ID on the SDP subarray."""

@@ -19,6 +19,15 @@ class EmulatedCSPWrapper(CSPWrapper):
     procedure for emulated devices.
     """
 
+    # --------------------------------------------------------------
+    # Subsystem properties definition
+
+    def is_emulated(self) -> bool:
+        return True
+
+    # --------------------------------------------------------------
+    # Specific CSP methods and properties
+
     def move_to_on(self) -> None:
         # NOTE: in old code this line was AFTER
         # self.central_node.TelescopeOn(). Empirically,

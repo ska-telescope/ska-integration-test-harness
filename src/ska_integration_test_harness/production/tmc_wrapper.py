@@ -50,6 +50,15 @@ class ProductionTMCWrapper(TMCWrapper):
         # configure logging (used also in tear down)
         self.logger = logging.getLogger(__name__)
 
+    # --------------------------------------------------------------
+    # Subsystem properties definition
+
+    def is_emulated(self) -> bool:
+        return False
+
+    # --------------------------------------------------------------
+    # Specific TMC methods and properties
+
     def tear_down(self) -> None:
         """Tear down the TMC devices.
 

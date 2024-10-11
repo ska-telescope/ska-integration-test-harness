@@ -7,18 +7,21 @@ import tango
 from ska_integration_test_harness.config.components_config import (
     DishesConfiguration,
 )
+from ska_integration_test_harness.structure.subsystem_wrapper import (
+    SubsystemWrapper,
+)
 
 
-# NOTE: in future, may some dishes be emulated and some real?
-class DishesWrapper(abc.ABC):
+class DishesWrapper(SubsystemWrapper, abc.ABC):
     """A test wrapper for the dishes."""
 
     def __init__(self, dishes_configuration: DishesConfiguration):
-        """Initialise the dishes wrapper."""
+        """Initialise the dishes wrapper.
 
+        :param dishes_configuration: The dishes configuration.
+        """
+        super().__init__()
         self._pre_init_dish_names(dishes_configuration)
-
-        # NOTE: currently dishes are fixed, may they be dynamic in future?
         self.dish_master_dict = {
             "dish_001": tango.DeviceProxy(
                 dishes_configuration.dish_master1_name
@@ -34,11 +37,24 @@ class DishesWrapper(abc.ABC):
             ),
         }
 
-        # Create Dish1 admin device proxy
         self.dish1_admin_dev_name = self.dish_master_list[0].adm_name()
         self.dish1_admin_dev_proxy = tango.DeviceProxy(
             self.dish1_admin_dev_name
         )
+
+    # --------------------------------------------------------------
+    # Subsystem properties definition
+
+    def get_subsystem_name(self) -> str:
+        """Get the name of the subsystem."""
+        return "Dishes"
+
+    def get_all_devices(self) -> dict[str, tango.DeviceProxy]:
+        """Get all the sub-system devices as a dictionary."""
+        return self.dish_master_dict
+
+    # --------------------------------------------------------------
+    # Specific Dishes methods and properties
 
     @abc.abstractmethod
     def _pre_init_dish_names(

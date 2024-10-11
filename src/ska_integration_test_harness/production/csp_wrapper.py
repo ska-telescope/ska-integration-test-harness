@@ -30,6 +30,15 @@ class ProductionCSPWrapper(CSPWrapper):
         super().__init__(csp_configuration)
         self.all_production = all_production
 
+    # --------------------------------------------------------------
+    # Subsystem properties definition
+
+    def is_emulated(self) -> bool:
+        return False
+
+    # --------------------------------------------------------------
+    # Specific CSP methods and properties
+
     WAIT_FOR_OFF_TIMEOUT = 50
 
     def move_to_on(self) -> None:

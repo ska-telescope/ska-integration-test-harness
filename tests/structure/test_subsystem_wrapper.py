@@ -107,7 +107,7 @@ class TestSubsystemWrapper:
         recap = subsystem.get_recap(devices_info_provider)
 
         assert_that(recap).contains(
-            "MockSubsystem (production). Devices:\n", 
+            "MockSubsystem (production). Devices:\n",
             "- tango/device/1: tango/device/1 (not found",
             "- tango/device/2: tango/device/2 (not found",
         )
