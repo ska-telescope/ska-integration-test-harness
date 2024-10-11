@@ -55,11 +55,14 @@ class TestDevicesInfoProvider:
         mock_get.return_value.json.return_value = json_response
         mock_get.return_value.status_code = 200
 
-        devices_info_provider = DevicesInfoProvider(kube_namespace="namespace")
+        devices_info_provider = DevicesInfoProvider(
+            kube_namespace="dummy-namespace"
+        )
         devices_info_provider.update()
 
         mock_get.assert_called_once_with(
-            "http://ska-k8s-config-exporter.namespace:8080/tango_devices",
+            "http://ska-k8s-config-exporter-service.dummy-namespace"
+            ":8080/tango_devices",
             timeout=10,
         )
 

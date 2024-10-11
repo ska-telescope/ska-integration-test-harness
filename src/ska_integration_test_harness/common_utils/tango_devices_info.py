@@ -85,7 +85,7 @@ class DevicesInfoProvider:
     to retrieve device information and recaps.
     """  # pylint: disable=line-too-long # noqa: E501
 
-    DEFAULT_SERVICE_NAME = "ska-k8s-config-exporter"
+    DEFAULT_SERVICE_NAME = "ska-k8s-config-exporter-service"
     """Default name of the ska-k8s-config-exporter service."""
 
     DEFAULT_PORT = 8080
