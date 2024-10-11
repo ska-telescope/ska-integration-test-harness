@@ -1,6 +1,19 @@
+"""Module to get information about Tango devices from ska-k8s-config-exporter.
+
+This module contains classes to get information about Tango devices from the
+`ska-k8s-config-exporter <https://gitlab.com/ska-telescope/ska-k8s-config-exporter>`_
+service. The information includes the name and version of the active
+Tango devices.
+
+The main classes are:
+
+- :class:`TangoDeviceInfo`: Information about a Tango device.
+- :class:`DevicesInfoProvider`: Provider to communicate with the
+  service and get the devices information.
+"""  # pylint: disable=line-too-long # noqa: E501
+
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Iterable, Optional
 
 import requests
 
@@ -31,12 +44,12 @@ class TangoDeviceInfo:
 
     - the name of the device (always present)
     - the version of the device (may be None)
-    """
+    """  # pylint: disable=line-too-long # noqa: E501
 
     name: str
     """Name of the device in the Tango database."""
 
-    version: Optional[str] = None
+    version: str | None = None
     """Version of the device, if available."""
 
     def get_recap(self, include_version: bool = True) -> str:
@@ -65,10 +78,12 @@ class TangoDeviceInfo:
 class DevicesInfoProvider:
     """Provider to get info about Tango devices from ska-k8s-config-exporter.
 
-    This class communicates with the ska-k8s-config-exporter service to fetch
+    This class communicates with the
+    `ska-k8s-config-exporter <https://gitlab.com/ska-telescope/ska-k8s-config-exporter>`_
+    service to fetch
     and store the information about Tango devices. It also provides methods
     to retrieve device information and recaps.
-    """
+    """  # pylint: disable=line-too-long # noqa: E501
 
     DEFAULT_SERVICE_NAME = "ska-k8s-config-exporter"
     """Default name of the ska-k8s-config-exporter service."""
@@ -88,7 +103,8 @@ class DevicesInfoProvider:
     ):
         """Initializes the DevicesInfoProvider with connection parameters.
 
-        :param kube_namespace: Kubernetes namespace where the service is running.
+        :param kube_namespace: Kubernetes namespace where the
+            service is running.
         :param service_name: Name of the ska-k8s-config-exporter service
             (has a default value).
         :param port: Port where the service is listening
@@ -132,10 +148,12 @@ class DevicesInfoProvider:
         Fetches the latest devices information from the ska-k8s-config-exporter
         service and updates the internal state.
 
-        :param timeout: Timeout in seconds for the request (default: 10 seconds).
-        :raises DevicesInfoNotAvailableException: If the service is not available.
+        :param timeout: Timeout in seconds for the request
+            (default: 10 seconds).
+        :raises DevicesInfoServiceException: If the service
+            is not available, or it does not respond as expected.
         """
-        url = f"http://{self.service_name}.{self.kube_namespace}:{self.port}/{self.path}"
+        url = self.get_update_service_url()
         try:
             response = requests.get(url, timeout=timeout)
             response.raise_for_status()

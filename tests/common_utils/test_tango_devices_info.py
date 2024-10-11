@@ -1,3 +1,5 @@
+"""Unit tests for DevicesInfoProvider class and its utilities."""
+
 from unittest.mock import patch
 
 import pytest
@@ -13,37 +15,6 @@ from ska_integration_test_harness.common_utils.tango_devices_info import (
 
 class TestDevicesInfoProvider:
     """Unit tests for DevicesInfoProvider class."""
-
-    def test_get_device_info_returns_info_when_device_exists(self):
-        """Returns device info when the device exists in the collection."""
-        devices_info_provider = DevicesInfoProvider(kube_namespace="namespace")
-        devices_info_provider.last_devices_info = {
-            "tango/device/1": TangoDeviceInfo(
-                name="tango/device/1", version="1.0.0"
-            ),
-            "tango/device/2": TangoDeviceInfo(
-                name="tango/device/2", version="2.0.0"
-            ),
-        }
-
-        device_info = devices_info_provider.get_device_info("tango/device/1")
-
-        assert_that(device_info.name).is_equal_to("tango/device/1")
-        assert_that(device_info.version).is_equal_to("1.0.0")
-
-    def test_get_device_info_raises_exception_when_device_does_not_exist(self):
-        """Raises DevicesInfoServiceException when device not found."""
-        devices_info_provider = DevicesInfoProvider(kube_namespace="namespace")
-        devices_info_provider.last_devices_info = {
-            "tango/device/1": TangoDeviceInfo(
-                name="tango/device/1", version="1.0.0"
-            ),
-        }
-
-        with pytest.raises(KeyError) as exc_info:
-            devices_info_provider.get_device_info("tango/device/2")
-
-        assert_that(str(exc_info.value)).contains("tango/device/2")
 
     def test_get_device_recap_returns_correct_recap(self):
         """Returns a correct recap for an existing device."""
@@ -74,7 +45,8 @@ class TestDevicesInfoProvider:
             "tango/device/2 (version: not available)"
         )
         assert_that(recap_device3).contains(
-            "tango/device/3 (not found among the k8s-config-exporter devices information)"
+            "tango/device/3 (not found among the "
+            "k8s-config-exporter devices information)"
         )
 
     @patch("requests.get")
@@ -113,11 +85,11 @@ class TestDevicesInfoProvider:
         devices_info_provider.update()
 
         assert_that(
-            devices_info_provider.get_device_info("tango/device/1").version
-        ).is_equal_to("1.0.0")
+            devices_info_provider.get_device_recap("tango/device/1")
+        ).is_equal_to("tango/device/1 (version: 1.0.0)")
         assert_that(
-            devices_info_provider.get_device_info("tango/device/2").version
-        ).is_equal_to("2.0.0")
+            devices_info_provider.get_device_recap("tango/device/2")
+        ).is_equal_to("tango/device/2 (version: 2.0.0)")
 
     @patch("requests.get")
     def test_update_handles_missing_versions(self, mock_get):
@@ -135,11 +107,11 @@ class TestDevicesInfoProvider:
         devices_info_provider.update()
 
         assert_that(
-            devices_info_provider.get_device_info("tango/device/1").version
-        ).is_none()
+            devices_info_provider.get_device_recap("tango/device/1")
+        ).is_equal_to("tango/device/1 (version: not available)")
         assert_that(
-            devices_info_provider.get_device_info("tango/device/2").version
-        ).is_equal_to("2.0.0")
+            devices_info_provider.get_device_recap("tango/device/2")
+        ).is_equal_to("tango/device/2 (version: 2.0.0)")
 
     @patch("requests.get")
     def test_update_raises_exception_on_service_unavailability(self, mock_get):
@@ -168,7 +140,7 @@ class TestDevicesInfoProvider:
 
     @patch("requests.get")
     def test_update_raises_exception_on_invalid_device_info(self, mock_get):
-        """Raises DevicesInfoServiceException when tango_devices_info is not a dictionary."""
+        """Raises exception when returned data has not the expected format."""
         json_response = {
             "tango_devices_info": None  # Invalid tango_devices_info
         }
@@ -192,5 +164,5 @@ class TestDevicesInfoProvider:
         devices_info_provider = DevicesInfoProvider(kube_namespace="namespace")
         devices_info_provider.update()
 
-        with pytest.raises(KeyError):
-            devices_info_provider.get_device_info("tango/device/1")
+        recap = devices_info_provider.get_device_recap("tango/device/1")
+        assert_that(recap).contains("tango/device/1 (not found among the")
