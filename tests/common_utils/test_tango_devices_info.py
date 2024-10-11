@@ -9,8 +9,8 @@ from assertpy import assert_that
 from ska_integration_test_harness.common_utils.tango_devices_info import (
     DevicesInfoProvider,
     DevicesInfoServiceException,
-    TangoDeviceInfo,
 )
+from tests.common_utils.utils import inject_device_info
 
 
 class TestDevicesInfoProvider:
@@ -19,14 +19,8 @@ class TestDevicesInfoProvider:
     def test_get_device_recap_returns_correct_recap(self):
         """Returns a correct recap for an existing device."""
         devices_info_provider = DevicesInfoProvider(kube_namespace="namespace")
-        devices_info_provider.last_devices_info = {
-            "tango/device/1": TangoDeviceInfo(
-                name="tango/device/1", version="1.0.0"
-            ),
-            "tango/device/2": TangoDeviceInfo(
-                name="tango/device/2", version=None
-            ),
-        }
+        inject_device_info(devices_info_provider, "tango/device/1", "1.0.0")
+        inject_device_info(devices_info_provider, "tango/device/2", None)
 
         recap_device1 = devices_info_provider.get_device_recap(
             "tango/device/1"
