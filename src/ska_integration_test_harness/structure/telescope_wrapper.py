@@ -4,9 +4,15 @@ from assertpy import assert_that
 from ska_control_model import ObsState
 from ska_tango_testing.integration import TangoEventTracer
 
+from ska_integration_test_harness.common_utils.tango_devices_info import (
+    DevicesInfoProvider,
+)
 from ska_integration_test_harness.structure.csp_wrapper import CSPWrapper
 from ska_integration_test_harness.structure.dishes_wrapper import DishesWrapper
 from ska_integration_test_harness.structure.sdp_wrapper import SDPWrapper
+from ska_integration_test_harness.structure.subsystem_wrapper import (
+    SubsystemWrapper,
+)
 from ska_integration_test_harness.structure.tmc_wrapper import TMCWrapper
 
 
@@ -69,6 +75,12 @@ class TelescopeWrapper:
     _csp: CSPWrapper | None = None
     _dishes: DishesWrapper | None = None
 
+    devices_info_provider: DevicesInfoProvider | None = None
+    """The devices info provider used to access the devices information.
+
+    (Used for recap purposes).
+    """
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(TelescopeWrapper, cls).__new__(cls)
@@ -117,6 +129,31 @@ class TelescopeWrapper:
         self.fail_if_not_set_up()
         return self._dishes
 
+    def get_subsystems_recap(self, update_devices_info: bool = True) -> str:
+        """Get a recap of the active sub-systems and their devices.
+
+        Get a recap of the active sub-systems, their production-emulated
+        status, and the devices they contain.
+
+        :param update_devices_info: If True, the devices info provider
+            is updated before getting the sub-systems recaps.
+
+        :return: The recap string.
+        """
+        if self.devices_info_provider and update_devices_info:
+            self.devices_info_provider.update()
+
+        recap = ""
+        for subsystem in [self._tmc, self._sdp, self._csp, self._dishes]:
+            if subsystem:
+                assert isinstance(subsystem, SubsystemWrapper)
+                recap += subsystem.get_recap(self.devices_info_provider) + "\n"
+
+        if recap == "":
+            recap = "No sub-systems are currently set up."
+
+        return recap
+
     # -----------------------------------------------------------------
     # Initialisation and tear down methods
 
@@ -127,7 +164,13 @@ class TelescopeWrapper:
         csp: CSPWrapper,
         dishes: DishesWrapper,
     ) -> None:
-        """Initialise the telescope test structure with the given devices."""
+        """Initialise the telescope test structure with the given devices.
+
+        :param tmc: The TMC sub-system wrapper.
+        :param sdp: The SDP sub-system wrapper.
+        :param csp: The CSP sub-system wrapper.
+        :param dishes: The Dishes sub-system wrapper.
+        """
         self._tmc = tmc
         self._sdp = sdp
         self._csp = csp
@@ -187,20 +230,17 @@ class TelescopeWrapper:
 
         :raises ValueError: If one or more sub-systems are missing.
         """
-        if (
-            self._tmc is None
-            or self._sdp is None
-            or self._csp is None
-            or self._dishes is None
-        ):
-            raise ValueError(
-                "Telescope test structure is not set up "
-                "(one or more sub-systems are missing). Sub-systems: "
-                f"TMC={self._tmc}, SDP={self._sdp}, "
-                f"CSP={self._csp}, Dishes={self._dishes}.\n"
-                "Please set up the telescope test structure first calling the "
-                "`set_up` method."
-            )
+        if self._tmc and self._sdp and self._csp and self._dishes:
+            return
+
+        raise ValueError(
+            "Telescope test structure is not set up "
+            "(one or more sub-systems are missing). Sub-systems: "
+            f"TMC={self._tmc}, SDP={self._sdp}, "
+            f"CSP={self._csp}, Dishes={self._dishes}.\n"
+            "Please set up the telescope test structure first calling the "
+            "`set_up` method."
+        )
 
     # -----------------------------------------------------------------
     # Other "technical" commands

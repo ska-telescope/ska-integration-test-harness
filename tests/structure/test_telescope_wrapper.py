@@ -6,6 +6,9 @@ import pytest
 import tango
 from assertpy import assert_that
 
+from ska_integration_test_harness.common_utils.tango_devices_info import (
+    DevicesInfoProvider,
+)
 from ska_integration_test_harness.emulated.dishes_wrapper import (
     EmulatedDishesWrapper,
 )
@@ -211,3 +214,78 @@ class TestTelescopeWrapper:
         assert_that(telescope2.sdp).is_equal_to(sdp)
         assert_that(telescope2.csp).is_equal_to(csp)
         assert_that(telescope2.dishes).is_equal_to(dishes)
+
+    def test_telescope_wrapper_subsystems_recap_is_as_expected(self):
+        """The telescope wrapper exposes the subsystems recap."""
+        telescope = TelescopeWrapper()
+        tmc, sdp, csp, dishes = self.create_subsystems()
+        telescope.set_up(
+            tmc=tmc,
+            sdp=sdp,
+            csp=csp,
+            dishes=dishes,
+        )
+
+        recap = telescope.get_subsystems_recap()
+
+        assert_that(recap).described_as(
+            "The recap contains the (set) subsystems and emulated status."
+        ).contains(
+            "TMC (production)",
+            "SDP (emulated)",
+            "CSP (production)",
+            "Dishes (emulated)",
+        )
+
+    def test_telescope_wrapper_subsystems_recap_when_not_set_up(self):
+        """The telescope wrapper exposes the subsystems recap."""
+        telescope = TelescopeWrapper()
+
+        recap = telescope.get_subsystems_recap()
+
+        assert_that(recap).described_as(
+            "The recap contains no subsystem when not set up."
+        ).contains(
+            "No sub-systems are currently set up.",
+        ).does_not_contain(
+            "TMC",
+            "SDP",
+            "CSP",
+            "Dishes",
+        )
+
+    def test_telescope_wrapper_subsystems_recap_is_updated_and_used(self):
+        """When the devices info is set, it is updated and used for recaps."""
+        telescope = TelescopeWrapper()
+        telescope.devices_info_provider = MagicMock(spec=DevicesInfoProvider)
+
+        def get_recap(dev_name):
+            """Return a mock recap for the given device name."""
+            return f"{dev_name} (mock recap)"
+
+        telescope.devices_info_provider.get_device_recap = get_recap
+        tmc, sdp, csp, dishes = self.create_subsystems()
+        telescope.set_up(
+            tmc=tmc,
+            sdp=sdp,
+            csp=csp,
+            dishes=dishes,
+        )
+
+        telescope.get_subsystems_recap(update_devices_info=True)
+
+        telescope.devices_info_provider.update.assert_called_once()
+        assert_that(telescope.get_subsystems_recap()).described_as(
+            "The devices info provider is updated and used for recaps."
+        ).contains(
+            "- central_node: ska_mid/tm_central/central_node (mock recap)",
+            "- subarray_node: ska_mid/tm_subarray_node/1 (mock recap)",
+            "- sdp_master: mid-sdp/control/0 (mock recap)",
+            "- csp_master: mid-csp/elt/master (mock recap)",
+            "- dish_001: ska001/elt/master (mock recap)",
+        ).described_as(
+            "Not initialised TMC devices are included with special flag."
+        ).contains(
+            "- csp_subarray_leaf_node: not yet set",
+            "- sdp_subarray_leaf_node: not yet set",
+        )
