@@ -58,3 +58,10 @@ class CSPWrapper(SubsystemWrapper, abc.ABC):
     @abc.abstractmethod
     def clear_command_call(self) -> None:
         """Clear the command call on the CSP (if needed)."""
+
+    def set_subarray_id(self, subarray_id: str) -> None:
+        """Set the subarray ID on the CSP subarray."""
+        subarray_id = str(subarray_id).zfill(2)
+        self.csp_subarray = tango.DeviceProxy(
+            f"mid-csp/subarray/{subarray_id}"
+        )
