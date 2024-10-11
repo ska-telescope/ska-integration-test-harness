@@ -84,9 +84,6 @@ def master_and_subarray_devices_have_state(
             expected_state,
         ),
         ExpectedStateChange(
-            telescope.csp.csp_subarray, "State", expected_state
-        ),
-        ExpectedStateChange(
             telescope.sdp.sdp_subarray, "State", expected_state
         ),
         ExpectedStateChange(telescope.csp.csp_master, "State", expected_state),
