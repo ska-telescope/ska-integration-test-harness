@@ -3,7 +3,7 @@
 from ska_control_model import ObsState
 
 from ska_integration_test_harness.actions.command_action import (
-    TelescopeCommandAction,
+    TransientQuiescentCommandAction,
 )
 from ska_integration_test_harness.actions.utils.generate_eb_pb_ids import (
     generate_eb_pb_ids,
@@ -14,7 +14,7 @@ from ska_integration_test_harness.actions.utils.termination_conditions import (
 from ska_integration_test_harness.inputs.json_input import JSONInput
 
 
-class CentralNodeAssignResources(TelescopeCommandAction):
+class CentralNodeAssignResources(TransientQuiescentCommandAction):
     """Invoke Assign Resource command on CentralNode."""
 
     def __init__(self, assign_input: JSONInput):
@@ -29,6 +29,12 @@ class CentralNodeAssignResources(TelescopeCommandAction):
         )
         return result, message
 
-    def termination_condition(self):
-        """All subarrays must be in IDLE state."""
+    def termination_condition_for_transient_state(self):
+        """All subarrays must reach the RESOURCING state."""
+        return all_subarrays_have_obs_state(
+            self.telescope, ObsState.RESOURCING
+        )
+
+    def termination_condition_for_quiescent_state(self):
+        """All subarrays must reach the IDLE state."""
         return all_subarrays_have_obs_state(self.telescope, ObsState.IDLE)

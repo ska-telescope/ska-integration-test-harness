@@ -4,11 +4,11 @@ from typing import Callable
 
 from ska_control_model import ObsState
 
+from ska_integration_test_harness.actions.central_node.central_node_assign_resources import (  # pylint: disable=line-too-long # noqa: E501
+    CentralNodeAssignResources,
+)
 from ska_integration_test_harness.actions.subarray.subarray_abort import (  # pylint: disable=line-too-long # noqa: E501
     SubarrayAbort,
-)
-from ska_integration_test_harness.actions.subarray.subarray_assign_resources import (  # pylint: disable=line-too-long # noqa: E501
-    SubarrayAssignResources,
 )
 from ska_integration_test_harness.actions.subarray.subarray_clear_obs_state import (  # pylint: disable=line-too-long # noqa: E501
     SubarrayClearObsState,
@@ -84,7 +84,7 @@ class SubarrayObsStateResetterFactory:
         :return: A `TelescopeAction` to reset the subarray to the
             `ObsState.RESOURCING` state.
         """
-        assign_resources_action = SubarrayAssignResources(
+        assign_resources_action = CentralNodeAssignResources(
             self.commands_inputs.get_input(
                 TestHarnessInputs.InputName.ASSIGN, fail_if_missing=True
             )
@@ -107,7 +107,7 @@ class SubarrayObsStateResetterFactory:
         return TelescopeActionSequence(
             [
                 self.create_action_to_reset_subarray_to_empty(),
-                SubarrayAssignResources(
+                CentralNodeAssignResources(
                     self.commands_inputs.get_input(
                         TestHarnessInputs.InputName.ASSIGN,
                         fail_if_missing=True,
