@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.2 (14th October 2024)
+
+- **SAH-1597**: Removed condition applied to check CSP subarray off state.
+
 ## v0.1.1 (11th September 2024)
 
 - **SP-4375**: small improvements to the README and to the API documentation
