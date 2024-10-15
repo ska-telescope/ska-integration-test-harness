@@ -6,6 +6,7 @@ from ska_tango_testing.integration import TangoEventTracer
 
 from ska_integration_test_harness.common_utils.tango_devices_info import (
     DevicesInfoProvider,
+    DevicesInfoServiceException,
 )
 from ska_integration_test_harness.structure.csp_wrapper import CSPWrapper
 from ska_integration_test_harness.structure.dishes_wrapper import DishesWrapper
@@ -140,10 +141,17 @@ class TelescopeWrapper:
 
         :return: The recap string.
         """
-        if self.devices_info_provider and update_devices_info:
-            self.devices_info_provider.update()
-
         recap = ""
+
+        if self.devices_info_provider and update_devices_info:
+            try:
+                self.devices_info_provider.update()
+            except DevicesInfoServiceException as error:
+                recap += (
+                    "WARNING: Devices info provider update failed with "
+                    f"error:\n{error}\n\n"
+                )
+
         for subsystem in [self._tmc, self._sdp, self._csp, self._dishes]:
             if subsystem:
                 assert isinstance(subsystem, SubsystemWrapper)

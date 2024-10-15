@@ -8,6 +8,7 @@ from assertpy import assert_that
 
 from ska_integration_test_harness.common_utils.tango_devices_info import (
     DevicesInfoProvider,
+    DevicesInfoServiceException,
 )
 from ska_integration_test_harness.emulated.dishes_wrapper import (
     EmulatedDishesWrapper,
@@ -153,6 +154,9 @@ class TestTelescopeWrapper:
 
         return tmc, sdp, csp, dishes
 
+    # -----------------------------------------------------------------------
+    # Setup tests
+
     def test_telescope_wrapper_exposes_setup_subsystems(self):
         """The telescope wrapper exposes the setup subsystems."""
         telescope = TelescopeWrapper()
@@ -195,6 +199,9 @@ class TestTelescopeWrapper:
         with pytest.raises(ValueError):
             _ = telescope.dishes
 
+    # -----------------------------------------------------------------------
+    # Singleton status tests
+
     @staticmethod
     def test_telescope_wrapper_is_a_singleton():
         """When creating a second instance, it returns the same subsystems."""
@@ -214,6 +221,9 @@ class TestTelescopeWrapper:
         assert_that(telescope2.sdp).is_equal_to(sdp)
         assert_that(telescope2.csp).is_equal_to(csp)
         assert_that(telescope2.dishes).is_equal_to(dishes)
+
+    # -----------------------------------------------------------------------
+    # Subsystems recap tests
 
     def test_subsystems_recap_recaps_all_subsystems(self):
         """The telescope wrapper exposes the subsystems recap."""
@@ -325,4 +335,36 @@ class TestTelescopeWrapper:
         ).contains(
             "- central_node: ska_mid/tm_central/central_node (mock recap)",
             "- csp_master: mid-csp/elt/master (mock recap)",
+        )
+
+    def test_subsystems_recap_handles_gently_info_provider_update_fail(self):
+        """If the devices info provider update fails, it is handled gently."""
+        # setup a telescope with subsystems and a devices info provider
+        telescope = TelescopeWrapper()
+        tmc, sdp, csp, dishes = self.create_subsystems()
+        telescope.set_up(
+            tmc=tmc,
+            sdp=sdp,
+            csp=csp,
+            dishes=dishes,
+        )
+        telescope.devices_info_provider = self._mock_devices_info_provider()
+        # pylint: disable=line-too-long # noqa: E501
+        telescope.devices_info_provider.update.side_effect = DevicesInfoServiceException(
+            "Mock update failed"
+        )
+
+        # get the recap
+        recap = telescope.get_subsystems_recap(update_devices_info=True)
+
+        # the recap method called for an update and
+        # generates the expected result
+        telescope.devices_info_provider.update.assert_called_once()
+        assert_that(recap).described_as(
+            "The devices info provider is updated and used for recaps."
+        ).contains(
+            "- central_node: ska_mid/tm_central/central_node (mock recap)",
+            "- csp_master: mid-csp/elt/master (mock recap)",
+        ).contains(
+            "Devices info provider update failed",
         )
