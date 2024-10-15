@@ -1,6 +1,6 @@
 """Unit tests on the telescope wrapper class."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 import tango
@@ -25,6 +25,7 @@ from ska_integration_test_harness.production.tmc_wrapper import (
 from ska_integration_test_harness.structure.telescope_wrapper import (
     TelescopeWrapper,
 )
+from tests.actions.utils.mock_device_proxy import create_device_proxy_mock
 
 
 class MockProductionTMCWrapper(ProductionTMCWrapper):
@@ -33,38 +34,24 @@ class MockProductionTMCWrapper(ProductionTMCWrapper):
     def __init__(self) -> None:
         """Init does nothing."""
         # pylint: disable=super-init-not-called
-        self.central_node = MagicMock(spec=tango.DeviceProxy)
-        self.central_node.dev_name.return_value = (
+        self.central_node = create_device_proxy_mock(
             "ska_mid/tm_central/central_node"
         )
-        self.subarray_node = MagicMock(spec=tango.DeviceProxy)
-        self.subarray_node.dev_name.return_value = "ska_mid/tm_subarray_node/1"
-        self.csp_master_leaf_node = MagicMock(spec=tango.DeviceProxy)
-        self.csp_master_leaf_node.dev_name.return_value = (
+        self.subarray_node = create_device_proxy_mock(
+            "ska_mid/tm_subarray_node/1"
+        )
+        self.csp_master_leaf_node = create_device_proxy_mock(
             "ska_mid/tm_leaf_node/csp_master"
         )
-        self.sdp_master_leaf_node = MagicMock(spec=tango.DeviceProxy)
-        self.sdp_master_leaf_node.dev_name.return_value = (
+        self.sdp_master_leaf_node = create_device_proxy_mock(
             "ska_mid/tm_leaf_node/sdp_master"
         )
         self.dish_leaf_node_list = [
-            MagicMock(spec=tango.DeviceProxy),
-            MagicMock(spec=tango.DeviceProxy),
-            MagicMock(spec=tango.DeviceProxy),
-            MagicMock(spec=tango.DeviceProxy),
+            create_device_proxy_mock("ska_mid/tm_leaf_node/dish_1"),
+            create_device_proxy_mock("ska_mid/tm_leaf_node/dish_2"),
+            create_device_proxy_mock("ska_mid/tm_leaf_node/dish_3"),
+            create_device_proxy_mock("ska_mid/tm_leaf_node/dish_4"),
         ]
-        self.dish_leaf_node_list[0].dev_name.return_value = (
-            "ska_mid/tm_leaf_node/dish_1"
-        )
-        self.dish_leaf_node_list[1].dev_name.return_value = (
-            "ska_mid/tm_leaf_node/dish_2"
-        )
-        self.dish_leaf_node_list[2].dev_name.return_value = (
-            "ska_mid/tm_leaf_node/dish_3"
-        )
-        self.dish_leaf_node_list[3].dev_name.return_value = (
-            "ska_mid/tm_leaf_node/dish_4"
-        )
         self.csp_subarray_leaf_node = None
         self.sdp_subarray_leaf_node = None
 
@@ -75,10 +62,8 @@ class MockEmulatedSDPWrapper(EmulatedSDPWrapper):
     def __init__(self) -> None:
         """Init does nothing."""
         # pylint: disable=super-init-not-called
-        self.sdp_master = MagicMock(spec=tango.DeviceProxy)
-        self.sdp_master.dev_name.return_value = "mid-sdp/control/0"
-        self.sdp_subarray = MagicMock(spec=tango.DeviceProxy)
-        self.sdp_subarray.dev_name.return_value = "mid-sdp/subarray/1"
+        self.sdp_master = create_device_proxy_mock("mid-sdp/control/0")
+        self.sdp_subarray = create_device_proxy_mock("mid-sdp/subarray/1")
 
 
 class MockProductionCSPWrapper(ProductionCSPWrapper):
@@ -87,10 +72,8 @@ class MockProductionCSPWrapper(ProductionCSPWrapper):
     def __init__(self) -> None:
         """Init does nothing."""
         # pylint: disable=super-init-not-called
-        self.csp_master = MagicMock(spec=tango.DeviceProxy)
-        self.csp_master.dev_name.return_value = "mid-csp/elt/master"
-        self.csp_subarray = MagicMock(spec=tango.DeviceProxy)
-        self.csp_subarray.dev_name.return_value = "mid-csp/elt/subarray_1"
+        self.csp_master = create_device_proxy_mock("mid-csp/elt/master")
+        self.csp_subarray = create_device_proxy_mock("mid-csp/elt/subarray_1")
 
 
 class MockEmulatedDishesWrapper(EmulatedDishesWrapper):
@@ -368,3 +351,57 @@ class TestTelescopeWrapper:
         ).contains(
             "Devices info provider update failed",
         )
+
+    # -----------------------------------------------------------------------
+    # Set subarray ID
+
+    def test_telescope_wrapper_set_subarray_id_initialises_subarray_devices(
+        self,
+    ):
+        """The set_subarray_id method initialises the subarray devices."""
+        telescope = TelescopeWrapper()
+        tmc, sdp, csp, dishes = self.create_subsystems()
+        telescope.set_up(
+            tmc=tmc,
+            sdp=sdp,
+            csp=csp,
+            dishes=dishes,
+        )
+
+        assert_that(telescope.tmc.csp_subarray_leaf_node).described_as(
+            "FAILED ASSUMPTION: CSP subarray leaf node is not set."
+        ).is_none()
+        assert_that(telescope.tmc.sdp_subarray_leaf_node).described_as(
+            "FAILED ASSUMPTION: SDP subarray leaf node is not set."
+        ).is_none()
+
+        with patch("tango.DeviceProxy") as mock_device_proxy:
+            telescope.set_subarray_id(1)
+
+        # The subarray devices are called with the expected names
+        mock_device_proxy.assert_any_call("ska_mid/tm_subarray_node/1")
+        mock_device_proxy.assert_any_call(
+            "ska_mid/tm_leaf_node/csp_subarray01"
+        )
+        mock_device_proxy.assert_any_call(
+            "ska_mid/tm_leaf_node/sdp_subarray01"
+        )
+        mock_device_proxy.assert_any_call("mid-sdp/subarray/01")
+        mock_device_proxy.assert_any_call("mid-csp/subarray/01")
+
+        # The subarray devices are set to the expected values
+        assert_that(telescope.tmc.csp_subarray_leaf_node).described_as(
+            "The CSP subarray leaf node is set."
+        ).is_not_none().is_equal_to(mock_device_proxy.return_value)
+        assert_that(telescope.tmc.sdp_subarray_leaf_node).described_as(
+            "The SDP subarray leaf node is set."
+        ).is_not_none().is_equal_to(mock_device_proxy.return_value)
+        assert_that(telescope.tmc.subarray_node).described_as(
+            "The subarray node is expected to change."
+        ).is_equal_to(mock_device_proxy.return_value)
+        assert_that(telescope.csp.csp_subarray).described_as(
+            "The CSP subarray is expected to change."
+        ).is_equal_to(mock_device_proxy.return_value)
+        assert_that(telescope.sdp.sdp_subarray).described_as(
+            "The SDP subarray is expected to change."
+        ).is_equal_to(mock_device_proxy.return_value)
