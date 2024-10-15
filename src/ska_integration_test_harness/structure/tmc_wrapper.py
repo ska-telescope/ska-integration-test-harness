@@ -93,3 +93,24 @@ class TMCWrapper(SubsystemWrapper, abc.ABC):
     @abc.abstractmethod
     def tear_down(self) -> None:
         """Reset the TMC devices to their initial state."""
+
+    def is_subarray_initialised(self) -> bool:
+        """Check if the subarray is initialised"""
+        return self.csp_subarray_leaf_node and self.sdp_subarray_leaf_node
+
+    def set_subarray_id(self, subarray_id: int):
+        """Set subarray ID"""
+
+        self.subarray_node = tango.DeviceProxy(
+            f"ska_mid/tm_subarray_node/{subarray_id}"
+        )
+
+        # NOTE: why zfill(2) after the first DeviceProxy creation?
+        subarray_id = str(subarray_id).zfill(2)
+
+        self.csp_subarray_leaf_node = tango.DeviceProxy(
+            f"ska_mid/tm_leaf_node/csp_subarray{subarray_id}"
+        )
+        self.sdp_subarray_leaf_node = tango.DeviceProxy(
+            f"ska_mid/tm_leaf_node/sdp_subarray{subarray_id}"
+        )
