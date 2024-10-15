@@ -67,7 +67,6 @@ def master_and_subarray_devices_have_state(
     state. The involved devices are:
 
     - TMC Central Node (telescopeState attribute)
-    - CSP Subarray Node (State attribute)
     - CSP Master Node (State attribute)
     - SDP Subarray Node (State attribute)
     - SDP Master Node (State attribute)
@@ -82,9 +81,6 @@ def master_and_subarray_devices_have_state(
             telescope.tmc.central_node,
             "telescopeState",
             expected_state,
-        ),
-        ExpectedStateChange(
-            telescope.csp.csp_subarray, "State", expected_state
         ),
         ExpectedStateChange(
             telescope.sdp.sdp_subarray, "State", expected_state

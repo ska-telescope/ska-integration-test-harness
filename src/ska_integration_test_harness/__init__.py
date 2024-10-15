@@ -6,4 +6,4 @@ of production or emulated SKA subsystems.
 More information will be added here as the project progresses.
 """
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
