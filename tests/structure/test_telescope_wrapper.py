@@ -350,8 +350,8 @@ class TestTelescopeWrapper:
         )
         telescope.devices_info_provider = self._mock_devices_info_provider()
         # pylint: disable=line-too-long # noqa: E501
-        telescope.devices_info_provider.update.side_effect = DevicesInfoServiceException(
-            "Mock update failed"
+        telescope.devices_info_provider.update.side_effect = (
+            DevicesInfoServiceException("Mock update failed")
         )
 
         # get the recap
