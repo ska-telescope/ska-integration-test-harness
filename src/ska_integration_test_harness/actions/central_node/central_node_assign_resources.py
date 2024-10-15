@@ -25,6 +25,7 @@ class CentralNodeAssignResources(TransientQuiescentCommandAction):
         cmd_input = generate_eb_pb_ids(self.assign_input)
         self._log("Invoking AssignResources on CentralNode")
         result, message = self.telescope.tmc.central_node.AssignResources(
+            # pylint: disable=duplicate-code
             cmd_input.as_str()
         )
         return result, message
