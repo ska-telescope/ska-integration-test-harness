@@ -2,11 +2,89 @@
 
 ## Overview
 
-Currently, a test harness for TMC-CSP integration tests. In future,
-a generic test harness integration testing an arbitrary combination
-of production or emulated SKA subsystems.
+Currently (17th October 2024), a test harness for TMC in MID integration tests,
+centred around the TMC subsystem and its interactions with CSP, SDP and the
+Dishes. In future, a generic test harness integration testing an
+arbitrary combination of production or emulated SKA subsystems.
 
 More information will be added here as the project progresses.
+
+### IMPORTANT: Scope and purpose
+
+Before diving into the (technical) details, it is important to
+understand the purpose of this project and its scope. 
+For this reason, we strongly suggest you to read the
+[dedicated Confluence page](https://confluence.skatelescope.org/pages/viewpage.action?pageId=289699655)
+
+
+### IMPORTANT: What this repository is about (and what it is not)
+
+A second important thing is to understand what this specific
+repository is about and what it is not.
+While the term **ITH** sometimes may be used to refer a wider concept
+and a large collection of tools, this repository
+(at the moment, 17th October 2024) contains a specific subset of tools. So,
+let's quickly clarify what you can find here (and what you cannot).
+
+#### What you can find here
+
+This repository essentially contains a Python framework to model the SUT, 
+it's subsystems and devices and the actions you can perform on them. More 
+specifically:
+
+- represent and permit to access the subsystems and the Tango devices
+in a structured way, potentially ignoring which subsystem is emulated and which is not;
+- simplify complex procedures to bring the SUT in a specific state before
+running the tests (e.g., make the actions to set the telescope
+in a specific state, synchronizing on events end ensuring the state
+is effectively reached);
+- simplify teardown procedures, to bring the SUT back to a known state
+after the tests are completed;
+- call tango commands on the devices;
+- overview on the active devices and their versions.
+
+At the moment (17th October 2024), the SUT consist in:
+
+- a production TMC, which is the "protagonist" of the tests (the subsystem
+  which receives most of the commands);
+- a production or emulated CSP;
+- a production or emulated SDP;
+- a set of production or emulated Dishes (where "productions" refers to
+  the software running on the real devices, and "emulated" to a software
+  that just "replicate" the behaviour of the real devices, without
+  actually having a complex logic behind; for the purposes of this test
+  harness, at the moment, a "production" device doesn't necessarily mean
+  it uses the real hardware).
+
+#### What you cannot find (and likely you will never)
+
+This repository does not contain and will likely never contain:
+
+- the tests definition or implementation (which instead can be found in
+  repos such as [SKA TMC-MID Integration](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/)
+  and [SKA Software Integration Tests](https://gitlab.com/ska-telescope/ska-sw-integration-testing);
+- the Helm charts to deploy the devices in a Kubernetes environment,
+  or the pipelines and Make commands to run the tests
+  (see previous point repos);
+- the specific "low-level" tools to track tango events and make assertions
+  on them (see [ska-tango-testing](https://gitlab.com/ska-telescope/ska-tango-testing));
+- pipeline support tools, such as the Jira integration scripts (see
+  [ska-ser-xray](https://gitlab.com/ska-telescope/ska-ser-xray));
+- the code of the emulators for the non-production devices (see
+  [ska-tmc-simulators](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators));
+- the code of the production devices.
+
+  
+#### What you cannot find (yet)
+
+Instead, this repository may (*and will likely*) contain in the future
+(but not at the moment, 17th October 2024):
+
+- a test harness which supports TMC-LOW integration tests;
+- a test harness which supports integrations tests where TMC is not
+  the protagonist.
+
+Stay tuned for updates!
 
 
 ## Installation

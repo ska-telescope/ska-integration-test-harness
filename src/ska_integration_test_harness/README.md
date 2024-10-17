@@ -332,6 +332,15 @@ In a certain sense, then the various internal tools are
 [STRATEGIES](https://refactoring.guru/design-patterns/strategy) used by
 the builder to compose the test harness.
 
+### Other tools
+
+The test harness also provides tools like:
+
+- an utility class to connect to the [ska-k8s-config-exporter](https://gitlab.com/ska-telescope/ska-k8s-config-exporter)
+  service and get the versions of the Tango devices running in the Kubernetes
+  namespace where the devices are deployed.
+
+
 ## How to use and extend this harness
 
 At the moment (September 2024) this harness has no well-defined
