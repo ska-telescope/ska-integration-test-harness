@@ -1,6 +1,6 @@
 """A collection of wrappers for various system components.
 
-:py:class:`~src.ska_integration_test_harness.structure.telescope_wrapper.TelescopeWrapper`
+:py:class:`~ska_integration_test_harness.structure.telescope_wrapper.TelescopeWrapper`
 is the main entry point for the telescope system.
 
 Right now, it exposes the following sub-systems (through a wrapper for each):
@@ -16,7 +16,7 @@ points to the devices of a real subsystem, or an implementation that points
 to the devices of an emulated subsystem).
 
 The module also contains a generic
-:py:class:`~src.ska_integration_test_harness.structure.subsystem_wrapper.SubsystemWrapper`
+:py:class:`~ska_integration_test_harness.structure.subsystem_wrapper.SubsystemWrapper`
 class that can be used as a base class for any subsystem wrapper.
 """  # pylint: disable=line-too-long # noqa: E501
 
