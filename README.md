@@ -56,13 +56,13 @@ At the moment (17th October 2024), the SUT consist in:
   harness, at the moment, a "production" device doesn't necessarily mean
   it uses the real hardware).
 
-#### What you cannot find (and likely you will never)
+#### What you cannot find (and likely will remain in separate places)
 
 This repository does not contain and will likely never contain:
 
 - the tests definition or implementation (which instead can be found in
   repos such as [SKA TMC-MID Integration](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/)
-  and [SKA Software Integration Tests](https://gitlab.com/ska-telescope/ska-sw-integration-testing);
+  and [SKA Software Integration Tests](https://gitlab.com/ska-telescope/ska-sw-integration-testing));
 - the Helm charts to deploy the devices in a Kubernetes environment,
   or the pipelines and Make commands to run the tests
   (see previous point repos);
@@ -94,7 +94,7 @@ To install this test harness you can follow two paths:
 1. The first is to import it via `poetry` as a classic dependency.
    
    ```bash
-   poetry add ska-integration-test-harness
+   poetry add --group test ska-integration-test-harness
    ```
    
 2. The second is to import it always via `poetry`, but pointing directly
@@ -106,31 +106,20 @@ subsystems and the integration tests. This second approach could be
 particularly useful in case you want to contribute to the project
 and need to apply your own changes quickly.
 
-To point directly the Gitlab repo and by-pass the semantic versioning,
+To point directly the Gitlab repo (potentially also on a specific branch)
+and by-pass the semantic versioning,
 add the following to your `pyproject.toml` file:
 
 ```toml
-[tool.poetry.dependencies]
-... rest of your dependencies ...
-ska-integration-test-harness = { git = "https://gitlab.com/ska-telescope/ska-integration-test-harness.git" }
+[tool.poetry.group.test.dependencies]
+... rest of your test dependencies ...
+ska-integration-test-harness = { git = "https://gitlab.com/ska-telescope/ska-integration-test-harness.git", branch = "your branch name" }
 ```
 
 When you added that, you can run `poetry lock --no-update` to update the
 `poetry.lock` file with the new dependency and `poetry install` to install it.
 If you make changes to your code and want them reflected in your project,
 you can run `poetry update ska-integration-test-harness && poetry install`.
-
-If you wish, with this mode you can also point to a specific branch:
-
-```toml
-[tool.poetry.dependencies]
-... rest of your dependencies ...
-ska-integration-test-harness = { git = "https://gitlab.com/ska-telescope/ska-integration-test-harness.git", branch = "main" }
-```
-
-## Architecture overview
-
-For an overview of the architecture of the test harness and the principles behind it, see the [architecture document](src/ska_integration_test_harness/README.md).
 
 
 ## Usage
@@ -208,9 +197,35 @@ dishes:
 
 ### Fixtures and facades
 
-To initialise the test harness, create a `TelescopeWrapper` object, 
-set it up with the various configured subsystems and then create your facades.
-To initialise the test harness you can use the `TestHarnessBuilder` class.
+To initialise and use this text harness, you will need to
+create some fixtures in your test script. The main fixtures you will
+create are:
+
+1. a `TelescopeWrapper`, 
+2. facades for each of your subsystems.
+
+Now we will not deep dive too much into the details of what they are,
+but essentially you can think of the `TelescopeWrapper` as a singleton
+representation of the _SUT_, and the _facades_
+as "views" of that system that will allow you to access the devices and
+interact with them performing (potentially auto-synchronized) actions. E.g., 
+
+```python
+# if tmc_central_node is a correctly initialised facade
+# to the TMC central node, calling such a command will permit you
+# to move the telescope to the ON state, ignoring any details about
+# interaction with other emulated/not-emulated devices and also
+# ignoring the synchronization (the ITH will guarantee that the
+# telescope will be in an ON state after the call, otherwise
+# an informative assertion error will be raised)
+tmc_central_node.move_to_on(wait_termination=True)
+```
+
+So, just to be clear, the `TelescopeWrapper` is something you have to
+initialise to have a test harness, and the facades just views which simplify
+your interaction with such a test harness. CTRL-Right clicking in your facades
+implementation is a good way to explore the mechanisms behind the test
+harness and the interaction with the actual Tango devices.
 
 Your fixtures code may look like this:
 
@@ -246,7 +261,7 @@ from ska_integration_test_harness.structure.telescope_wrapper import (
 
 @pytest.fixture
 def default_commands_inputs() -> TestHarnessInputs:
-    """Default JSON inputs for TMC commands."""
+    """Declare some JSON inputs for TMC commands."""
     return TestHarnessInputs(
         # assign and release, right now, are called on central node
         assign_input=FileJSONInput(
@@ -270,7 +285,7 @@ def default_commands_inputs() -> TestHarnessInputs:
 def telescope_wrapper(
     default_commands_inputs: TestHarnessInputs,
 ) -> TelescopeWrapper:
-    """Create an unique test harness with proxies to all devices."""
+    """Create and initialise an unique SUT wrapper."""
     test_harness_builder = TestHarnessBuilder()
 
     # import from a configuration file device names and emulation directives
@@ -320,7 +335,9 @@ def subarray_node_facade(telescope_wrapper: TelescopeWrapper):
     """Create a facade to TMC subarray node and all its operations."""
     subarray_node = TMCSubarrayNodeFacade(telescope_wrapper)
     yield subarray_node
-
+    # NOTE: in future, this subarray node facade may be merged with central
+    # node facade since they belong to the same subsystem.
+    # For now, we keep them separated.
 
 @pytest.fixture
 def csp(telescope_wrapper: TelescopeWrapper):
@@ -339,6 +356,12 @@ def dishes(telescope_wrapper: TelescopeWrapper):
     """Create a facade to dishes devices."""
     return DishesFacade(telescope_wrapper)
 ```
+
+Other than the fixtures, you may also want to create a fixture for
+the `TangoEventTracer` class, which is a tool to track the events
+of the Tango devices and make assertions on them. Check
+[ska-tango-testing](https://developer.skao.int/projects/ska-tango-testing/en/latest/guide/integration/getting_started.html)
+for more details.
 
 ### Interact with the test harness
 
@@ -373,8 +396,10 @@ def given_the_telescope_is_in_on_state(
     # NOTE: the ``wait_termination=True`` flag is used to make the action
     # synchronous, i.e. the call will block until all the synchronizations
     # conditions are met (explore the method and the action implementation
-    # for more details). In theory, I could avoid the flag,
-    # since the default value is True
+    # for more details) or, in other words, when the method call execution
+    # is completed, you are sure the telescope is in the ON state.
+    # This way you DON'T have to explicitly deal with
+    # synchronisation assertions (which are not relevant for the tests).
     central_node_facade.move_to_on(wait_termination=True)
 
 
@@ -399,7 +424,9 @@ def when_the_movetooff_command_is_issued(
     # (etc.)
 
     # Then I can issue the command, explicitly telling the call to
-    # not wait for the synchronization conditions to be met
+    # not wait for the synchronization conditions to be met, 
+    # since in the following steps I want to check the events
+    # manually (since they are the "object" of this test).
     central_node_facade.move_to_off(wait_termination=False)
 
 @then("the telescope is in OFF state")
@@ -411,16 +438,20 @@ def then_the_telescope_is_in_off_state(
     """Example of a Gherkin step to check the state of the telescope,
     implemented always accessing the facades devices to write assertions.
     """
+    # in then steps, tools like the TangoEventTracer can be used
+    # to check the events occurred after the command was issued.
+    # Of course, I am assuming in a fixture or in some previous step
+    # the tracer was subscribed to the events of the devices.
+    # I also assume that the tracer has no potentially "old" duplicated
+    # events which may make the test pass even if the telescope is not
     assert_that(event_tracer).described_as(
-        "TMC and CSP should have reached the OFF state within 60 seconds."
+        "TMC should have reached the OFF state within 60 seconds."
     ).within_timeout(60).has_change_event_occurred(
         central_node_facade.central_node, "telescopeState", DevState.OFF
-    ).has_change_event_occurred(
-        csp.csp_master, "State", DevState.OFF
     )
 
 ```
 
-A good example of tests script using this test harness is
+A good example of tests script written using this test harness is
 available in the
 [SKA TMC-MID Integration repository](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/-/merge_requests/234)
