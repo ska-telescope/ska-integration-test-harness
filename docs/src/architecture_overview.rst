@@ -182,8 +182,9 @@ from the test script.
 For example, let’s consider a test script that wants to send a scan
 command to the TMC Subarray Node and synchronize at the end of the scan:
 
--  the test script has (somehow - *see main README.md*) access to a
-   facade of the TMC Subarray Node;
+-  the test script has access to a
+   facade of the TMC Subarray Node (see :doc:`./getting_started` for
+   more details on how to use a facade);
 -  the facade exposes a ``scan()`` method, which can be called by the
    tests;
 -  the ``scan()`` method which instantiates an action called

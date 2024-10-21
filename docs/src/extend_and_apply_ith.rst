@@ -12,8 +12,7 @@ more use cases.
 How to use this test harness right now as is
 --------------------------------------------
 
-To use this test harness *as is*, you can follow the instructions in the
-main `README.md <../../README.md>`__ file.
+To use this test harness *as is*, you can follow the instructions in :doc:`./getting_started`.
 
 How to extend this test harness (within the current limitations)
 ----------------------------------------------------------------
@@ -68,7 +67,7 @@ and/or customize this test harness are:
       ``MyFileJsonInput('scan')``).*
 
 -  **Customize the init procedure (and the wrappers)**: the
-   initialisation procedure explained in the main README.md file can be
+   initialisation procedure explained in :doc:`./getting_started` file can be
    customized:
 
    -  sub-classing various configuration, validation, reader and factory
