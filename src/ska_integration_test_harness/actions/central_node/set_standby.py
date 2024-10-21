@@ -23,24 +23,16 @@ class SetStandby(TelescopeAction[None]):
         self.telescope.csp.move_to_off()
 
     def termination_condition(self):
-        """Master devices must be in STANDBY state, while
-        subarrays must be in OFF state,
-        and all dishes should be in STANDBY_LP mode."""
+        """Central node should be in STANDBY state and so also SDP
+       all dishes should be in STANDBY_LP mode."""
 
         # subarrays must be in OFF state,
         # master devices must be in STANDBY state
         res = [
             ExpectedStateChange(
-                self.telescope.sdp.sdp_subarray, "State", DevState.OFF
-            ),
-            ExpectedStateChange(
-                self.telescope.sdp.sdp_master, "State", DevState.STANDBY
-            ),
-            ExpectedStateChange(
-                self.telescope.csp.csp_subarray, "State", DevState.OFF
-            ),
-            ExpectedStateChange(
-                self.telescope.csp.csp_master, "State", DevState.STANDBY
+                self.telescope.tmc.central_node,
+                "telescopeState",
+                DevState.STANDBY,
             ),
         ]
 
