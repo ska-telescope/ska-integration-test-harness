@@ -1,5 +1,5 @@
-SKA Integration Test Harness - Overview & Getting started
-=========================================================
+SKA Integration Test Harness (ITH) - Overview & Getting started
+===================================================================
 
 Overview
 --------
