@@ -91,7 +91,7 @@ class ProductionTMCWrapper(TMCWrapper):
             MoveToOff().execute()
 
         # NOTE: is it really needed?
-        SubarrayMoveToOff().execute()
+        # SubarrayMoveToOff().execute()
 
         # if source dish vcc config is empty or not matching with default
         # dish vcc then load default dish vcc config
