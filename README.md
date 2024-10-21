@@ -2,7 +2,7 @@
 
 ## Overview
 
-Currently (17th October 2024), a test harness for TMC in MID integration tests,
+Currently (17th October 2024), a test harness for TMC in Mid integration tests,
 centred around the TMC subsystem and its interactions with CSP, SDP and the
 Dishes. In future, a generic test harness integration testing an
 arbitrary combination of production or emulated SKA subsystems.
@@ -29,7 +29,7 @@ let's quickly clarify what you can find here (and what you cannot).
 #### What you can find here
 
 This repository essentially contains a Python framework to model the SUT, 
-it's subsystems and devices and the actions you can perform on them. More 
+its subsystems and devices and the actions you can perform on them. More 
 specifically:
 
 - represent and permit to access the subsystems and the Tango devices
@@ -40,7 +40,7 @@ in a specific state, synchronizing on events end ensuring the state
 is effectively reached);
 - simplify teardown procedures, to bring the SUT back to a known state
 after the tests are completed;
-- call tango commands on the devices;
+- call Tango commands on the devices;
 - overview on the active devices and their versions.
 
 At the moment (17th October 2024), the SUT consist in:
@@ -49,7 +49,7 @@ At the moment (17th October 2024), the SUT consist in:
   which receives most of the commands);
 - a production or emulated CSP;
 - a production or emulated SDP;
-- a set of production or emulated Dishes (where "productions" refers to
+- a set of production or emulated Dishes (where "production" refers to
   the software running on the real devices, and "emulated" to a software
   that just "replicate" the behaviour of the real devices, without
   actually having a complex logic behind; for the purposes of this test
@@ -60,8 +60,8 @@ At the moment (17th October 2024), the SUT consist in:
 
 This repository does not contain and will likely never contain:
 
-- the tests definition or implementation (which instead can be found in
-  repos such as [SKA TMC-MID Integration](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/)
+- the test definitions or implementation (which instead can be found in
+  repos such as [SKA TMC Mid Integration](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/)
   and [SKA Software Integration Tests](https://gitlab.com/ska-telescope/ska-sw-integration-testing));
 - the Helm charts to deploy the devices in a Kubernetes environment,
   or the pipelines and Make commands to run the tests
@@ -80,8 +80,8 @@ This repository does not contain and will likely never contain:
 Instead, this repository may (*and will likely*) contain in the future
 (but not at the moment, 17th October 2024):
 
-- a test harness which supports TMC-LOW integration tests;
-- a test harness which supports integrations tests where TMC is not
+- a test harness which supports TMC Low integration tests;
+- a test harness which supports integration tests where TMC is not
   the protagonist.
 
 Stay tuned for updates!
@@ -454,4 +454,4 @@ def then_the_telescope_is_in_off_state(
 
 A good example of tests script written using this test harness is
 available in the
-[SKA TMC-MID Integration repository](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/-/merge_requests/234)
+[SKA TMC Mid Integration repository](https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/-/merge_requests/234)
