@@ -78,30 +78,30 @@ intersphinx_mapping = {
     "tango": ("https://pytango.readthedocs.io/en/v9.4.2/", None),
 }
 
-def copy_images(app):
-    if app.builder.name != 'html':
-        return
+# def copy_images(app):
+#     if app.builder.name != 'html':
+#         return
     
-    output_dir = os.path.join(app.outdir, 'uml-docs')
-    source_dir = os.path.join(app.srcdir, '..', '..', 'src', 'ska_integration_test_harness', 'uml-docs')
+#     output_dir = os.path.join(app.outdir, 'uml-docs')
+#     source_dir = os.path.join(app.srcdir, '..', '..', 'src', 'ska_integration_test_harness', 'uml-docs')
 
-    # create the output directory if it doesn't exist
-    os.makedirs(output_dir, exist_ok=True)
+#     # create the output directory if it doesn't exist
+#     os.makedirs(output_dir, exist_ok=True)
 
-    # list the png files in the source directory
-    images = [f for f in os.listdir(source_dir) if f.lower().endswith('.png')]
+#     # list the png files in the source directory
+#     images = [f for f in os.listdir(source_dir) if f.lower().endswith('.png')]
 
-    # copy the images to the output directory
-    for image in images:
-        source_path = os.path.join(source_dir, image)
-        output_path = os.path.join(output_dir, image)
-        with open(source_path, 'rb') as f:
-            with open(output_path, 'wb') as out:
-                out.write(f.read())
+#     # copy the images to the output directory
+#     for image in images:
+#         source_path = os.path.join(source_dir, image)
+#         output_path = os.path.join(output_dir, image)
+#         with open(source_path, 'rb') as f:
+#             with open(output_path, 'wb') as out:
+#                 out.write(f.read())
 
-def setup(app):
-    # connect the copy_images function to the builder-inited signal
-    app.connect('builder-inited', copy_images)
+# def setup(app):
+#     # connect the copy_images function to the builder-inited signal
+#     app.connect('builder-inited', copy_images)
 
 
 intersphinx_mapping = {
