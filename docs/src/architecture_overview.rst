@@ -13,8 +13,8 @@ likely remain the same.
 
 This document is updated the last time on 3rd September 2024.
 
-Architecture of the test harness
---------------------------------
+What glues the test scripts to the SUT?
+----------------------------------------
 
 This test harness is code that glues integration test scripts to the
 SUT. It is designed to provide a consistent interface for all tests, to
@@ -57,11 +57,11 @@ This test harness comprises:
       environment and configure the test harness with the right device
       names.
 
-RULES
------
+Integration Test Harness principles
+-----------------------------------
 
-RULE 1: Tests are agnostic to the test environment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINCIPLE #01: Tests are agnostic to the test environment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Test scripts should know as little as possible about the test
 environments so that the same test, with different configurations, can
@@ -70,8 +70,8 @@ consequence a test script should interact only with facades, with
 wrappers and with inputs: no actions, no configurations. Interaction
 with wrappers is needed to write meaningful assertions.
 
-RULE 2: Tests are agnostic to the SUT ecosystem
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINCIPLE #02: Tests are agnostic to the SUT ecosystem
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Integration tests make use of emulators and simulators. In many cases
 test scripts can be implemented in such a way that they do not know
@@ -94,18 +94,12 @@ objects <https://developer.skao.int/projects/ska-tango-testing/en/latest/guide/i
 it is possible to write tests that can be run with real devices and
 emulators without knowing which is which. See below for examples.
 
-Architecture
-------------
+Conventions (where to find the code)
+--------------------------------------
 
-|configurations| |configurations, facades and wrappers| |image1|
-
-(the source code of these diagrams is in ``*.plantuml`` and can be
-updated with ``java -jar plantuml.jar *.plantuml``; likewise for the
-other diagrams, or use the attached Makefile and do
-``make update-diagrams``).
-
-Conventions
------------
+Before starting understanding the idea behind each kind of component
+the test harness is made of (facades, actions, wrappers, etc.), it is
+useful to know where to find the code.
 
 The test harness files are organized in the following way:
 
@@ -153,6 +147,10 @@ Facade is a design pattern
 provides a simplified interface to a complex system. In this case the
 complex system is the test harness itself, with the wrappers that
 represent the SUT and the actions that act over the wrappers.
+
+Facades-based design is visually represented in the following UML.
+
+|facades|
 
 Why using actions?
 ~~~~~~~~~~~~~~~~~~
@@ -212,6 +210,10 @@ sequences, to perform more complex operations.(see
 as a complex inheritance hierarchy, to define common behaviours and to
 specialize them (give a look to the existing actions to see how they are
 implemented).
+
+The actions mechanism is represented (high level) in the following UML.
+
+|actions|
 
 Why using wrappers?
 ~~~~~~~~~~~~~~~~~~~
@@ -319,6 +321,11 @@ may be also subject to validation, to ensure that the configuration is
 correct and consistent to what is deployed (see ``config.validator``
 module).
 
+The configuration reading, validation and the test harness setup mechanisms
+are visually represented in the following UML diagram.
+
+|configurations|
+
 Currently, the main representation of the configuration is through YAML
 files. An example of valid configuration file is provided in `this file
 used in unit
@@ -366,6 +373,13 @@ The test harness also provides tools like:
    service and get the versions of the Tango devices running in the
    Kubernetes namespace where the devices are deployed.
 
+.. (the source code of these diagrams is in ``*.plantuml`` and can be
+.. updated with ``java -jar plantuml.jar *.plantuml``; likewise for the
+.. other diagrams, or use the attached Makefile and do
+.. ``make update-diagrams`` while being in the diagrams folder).
+
 .. |configurations| image:: uml-docs/architecture-config.png
-.. |configurations, facades and wrappers| image:: uml-docs/architecture-facades.png
-.. |image1| image:: uml-docs/architecture-actions.png
+.. |facades| image:: uml-docs/architecture-facades.png
+.. |actions| image:: uml-docs/architecture-actions.png
+
+

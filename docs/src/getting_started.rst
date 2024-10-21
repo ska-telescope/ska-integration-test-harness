@@ -480,4 +480,6 @@ with them like in this simplified example:
 
 A good example of tests script written using this test harness is
 available in the `SKA TMC Mid Integration
-repository <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/-/merge_requests/234>`__
+repository <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/-/merge_requests/234>`__.
+To read more about the architecture and the principles behind the test
+harness, check :doc:`./architecture_overview`.
