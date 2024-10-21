@@ -24,7 +24,7 @@ class SetStandby(TelescopeAction[None]):
 
     def termination_condition(self):
         """Central node should be in STANDBY state and so also SDP
-       all dishes should be in STANDBY_LP mode."""
+        all dishes should be in STANDBY_LP mode."""
 
         # subarrays must be in OFF state,
         # master devices must be in STANDBY state
