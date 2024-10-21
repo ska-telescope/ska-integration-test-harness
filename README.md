@@ -223,9 +223,10 @@ tmc_central_node.move_to_on(wait_termination=True)
 
 So, just to be clear, the `TelescopeWrapper` is something you have to
 initialise to have a test harness, and the facades just views which simplify
-your interaction with such a test harness. CTRL-Right clicking in your facades
-implementation is a good way to explore the mechanisms behind the test
-harness and the interaction with the actual Tango devices.
+your interaction with such a test harness. Inspecting the facade
+implementations is a good way to explore the mechanisms behind the test
+harness, the interaction with the actual Tango devices and the verified
+conditions in case you enable the synchronization.
 
 Your fixtures code may look like this:
 
@@ -362,6 +363,22 @@ the `TangoEventTracer` class, which is a tool to track the events
 of the Tango devices and make assertions on them. Check
 [ska-tango-testing](https://developer.skao.int/projects/ska-tango-testing/en/latest/guide/integration/getting_started.html)
 for more details.
+
+```python
+
+from ska_tango_testing.integration import TangoEventTracer
+
+@pytest.fixture
+def event_tracer() -> TangoEventTracer:
+    """Create a TangoEventTracer to track the events of the devices."""
+    return TangoEventTracer({
+        # add here an eventual mapping between attribute names and
+        # Enum types they are associated to, so assertion errors
+        # will display meaningful labels
+        # E.g. "obsState": ObsState
+        # (NOTE: DevState is not needed)
+    })
+```
 
 ### Interact with the test harness
 
