@@ -124,31 +124,79 @@ Design decisions
 Why use facades?
 ~~~~~~~~~~~~~~~~~~
 
-As mentioned above we want to insulate test scripts from the details of
-the SUT.
+As mentioned above we want an high-level way to represent the SUT, its
+sub-systems, its devices and the operations that can be performed
+against them. 
 
-For example, a test that verifies that the SCAN command works as
-expected, will use a facade of the TMC Central Node and a facade of the
-TMC Subarray Node. These facades will provide properties of the two
-components and methods to interact with them. The test script will not
-know that the TMC Central Node is a Tango Device and that the TMC
-Subarray Node is a Tango Device. It will not know that the TMC Central
-Node has a property called ``state`` and that the TMC Subarray Node has
-a method called ``scan``. It will only know that there is a facade
-called ``TMC`` that has a property called ``central_node`` and a facade
-called ``subarray_node`` that has a method called ``scan``.
+To achieve this, we use facades. Facades are classes that provide a
+simplified interface to a complex system, which in this case are each
+sub-system of the telescope. So foreach each sub-system we define a facade
+class which exposes:
 
-We opted for having more than just one facade, to avoid bloating a class
-with too many unrelated functionalities (`Single Responsibility
-Principle <https://en.wikipedia.org/wiki/Single-responsibility_principle>`__).
+-  the devices that are part of the sub-system;
+-  the operations that can be performed on the sub-system (like sending 
+   a command, or something more complex like moving the subsystem to a
+   certain state passing through a sequence of commands).
 
-Facade is a design pattern
-(`FACADE <https://refactoring.guru/design-patterns/facade>`__) that
-provides a simplified interface to a complex system. In this case the
-complex system is the test harness itself, with the wrappers that
-represent the SUT and the actions that act over the wrappers.
+When writing a test script, the test script will interact with the facade
+to access the devices and subscribe to their events and will use the
+facade to perform operations on the sub-system. The two main advantages
+of using facades are the following:
 
-Facades-based design is visually represented in the following UML.
+1. they are a semantic-oriented way to represent the SUT
+   and its sub-systems and they can be used encode structured interface
+   to something that is a bit more complex than a single Tango device;
+
+2. occasionally, they permit you to hide some technical details about
+   the interaction with the devices, especially if they are set-up or
+   tear-down interactions which are not the main point of the test.
+
+Let's see the advantages through the following example: you have to
+test the capability of TMC integrated with the other subsystems (production
+or emulated) to perform a scan.
+
+- **Use in the "GIVEN" steps**: first of all you have to be in a 
+  state where the TMC is ``READY`` to start the scan. To do so, instead of
+  calling by yourself all the Tango commands and synchronize explicitly
+  (producing this way a lot of boilerplate code which is not the main
+  point of the test), you can use a single line of code
+  that moves the TMC to the ``READY`` state, dealing transparently with
+  the synchronization.
+
+- **Use in the "WHEN" steps**: then you have to send the scan command to
+  the TMC. To do so you can, again, use the facade method. This way,
+  if in future the ``Scan`` command will somewhat change, the dependencies
+  will be more explicit and the places you have to update will be less.
+
+- **Use in the "THEN" steps**: finally, you have to check that the scan
+  has been performed correctly and all the involved sub-systems are in
+  the expected state. Through the various facades you can access in a 
+  structured way to the devices to:
+
+  - subscribe to the events (*before calling the command*)
+  - asserting over the events (*after calling the command*)
+  - eventually, asserting over the properties of the devices (*after
+    calling the command*)
+
+  If something changes in the configuration (e.g., the devices names),
+  you will have to update only a configuration file instead of all the
+  references to various devices names around your code.
+
+The choice of having a different facade for each sub-system
+favours the separation of concerns and is a way to avoid bloating a
+single "Test Harness" with too many unrelated functionalities
+(`Single Responsibility Principle 
+<https://en.wikipedia.org/wiki/Single-responsibility_principle>`__).
+
+
+The facade is also a known design pattern
+(`FACADE <https://refactoring.guru/design-patterns/facade>`__), which
+core idea is to provide a simplified interface to a complex system. 
+In this case the complex system is the test harness itself, with all its
+internal mechanisms that sometimes may be too technical to be exposed to
+the test scripts.
+
+Facades-based design is visually represented in the following UML diagram.
 
 |facades|
 
