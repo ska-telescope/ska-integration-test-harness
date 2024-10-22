@@ -1,8 +1,10 @@
+# pylint: disable=duplicate-code
 """A wrapper for TMC and all integration tests sub-components."""
 
 from typing import Tuple
 
 import tango
+from deprecated import deprecated
 from ska_control_model import ResultCode
 
 from ska_integration_test_harness.actions.central_node.central_node_assign_resources import (  # pylint: disable=line-too-long # noqa E501
@@ -32,6 +34,13 @@ from ska_integration_test_harness.structure.telescope_wrapper import (
 )
 
 
+@deprecated(
+    reason=(
+        "This facade is deprecated, since we want to use a facade for each "
+        "subsystem. Please use TMCFacade instead."
+    ),
+    version="0.2.0",
+)
 class TMCCentralNodeFacade:
     """A facade to TMC Central Node device and its actions.
 

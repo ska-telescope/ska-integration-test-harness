@@ -28,6 +28,7 @@ ska-control-model=">=1.0.0,<2.0.0"
 ska-tango-testing = "^0.7.2"
 ska-ser-logging = "^0.4.1"
 msgpack-numpy = "^0.4.8"
+deprecated = "^1.2.14"
 
 
 [tool.poetry.group.dev.dependencies]
