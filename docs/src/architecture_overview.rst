@@ -184,16 +184,16 @@ or emulated) to perform a scan.
 
 The choice of having a different facade for each sub-system
 favours the separation of concerns and is a way to avoid bloating a
-single "Test Harness" with too many unrelated functionalities
-(`Single Responsibility Principle 
+single "Test Harness" class with too many unrelated functionalities
+and responsibilities (`Single Responsibility Principle 
 <https://en.wikipedia.org/wiki/Single-responsibility_principle>`__).
 
 
-The facade is also a known design pattern
+The facade is also a well known design pattern
 (`FACADE <https://refactoring.guru/design-patterns/facade>`__), which
 core idea is to provide a simplified interface to a complex system. 
 In this case the complex system is the test harness itself, with all its
-internal mechanisms that sometimes may be too technical to be exposed to
+internal mechanisms that sometimes may be too technical to be exposed in
 the test scripts.
 
 Facades-based design is visually represented in the following UML diagram.
@@ -203,29 +203,65 @@ Facades-based design is visually represented in the following UML diagram.
 Why use actions?
 ~~~~~~~~~~~~~~~~~~
 
-A test script has to interact with the SUT and send it operations to
-perform. These operations are complex and require multiple steps,
-possibly involving more than one component. In a distributed system like
-the telescope, the operations are often asynchronous and involve
-multiple devices, each evolving with its own timing.
+The general idea of the **actions**, in brief, is to encode an operation
+you perform over the telescope in a single class. One may ask, why not
+just a single method in a facade or a wrapper? Or also, why do not
+just directly call Tango commands from the test script? Here there follow
+some reasons.
 
-Very frequently an operation is not just a single command, but a
-sequence of commands. In these cases we often have to wait for something
-to happen on some part of the SUT before starting a subsequent step.
+First of all, a test script has to interact with the SUT and its subsystems
+and it does that by sending Tango commands on devices. Even if apparently
+having a class just to send a command may seem an overkill, in reality
+there are a lot of complexities that justifies the existence of actions:
 
-Actions are building blocks that encapsulate the complexity of these
-operations. They are designed to be easy to use and to be powerful. They
-embed both the operations to be performed and their termination
-condition, that is checked within a timeout. Termination conditions can
-only be expressed with a list of expected tango change events.
+- the commands need to be called in on the right device;
+- the commands require the right input;
+- since the telescope is a distributed system, after most of the commands
+  are executed we have to wait for some events to happen to be sure that
+  the operation is completed;
+- very often, the operations implicitly involve devices that are part of
+  different sub-systems, so the synchronization has to be done in a
+  coordinated way;
+- since some commands trigger long running operations, you may want to
+  choose to synchronize at the end of the operation (next quiescent state)
+  or at the when the command is accepted (next transient state);
+- if something changes about the command (e.g., the name, the input,
+  the expected events, the expected state of the devices), you may want to
+  update only in one place and have all the dependencies as much explicit
+  as possible;
+- you may want to automatically log the run operations and their results
+  in a transparent way.
 
-An action can eventually be “executed”, by calling the ``execute``
-method of the action. This method will perform the operation, wait for
-its termination and return a result. The details of how to execute an
-action (for example, what Tango Command to send to a device) are hidden
-from the test script.
+Moreover, in the context of the testing of the telescope, not all the
+operations are just a single command but:
 
-For example, let’s consider a test script that wants to send a scan
+- sometimes you may want to call at once a sequence of operations;
+- sometimes an operation is simply more sophisticated than calling a single
+  command and you need additional logic (that is never a good thing to
+  be put explicitly in a test script).
+
+All these reasons justify the existence of actions, as building blocks
+to encapsulate the complexity of the operations that are performed over
+the telescope. The actions so are represented through classes,
+that embed both the *code to perform the operation* and *the
+termination/synchronization condition*. 
+All the action classes extend a common base class
+(:py:class:`~ska_integration_test_harness.actions.telescope_action.TelescopeAction`)
+and implement as abstract methods the procedure to perform the action
+and the condition to synchronize at the end of the action (if needed).
+From the base class they inherit:
+
+- the logic to execute the action;
+- the logic to log the action (if needed);
+- the logic to synchronize at the end of the action (if needed);
+- the fact of having a target (the wrappers - *see next section*);
+- properties like a name, the timeout, etc.
+
+At the moment, the actions are generally called by facades (or by other
+actions, or by wrappers specific implementations) and they are used to
+perform the operations that are needed to
+be done over the telescope. For example, let’s consider a
+test script that wants to send a scan
 command to the TMC Subarray Node and synchronize at the end of the scan:
 
 -  the test script has access to a
@@ -242,14 +278,16 @@ command to the TMC Subarray Node and synchronize at the end of the scan:
 -  the actions interact with the correct wrappers (and consequently to
    the Tango devices) to perform the operation.
 
-Actions are based on the
-`COMMAND <https://refactoring.guru/design-patterns/command>`__,
+Actions general idea is based on the
+`COMMAND <https://refactoring.guru/design-patterns/command>`__ design pattern
+and make heavy use of
 `TEMPLATE
-METHOD <https://refactoring.guru/design-patterns/template-method>`__ and
+METHODS <https://refactoring.guru/design-patterns/template-method>`__. A
+a sequence of actions is also implemented through the
 `COMPOSITE <https://refactoring.guru/design-patterns/composite>`__
-design patterns.
+design pattern.
 
-To implement an action, one has to extend the ``TelescopeAction`` base
+To implement an action, you have to extend the ``TelescopeAction`` base
 class and override the abstract methods (to define the *procedure* that
 implements the action and the *synchronization condition* that defines
 when the action is completed). Note also that actions can be composed in
@@ -263,33 +301,71 @@ The actions mechanism is represented (high level) in the following UML.
 
 |actions|
 
-Why use wrappers?
-~~~~~~~~~~~~~~~~~~~
+Why use wrappers? (and differences from facades)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Wrappers embed the parts of the SUT that the test script needs to
-interact with. In the current version of the harness, wrappers wrap
-Tango Device Proxies. Their responsibilities are to:
+In the Integration Test Harness, the wrappers can be seen as the
+way we *internally* use to represent the SUT (a telescope), it's
+sub-systems and the devices. Concretely, the wrappers are classes that:
 
--  define the structure of the SUT (i.e. which sub-systems are part of
-   it and which devices are part of each sub-system);
--  hold and hide some technical details about the interaction with such
-   devices, that may differ between emulated and production devices;
--  implement teardown procedures that are needed to reset the SUT to a
-   known state after executing of a test.
+- encode the structure of the SUT (i.e. which sub-systems are part of it
+  and which devices are part of each sub-system);
+- support the performing of "technical actions" over the devices (like
+  the tear-down to a "base state", the logging of the devices versions,
+  etc.);
+- encapsulate the technical details related to the *emulated* or *production*
+  status of the devices (permitting to abstract over that from the test
+  scripts and from the actions);
+- support a certain level of configuration.
 
-The main access point to the wrappers (``TelescopeWrapper``) is intended
-to be a
-`SINGLETON <https://refactoring.guru/design-patterns/singleton>`__, so
-once it’s initialised, you can access it from everywhere in the code
-just by accessing its instance. This way multiple facades and actions
-can share the same (already configured) instance of the wrapper without
-being aware of it and without the need to pass it around.
+The main access point to the wrappers is a class called
+:py:class:`~ska_integration_test_harness.structure.telescope_wrapper.TelescopeWrapper`,
+which is intended to represent the entire SUT and internally holds
+references to all the sub-systems wrappers. Since the SUT is one, the
+``TelescopeWrapper`` is a `SINGLETON <https://refactoring.guru/design-patterns/singleton>`__,
+so once it’s initialised, you can access it from everywhere in the code
+just by accessing its unique instance. The sub-systems wrappers are
+instead dedicated abstract classes, which may have a "production" and an
+"emulated" concrete implementation. Each sub-system extend a common base
+abstract class (which provides a common interface for some recurrent
+operations) and, usually, supports a specific configuration.
 
-   NOTE: while the abstract and/or generic classes contained in the
-   ``structure`` package never point to ``actions`` (to avoid cyclic
-   dependencies), their concrete implementations in the ``emulated`` and
-   ``production`` packages may need to point to actions to perform the
-   operations.
+**What is the difference between a facade and a wrapper?**
+
+A doubt that may arise is: why do we need both facades and wrappers? The doubt
+is more than legit, since they both represent the SUT, they both have classes
+for the sub-systems and they both have references to the devices. Said that,
+the choice of having both is not casual and is based on the fact that, even
+if they represent the same thing, they are used in different contexts and
+for different purposes.
+
+- The facades are used in the test scripts to provide a high-level interface
+  to the SUT. They are mean to be 100% agnostic of technical details and
+  instead they are focused on exposing the (business meaningful) operations
+  that can be performed over the SUT and the devices that are part of it.
+
+- The wrappers instead are something opposite, they are a more internal
+  technical representation of the SUT, which can be used to represent what
+  we are testing (in a layer that stays hidden from the test scripts)
+  and its technical details (like, the fact something may be production
+  or emulated, technical initialisation and tear-down procedures, etc.).
+
+
+Moreover, the existence of the wrappers as separate entities from the
+facades is justified also by the actions. As we already said in the
+previous section, the actions are classes that perform operations over
+the telescope and such operations need to be performed on a target. If the
+target is a facade, we would have two problems:
+
+- circular dependencies, since the facades are also the ones that instantiate
+  the specific actions;
+- the actions occasionally need to access something more "internal" and
+  technical (e.g., a method that differentiates between production and
+  emulated devices) and we want to keep this separate from the facades.
+
+In other words, the wrappers are the internal representation of the SUT
+which permits the more external representation (the facades) to be
+more business-oriented and high-level.
 
 Why use JSON data builder?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
