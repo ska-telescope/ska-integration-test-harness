@@ -1,4 +1,4 @@
-"""Wrapper for subarray node."""
+"""A facade to subarray in TMC."""
 
 from ska_control_model import ObsState
 
