@@ -121,7 +121,7 @@ itself.
 Design decisions
 ----------------
 
-Why using facades?
+Why use facades?
 ~~~~~~~~~~~~~~~~~~
 
 As mentioned above we want to insulate test scripts from the details of
@@ -152,7 +152,7 @@ Facades-based design is visually represented in the following UML.
 
 |facades|
 
-Why using actions?
+Why use actions?
 ~~~~~~~~~~~~~~~~~~
 
 A test script has to interact with the SUT and send it operations to
@@ -215,7 +215,7 @@ The actions mechanism is represented (high level) in the following UML.
 
 |actions|
 
-Why using wrappers?
+Why use wrappers?
 ~~~~~~~~~~~~~~~~~~~
 
 Wrappers embed the parts of the SUT that the test script needs to
@@ -243,7 +243,7 @@ being aware of it and without the need to pass it around.
    ``production`` packages may need to point to actions to perform the
    operations.
 
-Why using JSON data builder?
+Why use JSON data builder?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Some actions over the telescope (such as the *scan*, *configure*,
@@ -290,7 +290,7 @@ to do other operations). This class is used by the initialisation
 procedures to load and validate the JSON input for the commands used in
 the teardown procedures.
 
-Why using configuration classes?
+Why use configuration classes?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 These are mechanisms that collect configuration data from files or
@@ -331,7 +331,7 @@ files. An example of valid configuration file is provided in `this file
 used in unit
 tests <../../tests/config_examples/valid_test_harness_config.yaml>`__.
 
-Why having an initialisation procedure?
+Why have an initialisation procedure?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A complete test harness can be - potentially - set up just by creating a
