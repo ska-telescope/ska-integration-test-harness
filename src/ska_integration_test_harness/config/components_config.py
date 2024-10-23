@@ -59,30 +59,22 @@ class TMCConfiguration(SubsystemConfiguration):
 
     # pylint: disable=too-many-instance-attributes
 
-    centralnode_name: str = None  # = "ska_mid/tm_central/central_node"
-    tmc_subarraynode1_name: str = None  # = "ska_mid/tm_subarray_node/1"
+    centralnode_name: str = None
+    tmc_subarraynode1_name: str = None
 
     # CSP-related nodes
-    tmc_csp_master_leaf_node_name: str = (
-        None  # = "ska_mid/tm_leaf_node/csp_master"
-    )
-    tmc_csp_subarray_leaf_node_name: str = None  # = (
-    #     "ska_mid/tm_leaf_node/csp_subarray01"
-    # )
+    tmc_csp_master_leaf_node_name: str = None
+    tmc_csp_subarray_leaf_node_name: str = None
 
     # SDP-related nodes
-    tmc_sdp_master_leaf_node_name: str = (
-        None  # = "ska_mid/tm_leaf_node/sdp_master"
-    )
-    tmc_sdp_subarray_leaf_node_name: str = None  # = (
-    #     "ska_mid/tm_leaf_node/sdp_subarray01"
-    # )
+    tmc_sdp_master_leaf_node_name: str = None
+    tmc_sdp_subarray_leaf_node_name: str = None
 
     # Dish leaf nodes
-    tmc_dish_leaf_node1_name: str = None  # = "ska_mid/tm_leaf_node/d0001"
-    tmc_dish_leaf_node2_name: str = None  # = "ska_mid/tm_leaf_node/d0036"
-    tmc_dish_leaf_node3_name: str = None  # = "ska_mid/tm_leaf_node/d0063"
-    tmc_dish_leaf_node4_name: str = None  # = "ska_mid/tm_leaf_node/d0100"
+    tmc_dish_leaf_node1_name: str = None
+    tmc_dish_leaf_node2_name: str = None
+    tmc_dish_leaf_node3_name: str = None
+    tmc_dish_leaf_node4_name: str = None
 
     # NOTE: in TMC hierarchy, is it more sensed to group by master/subarray
     # or by device type?
@@ -121,8 +113,8 @@ class CSPConfiguration(SubsystemConfiguration):
     It is initialised with default values.
     """
 
-    csp_master_name: str = None  # = "mid-csp/control/0"
-    csp_subarray1_name: str = None  # = "mid-csp/subarray/01"
+    csp_master_name: str = None
+    csp_subarray1_name: str = None
 
     def get_device_names(self) -> dict[str, str]:
         return {
@@ -142,8 +134,8 @@ class SDPConfiguration(SubsystemConfiguration):
     It is initialised with default values.
     """
 
-    sdp_master_name: str = None  # = "mid-sdp/control/0"
-    sdp_subarray1_name: str = None  # = "mid-sdp/subarray/01"
+    sdp_master_name: str = None
+    sdp_subarray1_name: str = None
 
     def get_device_names(self) -> dict[str, str]:
         return {
@@ -164,10 +156,10 @@ class DishesConfiguration(SubsystemConfiguration):
     have when the dishes are emulated).
     """
 
-    dish_master1_name: str = None  # = "ska001/elt/master"
-    dish_master2_name: str = None  # = "ska036/elt/master"
-    dish_master3_name: str = None  # = "ska063/elt/master"
-    dish_master4_name: str = None  # = "ska100/elt/master"
+    dish_master1_name: str = None
+    dish_master2_name: str = None
+    dish_master3_name: str = None
+    dish_master4_name: str = None
 
     def get_device_names(self) -> dict[str, str]:
         return {
