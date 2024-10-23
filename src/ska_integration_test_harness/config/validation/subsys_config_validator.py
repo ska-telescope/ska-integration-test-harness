@@ -167,10 +167,9 @@ class DeviceNamesValidator(SubsystemConfigurationValidator):
 
         :param config: The configuration to validate.
         """
-        for attr in config.attributes_with_device_names():
-            dev_name = getattr(config, attr)
+        for dev_key, dev_name in config.get_device_names().items():
             if not dev_name:
-                self.add_warning(f"The attribute '{attr}' is empty.")
+                self.add_warning(f"The attribute '{dev_key}' is empty.")
                 continue
 
             try:
@@ -207,10 +206,7 @@ class EmulationConsistencyValidator(SubsystemConfigurationValidator):
 
         :param config: The configuration to validate.
         """
-        for attr in config.attributes_with_device_names():
-            dev_name = getattr(config, attr)
-            if not dev_name:
-                continue
+        for dev_key, dev_name in config.get_device_names().items():
 
             dev_proxy = tango.DeviceProxy(dev_name)
             responds_as_emulator = self._device_responds_as_emulator(dev_proxy)
@@ -219,15 +215,15 @@ class EmulationConsistencyValidator(SubsystemConfigurationValidator):
                 self.add_warning(
                     f"The configuration {config.__class__.__name__} "
                     "specifies that the devices are emulated, but "
-                    f"the device '{dev_name}' looks like it is not "
+                    f"the device {dev_key}='{dev_name}' looks like it is not "
                     "an emulator."
                 )
             elif not config.is_emulated and responds_as_emulator:
                 self.add_warning(
                     f"The configuration {config.__class__.__name__} "
                     "specifies that the devices are production devices, "
-                    f"but the device '{dev_name}' looks like it is an "
-                    "emulator."
+                    f"but the device {dev_key}='{dev_name}' looks like "
+                    "it is an emulator."
                 )
 
     def _device_responds_as_emulator(

@@ -19,19 +19,12 @@ class DummySubsystemConfiguration(SubsystemConfiguration):
     required_attribute: str = None
     optional_attribute: int = 0
 
-    def all_attributes(self) -> list[str]:
-        """Return the names of all attributes.
-
-        :return: List of attribute names.
-        """
-        return ["device_name", "required_attribute", "optional_attribute"]
-
-    def attributes_with_device_names(self) -> list[str]:
+    def get_device_names(self) -> dict[str, str]:
         """Return the names of the attributes that contain device names.
 
         :return: List of attribute names.
         """
-        return ["device_name"]
+        return {"device_name": self.device_name}
 
     def mandatory_attributes(self) -> list[str]:
         """Return the names of the mandatory attributes.

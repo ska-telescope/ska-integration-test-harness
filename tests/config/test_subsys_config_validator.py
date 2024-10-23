@@ -231,5 +231,6 @@ class TestEmulationConsistencyValidator:
             assert_that(validator.errors_and_warnings).is_not_empty()
             assert_that(validator.errors_and_warnings[0].message).contains(
                 "specifies that the devices are emulated, but the device "
-                "'production/device' looks like it is not an emulator"
+                "device_name='production/device' looks like it is "
+                "not an emulator"
             )

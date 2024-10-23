@@ -21,11 +21,8 @@ class SubsystemConfiguration(abc.ABC):
 
     - extend it,
     - add as attributes your own configuration parameters,
-    - implement the method ``all_attributes`` that returns a list of all
-      attribute names,
-    - optionally, override the methods ``attributes_with_device_names`` and
-      ``mandatory_attributes`` to specify which attributes contain device names
-      and which are mandatory (useful for further validation).
+    - implement a few methods to expose attributes containing device names
+      and the mandatory attributes.
 
     A subsystem in the context of SKA can be emulated or a production one.
     This class contains a boolean flag that will specify that. By default,
@@ -36,15 +33,10 @@ class SubsystemConfiguration(abc.ABC):
     is_emulated: bool = True
 
     @abc.abstractmethod
-    def all_attributes(self) -> list[str]:
-        """Return the names of all attributes.
+    def get_device_names(self) -> dict[str, str]:
+        """Return all the device names.
 
-        :return: List of attribute names.
-        """
-
-    @abc.abstractmethod
-    def attributes_with_device_names(self) -> list[str]:
-        """Return the names of the attributes that contain device names.
+        (associated with they "keyword" name in the configuration)
 
         :return: List of attribute names.
         """
@@ -95,25 +87,30 @@ class TMCConfiguration(SubsystemConfiguration):
     # NOTE: in TMC hierarchy, is it more sensed to group by master/subarray
     # or by device type?
 
-    def all_attributes(self) -> list[str]:
-        return [
-            "centralnode_name",
-            "tmc_subarraynode1_name",
-            "tmc_csp_master_leaf_node_name",
-            "tmc_csp_subarray_leaf_node_name",
-            "tmc_sdp_master_leaf_node_name",
-            "tmc_sdp_subarray_leaf_node_name",
-            "tmc_dish_leaf_node1_name",
-            "tmc_dish_leaf_node2_name",
-            "tmc_dish_leaf_node3_name",
-            "tmc_dish_leaf_node4_name",
-        ]
-
-    def attributes_with_device_names(self) -> list[str]:
-        return self.all_attributes()
+    def get_device_names(self) -> dict[str, str]:
+        return {
+            "centralnode_name": self.centralnode_name,
+            "tmc_subarraynode1_name": self.tmc_subarraynode1_name,
+            "tmc_csp_master_leaf_node_name": (
+                self.tmc_csp_master_leaf_node_name
+            ),
+            "tmc_csp_subarray_leaf_node_name": (
+                self.tmc_csp_subarray_leaf_node_name
+            ),
+            "tmc_sdp_master_leaf_node_name": (
+                self.tmc_sdp_master_leaf_node_name
+            ),
+            "tmc_sdp_subarray_leaf_node_name": (
+                self.tmc_sdp_subarray_leaf_node_name
+            ),
+            "tmc_dish_leaf_node1_name": self.tmc_dish_leaf_node1_name,
+            "tmc_dish_leaf_node2_name": self.tmc_dish_leaf_node2_name,
+            "tmc_dish_leaf_node3_name": self.tmc_dish_leaf_node3_name,
+            "tmc_dish_leaf_node4_name": self.tmc_dish_leaf_node4_name,
+        }
 
     def mandatory_attributes(self) -> list[str]:
-        return self.all_attributes()
+        return self.get_device_names().keys()
 
 
 @dataclass
@@ -127,14 +124,14 @@ class CSPConfiguration(SubsystemConfiguration):
     csp_master_name: str = None  # = "mid-csp/control/0"
     csp_subarray1_name: str = None  # = "mid-csp/subarray/01"
 
-    def attributes_with_device_names(self) -> list[str]:
-        return ["csp_master_name", "csp_subarray1_name"]
+    def get_device_names(self) -> dict[str, str]:
+        return {
+            "csp_master_name": self.csp_master_name,
+            "csp_subarray1_name": self.csp_subarray1_name,
+        }
 
     def mandatory_attributes(self) -> list[str]:
-        return self.attributes_with_device_names()
-
-    def all_attributes(self) -> list[str]:
-        return self.attributes_with_device_names()
+        return self.get_device_names().keys()
 
 
 @dataclass
@@ -148,14 +145,14 @@ class SDPConfiguration(SubsystemConfiguration):
     sdp_master_name: str = None  # = "mid-sdp/control/0"
     sdp_subarray1_name: str = None  # = "mid-sdp/subarray/01"
 
-    def attributes_with_device_names(self) -> list[str]:
-        return ["sdp_master_name", "sdp_subarray1_name"]
+    def get_device_names(self) -> dict[str, str]:
+        return {
+            "sdp_master_name": self.sdp_master_name,
+            "sdp_subarray1_name": self.sdp_subarray1_name,
+        }
 
     def mandatory_attributes(self) -> list[str]:
-        return self.attributes_with_device_names()
-
-    def all_attributes(self) -> list[str]:
-        return self.attributes_with_device_names()
+        return self.get_device_names().keys()
 
 
 @dataclass
@@ -172,16 +169,13 @@ class DishesConfiguration(SubsystemConfiguration):
     dish_master3_name: str = None  # = "ska063/elt/master"
     dish_master4_name: str = None  # = "ska100/elt/master"
 
-    def all_attributes(self) -> list[str]:
-        return [
-            "dish_master1_name",
-            "dish_master2_name",
-            "dish_master3_name",
-            "dish_master4_name",
-        ]
-
-    def attributes_with_device_names(self) -> list[str]:
-        return self.all_attributes()
+    def get_device_names(self) -> dict[str, str]:
+        return {
+            "dish_master1_name": self.dish_master1_name,
+            "dish_master2_name": self.dish_master2_name,
+            "dish_master3_name": self.dish_master3_name,
+            "dish_master4_name": self.dish_master4_name,
+        }
 
     def mandatory_attributes(self) -> list[str]:
-        return self.all_attributes()
+        return self.get_device_names().keys()
