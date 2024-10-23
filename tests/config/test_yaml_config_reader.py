@@ -210,3 +210,52 @@ class TestYAMLConfigurationReader:
         tmc_config = reader.get_tmc_configuration()
 
         assert_that(tmc_config).is_none()
+
+    # --------------------------------------------------
+    # Tests for when subarray is numbered dynamically
+
+    @pytest.fixture(scope="class")
+    def numbered_subarray_yaml_path(self) -> str:
+        """Path to a valid YAML config file with dynamic subarray numbering."""
+        return f"{self.CONFIG_DATA_DIR}/numbered_subarray.yaml"
+
+    def test_get_tmc_config_loads_correctly_multiple_subarrays(
+        self, numbered_subarray_yaml_path: str
+    ) -> None:
+        """TMC config is parsed correctly when subarrays are numbered."""
+        reader = YAMLConfigurationReader()
+        reader.read_configuration_file(numbered_subarray_yaml_path)
+
+        tmc_config = reader.get_tmc_configuration()
+
+        assert_that(tmc_config.tmc_subarraynode1_name).described_as(
+            "The first subarray node name is available and correct"
+        ).is_equal_to("ska_mid/tm_subarray_node/1")
+        assert_that(tmc_config.subarrays_names).described_as(
+            "Both subarray names are available and correct"
+        ).contains_only(1, 4)
+        assert_that(tmc_config.subarrays_names[1]).described_as(
+            "The first subarray name is correct"
+        ).is_equal_to("ska_mid/tm_subarray_node/1")
+        assert_that(tmc_config.subarrays_names[4]).described_as(
+            "The second subarray name is correct"
+        ).is_equal_to("ska_mid/tm_subarray_node/4")
+
+    def test_get_sdp_config_uses_1_as_subarray_default_number(
+        self, numbered_subarray_yaml_path: str
+    ) -> None:
+        """A default number is used when parsing non-numbered subarrays."""
+        reader = YAMLConfigurationReader()
+        reader.read_configuration_file(numbered_subarray_yaml_path)
+
+        sdp_config = reader.get_sdp_configuration()
+
+        assert_that(sdp_config.sdp_subarray1_name).described_as(
+            "The first subarray node name is available and correct"
+        ).is_equal_to("mid-sdp/subarray/01")
+        assert_that(sdp_config.sdp_subarrays_names).described_as(
+            "Both subarray names are available and correct"
+        ).contains_only(1, 4)
+        assert_that(sdp_config.sdp_subarrays_names[1]).described_as(
+            "The first subarray name is correct"
+        ).is_equal_to("mid-sdp/subarray/01")
