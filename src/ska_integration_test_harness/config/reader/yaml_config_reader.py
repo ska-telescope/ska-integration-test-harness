@@ -115,23 +115,23 @@ class YAMLConfigurationReader(ConfigurationReader):
         return TMCConfiguration(
             is_emulated=tmc.get("is_emulated", False),
             centralnode_name=tmc.get("centralnode_name"),
-            tmc_subarraynode1_name=tmc.get("tmc_subarraynode1_name"),
             tmc_csp_master_leaf_node_name=tmc.get(
                 "tmc_csp_master_leaf_node_name"
             ),
-            tmc_csp_subarray_leaf_node_name=tmc.get(
-                "tmc_csp_subarray_leaf_node_name"
-            ),
             tmc_sdp_master_leaf_node_name=tmc.get(
                 "tmc_sdp_master_leaf_node_name"
-            ),
-            tmc_sdp_subarray_leaf_node_name=tmc.get(
-                "tmc_sdp_subarray_leaf_node_name"
             ),
             tmc_dish_leaf_node1_name=tmc.get("tmc_dish_leaf_node1_name"),
             tmc_dish_leaf_node2_name=tmc.get("tmc_dish_leaf_node2_name"),
             tmc_dish_leaf_node3_name=tmc.get("tmc_dish_leaf_node3_name"),
             tmc_dish_leaf_node4_name=tmc.get("tmc_dish_leaf_node4_name"),
+            subarrays_names={1: tmc.get("tmc_subarraynode1_name")},
+            tmc_csp_subarrays_leaf_nodes_names={
+                1: tmc.get("tmc_csp_subarray_leaf_node_name")
+            },
+            tmc_sdp_subarrays_leaf_nodes_names={
+                1: tmc.get("tmc_sdp_subarray_leaf_node_name")
+            },
         )
 
     def get_csp_configuration(self) -> CSPConfiguration | None:
@@ -143,7 +143,7 @@ class YAMLConfigurationReader(ConfigurationReader):
         return CSPConfiguration(
             is_emulated=csp.get("is_emulated", True),
             csp_master_name=csp.get("csp_master_name"),
-            csp_subarray1_name=csp.get("csp_subarray1_name"),
+            csp_subarrays_names={1: csp.get("csp_subarray1_name")},
         )
 
     def get_sdp_configuration(self) -> SDPConfiguration | None:
@@ -155,7 +155,7 @@ class YAMLConfigurationReader(ConfigurationReader):
         return SDPConfiguration(
             is_emulated=sdp.get("is_emulated", True),
             sdp_master_name=sdp.get("sdp_master_name"),
-            sdp_subarray1_name=sdp.get("sdp_subarray1_name"),
+            sdp_subarrays_names={1: sdp.get("sdp_subarray1_name")},
         )
 
     def get_dish_configuration(self) -> DishesConfiguration | None:

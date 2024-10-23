@@ -6,7 +6,7 @@ classes to encapsulate these configurations.
 """
 
 import abc
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -59,16 +59,36 @@ class TMCConfiguration(SubsystemConfiguration):
 
     # pylint: disable=too-many-instance-attributes
 
+    # Central node name
     centralnode_name: str = None
-    tmc_subarraynode1_name: str = None
 
-    # CSP-related nodes
+    # Controllers leaf nodes names
     tmc_csp_master_leaf_node_name: str = None
-    tmc_csp_subarray_leaf_node_name: str = None
-
-    # SDP-related nodes
     tmc_sdp_master_leaf_node_name: str = None
-    tmc_sdp_subarray_leaf_node_name: str = None
+
+    # Subarray nodes names
+    subarrays_names: dict[int, str] = field(default_factory=dict)
+    tmc_csp_subarrays_leaf_nodes_names: dict[int, str] = field(
+        default_factory=dict
+    )
+    tmc_sdp_subarrays_leaf_nodes_names: dict[int, str] = field(
+        default_factory=dict
+    )
+
+    @property
+    def tmc_subarraynode1_name(self) -> str:
+        """Get the name of the first subarray node."""
+        return self.subarrays_names.get(1)
+
+    @property
+    def tmc_sdp_subarray_leaf_node_name(self) -> str:
+        """Get the name of the first subarray node."""
+        return self.tmc_sdp_subarrays_leaf_nodes_names.get(1)
+
+    @property
+    def tmc_csp_subarray_leaf_node_name(self) -> str:
+        """Get the name of the first subarray node."""
+        return self.tmc_csp_subarrays_leaf_nodes_names.get(1)
 
     # Dish leaf nodes
     tmc_dish_leaf_node1_name: str = None
@@ -114,7 +134,12 @@ class CSPConfiguration(SubsystemConfiguration):
     """
 
     csp_master_name: str = None
-    csp_subarray1_name: str = None
+    csp_subarrays_names: dict[int, str] = field(default_factory=dict)
+
+    @property
+    def csp_subarray1_name(self) -> str:
+        """Get the name of the first subarray."""
+        return self.csp_subarrays_names.get(1)
 
     def get_device_names(self) -> dict[str, str]:
         return {
@@ -135,7 +160,12 @@ class SDPConfiguration(SubsystemConfiguration):
     """
 
     sdp_master_name: str = None
-    sdp_subarray1_name: str = None
+    sdp_subarrays_names: dict[int, str] = field(default_factory=dict)
+
+    @property
+    def sdp_subarray1_name(self) -> str:
+        """Get the name of the first subarray."""
+        return self.sdp_subarrays_names.get(1)
 
     def get_device_names(self) -> dict[str, str]:
         return {

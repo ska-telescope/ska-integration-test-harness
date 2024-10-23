@@ -119,9 +119,7 @@ class RequiredFieldsValidator(SubsystemConfigurationValidator):
     """Validator to check that all required fields are set.
 
     This validator checks that all required fields in the subsystem
-    configuration
-    are specified and are of the correct type. It logs errors if any required
-    attribute is missing or has an incorrect type.
+    configuration. It logs errors if any required attribute is missing.
 
     :param config: The configuration to validate.
     """
@@ -129,23 +127,14 @@ class RequiredFieldsValidator(SubsystemConfigurationValidator):
     def validate(self, config: SubsystemConfiguration) -> None:
         """Validate the required fields of a subsystem configuration.
 
-        Check that all the required fields are set in the configuration
-        and that they are of the expected type. Errors are logged for any
-        missing or incorrectly typed attributes.
+        Check that all the required fields are set in the configuration.
 
         :param config: The configuration to validate.
         """
         for attr in config.mandatory_attributes():
-            attr_value = getattr(config, attr)
+            attr_value = getattr(config, attr, None)
             if not attr_value:
                 self.add_error(f"The attribute '{attr}' is missing.")
-            # get attribute expected type
-            expected_type = config.__annotations__[attr]
-            if not isinstance(attr_value, expected_type):
-                self.add_error(
-                    f"The attribute '{attr}' is not of "
-                    f"the expected type '{expected_type}'."
-                )
 
 
 class DeviceNamesValidator(SubsystemConfigurationValidator):

@@ -127,20 +127,6 @@ class TestRequiredFieldsValidator:
             "The attribute 'required_attribute' is missing."
         )
 
-    def test_validate_incorrect_type_for_field(self):
-        """Validation adds an error if field has incorrect type."""
-        config = DummySubsystemConfiguration(
-            device_name=12345, required_attribute="value"
-        )
-        validator = RequiredFieldsValidator()
-
-        validator.validate(config)
-
-        assert_that(validator.errors_and_warnings).is_not_empty()
-        assert_that(validator.errors_and_warnings[0].message).contains(
-            "The attribute 'device_name' is not of the expected type"
-        )
-
 
 # 3. Tests for DeviceNamesValidator
 class TestDeviceNamesValidator:
