@@ -250,7 +250,7 @@ the telescope. The actions are so represented through classes,
 that embed both the *code to perform the operation* and *the
 termination/synchronization condition*. 
 All the action classes extend a common base class
-(:py:class:`~ska_integration_test_harness.actions.telescope_action.TelescopeAction`)
+(:py:class:`~ska_integration_test_harness.actions.TelescopeAction`)
 and implement as abstract methods the procedure to perform the action
 and the condition to synchronize at the end of the action (if needed).
 From the base class they inherit:
@@ -292,12 +292,12 @@ a sequence of actions is also implemented through the
 design pattern.
 
 To implement an action, you have to extend the
-:py:class:`~ska_integration_test_harness.actions.telescope_action.TelescopeAction`
+:py:class:`~ska_integration_test_harness.actions.TelescopeAction`
 base class and implement the abstract methods (to define the *procedure* that
 implements the action and the *synchronization condition* that defines
 when the action is completed). Note also that actions can be composed in
-sequences, to perform more complex operations.(see
-:py:class:`~ska_integration_test_harness.actions.telescope_action_sequence.TelescopeActionSequence`
+sequences, to perform more complex operations (see
+:py:class:`~ska_integration_test_harness.actions.TelescopeActionSequence`
 ). Note also that actions can also be defined
 as a complex inheritance hierarchy, to define common behaviours and to
 specialize them (give a look to the existing actions to see how they are
@@ -325,7 +325,7 @@ sub-systems and the devices. Concretely, the wrappers are classes that:
 - support a certain level of configuration.
 
 The main access point to the wrappers is a class called
-:py:class:`~ska_integration_test_harness.structure.telescope_wrapper.TelescopeWrapper`,
+:py:class:`~ska_integration_test_harness.structure.TelescopeWrapper`,
 which is intended to represent the entire SUT and internally holds
 references to all the sub-systems wrappers. Since the SUT is one, the
 telescope wrapper is a `SINGLETON <https://refactoring.guru/design-patterns/singleton>`__,
@@ -437,9 +437,9 @@ it, we use configuration classes. Generally, foreach sub-system we want
 to have a configuration class that represents the configuration data
 needed to initialise the sub-system (e.g., for the TMC configuration
 we have a
-:py:class:`~ska_integration_test_harness.config.components_config.TMCConfiguration`
+:py:class:`~ska_integration_test_harness.config.TMCConfiguration`
 class). All subsystems configuration are then collected in a common class
-(:py:class:`~ska_integration_test_harness.config.test_harness_config.TestHarnessConfiguration`)
+(:py:class:`~ska_integration_test_harness.config.TestHarnessConfiguration`)
 which serves as entry point to the configuration.
 
 This configuration instance can be filled in programmatically and passed to
