@@ -253,12 +253,7 @@ Your fixtures code may look like this:
    from ska_integration_test_harness.facades.csp_facade import CSPFacade
    from ska_integration_test_harness.facades.dishes_facade import DishesFacade
    from ska_integration_test_harness.facades.sdp_facade import SDPFacade
-   from ska_integration_test_harness.facades.tmc_central_node_facade import (
-       TMCCentralNodeFacade,
-   )
-   from ska_integration_test_harness.facades.tmc_subarray_node_facade import (
-       TMCSubarrayNodeFacade,
-   )
+   from ska_integration_test_harness.facades.tmc_facade import TMCFacade
    from ska_integration_test_harness.init.test_harness_builder import (
        TestHarnessBuilder,
    )
@@ -338,20 +333,9 @@ Your fixtures code may look like this:
    # Facades to access the devices
 
    @pytest.fixture
-   def central_node_facade(telescope_wrapper: TelescopeWrapper):
-       """Create a facade to TMC central node and all its operations."""
-       central_node_facade = TMCCentralNodeFacade(telescope_wrapper)
-       yield central_node_facade
-
-
-   @pytest.fixture
-   def subarray_node_facade(telescope_wrapper: TelescopeWrapper):
-       """Create a facade to TMC subarray node and all its operations."""
-       subarray_node = TMCSubarrayNodeFacade(telescope_wrapper)
-       yield subarray_node
-       # NOTE: in future, this subarray node facade may be merged with central
-       # node facade since they belong to the same subsystem.
-       # For now, we keep them separated.
+   def tmc(telescope_wrapper: TelescopeWrapper):
+       """Create a facade to TMC devices."""
+       return TMCFacade(telescope_wrapper)
 
    @pytest.fixture
    def csp(telescope_wrapper: TelescopeWrapper):
@@ -411,15 +395,13 @@ with them like in this simplified example:
 
    from assertpy import assert_that
    from pytest_bdd import given, when, then, scenario
-   from ska_integration_test_harness.facades.tmc_central_node_facade import (
-       TMCCentralNodeFacade,
-   )
+   from ska_integration_test_harness.facades.tmc_facade import TMCFacade
    from ska_tango_testing.integration import TangoEventTracer
    from tango import DevState
 
    @given("the telescope is in ON state")
    def given_the_telescope_is_in_on_state(
-       central_node_facade: TMCCentralNodeFacade,
+       tmc: TMCFacade,
    ):
        """Example of a Gherkin step to set the telescope in the ON state,
        implemented interacting with the TMC central node facade.
@@ -431,12 +413,12 @@ with them like in this simplified example:
        # is completed, you are sure the telescope is in the ON state.
        # This way you DON'T have to explicitly deal with
        # synchronisation assertions (which are not relevant for the tests).
-       central_node_facade.move_to_on(wait_termination=True)
+       tmc.move_to_on(wait_termination=True)
 
 
    @when("the MoveToOff command is issued")
    def when_the_movetooff_command_is_issued(
-       central_node_facade: TMCCentralNodeFacade,
+       tmc: TMCFacade,
        csp: CSPFacade,
        event_tracer: TangoEventTracer,
    ):
@@ -449,7 +431,7 @@ with them like in this simplified example:
        # using the facades, I can access the
        # device proxies and subscribe to the devices
        event_tracer.subscribe_event(
-           central_node_facade.central_node, "telescopeState"
+           tmc.central_node, "telescopeState"
        )
        event_tracer.subscribe_event(csp.csp_master, "State")
        # (etc.)
@@ -458,11 +440,11 @@ with them like in this simplified example:
        # not wait for the synchronization conditions to be met, 
        # since in the following steps I want to check the events
        # manually (since they are the "object" of this test).
-       central_node_facade.move_to_off(wait_termination=False)
+       tmc.move_to_off(wait_termination=False)
 
    @then("the telescope is in OFF state")
    def then_the_telescope_is_in_off_state(
-       central_node_facade: TMCCentralNodeFacade,
+       tmc: TMCFacade,
        csp: CSPFacade,
        event_tracer: TangoEventTracer,
    ):
@@ -478,7 +460,7 @@ with them like in this simplified example:
        assert_that(event_tracer).described_as(
            "TMC should have reached the OFF state within 60 seconds."
        ).within_timeout(60).has_change_event_occurred(
-           central_node_facade.central_node, "telescopeState", DevState.OFF
+           tmc.central_node, "telescopeState", DevState.OFF
        )
 
 A good example of tests script written using this test harness is
