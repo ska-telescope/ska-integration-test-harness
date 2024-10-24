@@ -120,4 +120,9 @@ tests <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/-/merge_
 which use the test harness to test the subarray-related operations over
 the TMC (with a production CSP and emulated SDP and Dishes).
 
+Another more recent use case (October 2024) is 
+`this new set of TMC system tests <https://gitlab.com/ska-telescope/ska-sw-integration-testing/-/merge_requests/7/>`__,
+which run in an environment where TMC, CSP, SDP and Dishes are production
+sub-systems.
+
 

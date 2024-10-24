@@ -103,17 +103,22 @@ useful to know where to find the code.
 
 The test harness files are organized in the following way:
 
--  Facades have to be added in the ``facades`` folder
--  Actions have to be added in the ``actions`` folder
+-  Facades have to be added in the 
+   :py:mod:`ska_integration_test_harness.facades` folder
+-  Actions have to be added in the
+   :py:mod:`ska_integration_test_harness.actions` folder
 -  Abstract definitions of the wrappers have to be added in the
-   ``structure``, while ``emulated`` and ``production`` folders contain
-   the concrete implementations of the wrappers for the emulated and
-   production sub-systems.
--  Input-related classes have to be added in the ``inputs`` folder
--  configuration-related classes have to be added in the ``config``
-   folder.
--  The ``init`` folder contains all the factories needed to initialise
-   the test harness.
+   :py:mod:`ska_integration_test_harness.structure` folder,
+   while :py:mod:`ska_integration_test_harness.emulated`
+   and :py:mod:`ska_integration_test_harness.production`
+   folders contains respectively the concrete implementations of the
+   wrappers for the emulated and production sub-systems.
+-  Input-related classes have to be added in the
+   :py:mod:`ska_integration_test_harness.inputs` folder
+-  configuration-related classes have to be added in the
+   :py:mod:`ska_integration_test_harness.config` folder
+-  The :py:mod:`ska_integration_test_harness.init` folder
+   contains all the factories needed to initialise the test harness.
 
 The top-level ``tests`` folder contains the unit tests for the harness
 itself.
