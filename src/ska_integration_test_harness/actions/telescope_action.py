@@ -311,7 +311,15 @@ class TelescopeAction(abc.ABC, Generic[T]):
         """
 
         # Log the beginning of the action execution
-        self._log("Starting action execution")
+        log_msg = "Starting action execution"
+        if self.wait_termination:
+            log_msg += (
+                f" (wait_termination=True, "
+                f"timeout={self.termination_condition_timeout})"
+            )
+        else:
+            log_msg += " (wait_termination=False)"
+        self._log(log_msg)
 
         if self.wait_termination:
             # Subscribe to the expected state changes

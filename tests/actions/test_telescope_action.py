@@ -62,25 +62,64 @@ class TestTelescopeAction:
         - the action infrastructure should log the end of the action.
         """
         action = self.create_simple_action()
+
         with patch.object(action, "_logger") as mock_logger:
             action.execute()
-            assert_that(mock_logger.info.call_count).is_equal_to(
-                3
-            )  # Start, action, and end logs
 
-            expected_calls = [
-                call("%s: %s", "SimpleAction", "Starting action execution"),
-                call("%s: %s", "SimpleAction", "Executing simple action"),
-                call("%s: %s", "SimpleAction", "Action execution completed"),
-            ]
-            assert_that(mock_logger.info.call_args_list).is_equal_to(
-                expected_calls
-            )
+        assert_that(mock_logger.info.call_count).described_as(
+            "We expect 3 log messages: "
+            "action start, action execution, action end"
+        ).is_equal_to(3)
+        expected_calls = [
+            call(
+                "%s: %s",
+                "SimpleAction",
+                "Starting action execution "
+                "(wait_termination=True, timeout=30)",
+            ),
+            call("%s: %s", "SimpleAction", "Executing simple action"),
+            call("%s: %s", "SimpleAction", "Action execution completed"),
+        ]
+        assert_that(mock_logger.info.call_args_list).described_as(
+            "The log messages should be in the expected order"
+        ).is_equal_to(expected_calls)
 
-            mock_logger.reset_mock()
-            action.set_logging_policy(False)
+    def test_execute_with_no_logging(self):
+        """Execute should not log if logging is disabled.
+
+        Given an action that does nothing but log, when the action is executed
+        with logging disabled, the action infrastructure should not log the
+        start of the action, the action should not log its own execution, and
+        the action infrastructure should not log the end of the action.
+        """
+        action = self.create_simple_action()
+        action.set_logging_policy(False)
+
+        with patch.object(action, "_logger") as mock_logger:
             action.execute()
-            assert_that(mock_logger.info.call_count).is_equal_to(0)
+
+        assert_that(mock_logger.info.call_count).is_equal_to(0)
+
+    def test_execute_logs_no_wait_termination(self):
+        """Execute should log no wait termination when policy is False.
+
+        Given an action that does nothing but log, when the action is executed
+        with wait_termination set to False, the action infrastructure should
+        log that wait termination is disabled.
+        """
+        action = self.create_simple_action()
+        action.set_termination_condition_policy(False)
+
+        with patch.object(action, "_logger") as mock_logger:
+            action.execute()
+
+        assert_that(mock_logger.info.call_args_list).contains(
+            call(
+                "%s: %s",
+                "SimpleAction",
+                "Starting action execution (wait_termination=False)",
+            ),
+        )
 
     def test_action_can_be_configured_timeout_term_condition_and_logging(self):
         """Action can be configured with timeout, term. cond., and log. policy.
