@@ -41,12 +41,11 @@ More specifically:
    in a structured way, potentially ignoring which subsystem is emulated
    and which is not;
 -  simplify complex procedures to bring the SUT in a specific state
-   before running the tests (e.g., make the actions to set the telescope
-   in a specific state, synchronizing on events end ensuring the state
+   before running the tests (e.g., call the commands to set the telescope
+   in a specific desired state, synchronizing on events end ensuring the state
    is effectively reached);
 -  simplify teardown procedures, to bring the SUT back to a known state
    after the tests are completed;
--  call Tango commands on the devices;
 -  overview on the active devices and their versions.
 
 At the moment (17th October 2024), the SUT consist in:
@@ -55,12 +54,13 @@ At the moment (17th October 2024), the SUT consist in:
    subsystem which receives most of the commands);
 -  a production or emulated CSP;
 -  a production or emulated SDP;
--  a set of production or emulated Dishes (where “production” refers to
-   the software running on the real devices, and “emulated” to a
-   software that just “replicate” the behaviour of the real devices,
-   without actually having a complex logic behind; for the purposes of
-   this test harness, at the moment, a “production” device doesn’t
-   necessarily mean it uses the real hardware).
+-  a set of production or emulated Dishes.
+
+**NOTE:** for the purposes of this test harness, we use the term
+*"production"* to refer to the real software that needs to be tested, and
+*"emulated"* to refer to a software that just “replicate” the behaviour of
+the real devices, without actually having a complex logic behind. The term
+*"production"* doesn't mean we are using the real hardware.
 
 What you cannot find (and likely will remain in separate places)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -80,19 +80,22 @@ This repository does not contain and will likely never contain:
    `ska-tango-testing <https://gitlab.com/ska-telescope/ska-tango-testing>`__);
 -  pipeline support tools, such as the Jira integration scripts (see
    `ska-ser-xray <https://gitlab.com/ska-telescope/ska-ser-xray>`__);
--  the code of the emulators for the non-production devices (see
+-  the code of the emulators for the non-production subsystems devices (see
    `ska-tmc-simulators <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators>`__);
 -  the code of the production devices.
 
 What you cannot find (yet)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Instead, this repository may (*and will likely*) contain in the future
-(but not at the moment, 17th October 2024):
+Instead, this framework may (*and will likely*) support in the future
+(**but not at the moment, 17th October 2024**):
 
--  a test harness which supports TMC Low integration tests;
--  a test harness which supports integration tests where TMC is not the
-   protagonist.
+- TMC Low integration tests;
+- integration tests where TMC is not the
+  protagonist (i.e., you can call commands not only on TMC but also on
+  CSP, SDP, etc. and check the interactions between them, without
+  having TMC involved);
+- tests with multiple subarrays.
 
 Stay tuned for updates!
 
@@ -135,11 +138,7 @@ in your project, you can run
 Usage
 -----
 
-Below is an example of how to initialise the test harness through
-opportune fixtures in a ``pytest`` test script. We assume you have
-available a ``test_harness_config.yaml`` file (see
-`example <tests/config_examples/valid_test_harness_config.yaml>`__ and
-also a set of JSON files for the various required inputs.
+Below we explain how to use the test harness in your test scripts.
 
 Prerequisites
 ~~~~~~~~~~~~~
@@ -152,15 +151,19 @@ Integration <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/>`
 (`docs <https://developer.skao.int/projects/ska-tmc-mid-integration/en/latest/getting_started/getting_started.html>`__).
 
 Since some of the devices are emulators, you might also want to check
-`this <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common/-/tree/master/src/ska_tmc_common/test_helpers?ref_type=heads>`__
-and
-`this <https://developer.skao.int/projects/ska-tmc-common/en/latest/HelperDevices/TangoHelperDevices.html>`__.
+`this documentation page <https://developer.skao.int/projects/ska-tmc-common/en/latest/HelperDevices/TangoHelperDevices.html>`__
+and - if necessary - 
+`the emulators implementation <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common/-/tree/master/src/ska_tmc_common/test_helpers?ref_type=heads>`__.
+
+.. _configuration_example:
 
 Configuration
 ~~~~~~~~~~~~~
 
 To configure the test harness using the default method, you need to
-create a YAML file such as the following:
+create a YAML file that specifies a few configuration such as the
+expected device names and whether the devices are emulated or not. The
+file will look like this:
 
 .. code:: yaml
 

@@ -126,15 +126,17 @@ Why use facades?
 
 As mentioned above we want an high-level way to represent the SUT, its
 sub-systems, its devices and the operations that can be performed
-against them. 
+against them. To achieve this, we use **Facades**.
 
-To achieve this, we use facades. Facades are classes that provide a
-simplified interface to a complex system, which in this case are each
-sub-system of the telescope. So foreach each sub-system we define a facade
-class which exposes:
+Facades are classes that provide a simplified interface to a complex system;
+in this case, the complex system is the combination of the telescope
+subsystems and the test harness internal logic itself. 
+
+Concretely, we define a facade for each sub-system of the telescope
+(e.g., TMC, CSP, DSH, etc.) and we make it expose: 
 
 -  the devices that are part of the sub-system;
--  the operations that can be performed on the sub-system (like sending 
+-  the operations that can be performed on the sub-system (like sending
    a command, or something more complex like moving the subsystem to a
    certain state passing through a sequence of commands).
 
@@ -147,7 +149,7 @@ of using facades are the following:
    and its sub-systems and they can be used encode structured interface
    to something that is a bit more complex than a single Tango device;
 
-2. occasionally, they permit you to hide some technical details about
+2. they permit you to hide some technical details about
    the interaction with the devices, especially if they are set-up or
    tear-down interactions which are not the main point of the test.
 
@@ -155,7 +157,7 @@ Let's see the advantages through the following example: you have to
 test the capability of TMC integrated with the other subsystems (production
 or emulated) to perform a scan.
 
-- **Use in the "GIVEN" steps**: first of all you have to be in a 
+- **Use in the "GIVEN" steps**: first of all, you have to be in a 
   state where the TMC is ``READY`` to start the scan. To do so, instead of
   calling by yourself all the Tango commands and synchronize explicitly
   (producing this way a lot of boilerplate code which is not the main
@@ -163,8 +165,9 @@ or emulated) to perform a scan.
   that moves the TMC to the ``READY`` state, dealing transparently with
   the synchronization.
 
-- **Use in the "WHEN" steps**: then you have to send the scan command to
-  the TMC. To do so you can, again, use the facade method. This way,
+- **Use in the "WHEN" steps**: after you setup the desired condition,
+  you have to send the ``Scan`` command to the TMC. To do so you can, again, 
+  use the facade method. This way,
   if in future the ``Scan`` command will somewhat change, the dependencies
   will be more explicit and the places you have to update will be less.
 
@@ -173,10 +176,10 @@ or emulated) to perform a scan.
   the expected state. Through the various facades you can access in a 
   structured way to the devices to:
 
-  - subscribe to the events (*before calling the command*)
-  - asserting over the events (*after calling the command*)
+  - subscribe to the events (*before calling the command*);
+  - asserting over the events (*after calling the command*);
   - eventually, asserting over the properties of the devices (*after
-    calling the command*)
+    calling the command*).
 
   If something changes in the configuration (e.g., the devices names),
   you will have to update only a configuration file instead of all the
@@ -203,9 +206,9 @@ Facades-based design is visually represented in the following UML diagram.
 Why use actions?
 ~~~~~~~~~~~~~~~~~~
 
-The general idea of the **actions**, in brief, is to encode an operation
+The general idea of the **actions** is - in brief - to encode an operation
 you perform over the telescope in a single class. One may ask, why not
-just a single method in a facade or a wrapper? Or also, why do not
+just a single method in a facade or a wrapper? Or also, why not
 just directly call Tango commands from the test script? Here there follow
 some reasons.
 
@@ -214,35 +217,31 @@ and it does that by sending Tango commands on devices. Even if apparently
 having a class just to send a command may seem an overkill, in reality
 there are a lot of complexities that justifies the existence of actions:
 
-- the commands need to be called in on the right device;
+- the commands have to be called in on the right device;
 - the commands require the right input;
-- since the telescope is a distributed system, after most of the commands
-  are executed we have to wait for some events to happen to be sure that
-  the operation is completed;
+- since the telescope is a distributed system, most command calls are
+  asynchronous and the test script has to synchronize with the devices;
+- in a more general sense, when performing an operation (in your GIVEN steps)
+  you may want to synchronize over a desired transient or quiescent state
 - very often, the operations implicitly involve devices that are part of
-  different sub-systems, so the synchronization has to be done in a
-  coordinated way;
-- since some commands trigger long running operations, you may want to
-  choose to synchronize at the end of the operation (next quiescent state)
-  or at the when the command is accepted (next transient state);
+  different sub-systems, so the synchronization may need to involve them all;
 - if something changes about the command (e.g., the name, the input,
   the expected events, the expected state of the devices), you may want to
   update only in one place and have all the dependencies as much explicit
   as possible;
-- you may want to automatically log the run operations and their results
+- you may want to automatically log the operations you run and their results
   in a transparent way.
 
 Moreover, in the context of the testing of the telescope, not all the
 operations are just a single command but:
 
-- sometimes you may want to call at once a sequence of operations;
-- sometimes an operation is simply more sophisticated than calling a single
-  command and you need additional logic (that is never a good thing to
-  be put explicitly in a test script).
+- sometimes you may want to build and call a sequence of operations;
+- sometimes an operation is simply more sophisticated than a simple command
+  call and additional logic it's needed.
 
-All these reasons justify the existence of actions, as building blocks
+All these reasons justify the existence of actions as structured entities
 to encapsulate the complexity of the operations that are performed over
-the telescope. The actions so are represented through classes,
+the telescope. The actions are so represented through classes,
 that embed both the *code to perform the operation* and *the
 termination/synchronization condition*. 
 All the action classes extend a common base class
@@ -261,8 +260,8 @@ At the moment, the actions are generally called by facades (or by other
 actions, or by wrappers specific implementations) and they are used to
 perform the operations that are needed to
 be done over the telescope. For example, let’s consider a
-test script that wants to send a scan
-command to the TMC Subarray Node and synchronize at the end of the scan:
+test script that wants to send a scan ``Scan``
+command to the TMC Subarray Node:
 
 -  the test script has access to a
    facade of the TMC Subarray Node (see :doc:`./getting_started` for
@@ -287,12 +286,14 @@ a sequence of actions is also implemented through the
 `COMPOSITE <https://refactoring.guru/design-patterns/composite>`__
 design pattern.
 
-To implement an action, you have to extend the ``TelescopeAction`` base
-class and override the abstract methods (to define the *procedure* that
+To implement an action, you have to extend the
+:py:class:`~ska_integration_test_harness.actions.telescope_action.TelescopeAction`
+base class and implement the abstract methods (to define the *procedure* that
 implements the action and the *synchronization condition* that defines
 when the action is completed). Note also that actions can be composed in
 sequences, to perform more complex operations.(see
-``TelescopeActionSequence``). Note also that actions can also be defined
+:py:class:`~ska_integration_test_harness.actions.telescope_action_sequence.TelescopeActionSequence`
+). Note also that actions can also be defined
 as a complex inheritance hierarchy, to define common behaviours and to
 specialize them (give a look to the existing actions to see how they are
 implemented).
@@ -304,7 +305,7 @@ The actions mechanism is represented (high level) in the following UML.
 Why use wrappers? (and differences from facades)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In the Integration Test Harness, the wrappers can be seen as the
+In the Integration Test Harness, the **wrappers** can be seen as the
 way we *internally* use to represent the SUT (a telescope), it's
 sub-systems and the devices. Concretely, the wrappers are classes that:
 
@@ -322,7 +323,7 @@ The main access point to the wrappers is a class called
 :py:class:`~ska_integration_test_harness.structure.telescope_wrapper.TelescopeWrapper`,
 which is intended to represent the entire SUT and internally holds
 references to all the sub-systems wrappers. Since the SUT is one, the
-``TelescopeWrapper`` is a `SINGLETON <https://refactoring.guru/design-patterns/singleton>`__,
+telescope wrapper is a `SINGLETON <https://refactoring.guru/design-patterns/singleton>`__,
 so once it’s initialised, you can access it from everywhere in the code
 just by accessing its unique instance. The sub-systems wrappers are
 instead dedicated abstract classes, which may have a "production" and an
@@ -345,14 +346,13 @@ for different purposes.
   that can be performed over the SUT and the devices that are part of it.
 
 - The wrappers instead are something opposite, they are a more internal
-  technical representation of the SUT, which can be used to represent what
-  we are testing (in a layer that stays hidden from the test scripts)
-  and its technical details (like, the fact something may be production
-  or emulated, technical initialisation and tear-down procedures, etc.).
-
+  technical representation of the SUT, which may include technical details
+  which are not related to the business logic of the test script body
+  (like, the fact something may be production or emulated, technical
+  initialisation and tear-down procedures, etc.).
 
 Moreover, the existence of the wrappers as separate entities from the
-facades is justified also by the actions. As we already said in the
+facades is justified also by the Actions mechanism. As we already said in the
 previous section, the actions are classes that perform operations over
 the telescope and such operations need to be performed on a target. If the
 target is a facade, we would have two problems:
@@ -361,7 +361,8 @@ target is a facade, we would have two problems:
   the specific actions;
 - the actions occasionally need to access something more "internal" and
   technical (e.g., a method that differentiates between production and
-  emulated devices) and we want to keep this separate from the facades.
+  emulated devices) and exposing that in the facade would make them
+  be less business-oriented.
 
 In other words, the wrappers are the internal representation of the SUT
 which permits the more external representation (the facades) to be
@@ -421,29 +422,25 @@ These are mechanisms that collect configuration data from files or
 runtime flags, represent them in objects, and support fixtures to setup
 the proper instances of the test harness.
 
-There are a number of classes that represent the default configuration
-of the structure of the SUT. For example, the class ``TMCConfiguration``
-contains the names (i.e. TRLs) of the devices that are part of the TMC.
-The class ``CSPConfiguration`` contains the names of the devices that
-are part of the CSP. The directive to use the emulated or the production
-devices is another example of configuration data (very important for the
-initialisation of the test harness).
+The test harness to be initialised needs a lot of configuration data, such as:
 
-All the needed configurations are collected in a single class called
-``TestHarnessConfigurations``, which represents the configuration used
-to initialise the test harness. The initialisation procedure refers to
-this class (and to a few readers and validators) to load and validate
-the configuration files and use them to set up the test harness.
+- the names of the devices that are part of the subsystems;
+- the flags that tell what is emulated and what is production.
 
-Since the configuration may come from different sources (environment
-variables, hardcoded values, files, etc.) and since it’s easy to lose
-track of them an object-oriented approach is used to represent them in a
-structured way and to provide a consistent interface to them. To avoid
-inconsistencies, a *factory* class is used to create all the instances
-of those configurations (see ``config.reader`` module). Configurations
-may be also subject to validation, to ensure that the configuration is
-correct and consistent to what is deployed (see ``config.validator``
-module).
+To give structure to this data and to provide a consistent interface to
+it, we use configuration classes. Generally, foreach sub-system we want
+to have a configuration class that represents the configuration data
+needed to initialise the sub-system (e.g., for the TMC configuration
+we have a
+:py:class:`~ska_integration_test_harness.config.components_config.TMCConfiguration`
+class). All subsystems configuration are then collected in a common class
+(:py:class:`~ska_integration_test_harness.config.test_harness_config.TestHarnessConfiguration`)
+which serves as entry point to the configuration.
+
+This configuration instance can be filled in programmatically and passed to
+the test harness initialisation procedures, or - more commonly - can be
+loaded from a YAML file. A configuration can also be validated, to ensure
+that all the required fields are set, the given devices are reachable, etc.
 
 The configuration reading, validation and the test harness setup mechanisms
 are visually represented in the following UML diagram.
@@ -451,29 +448,24 @@ are visually represented in the following UML diagram.
 |configurations|
 
 Currently, the main representation of the configuration is through YAML
-files. An example of valid configuration file is provided in `this file
-used in unit
-tests <../../tests/config_examples/valid_test_harness_config.yaml>`__.
+files. An example of valid configuration file is provided in
+:ref:`configuration_example`. 
 
 Why have an initialisation procedure?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A complete test harness can be - potentially - set up just by creating a
-``TelescopeWrapper`` and initialising it with sub-systems wrappers
+telescope wrapper instance and initialising it with sub-systems wrappers
 (properly initialised with configuration classes and input). Since this
-can be quite complex, a default initialisation procedure is encoded in a
-builder class, which:
+can be a quite complex and error prone procedure,
+a default initialisation procedure is encoded in a builder class, which:
 
 -  reads the configuration from a YAML file;
-
 -  validates it (checking all required fields and sections are set, that
    the device names point to existing and reachable Tango devices,
    etc.);
-
 -  collects the default input;
-
 -  validates them;
-
 -  uses the input and the configuration to create the instances of the
    wrappers.
 
