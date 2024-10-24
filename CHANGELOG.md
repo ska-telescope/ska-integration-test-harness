@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.0 (24th October 2024)
+
+- **SST-975**: Add a mechanism to console log the Tango devices versions
+  when the tests are running.
+- **SST-975**: Improvements in the documentation, creation of a new unique
+  facade for TMC + other minor internal improvements.
+
 ## v0.1.2 (14th October 2024)
 
 - **SAH-1597**: Removed condition applied to check CSP subarray off state.
