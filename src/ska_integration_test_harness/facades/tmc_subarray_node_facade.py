@@ -49,13 +49,6 @@ from ska_integration_test_harness.structure.telescope_wrapper import (  # pylint
 )
 
 
-@deprecated(
-    reason=(
-        "This facade is deprecated, since we want to use a facade for each "
-        "subsystem. Please use TMCFacade instead."
-    ),
-    version="0.2.0",
-)
 class TMCSubarrayNodeFacade:
     """A facade to TMC Subarray Node device and its actions.
 
@@ -70,8 +63,21 @@ class TMCSubarrayNodeFacade:
       individual state changes (through command calls) or forcing the
       change of the obs state to a target state whatever the current state is,
     - various other actions (e.g., five point calibration scan).
+
+    **IMPORTANT NOTE**: This facade is deprecated,
+    since we want to use a facade for each
+    sub-system. Please use
+    :py:class:`~ska_integration_test_harness.facades.tmc_facade.TMCFacade`
+    instead.
     """
 
+    @deprecated(
+        reason=(
+            "This facade is deprecated, since we want to use a facade "
+            "for each subsystem. Please use TMCFacade instead."
+        ),
+        version="0.2.0",
+    )
     def __init__(self, telescope: TelescopeWrapper) -> None:
         self._telescope = telescope
 

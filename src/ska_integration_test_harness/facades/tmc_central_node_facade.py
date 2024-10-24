@@ -34,13 +34,6 @@ from ska_integration_test_harness.structure.telescope_wrapper import (
 )
 
 
-@deprecated(
-    reason=(
-        "This facade is deprecated, since we want to use a facade for each "
-        "subsystem. Please use TMCFacade instead."
-    ),
-    version="0.2.0",
-)
 class TMCCentralNodeFacade:
     """A facade to TMC Central Node device and its actions.
 
@@ -53,8 +46,21 @@ class TMCCentralNodeFacade:
     - actions to move the telescope to ON, OFF and STANDBY states,
     - actions to load dish VCC configuration, assign and release resources,
     - a generic action to perform any action on central node.
+
+    **IMPORTANT NOTE**: This facade is deprecated,
+    since we want to use a facade for each
+    sub-system. Please use
+    :py:class:`~ska_integration_test_harness.facades.tmc_facade.TMCFacade`
+    instead.
     """
 
+    @deprecated(
+        reason=(
+            "This facade is deprecated, since we want to use a facade "
+            "for each subsystem. Please use TMCFacade instead."
+        ),
+        version="0.2.0",
+    )
     def __init__(self, telescope: TelescopeWrapper) -> None:
         self._telescope = telescope
 
