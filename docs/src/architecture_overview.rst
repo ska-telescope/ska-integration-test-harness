@@ -155,7 +155,7 @@ of using facades are the following:
    to something that is a bit more complex than a single Tango device;
 
 2. they permit you to hide some technical details about
-   the interaction with the devices, especially if they are set-up or
+   the interaction with the devices, especially if there are set-up or
    tear-down interactions which are not the main point of the test.
 
 Let's see the advantages through the following example: you have to
@@ -173,7 +173,7 @@ or emulated) to perform a scan.
 - **Use in the "WHEN" steps**: after you setup the desired condition,
   you have to send the ``Scan`` command to the TMC. To do so you can, again, 
   use the facade method. This way,
-  if in future the ``Scan`` command will somewhat change, the dependencies
+  if in future the ``Scan`` command changes, the dependencies
   will be more explicit and the places you have to update will be less.
 
 - **Use in the "THEN" steps**: finally, you have to check that the scan

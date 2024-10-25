@@ -369,8 +369,8 @@ for more details.
    def event_tracer() -> TangoEventTracer:
        """Create a TangoEventTracer to track the events of the devices."""
        return TangoEventTracer({
-           # add here an eventual mapping between attribute names and
-           # Enum types they are associated to, so assertion errors
+           # add here the mapping between attribute names and the
+           # Enum types they are associated with, so assertion errors
            # will display meaningful labels
            # E.g. "obsState": ObsState
            # (NOTE: DevState is not needed)
@@ -407,7 +407,7 @@ with them like in this simplified example:
        implemented interacting with the TMC central node facade.
        """
        # NOTE: the ``wait_termination=True`` flag is used to make the action
-       # synchronous, i.e. the call will block until all the synchronizations
+       # synchronous, i.e. the call will block until all the synchronization
        # conditions are met (explore the method and the action implementation
        # for more details) or, in other words, when the method call execution
        # is completed, you are sure the telescope is in the ON state.
