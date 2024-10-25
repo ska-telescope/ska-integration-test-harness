@@ -2,7 +2,7 @@
 
 ## v0.2.0 (25th October 2024)
 
-- **SST-975**: Add a mechanism to console log the Tango devices versions
+- **SST-975**: Add a mechanism to console log the Tango device versions
   when the tests are running.
 - **SST-975**: Improvements in the documentation, creation of a new unique
   facade for TMC + other minor internal improvements.

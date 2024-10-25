@@ -312,7 +312,7 @@ Your fixtures code may look like this:
        # set the kubernetes namespace where the devices are running
        # (so we can access
        # https://gitlab.com/ska-telescope/ska-k8s-config-exporter
-       # to log Tango devices versions)
+       # to log Tango device versions)
        test_harness_builder.set_kubernetes_namespace(os.getenv("KUBE_NAMESPACE"))
 
 

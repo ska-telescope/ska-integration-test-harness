@@ -186,9 +186,9 @@ or emulated) to perform a scan.
   - eventually, assert that the properties of the devices are as expected (*after
     calling the command*).
 
-  If something changes in the configuration (e.g., the devices names),
+  If something changes in the configuration (e.g., the device names),
   you will have to update only a configuration file instead of all the
-  references to various devices names around your code.
+  references to various device names around your code.
 
 The choice of having a different facade for each sub-system
 favours the separation of concerns and is a way to avoid bloating a
@@ -317,7 +317,7 @@ sub-systems and the devices. Concretely, the wrappers are classes that:
 - encode the structure of the SUT (i.e. which sub-systems are part of it
   and which devices are part of each sub-system);
 - support the performing of "technical actions" over the devices (like
-  the tear-down to a "base state", the logging of the devices versions,
+  the tear-down to a "base state", the logging of the device versions,
   etc.);
 - encapsulate the technical details related to the *emulated* or *production*
   status of the devices (permitting to abstract over that from the test
