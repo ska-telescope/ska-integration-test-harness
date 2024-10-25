@@ -271,19 +271,18 @@ be done on the telescope. For example, let’s consider a
 test script that wants to send a scan ``Scan``
 command to the TMC Subarray Node:
 
--  the test script has access to a
-   facade of the TMC Subarray Node (see :doc:`./getting_started` for
-   more details on how to use a facade);
--  the facade exposes a ``scan()`` method, which can be called by the
-   tests;
--  the ``scan()`` method which instantiates an action called
-   ``SubarrayScan``, adds to it the necessary arguments and then calls
-   its ``execute`` method;
--  who implemented the class, defined all the related logic to send the
-   scan command and - *optionally* - synchronize at the end of the scan
-   operation in the same place (implementing two abstract methods);
--  the actions interact with the correct wrappers (and consequently to
-   the Tango devices) to perform the operation.
+- the test script has access to a
+  facade of the TMC Subarray Node (see :doc:`./getting_started` for
+  more details on how to use a facade);
+- the facade exposes a ``scan()`` method, which can be called by the tests;
+- the ``scan()`` method which instantiates an action called
+  ``SubarrayScan``, adds to it the necessary arguments and then calls
+  its ``execute()`` method;
+- the action class defines the logic to send the ``Scan``
+  command and, *optionally*, also specifies the events to synchronize with
+  to verify that the scan was performed correctly;
+- the action interacts with the correct wrappers (and consequently to
+  the Tango devices) to perform the operation.
 
 Actions general idea is based on the
 `Command <https://refactoring.guru/design-patterns/command>`__ design pattern
