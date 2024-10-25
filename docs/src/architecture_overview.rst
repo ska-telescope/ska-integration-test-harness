@@ -164,7 +164,7 @@ or emulated) to perform a scan.
 
 - **Use in the "GIVEN" steps**: first of all, you have to be in a 
   state where the TMC is ``READY`` to start the scan. To do so, instead of
-  calling by yourself all the Tango commands and synchronize explicitly
+  calling all the Tango commands by yourself and synchronizing explicitly
   (producing this way a lot of boilerplate code which is not the main
   point of the test), you can use a single line of code
   that moves the TMC to the ``READY`` state, dealing transparently with
@@ -174,7 +174,7 @@ or emulated) to perform a scan.
   you have to send the ``Scan`` command to the TMC. To do so you can, again, 
   use the facade method. This way,
   if in future the ``Scan`` command changes, the dependencies
-  will be more explicit and the places you have to update will be less.
+  will be more explicit and you will have less code to change.
 
 - **Use in the "THEN" steps**: finally, you have to check that the scan
   has been performed correctly and all the involved sub-systems are in
@@ -182,8 +182,8 @@ or emulated) to perform a scan.
   structured way to the devices to:
 
   - subscribe to the events (*before calling the command*);
-  - asserting over the events (*after calling the command*);
-  - eventually, asserting over the properties of the devices (*after
+  - assert that events have happened (*after calling the command*);
+  - eventually, assert that the properties of the devices are as expected (*after
     calling the command*).
 
   If something changes in the configuration (e.g., the devices names),
@@ -192,19 +192,19 @@ or emulated) to perform a scan.
 
 The choice of having a different facade for each sub-system
 favours the separation of concerns and is a way to avoid bloating a
-single "Test Harness" class with too many unrelated functionalities
-and responsibilities (`Single Responsibility Principle 
+single "Test Harness" class with too much unrelated functionality
+and too many responsibilities (`Single Responsibility Principle 
 <https://en.wikipedia.org/wiki/Single-responsibility_principle>`__).
 
 
 The facade is also a well known design pattern
-(`FACADE <https://refactoring.guru/design-patterns/facade>`__), which
+(`FACADE <https://refactoring.guru/design-patterns/facade>`__), whose
 core idea is to provide a simplified interface to a complex system. 
 In this case the complex system is the test harness itself, with all its
 internal mechanisms that sometimes may be too technical to be exposed in
 the test scripts.
 
-Facades-based design is visually represented in the following UML diagram.
+Facade-based design is visually represented in the following UML diagram.
 
 |facades|
 
@@ -219,7 +219,7 @@ some reasons.
 
 First of all, a test script has to interact with the SUT and its subsystems
 and it does that by sending Tango commands on devices. Even if apparently
-having a class just to send a command may seem an overkill, in reality
+having a class just to send a command may seem like overkill, in reality
 there are a lot of complexities that justifies the existence of actions:
 
 - the commands have to be called in on the right device;
