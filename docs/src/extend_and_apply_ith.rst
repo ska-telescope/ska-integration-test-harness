@@ -1,5 +1,4 @@
-
-How to use and extend
+How to Use and Extend
 ========================
 
 

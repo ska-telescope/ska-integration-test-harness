@@ -1,4 +1,4 @@
-Architecture design decisions
+Architecture Design Decisions
 ==============================
 
 This document provides an overview of the architecture of the SKA

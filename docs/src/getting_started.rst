@@ -1,4 +1,4 @@
-Overview and getting started
+Overview and Getting Started
 ===============================
 
 Overview
