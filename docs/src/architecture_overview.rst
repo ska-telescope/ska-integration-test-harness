@@ -2,8 +2,8 @@ Architecture overview of the SKA Integration Test Harness
 =========================================================
 
 This document provides an overview of the architecture of the SKA
-Integration Test Harness and the principles behind it. It is on purpose
-written as a high-level document, to provide a general understanding of
+Integration Test Harness and the principles behind it. It is
+written as a high-level document on purpose, to provide a general understanding of
 the design decisions and the conventions used in the test harness, more
 than a detailed description of the code.
 
@@ -33,7 +33,7 @@ This test harness comprises:
 
 -  **facades**, aimed at providing a consistent interface to the SUT so
    that test scripts are insulated from internal details
--  **actions**, which are the building blocks of tests and each include
+-  **actions**, which are the building blocks of tests and each includes
    a relatively complex action that can be performed on the SUT (like
    sending a command to a device)
 -  **wrappers**, which wrap sub-systems of the SUT and provide a
@@ -44,8 +44,8 @@ This test harness comprises:
    various commands that are sent to the SUT
 -  **configurations**, which are used to gather configuration data or
    flags from the environment and provide a structured interface to them
--  **emulators**, which are real tango devices whose behaviour is
-   programmed to simulate in a very simple way the behaviour of real
+-  **emulators**, which are real Tango devices whose behaviour is
+   programmed to mimic in a very simple way the behaviour of real
    devices. They are needed to ensure that SUT is embedded in the
    environment that it expects.
 
@@ -60,7 +60,7 @@ This test harness comprises:
 Integration Test Harness principles
 -----------------------------------
 
-PRINCIPLE #01: Tests are agnostic to the test environment
+PRINCIPLE 1: Tests are agnostic to the test environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Test scripts should know as little as possible about the test
@@ -70,7 +70,7 @@ consequence a test script should interact only with facades, with
 wrappers and with inputs: no actions, no configurations. Interaction
 with wrappers is needed to write meaningful assertions.
 
-PRINCIPLE #02: Tests are agnostic to the SUT ecosystem
+PRINCIPLE 2: Tests are agnostic to the SUT ecosystem
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Integration tests make use of emulators and simulators. In many cases
