@@ -26,7 +26,7 @@ IMPORTANT: What this repository is about (and what it is not)
 A second important thing is to understand what this specific repository
 is about and what it is not. While the term **ITH** sometimes may be
 used to refer a wider concept and a large collection of tools, this
-repository (at the moment, October 2024) contains a specific subset
+repository contains a specific subset
 of tools. So, let’s quickly clarify what you can find here (and what you
 cannot).
 
@@ -48,7 +48,7 @@ More specifically:
    after the tests are completed;
 -  overview of the active devices and their versions.
 
-At the moment (October 2024), the SUT consists off:
+At the moment, the SUT consists off:
 
 -  a production TMC, which is the “protagonist” of the tests (the
    subsystem which receives most of the commands);
@@ -88,7 +88,7 @@ What you cannot find (yet)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Instead, this framework may (*and will likely*) support in the future
-(**but not at the moment, October 2024**):
+(**but not at the moment**):
 
 - TMC Low integration tests;
 - integration tests where TMC is not the

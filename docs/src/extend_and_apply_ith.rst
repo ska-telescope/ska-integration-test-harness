@@ -17,7 +17,7 @@ To use this test harness *as is*, you can follow the instructions in :doc:`./get
 How to extend this test harness (within the current limitations)
 ----------------------------------------------------------------
 
-Right now (October 2024) the test harness is designed for integration
+Right now the test harness is designed for integration
 tests of the TMC with CSP in MID. Probably, it is still capable of
 supporting TMC-X in MID integrations tests.
 
@@ -119,7 +119,7 @@ tests <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/-/merge_
 which use the test harness to test the subarray-related operations over
 the TMC (with a production CSP and emulated SDP and Dishes).
 
-Another more recent use case (October 2024) is 
+Another more recent use case is 
 `this new set of TMC system tests <https://gitlab.com/ska-telescope/ska-sw-integration-testing/-/merge_requests/7/>`__,
 which run in an environment where TMC, CSP, SDP and Dishes are production
 sub-systems.
