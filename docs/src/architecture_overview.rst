@@ -1,5 +1,5 @@
-Architecture overview of the SKA Integration Test Harness
-=========================================================
+Architecture design decisions
+==============================
 
 This document provides an overview of the architecture of the SKA
 Integration Test Harness and the principles behind it. It is

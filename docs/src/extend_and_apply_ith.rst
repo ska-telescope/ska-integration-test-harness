@@ -1,6 +1,6 @@
 
-How to use and extend this harness
-====================================
+How to use and extend
+========================
 
 
 At the moment (October 2024) this harness has no well-defined
