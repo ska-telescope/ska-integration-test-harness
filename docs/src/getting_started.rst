@@ -37,7 +37,7 @@ This repository essentially contains a Python framework to model the
 SUT, its subsystems and devices and the actions you can perform on them.
 More specifically:
 
--  represent and permit to access the subsystems and the Tango devices
+-  represent and allow access to the subsystems and the Tango devices
    in a structured way, potentially ignoring which subsystem is emulated
    and which is not;
 -  simplify complex procedures to bring the SUT in a specific state

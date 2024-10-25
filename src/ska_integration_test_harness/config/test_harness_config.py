@@ -28,7 +28,7 @@ class TestHarnessConfiguration:
     configuration may be useful to select only the needed subsystems.
 
     A support enum is provided to specify the subsystems names, and
-    permit to access in a parametric way the configurations.
+    allow access to the configurations in a parametric way.
     """
 
     # (this is not a pytest test class)
