@@ -44,7 +44,7 @@ class TelescopeWrapper:
 
         # ...
 
-        # In any point of the code, you can access the subsystems
+        # In any point of the code, you have access to the subsystems
         # (and their devices) using the properties of the telescope instance.
         telescope = TelescopeWrapper()
         do_something(telescope.tmc.central_node)

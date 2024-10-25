@@ -430,8 +430,8 @@ with them like in this simplified example:
        NOTE: the ``wait_termination=False`` flag is used to not block the call,
        so the tracer can be used separately to check the events.
        """
-       # using the facades, I can access the
-       # device proxies and subscribe to the devices
+       # using the facades, I have access to the
+       # device proxies and I can subscribe to the events
        event_tracer.subscribe_event(
            tmc.central_node, "telescopeState"
        )
