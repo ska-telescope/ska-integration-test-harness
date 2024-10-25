@@ -13,7 +13,7 @@ actions and the configuration and initialization mechanisms).
 
 The section is a sort of enumeration of the main concrete classes and
 components that are part of the ska-integration-test-harness for testing
-TMC-CSP in MID (at the time of writing).
+TMC-CSP in Mid (at the time of writing).
 
 **IMPORTANT NOTE**: A very crucial difference between the two sections 
 is that the first

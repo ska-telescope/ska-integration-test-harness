@@ -26,7 +26,7 @@ to maintain** (so that tests can be updated quickly) and **reliable**
 
 As of October 2024 the test harness is designed to work with Tango
 Devices, and specifically to support tests for integration of TMC with
-CSP in MID, but it can be extended to work with other types of
+CSP in Mid, but it can be extended to work with other types of
 components.
 
 This test harness comprises:
@@ -49,7 +49,7 @@ This test harness comprises:
    devices. They are needed to ensure that SUT is embedded in the
    environment that it expects.
 
-   -  Currently, emulators are those used in the TMC-MID integration
+   -  Currently, emulators are those used in the TMC-Mid integration
       tests
       (`Code <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common/-/tree/master/src/ska_tmc_common/test_helpers?ref_type=heads>`__,
       `Documentation <https://developer.skao.int/projects/ska-tmc-common/en/latest/HelperDevices/TangoHelperDevices.html>`__).

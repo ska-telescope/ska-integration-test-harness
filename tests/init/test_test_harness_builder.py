@@ -29,7 +29,7 @@ class TestTestHarnessBuilder:
     Since this is a particularly critical component, we test it minimizing
     the use of mocks and patches. We use them only when strictly necessary
     (e.g., Tango API). The used configurations are realistic ones, taken
-    from TMC-CSP MID integration tests. The passed input instead are JSON,
+    from TMC-CSP Mid integration tests. The passed input instead are JSON,
     but not semantically meaningful (it doesn't matter for the tests,
     since they will be needed only in teardown procedures or similar).
     """

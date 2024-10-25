@@ -146,7 +146,7 @@ Prerequisites
 To use this test harness, first of all, you need a Kubernetes cluster
 with all the production and emulated devices running. This part is not
 covered by this project, which in fact assumes an environment equivalent
-to that used in the test repository `SKA TMC-MID
+to that used in the test repository `SKA TMC-Mid
 Integration <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/>`__
 (`docs <https://developer.skao.int/projects/ska-tmc-mid-integration/en/latest/getting_started/getting_started.html>`__).
 

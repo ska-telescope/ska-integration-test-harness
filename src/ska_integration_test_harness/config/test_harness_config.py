@@ -23,7 +23,7 @@ class TestHarnessConfiguration:
     Each field of this class is a configuration for a different subsystem of
     the test harness, such as the TMC, CSP, SDP, and the dishes. Even if they
     are marked as optional, for now they are all required, as the test harness
-    is strictly built for TMC-MID integration tests. In the future, we may
+    is strictly built for TMC-Mid integration tests. In the future, we may
     support an elastic choice of which subsystems to include, so this
     configuration may be useful to select only the needed subsystems.
 

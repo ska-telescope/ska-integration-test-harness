@@ -5,7 +5,7 @@ How to use and extend this harness
 
 At the moment (October 2024) this harness has no well-defined
 extension points yet and it is pretty specific to the TMC-CSP
-integration tests in MID. Based on feedback and on the evolution of the
+integration tests in Mid. Based on feedback and on the evolution of the
 project, the harness will be extended to be more flexible and to support
 more use cases.
 
@@ -18,8 +18,8 @@ How to extend this test harness (within the current limitations)
 ----------------------------------------------------------------
 
 Right now the test harness is designed for integration
-tests of the TMC with CSP in MID. Probably, it is still capable of
-supporting TMC-X in MID integrations tests.
+tests of the TMC with CSP in Mid. Probably, it is still capable of
+supporting TMC-X in Mid integrations tests.
 
 Even if it is not yet generic, it still supports some level of
 customisation. Within the current limitations, your main ways to extend
@@ -95,7 +95,7 @@ How you will be able to extend this test harness in the future
 --------------------------------------------------------------
 
 In the future, the test harness will be more flexible and will not be
-centered strictly on the TMC-X integration tests in MID.
+centered strictly on the TMC-X integration tests in Mid.
 
 Probably, there will be a generic *core*, made by an elastic
 infrastructure, the action mechanism, some generic and parametric
@@ -114,7 +114,7 @@ Test Harness applications examples
 ----------------------------------
 
 Right now (October 2024), this test harness is used for the new set of
-`TMC-CSP MID integration
+`TMC-CSP Mid integration
 tests <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/-/merge_requests/234>`__,
 to test the subarray-related operations on
 the TMC (with a production CSP and emulated SDP and Dishes).
