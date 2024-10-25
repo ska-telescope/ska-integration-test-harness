@@ -125,7 +125,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
       a TimeoutError is raised.
 
 
-    Before calling the :py:meth:`execute` method, you can customize some
+    Before calling the :py:meth:`execute` method, you can customise some
     configurations of the action:
 
     - you can change the timeout for the termination condition by calling
@@ -147,7 +147,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
         # create an instance of the action
         action = MyAction(my_parameter=42)
 
-        # [optional] customize the timeout for the termination condition
+        # [optional] customise the timeout for the termination condition
         action.set_termination_condition_timeout(10)
 
         # [optional] execute the action without waiting for the
@@ -268,7 +268,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
         - if the termination condition does not occur within a timeout,
           a TimeoutError is raised.
 
-        Before calling the :py:meth:`execute` method, you can customize some
+        Before calling the :py:meth:`execute` method, you can customise some
         configurations of the action:
 
         - you can change the timeout for the termination condition by calling
@@ -290,7 +290,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
             # create an instance of the action
             action = MyAction(my_parameter=42)
 
-            # [optional] customize the timeout for the termination condition
+            # [optional] customise the timeout for the termination condition
             action.set_termination_condition_timeout(10)
 
             # [optional] execute the action without waiting for the

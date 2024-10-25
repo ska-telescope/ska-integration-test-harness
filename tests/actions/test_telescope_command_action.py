@@ -49,8 +49,8 @@ class TestTransientQuiescentCommandAction:
         """The termination condition returns the quiescent state by default."""
         action = DummyTransientQuiescentCommand()
 
-        assert_that(action.synchronize_on_transient_state).described_as(
-            "By default, synchronize_on_transient_state should be False"
+        assert_that(action.synchronise_on_transient_state).described_as(
+            "By default, synchronise_on_transient_state should be False"
         ).is_false()
 
         assert_that(action.termination_condition()).is_length(1)
@@ -62,10 +62,10 @@ class TestTransientQuiescentCommandAction:
     def test_termination_condition_when_set_returns_transient_state():
         """The termination condition returns the transient state when set."""
         action = DummyTransientQuiescentCommand()
-        action.set_synchronize_on_transient_state(True)
+        action.set_synchronise_on_transient_state(True)
 
-        assert_that(action.synchronize_on_transient_state).described_as(
-            "synchronize_on_transient_state should be set to True"
+        assert_that(action.synchronise_on_transient_state).described_as(
+            "synchronise_on_transient_state should be set to True"
         ).is_true()
 
         assert_that(action.termination_condition()).is_length(1)

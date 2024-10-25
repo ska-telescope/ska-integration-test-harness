@@ -89,7 +89,7 @@ class SubarrayObsStateResetterFactory:
                 TestHarnessInputs.InputName.ASSIGN, fail_if_missing=True
             )
         )
-        assign_resources_action.set_synchronize_on_transient_state(True)
+        assign_resources_action.set_synchronise_on_transient_state(True)
 
         return TelescopeActionSequence(
             [
@@ -123,7 +123,7 @@ class SubarrayObsStateResetterFactory:
             the `ObsState.ABORTING` state.
         """
         abort_action = SubarrayAbort()
-        abort_action.set_synchronize_on_transient_state(True)
+        abort_action.set_synchronise_on_transient_state(True)
 
         return TelescopeActionSequence(
             [
@@ -158,7 +158,7 @@ class SubarrayObsStateResetterFactory:
                 TestHarnessInputs.InputName.CONFIGURE, fail_if_missing=True
             )
         )
-        configure_action.set_synchronize_on_transient_state(True)
+        configure_action.set_synchronise_on_transient_state(True)
 
         return TelescopeActionSequence(
             [

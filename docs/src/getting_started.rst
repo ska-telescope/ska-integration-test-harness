@@ -42,7 +42,7 @@ More specifically:
    or it is not;
 -  simplify complex procedures to bring the SUT into a specific state
    before running the tests (e.g., call the commands to put the telescope
-   in the desired state, synchronize when the events have finished, and ensure the state
+   in the desired state, synchronise when the events have finished, and ensure the state
    is effectively reached);
 -  simplify teardown procedures, to bring the SUT back to a known state
    after the tests are completed;
@@ -222,7 +222,7 @@ Now we will not deep dive too much into the details of what they are,
 but essentially you can think of the ``TelescopeWrapper`` as a singleton
 representation of the *SUT*, and the *facades* as “views” of that system
 that will allow you to access the devices and interact with them
-performing (potentially auto-synchronized) actions. E.g.,
+performing (potentially auto-synchronised) actions. E.g.,
 
 .. code:: python
 
@@ -230,7 +230,7 @@ performing (potentially auto-synchronized) actions. E.g.,
    # to the TMC central node, calling such a command will permit you
    # to move the telescope to the ON state, ignoring any details about
    # interaction with other emulated/not-emulated devices and also
-   # ignoring the synchronization (the ITH will guarantee that the
+   # ignoring the synchronisation (the ITH will guarantee that the
    # telescope will be in an ON state after the call, otherwise
    # an informative assertion error will be raised)
    tmc_central_node.move_to_on(wait_termination=True)
@@ -240,7 +240,7 @@ initialise to have a test harness, and the facades just views which
 simplify your interaction with such a test harness. Inspecting the
 facade implementations is a good way to explore the mechanisms behind
 the test harness, the interaction with the actual Tango devices and the
-verified conditions in case you enable the synchronization.
+verified conditions in case you enable the synchronisation.
 
 Your fixtures code may look like this:
 
@@ -326,7 +326,7 @@ Your fixtures code may look like this:
        # (obsState=READY, telescopeState=OFF, no resources assigned)
        telescope.tear_down()
 
-       # NOTE: As the code is organized now, I cannot anticipate the
+       # NOTE: As the code is organised now, I cannot anticipate the
        # teardown of the telescope structure. To run reset now I should
        # init subarray node (with SetSubarrayId), but to do that I need
        # to know subarray_id, which is a parameter of the Gherkin steps.
@@ -409,7 +409,7 @@ with them like in this simplified example:
        implemented interacting with the TMC central node facade.
        """
        # NOTE: the ``wait_termination=True`` flag is used to make the action
-       # synchronous, i.e. the call will block until all the synchronization
+       # synchronous, i.e. the call will block until all the synchronisation
        # conditions are met (explore the method and the action implementation
        # for more details) or, in other words, when the method call execution
        # is completed, you are sure the telescope is in the ON state.
@@ -439,7 +439,7 @@ with them like in this simplified example:
        # (etc.)
 
        # Then I can issue the command, explicitly telling the call to
-       # not wait for the synchronization conditions to be met, 
+       # not wait for the synchronisation conditions to be met, 
        # since in the following steps I want to check the events
        # manually (since they are the "object" of this test).
        tmc.move_to_off(wait_termination=False)

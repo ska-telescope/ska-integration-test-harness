@@ -9,7 +9,7 @@ The following API documentation is divided into two main sections:
 The first section is a general overview of the core mechanisms that
 make up the ska-integration-test-harness (e.g., such as the telescope
 definition, the abstract subsystem wrappers, the extension points to create
-actions and the configuration and initialization mechanisms).
+actions and the configuration and initialisation mechanisms).
 
 The section is a sort of enumeration of the main concrete classes and
 components that are part of the ska-integration-test-harness for testing

@@ -104,7 +104,7 @@ Before starting to understand the idea behind each kind of component
 in the test harness (facades, actions, wrappers, etc.), it is
 useful to know where to find the code.
 
-The test harness files are organized in the following way:
+The test harness files are organised in the following way:
 
 -  Facades have to be added in the 
    :py:mod:`~ska_integration_test_harness.facades` folder
@@ -167,11 +167,11 @@ or emulated) to perform a scan.
 
 - **Use in the "GIVEN" steps**: first of all, you have to be in a 
   state where the TMC is ``READY`` to start the scan. To do so, instead of
-  calling all the Tango commands by yourself and synchronizing explicitly
+  calling all the Tango commands by yourself and synchronising explicitly
   (producing this way a lot of boilerplate code which is not the main
   point of the test), you can use a single line of code
   that moves the TMC to the ``READY`` state, dealing transparently with
-  the synchronization.
+  the synchronisation.
 
 - **Use in the "WHEN" steps**: after you setup the desired condition,
   you have to send the ``Scan`` command to the TMC. To do so you can, again, 
@@ -228,11 +228,11 @@ there are a lot of complexities that justifies the existence of actions:
 - the commands have to be called in on the right device;
 - the commands require the right input;
 - since the telescope is a distributed system, most command calls are
-  asynchronous and the test script has to synchronize with the devices;
+  asynchronous and the test script has to synchronise with the devices;
 - in a more general sense, when performing an operation (in your GIVEN steps)
-  you may want to synchronize on a desired transient or quiescent state
+  you may want to synchronise on a desired transient or quiescent state
 - very often, the operations implicitly involve devices that are part of
-  different subsystems, so the synchronization may need to involve them all;
+  different subsystems, so the synchronisation may need to involve them all;
 - if something changes about the command (e.g., the name, the input,
   the expected events, the expected state of the devices), you may want to
   update only in one place and have all the dependencies as much explicit
@@ -251,16 +251,16 @@ All these reasons justify the existence of actions as structured entities
 to encapsulate the complexity of the operations that are performed on
 the telescope. The actions are represented through classes
 that embed both the *code to perform the operation* and *the
-termination/synchronization condition*. 
+termination/synchronisation condition*. 
 All the action classes extend a common base class
 (:py:class:`~ska_integration_test_harness.actions.TelescopeAction`)
 and implement as abstract methods the procedure to perform the action
-and the condition to synchronize at the end of the action (if needed).
+and the condition to synchronise at the end of the action (if needed).
 From the base class they inherit:
 
 - the logic to execute the action;
 - the logic to log the action (if needed);
-- the logic to synchronize at the end of the action (if needed);
+- the logic to synchronise at the end of the action (if needed);
 - the fact of having a target (the wrappers - *see next section*);
 - properties like a name, the timeout, etc.
 
@@ -279,7 +279,7 @@ command to the TMC Subarray Node:
   ``SubarrayScan``, adds to it the necessary arguments and then calls
   its ``execute()`` method;
 - the action class defines the logic to send the ``Scan``
-  command and, *optionally*, also specifies the events to synchronize with
+  command and, *optionally*, also specifies the events to synchronise with
   to verify that the scan was performed correctly;
 - the action interacts with the correct wrappers (and consequently to
   the Tango devices) to perform the operation.
@@ -294,13 +294,13 @@ through `Composite <https://refactoring.guru/design-patterns/composite>`__.
 To implement an action, you have to extend the
 :py:class:`~ska_integration_test_harness.actions.TelescopeAction`
 base class and implement the abstract methods (to define the *procedure* that
-implements the action and the *synchronization condition* that defines
+implements the action and the *synchronisation condition* that defines
 when the action is completed). Note also that actions can be composed in
 sequences, to perform more complex operations (see
 :py:class:`~ska_integration_test_harness.actions.TelescopeActionSequence`
 ). Note also that actions can also be defined
 as a complex inheritance hierarchy, to define common behaviours and to
-specialize them (see how the existing actions are
+specialise them (see how the existing actions are
 implemented).
 
 The actions mechanism is represented (high level) in the following UML.

@@ -22,7 +22,7 @@ supporting TMC-X in Mid integrations tests.
 
 Even if it is not yet generic, it still supports some level of
 customisation. Within the current limitations, your main ways to extend
-and/or customize this test harness are:
+and/or customise this test harness are:
 
 -  **Add new actions**: you can add new actions by sub-classing the
    ``TelescopeAction`` class and implementing the abstract methods. You
@@ -39,7 +39,7 @@ and/or customize this test harness are:
    ..
 
       **Example**: you want to encode a complex procedure that requires
-      multiple steps and synchronization points :math:`\to` *you use the
+      multiple steps and synchronisation points :math:`\to` *you use the
       composite action mechanism to create a sequence of actions that
       perform the procedure. If there is the need of using if-then-else
       constructs or similar you can create a new action that acts as an
@@ -64,9 +64,9 @@ and/or customize this test harness are:
       input files through keywords which refer to the command you
       are calling (e.g., ``MyFileJsonInput('scan')``).*
 
--  **Customize the init procedure (and the wrappers)**: the
+-  **Customise the init procedure (and the wrappers)**: the
    initialisation procedure explained in :doc:`./getting_started` file can be
-   customized:
+   customised:
 
    -  sub-classing various configuration, validation, reader and factory
       classes and injecting them in the builder, so they will be used
@@ -75,7 +75,7 @@ and/or customize this test harness are:
       sub-classing the existing one, maybe creating a new one from
       scratch).
 
-   Customizing the initialisation procedure may be a necessary step if
+   Customising the initialisation procedure may be a necessary step if
    you want to replace, modify and/or extend what makes the test harness
    ``structure`` (the ``TelescopeWrapper``, the subsystem wrappers,
    etc.).

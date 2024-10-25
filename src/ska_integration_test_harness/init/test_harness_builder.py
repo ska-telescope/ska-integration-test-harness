@@ -39,9 +39,9 @@ class TestHarnessBuilder:
     JSON inputs for various commands/purposes.
 
     The class uses also a set of tools to read and validate the configurations
-    and the inputs. Potentially, you can inject your own tools to customize
+    and the inputs. Potentially, you can inject your own tools to customise
     the behaviour of the builder. Potentially, you can also subclass this
-    builder to customize its behaviour.
+    builder to customise its behaviour.
 
     Usage example:
 
