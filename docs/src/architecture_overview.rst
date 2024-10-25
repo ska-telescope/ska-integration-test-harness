@@ -86,8 +86,8 @@ defined, implemented and deployed prior to the execution of the test
 script (and hence prior to the execution of the test harness).
 
 In some cases it may be necessary for the test script to make assertions
-on emulators (i.e. to use them as @SPY `Spy objects as test doubles -
-Meszaros <http://xunitpatterns.com/Test%20Spy.html>`__). In these cases
+on emulators (i.e. to use them as `spy objects
+<http://xunitpatterns.com/Test%20Spy.html>`__). In these cases
 such a test makes the assumption that the device is emulated. By
 carefully writing assertions though, and through the use of `tracer
 objects <https://developer.skao.int/projects/ska-tango-testing/en/latest/guide/integration/index.html#tracer-objects>`__,
