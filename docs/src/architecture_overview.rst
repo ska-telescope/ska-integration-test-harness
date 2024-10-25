@@ -245,7 +245,7 @@ operations are just a single command but:
   call and additional logic is needed.
 
 All these reasons justify the existence of actions as structured entities
-to encapsulate the complexity of the operations that are performed over
+to encapsulate the complexity of the operations that are performed on
 the telescope. The actions are represented through classes
 that embed both the *code to perform the operation* and *the
 termination/synchronization condition*. 
@@ -358,7 +358,7 @@ for different purposes.
 
 Moreover, the existence of the wrappers as separate entities from the
 facades is justified also by the Actions mechanism. As we already said in the
-previous section, the actions are classes that perform operations over
+previous section, the actions are classes that perform operations on
 the telescope and such operations need to be performed on a target. If the
 target is a facade, we would have two problems:
 
