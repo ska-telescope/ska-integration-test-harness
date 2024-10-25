@@ -61,10 +61,9 @@ and/or customize this test harness are:
 
       **Example**: you have a collection of JSON files in a your test
       data folder and you want to use them as input :math:`\to` *you
-      sub-class the file-based input class, you specify how to access
-      your test data and you permit to access one of those files just
-      specifying a keyword in the constructor of the input class (e.g.,
-      ``MyFileJsonInput('scan')``).*
+      sub-class the file-based input class and you allow access to your own
+      input files through keywords which refer to the command you
+      are calling (e.g., ``MyFileJsonInput('scan')``).*
 
 -  **Customize the init procedure (and the wrappers)**: the
    initialisation procedure explained in :doc:`./getting_started` file can be

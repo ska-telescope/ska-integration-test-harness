@@ -26,7 +26,7 @@ class TestHarnessInputs:
       - release
 
     A support enum is provided to specify the input names, and
-    permit to access in a parametric way the inputs.
+    allow access to the inputs in a parametric way.
     """
 
     # (this is not a pytest test class)
