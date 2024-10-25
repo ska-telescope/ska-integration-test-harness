@@ -242,7 +242,7 @@ operations are just a single command but:
 
 - sometimes you may want to build and call a sequence of operations;
 - sometimes an operation is simply more sophisticated than a simple command
-  call and additional logic it's needed.
+  call and additional logic is needed.
 
 All these reasons justify the existence of actions as structured entities
 to encapsulate the complexity of the operations that are performed over
@@ -332,22 +332,22 @@ telescope wrapper is a `SINGLETON <https://refactoring.guru/design-patterns/sing
 so once it’s initialised, you can access it from everywhere in the code
 just by accessing its unique instance. The sub-systems wrappers are
 instead dedicated abstract classes, which may have a "production" and an
-"emulated" concrete implementation. Each sub-system extend a common base
+"emulated" concrete implementation. Each sub-system extends a common base
 abstract class (which provides a common interface for some recurrent
 operations) and, usually, supports a specific configuration.
 
 **What is the difference between a facade and a wrapper?**
 
 A doubt that may arise is: why do we need both facades and wrappers? The doubt
-is more than legit, since they both represent the SUT, they both have classes
-for the sub-systems and they both have references to the devices. Said that,
+is legitimate, since they both represent the SUT, they both have classes
+for the sub-systems and they both have references to the devices. Despite that,
 the choice of having both is not casual and is based on the fact that, even
 if they represent the same thing, they are used in different contexts and
 for different purposes.
 
 - The facades are used in the test scripts to provide a high-level interface
-  to the SUT. They are mean to be 100% agnostic of technical details and
-  instead they are focused on exposing the (business meaningful) operations
+  to the SUT. They are mean to be 100% agnostic to technical details and
+  instead they are focused on exposing the operations (meaningful to the business)
   that can be performed over the SUT and the devices that are part of it.
 
 - The wrappers instead are something opposite, they are a more internal
