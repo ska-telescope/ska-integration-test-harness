@@ -48,7 +48,7 @@ More specifically:
    after the tests are completed;
 -  overview of the active devices and their versions.
 
-At the moment (October 2024), the SUT consist in:
+At the moment (October 2024), the SUT consists off:
 
 -  a production TMC, which is the “protagonist” of the tests (the
    subsystem which receives most of the commands);
@@ -153,7 +153,7 @@ Integration <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/>`
 Since some of the devices are emulators, you might also want to check
 `this documentation page <https://developer.skao.int/projects/ska-tmc-common/en/latest/HelperDevices/TangoHelperDevices.html>`__
 and - if necessary - 
-`the emulators implementation <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common/-/tree/master/src/ska_tmc_common/test_helpers?ref_type=heads>`__.
+`the emulator implementations <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common/-/tree/master/src/ska_tmc_common/test_helpers?ref_type=heads>`__.
 
 .. _configuration_example:
 
