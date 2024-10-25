@@ -25,7 +25,7 @@ to maintain** (so that tests can be updated quickly) and **reliable**
 (so that tests can be trusted).
 
 As of October 2024 the test harness is designed to work with Tango
-Devices, and specifically to support tests for integration of TMC with
+devices, and specifically to support tests for integration of TMC with
 CSP in Mid, but it can be extended to work with other types of
 components.
 
@@ -81,7 +81,7 @@ emulated devices.
 
 Of course, somewhere one needs to say that a device is emulated and what
 should its behaviour be. This is done in the configuration files/flags
-and, because emulated devices are de facto Tango Devices, they should be
+and, because emulated devices are de facto Tango devices, they should be
 defined, implemented and deployed prior to the execution of the test
 script (and hence prior to the execution of the test harness).
 
