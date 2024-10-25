@@ -113,13 +113,17 @@ harness.
 Test Harness applications examples
 ----------------------------------
 
-Right now (October 2024), this test harness is used for the new set of
+Here there follows some (not necessarily exhaustive) examples of how this
+test harness has been used.
+
+In September 2024, this test harness was used for the new set of
+this test harness is used for the new set of
 `TMC-CSP Mid integration
 tests <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/-/merge_requests/234>`__,
 to test the subarray-related operations on
 the TMC (with a production CSP and emulated SDP and Dishes).
 
-Another more recent use case is 
+In October 2024, this test harness was used for 
 `this new set of TMC system tests <https://gitlab.com/ska-telescope/ska-sw-integration-testing/-/merge_requests/7/>`__,
 which run in an environment where TMC, CSP, SDP and Dishes are production
 subsystems.
