@@ -27,7 +27,7 @@ class ExpectedEvent:
 
     An event is described by:
 
-    - a tango device (or its name),
+    - a Tango device (or its name),
     - an attribute (name),
     - a predicate, that evaluates the event object (of type ``ReceivedEvent``)
       and returns a boolean indicating whether the event matches the expected

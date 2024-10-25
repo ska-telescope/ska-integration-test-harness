@@ -89,7 +89,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
                 return []
 
         # create an action that - if necessary - runs
-        # a certain tango command on TMC central node and terminates
+        # a certain Tango command on TMC central node and terminates
         # when that device reaches a certain state. The action then
         # returns true or false depending if the command was necessary or not.
         # Some further logging is done if the command wasn't necessary.

@@ -75,7 +75,7 @@ This repository does not contain and will likely never contain:
 -  the Helm charts to deploy the devices in a Kubernetes environment, or
    the pipelines and Make commands to run the tests (see previous point
    repos);
--  the specific “low-level” tools to track tango events and make
+-  the specific “low-level” tools to track Tango events and make
    assertions on them (see
    `ska-tango-testing <https://gitlab.com/ska-telescope/ska-tango-testing>`__);
 -  pipeline support tools, such as the Jira integration scripts (see

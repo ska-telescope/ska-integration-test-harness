@@ -14,7 +14,7 @@ class SubsystemWrapper(abc.ABC):
     (e.g. CSP, TMC, Dishes, etc.). A subsystem has the following properties:
 
     - has a name
-    - has tango devices
+    - has Tango devices
     - can be emulated or not
 
     On a subsystem, we can perform the following operations:
