@@ -131,7 +131,11 @@ When you added that, you can run ``poetry lock --no-update`` to update
 the ``poetry.lock`` file with the new dependency and ``poetry install``
 to install it. If you make changes to your code and want them reflected
 in your project, you can run
-``poetry update ska-integration-test-harness && poetry install``.
+
+.. code:: bash
+
+   poetry update ska-integration-test-harness && poetry install
+
 
 Usage
 -----
