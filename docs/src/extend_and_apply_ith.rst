@@ -78,7 +78,7 @@ and/or customize this test harness are:
 
    Customizing the initialisation procedure may be a necessary step if
    you want to replace, modify and/or extend what makes the test harness
-   ``structure`` (the ``TelescopeWrapper``, the sub-systems wrappers,
+   ``structure`` (the ``TelescopeWrapper``, the subsystems wrappers,
    etc.).
 
       **Example**: you want to implement a your own wrapper, which
@@ -87,9 +87,9 @@ and/or customize this test harness are:
       you extend the configuration classes and the reader to support it,
       (optionally) you subclass the input validator and you inject it
       into the initialisation builder, you subclass the wrapper of the
-      sub-system you want to replace and to use it in your test harness
+      subsystem you want to replace and to use it in your test harness
       you subclass the factory that produces the wrappers and override
-      the method that creates the wrapper for that sub-system.*
+      the method that creates the wrapper for that subsystem.*
 
 How you will be able to extend this test harness in the future
 --------------------------------------------------------------
@@ -122,6 +122,6 @@ the TMC (with a production CSP and emulated SDP and Dishes).
 Another more recent use case is 
 `this new set of TMC system tests <https://gitlab.com/ska-telescope/ska-sw-integration-testing/-/merge_requests/7/>`__,
 which run in an environment where TMC, CSP, SDP and Dishes are production
-sub-systems.
+subsystems.
 
 

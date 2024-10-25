@@ -34,7 +34,7 @@ class SDPWrapper(SubsystemWrapper, abc.ABC):
         return "SDP"
 
     def get_all_devices(self) -> dict[str, tango.DeviceProxy]:
-        """Get all the sub-system devices as a dictionary."""
+        """Get all the subsystem devices as a dictionary."""
         return {
             "sdp_master": self.sdp_master,
             "sdp_subarray": self.sdp_subarray,

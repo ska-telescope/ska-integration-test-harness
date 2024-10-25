@@ -316,7 +316,7 @@ Your fixtures code may look like this:
        test_harness_builder.set_kubernetes_namespace(os.getenv("KUBE_NAMESPACE"))
 
 
-       # build the wrapper of the telescope and its sub-systems
+       # build the wrapper of the telescope and its subsystems
        telescope = test_harness_builder.build()
        yield telescope
 

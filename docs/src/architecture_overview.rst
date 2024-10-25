@@ -36,7 +36,7 @@ This test harness comprises:
 -  **actions**, which are the building blocks of tests and each includes
    a relatively complex action that can be performed on the SUT (like
    sending a command to a device)
--  **wrappers**, which wrap sub-systems of the SUT and provide a
+-  **wrappers**, which wrap subsystems of the SUT and provide a
    structured interface to them and to their devices, eventually
    providing an abstraction for some operations (e.g., operations that
    may differ between a production device and an emulator)
@@ -112,7 +112,7 @@ The test harness files are organized in the following way:
    while :py:mod:`~ska_integration_test_harness.emulated`
    and :py:mod:`~ska_integration_test_harness.production`
    folders contains respectively the concrete implementations of the
-   wrappers for the emulated and production sub-systems.
+   wrappers for the emulated and production subsystems.
 -  Input-related classes have to be added in the
    :py:mod:`~ska_integration_test_harness.inputs` folder
 -  configuration-related classes have to be added in the
@@ -130,28 +130,28 @@ Why use facades?
 ~~~~~~~~~~~~~~~~~~
 
 As mentioned above we want an high-level way to represent the SUT, its
-sub-systems, its devices and the operations that can be performed
+subsystems, its devices and the operations that can be performed
 against them. To achieve this, we use **Facades**.
 
 Facades are classes that provide a simplified interface to a complex system;
 in this case, the complex system is the combination of the telescope
 subsystems and the test harness internal logic itself. 
 
-Concretely, we define a facade for each sub-system of the telescope
+Concretely, we define a facade for each subsystem of the telescope
 (e.g., TMC, CSP, DSH, etc.) and we make it expose: 
 
--  the devices that are part of the sub-system;
--  the operations that can be performed on the sub-system (like sending
+-  the devices that are part of the subsystem;
+-  the operations that can be performed on the subsystem (like sending
    a command, or something more complex like moving the subsystem to a
    certain state passing through a sequence of commands).
 
 When writing a test script, the test script will interact with the facade
 to access the devices and subscribe to their events and will use the
-facade to perform operations on the sub-system. The two main advantages
+facade to perform operations on the subsystem. The two main advantages
 of using facades are the following:
 
 1. they are a semantic-oriented way to represent the SUT
-   and its sub-systems and they can be used encode structured interface
+   and its subsystems and they can be used encode structured interface
    to something that is a bit more complex than a single Tango device;
 
 2. they permit you to hide some technical details about
@@ -177,7 +177,7 @@ or emulated) to perform a scan.
   will be more explicit and you will have less code to change.
 
 - **Use in the "THEN" steps**: finally, you have to check that the scan
-  has been performed correctly and all the involved sub-systems are in
+  has been performed correctly and all the involved subsystems are in
   the expected state. Through the various facades you can access in a 
   structured way to the devices to:
 
@@ -190,7 +190,7 @@ or emulated) to perform a scan.
   you will have to update only a configuration file instead of all the
   references to various device names around your code.
 
-The choice of having a different facade for each sub-system
+The choice of having a different facade for each subsystem
 favours the separation of concerns and is a way to avoid bloating a
 single "Test Harness" class with too much unrelated functionality
 and too many responsibilities (see `Single Responsibility Principle 
@@ -229,7 +229,7 @@ there are a lot of complexities that justifies the existence of actions:
 - in a more general sense, when performing an operation (in your GIVEN steps)
   you may want to synchronize on a desired transient or quiescent state
 - very often, the operations implicitly involve devices that are part of
-  different sub-systems, so the synchronization may need to involve them all;
+  different subsystems, so the synchronization may need to involve them all;
 - if something changes about the command (e.g., the name, the input,
   the expected events, the expected state of the devices), you may want to
   update only in one place and have all the dependencies as much explicit
@@ -310,10 +310,10 @@ Why use wrappers? (and differences from facades)
 
 In the Integration Test Harness, the **wrappers** can be seen as the
 way we *internally* use to represent the SUT (a telescope), it's
-sub-systems and the devices. Concretely, the wrappers are classes that:
+subsystems and the devices. Concretely, the wrappers are classes that:
 
-- encode the structure of the SUT (i.e. which sub-systems are part of it
-  and which devices are part of each sub-system);
+- encode the structure of the SUT (i.e. which subsystems are part of it
+  and which devices are part of each subsystem);
 - support the performing of "technical actions" on the devices (like
   the tear-down to a "base state", the logging of the device versions,
   etc.);
@@ -325,13 +325,13 @@ sub-systems and the devices. Concretely, the wrappers are classes that:
 The main access point to the wrappers is a class called
 :py:class:`~ska_integration_test_harness.structure.TelescopeWrapper`,
 which is intended to represent the entire SUT and internally holds
-references to all the sub-systems wrappers. Since the SUT is one, the
+references to all the subsystems wrappers. Since the SUT is one, the
 telescope wrapper is a
 `Singleton <https://refactoring.guru/design-patterns/singleton>`__,
 so once it’s initialised, you can access it from everywhere in the code
-just by accessing its unique instance. The sub-systems wrappers are
+just by accessing its unique instance. The subsystems wrappers are
 instead dedicated abstract classes, which may have a "production" and an
-"emulated" concrete implementation. Each sub-system extends a common base
+"emulated" concrete implementation. Each subsystem extends a common base
 abstract class (which provides a common interface for some recurrent
 operations) and, usually, supports a specific configuration.
 
@@ -339,7 +339,7 @@ operations) and, usually, supports a specific configuration.
 
 A doubt that may arise is: why do we need both facades and wrappers? The doubt
 is legitimate, since they both represent the SUT, they both have classes
-for the sub-systems and they both have references to the devices. Despite that,
+for the subsystems and they both have references to the devices. Despite that,
 the choice of having both is not casual and is based on the fact that, even
 if they represent the same thing, they are used in different contexts and
 for different purposes.
@@ -432,9 +432,9 @@ The test harness to be initialised needs a lot of configuration data, such as:
 - the flags that tell what is emulated and what is production.
 
 To give structure to this data and to provide a consistent interface to
-it, we use configuration classes. Generally, foreach sub-system we want
+it, we use configuration classes. Generally, foreach subsystem we want
 to have a configuration class that represents the configuration data
-needed to initialise the sub-system (e.g., for the TMC configuration
+needed to initialise the subsystem (e.g., for the TMC configuration
 we have a
 :py:class:`~ska_integration_test_harness.config.TMCConfiguration`
 class). All subsystems configuration are then collected in a common class
@@ -459,7 +459,7 @@ Why have an initialisation procedure?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A complete test harness can be - potentially - set up just by creating a
-telescope wrapper instance and initialising it with sub-systems wrappers
+telescope wrapper instance and initialising it with subsystems wrappers
 (properly initialised with configuration classes and input). Since this
 can be a quite complex and error prone procedure,
 a default initialisation procedure is encoded in a builder class, which:

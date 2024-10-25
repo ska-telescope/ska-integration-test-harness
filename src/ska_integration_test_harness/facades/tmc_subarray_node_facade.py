@@ -59,7 +59,7 @@ from ska_integration_test_harness.structure.telescope_wrapper import (  # pylint
 class TMCSubarrayNodeFacade:
     """A facade to TMC Subarray Node device and its actions.
 
-    A facade to TMC sub-system, providing a simplified interface to the
+    A facade to TMC subsystem, providing a simplified interface to the
     subarray node devices and their actions. It contains:
 
     - references to subarray node device,
@@ -72,8 +72,7 @@ class TMCSubarrayNodeFacade:
     - various other actions (e.g., five point calibration scan).
 
     **IMPORTANT NOTE**: This facade is deprecated,
-    since we want to use a facade for each
-    sub-system. Please use
+    since we want to use a facade for each subsystem. Please use
     :py:class:`~ska_integration_test_harness.facades.tmc_facade.TMCFacade`
     instead.
     """

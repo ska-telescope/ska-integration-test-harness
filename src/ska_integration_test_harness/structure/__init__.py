@@ -3,7 +3,7 @@
 :py:class:`~ska_integration_test_harness.structure.telescope_wrapper.TelescopeWrapper`
 is the main entry point for the telescope system.
 
-Right now, it exposes the following sub-systems (through a wrapper for each):
+Right now, it exposes the following subsystems (through a wrapper for each):
 
 - TMC
 - SDP

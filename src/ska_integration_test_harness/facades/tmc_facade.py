@@ -38,7 +38,7 @@ from ..structure.telescope_wrapper import TelescopeWrapper
 class TMCFacade:
     """A facade to TMC devices and the actions on them.
 
-    A facade to TMC sub-system, providing a simplified interface to:
+    A facade to TMC subsystem, providing a simplified interface to:
 
     - references to central node device,
     - references to subarray devices and their leaf devices,
