@@ -116,7 +116,7 @@ Test Harness applications examples
 Right now (October 2024), this test harness is used for the new set of
 `TMC-CSP MID integration
 tests <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/-/merge_requests/234>`__,
-which use the test harness to test the subarray-related operations over
+to test the subarray-related operations on
 the TMC (with a production CSP and emulated SDP and Dishes).
 
 Another more recent use case is 

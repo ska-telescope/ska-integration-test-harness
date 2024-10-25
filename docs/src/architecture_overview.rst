@@ -97,8 +97,8 @@ emulators without knowing which is which. See below for examples.
 Conventions (where to find the code)
 --------------------------------------
 
-Before starting understanding the idea behind each kind of component
-the test harness is made of (facades, actions, wrappers, etc.), it is
+Before starting to understand the idea behind each kind of component
+in the test harness (facades, actions, wrappers, etc.), it is
 useful to know where to find the code.
 
 The test harness files are organized in the following way:
@@ -246,7 +246,7 @@ operations are just a single command but:
 
 All these reasons justify the existence of actions as structured entities
 to encapsulate the complexity of the operations that are performed over
-the telescope. The actions are so represented through classes,
+the telescope. The actions are represented through classes
 that embed both the *code to perform the operation* and *the
 termination/synchronization condition*. 
 All the action classes extend a common base class
@@ -300,7 +300,7 @@ sequences, to perform more complex operations (see
 :py:class:`~ska_integration_test_harness.actions.TelescopeActionSequence`
 ). Note also that actions can also be defined
 as a complex inheritance hierarchy, to define common behaviours and to
-specialize them (give a look to the existing actions to see how they are
+specialize them (see how the existing actions are
 implemented).
 
 The actions mechanism is represented (high level) in the following UML.
@@ -350,9 +350,9 @@ for different purposes.
   instead they are focused on exposing the operations (meaningful to the business)
   that can be performed over the SUT and the devices that are part of it.
 
-- The wrappers instead are something opposite, they are a more internal
-  technical representation of the SUT, which may include technical details
-  which are not related to the business logic of the test script body
+- The wrappers instead are the opposite, they are an internal
+  technical representation of the SUT, which may include details
+  which are not related to the business logic of the test script
   (like, the fact something may be production or emulated, technical
   initialisation and tear-down procedures, etc.).
 
@@ -373,7 +373,7 @@ In other words, the wrappers are the internal representation of the SUT
 which permits the more external representation (the facades) to be
 more business-oriented and high-level.
 
-Why use JSON data builder?
+Why use a JSON data builder?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Some actions over the telescope (such as the *scan*, *configure*,
@@ -400,8 +400,8 @@ be represented in many ways (a string, a dictionary, a reference to a
 file, etc.) and we want a consistent way to represent it in the test
 harness context. Moreover, sometimes we want to be able to deal with
 guaranteed and validated input (e.g., when we set the initial default
-input), sometimes we want to explicitly handle the case of un-valid
-input (e.g., for un-happy paths tests) and sometimes we want to just
+input), sometimes we want to explicitly handle the case of invalid
+input (e.g., for unhappy paths tests) and sometimes we want to just
 ignore that (an action that just sends a commands wants to deal the same
 way with valid and invalid input).
 
@@ -470,7 +470,7 @@ a default initialisation procedure is encoded in a builder class, which:
    the device names point to existing and reachable Tango devices,
    etc.);
 -  collects the default input;
--  validates them;
+-  validates it;
 -  uses the input and the configuration to create the instances of the
    wrappers.
 
