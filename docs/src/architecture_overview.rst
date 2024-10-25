@@ -97,8 +97,8 @@ emulators without knowing which is which. See below for examples.
 Conventions (where to find the code)
 --------------------------------------
 
-Before starting understanding the idea behind each kind of component
-the test harness is made of (facades, actions, wrappers, etc.), it is
+Before starting to understand the idea behind each kind of component
+in the test harness (facades, actions, wrappers, etc.), it is
 useful to know where to find the code.
 
 The test harness files are organized in the following way:
@@ -300,7 +300,7 @@ sequences, to perform more complex operations (see
 :py:class:`~ska_integration_test_harness.actions.TelescopeActionSequence`
 ). Note also that actions can also be defined
 as a complex inheritance hierarchy, to define common behaviours and to
-specialize them (give a look to the existing actions to see how they are
+specialize them (see how the existing actions are
 implemented).
 
 The actions mechanism is represented (high level) in the following UML.
