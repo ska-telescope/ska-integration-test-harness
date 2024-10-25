@@ -38,15 +38,15 @@ SUT, its subsystems and devices and the actions you can perform on them.
 More specifically:
 
 -  represent and allow access to the subsystems and the Tango devices
-   in a structured way, potentially ignoring which subsystem is emulated
-   and which is not;
--  simplify complex procedures to bring the SUT in a specific state
-   before running the tests (e.g., call the commands to set the telescope
-   in a specific desired state, synchronizing on events end ensuring the state
+   in a structured way, regardless of whether a subsystem is emulated
+   or it is not;
+-  simplify complex procedures to bring the SUT into a specific state
+   before running the tests (e.g., call the commands to put the telescope
+   in the desired state, synchronize when the events have finished, and ensure the state
    is effectively reached);
 -  simplify teardown procedures, to bring the SUT back to a known state
    after the tests are completed;
--  overview on the active devices and their versions.
+-  overview of the active devices and their versions.
 
 At the moment (October 2024), the SUT consist in:
 
@@ -80,7 +80,7 @@ This repository does not contain and will likely never contain:
    `ska-tango-testing <https://gitlab.com/ska-telescope/ska-tango-testing>`__);
 -  pipeline support tools, such as the Jira integration scripts (see
    `ska-ser-xray <https://gitlab.com/ska-telescope/ska-ser-xray>`__);
--  the code of the emulators for the non-production subsystems devices (see
+-  the code of the emulators for the non-production subsystem devices (see
    `ska-tmc-simulators <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators>`__);
 -  the code of the production devices.
 
@@ -146,7 +146,7 @@ Prerequisites
 To use this test harness, first of all, you need a Kubernetes cluster
 with all the production and emulated devices running. This part is not
 covered by this project, which in fact assumes an environment equivalent
-to what is used in the test repository `SKA TMC-MID
+to that used in the test repository `SKA TMC-MID
 Integration <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/>`__
 (`docs <https://developer.skao.int/projects/ska-tmc-mid-integration/en/latest/getting_started/getting_started.html>`__).
 
