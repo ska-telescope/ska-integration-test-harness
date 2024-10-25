@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.2.0 (24th October 2024)
+## v0.2.0 (25th October 2024)
 
 - **SST-975**: Add a mechanism to console log the Tango devices versions
   when the tests are running.

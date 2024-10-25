@@ -4,7 +4,7 @@ SKA Integration Test Harness (ITH) - Overview & Getting started
 Overview
 --------
 
-Currently (17th October 2024), a test harness for TMC in Mid integration
+Currently (October 2024), a test harness for TMC in Mid integration
 tests, centred around the TMC subsystem and its interactions with CSP,
 SDP and the Dishes. In future, a generic test harness integration
 testing an arbitrary combination of production or emulated SKA
@@ -26,7 +26,7 @@ IMPORTANT: What this repository is about (and what it is not)
 A second important thing is to understand what this specific repository
 is about and what it is not. While the term **ITH** sometimes may be
 used to refer a wider concept and a large collection of tools, this
-repository (at the moment, 17th October 2024) contains a specific subset
+repository (at the moment, October 2024) contains a specific subset
 of tools. So, let’s quickly clarify what you can find here (and what you
 cannot).
 
@@ -48,7 +48,7 @@ More specifically:
    after the tests are completed;
 -  overview on the active devices and their versions.
 
-At the moment (17th October 2024), the SUT consist in:
+At the moment (October 2024), the SUT consist in:
 
 -  a production TMC, which is the “protagonist” of the tests (the
    subsystem which receives most of the commands);
@@ -88,7 +88,7 @@ What you cannot find (yet)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Instead, this framework may (*and will likely*) support in the future
-(**but not at the moment, 17th October 2024**):
+(**but not at the moment, October 2024**):
 
 - TMC Low integration tests;
 - integration tests where TMC is not the

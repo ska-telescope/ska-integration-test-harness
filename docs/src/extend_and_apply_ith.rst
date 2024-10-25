@@ -3,7 +3,7 @@ How to use and extend this harness
 ====================================
 
 
-At the moment (September 2024) this harness has no well-defined
+At the moment (October 2024) this harness has no well-defined
 extension points yet and it is pretty specific to the TMC-CSP
 integration tests in MID. Based on feedback and on the evolution of the
 project, the harness will be extended to be more flexible and to support
@@ -17,7 +17,7 @@ To use this test harness *as is*, you can follow the instructions in :doc:`./get
 How to extend this test harness (within the current limitations)
 ----------------------------------------------------------------
 
-Right now (September 2024) the test harness is designed for integration
+Right now (October 2024) the test harness is designed for integration
 tests of the TMC with CSP in MID. Probably, it is still capable of
 supporting TMC-X in MID integrations tests.
 
@@ -114,7 +114,7 @@ harness.
 Test Harness applications examples
 ----------------------------------
 
-Right now (September 2024), this test harness is used for the new set of
+Right now (October 2024), this test harness is used for the new set of
 `TMC-CSP MID integration
 tests <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/-/merge_requests/234>`__,
 which use the test harness to test the subarray-related operations over
