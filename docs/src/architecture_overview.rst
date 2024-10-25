@@ -181,8 +181,8 @@ or emulated) to perform a scan.
 
 - **Use in the "THEN" steps**: finally, you have to check that the scan
   has been performed correctly and all the involved subsystems are in
-  the expected state. Through the various facades you can access in a 
-  structured way to the devices to:
+  the expected state. Through the various facades you have access to the devices in a 
+  structured way to:
 
   - subscribe to the events (*before calling the command*);
   - assert that events have happened (*after calling the command*);
