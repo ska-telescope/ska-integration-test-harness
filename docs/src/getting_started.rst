@@ -57,10 +57,10 @@ At the moment, the SUT consists off:
 -  a set of production or emulated Dishes.
 
 **NOTE:** for the purposes of this test harness, we use the term
-*"production"* to refer to the real software that needs to be tested, and
-*"emulated"* to refer to a software that just “replicate” the behaviour of
-the real devices, without actually having a complex logic behind. The term
-*"production"* doesn't mean we are using the real hardware.
+*production* to refer to real software that needs to be tested, and
+*emulated* to refer to software that replicates the behaviour of
+the real devices without having complex logic behind it. The term
+*production* doesn't mean we are using the real hardware.
 
 What you cannot find (and likely will remain in separate places)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
