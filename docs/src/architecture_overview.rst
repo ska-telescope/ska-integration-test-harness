@@ -11,7 +11,7 @@ Since the test harness is still in development, both the code and the
 design may change in the future. The overall principles, however, will
 likely remain the same.
 
-This document is updated the last time on 3rd September 2024.
+This document is updated the last time in October 2024.
 
 What glues the test scripts to the SUT?
 ----------------------------------------
@@ -24,7 +24,7 @@ be **easy to use** (so that tests can be written quickly), to be **easy
 to maintain** (so that tests can be updated quickly) and **reliable**
 (so that tests can be trusted).
 
-As of September 2024 the test harness is designed to work with Tango
+As of October 2024 the test harness is designed to work with Tango
 Devices, and specifically to support tests for integration of TMC with
 CSP in MID, but it can be extended to work with other types of
 components.
