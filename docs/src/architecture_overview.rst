@@ -21,13 +21,16 @@ SUT. It is designed to provide a consistent interface for all tests, to
 be **powerful** (allowing for complex tests), to be **flexible**
 (extensible to meet the needs of different SUTs and different tests), to
 be **easy to use** (so that tests can be written quickly), to be **easy
-to maintain** (so that tests can be updated quickly) and **reliable**
-(so that tests can be trusted).
+to maintain** (so that tests and the harness itself can be updated quickly)
+and **reliable** (so that tests can be trusted).
 
-As of October 2024 the test harness is designed to work with Tango
-devices, and specifically to support tests for integration of TMC with
-CSP in Mid, but it can be extended to work with other types of
-components.
+The test harness is designed to work with SKA subsystems' Tango devices,
+specifically to support integration tests where you have one or more SKA
+subsystems (e.g., TMC, CSP, etc.) deployed as a production component or as
+an emulator. At the moment the test harness is specifically designed to
+work with the TMC subsystem, integrated with CSP, SDP and the dishes
+(TMC in Mid); in the future, it may be extended to support other
+subsystems and other SUT variants.
 
 This test harness comprises:
 
