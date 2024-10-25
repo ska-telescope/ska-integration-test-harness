@@ -351,7 +351,7 @@ Your fixtures code may look like this:
 
    @pytest.fixture
    def dishes(telescope_wrapper: TelescopeWrapper):
-       """Create a facade to dishes devices."""
+       """Create a facade to Dish devices."""
        return DishesFacade(telescope_wrapper)
 
 Other than the fixtures, you may also want to create a fixture for the

@@ -93,7 +93,7 @@ class TMCSubarrayNodeFacade:
 
     @property
     def dish_leaf_node_list(self):
-        """Return Dish Leaf Node List"""
+        """Return the dish leaf nodes as a list of device proxies."""
         return self._telescope.tmc.dish_leaf_node_list
         # NOTE: in old test harness code, sometimes just the first two
         # dishes were used. I don't know if there was a reason behind that

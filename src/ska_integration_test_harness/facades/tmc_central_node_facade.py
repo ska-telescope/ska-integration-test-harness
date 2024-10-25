@@ -133,7 +133,7 @@ class TMCCentralNodeFacade:
     ) -> Tuple[ResultCode, str]:
         """Invoke LoadDishCfg command on central Node.
 
-        :param dish_vcc_config: Dish vcc configuration json string.
+        :param dish_vcc_config: Dishes VCC configuration json.
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
             condition is waited.
