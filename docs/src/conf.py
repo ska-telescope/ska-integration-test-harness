@@ -13,18 +13,18 @@ import os
 import sys
 
 
-sys.path.insert(0, os.path.abspath('../../src'))
+sys.path.insert(0, os.path.abspath("../../src"))
 
 
 # -- Project information -----------------------------------------------------
 
 # General information about the project.
-project = 'SKA Integration Test Harness'
-copyright = '2024, IDS Srl'
-author = 'Emanuele Lena <emanuele.lena@designcoaching.net>'
+project = "SKA Integration Test Harness"
+copyright = "2024, IDS Srl"
+author = "Emanuele Lena <emanuele.lena@designcoaching.net>"
 
 # The full version, including alpha/beta/rc tags.
-version = '0.2.0'
+version = "0.2.0"
 
 # -- General configuration ------------------------------------------------
 
@@ -37,17 +37,17 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx_autodoc_typehints",
-    'm2r',
+    "m2r",
 ]
 
-source_suffix = ['.rst', '.md']
+source_suffix = [".rst", ".md"]
 
 # "numpy", "tango",
 autodoc_mock_imports = [
-    "assertpy", 
-    "tango", 
-    "ska_control_model", 
-    "ska_tango_testing", 
+    "assertpy",
+    "tango",
+    "ska_control_model",
+    "ska_tango_testing",
 ]
 
 
@@ -76,39 +76,16 @@ html_context = {}
 
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3.10', None), 
-    'pytest': ("https://docs.pytest.org/en/7.1.x/", None),
+    "python": ("https://docs.python.org/3.10", None),
+    "pytest": ("https://docs.pytest.org/en/7.1.x/", None),
     "tango": ("https://pytango.readthedocs.io/en/v9.4.2/", None),
 }
 
-# def copy_images(app):
-#     if app.builder.name != 'html':
-#         return
-    
-#     output_dir = os.path.join(app.outdir, 'uml-docs')
-#     source_dir = os.path.join(app.srcdir, '..', '..', 'src', 'ska_integration_test_harness', 'uml-docs')
-
-#     # create the output directory if it doesn't exist
-#     os.makedirs(output_dir, exist_ok=True)
-
-#     # list the png files in the source directory
-#     images = [f for f in os.listdir(source_dir) if f.lower().endswith('.png')]
-
-#     # copy the images to the output directory
-#     for image in images:
-#         source_path = os.path.join(source_dir, image)
-#         output_path = os.path.join(output_dir, image)
-#         with open(source_path, 'rb') as f:
-#             with open(output_path, 'wb') as out:
-#                 out.write(f.read())
-
-# def setup(app):
-#     # connect the copy_images function to the builder-inited signal
-#     app.connect('builder-inited', copy_images)
-
-
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3.10', None), 
+    "python": ("https://docs.python.org/3.10", None),
     "tango": ("https://pytango.readthedocs.io/en/v9.4.2/", None),
-    "ska_tango_testing": ("https://developer.skao.int/projects/ska-tango-testing/en/latest/", None),
+    "ska_tango_testing": (
+        "https://developer.skao.int/projects/ska-tango-testing/en/latest/",
+        None,
+    ),
 }
