@@ -91,10 +91,8 @@ Instead, this framework may (*and will likely*) support in the future
 (**but not at the moment**):
 
 - TMC Low integration tests;
-- integration tests where TMC is not the
-  protagonist (i.e., you can call commands not only on TMC but also on
-  CSP, SDP, etc. and check the interactions between them, without
-  having TMC involved);
+- integration tests where TMC is not involved (e.g.,
+  stand-alone tests of a single subsystem);
 - tests with multiple subarrays.
 
 Stay tuned for updates!
