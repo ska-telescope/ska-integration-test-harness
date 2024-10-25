@@ -28,7 +28,7 @@ class TelescopeWrapper:
     This class is a *Singleton*, so this mean that there is only one instance
     of it in the entire code. This is done to avoid the creation of multiple
     "telescope" instances, potentially inconsistently initialised with
-    different sub-subsystems (which may be configured differently).
+    different subsystem instances (which may be configured differently).
 
     To initialise the telescope test structure, create an instance of this
     class and call the `set_up` method with the instances of the TMC, SDP, CSP,

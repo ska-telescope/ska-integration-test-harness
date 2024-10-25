@@ -78,7 +78,7 @@ and/or customize this test harness are:
 
    Customizing the initialisation procedure may be a necessary step if
    you want to replace, modify and/or extend what makes the test harness
-   ``structure`` (the ``TelescopeWrapper``, the subsystems wrappers,
+   ``structure`` (the ``TelescopeWrapper``, the subsystem wrappers,
    etc.).
 
       **Example**: you want to implement a your own wrapper, which

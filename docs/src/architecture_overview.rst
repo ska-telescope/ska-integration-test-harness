@@ -325,11 +325,11 @@ subsystems and the devices. Concretely, the wrappers are classes that:
 The main access point to the wrappers is a class called
 :py:class:`~ska_integration_test_harness.structure.TelescopeWrapper`,
 which is intended to represent the entire SUT and internally holds
-references to all the subsystems wrappers. Since the SUT is one, the
+references to all the subsystem wrappers. Since the SUT is one, the
 telescope wrapper is a
 `Singleton <https://refactoring.guru/design-patterns/singleton>`__,
 so once it’s initialised, you can access it from everywhere in the code
-just by accessing its unique instance. The subsystems wrappers are
+just by accessing its unique instance. The subsystem wrappers are
 instead dedicated abstract classes, which may have a "production" and an
 "emulated" concrete implementation. Each subsystem extends a common base
 abstract class (which provides a common interface for some recurrent
@@ -459,7 +459,7 @@ Why have an initialisation procedure?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A complete test harness can be - potentially - set up just by creating a
-telescope wrapper instance and initialising it with subsystems wrappers
+telescope wrapper instance and initialising it with subsystem wrappers
 (properly initialised with configuration classes and input). Since this
 can be a quite complex and error prone procedure,
 a default initialisation procedure is encoded in a builder class, which:

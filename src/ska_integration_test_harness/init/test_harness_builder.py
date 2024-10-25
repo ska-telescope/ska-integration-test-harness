@@ -86,7 +86,7 @@ class TestHarnessBuilder:
         """The Kubernetes namespace where the SUT is deployed.
 
         It is optional, but if you set it, it will be used to connect to
-        get more information about the various subsystems devices.
+        get more information about the various subsystem devices.
         """
 
         # --------------------------------------------------------------

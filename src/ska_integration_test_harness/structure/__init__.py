@@ -10,7 +10,7 @@ Right now, it exposes the following subsystems (through a wrapper for each):
 - CSP
 - Dishes
 
-All the subsystems wrappers are represented by abstract classes, so you can
+All the subsystem wrappers are represented by abstract classes, so you can
 create your own implementation for each one (e.g., an implementation that
 points to the devices of a real subsystem, or an implementation that points
 to the devices of an emulated subsystem).

@@ -202,7 +202,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
 
         self.telescope = TelescopeWrapper()
         """The telescope instance, which you can use to access all the
-        subsystems devices (TMC, CSP, SDP, Dishes)."""
+        subsystem devices (TMC, CSP, SDP, Dishes)."""
 
         self._state_change_waiter = StateChangeWaiter()
         """The state change waiter, which is used to wait for the
@@ -362,7 +362,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
         (i.e., your interaction with the SUT components). Remember
         you already have available the telescope instance
         as ``self.telescope`` (which you can use to access all the
-        subsystems devices).
+        subsystem devices).
 
         If you need to return something from the action, you can
         do it. Else you can also return nothing.

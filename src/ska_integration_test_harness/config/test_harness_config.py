@@ -27,7 +27,7 @@ class TestHarnessConfiguration:
     support an elastic choice of which subsystems to include, so this
     configuration may be useful to select only the needed subsystems.
 
-    A support enum is provided to specify the subsystems names, and
+    A support enum is provided to specify the subsystem names, and
     allow access to the configurations in a parametric way.
     """
 
@@ -35,7 +35,7 @@ class TestHarnessConfiguration:
     __test__ = False
 
     class SubsystemName(Enum):
-        """An enumeration of the possible subsystems names.
+        """An enumeration of the possible subsystem names.
 
         An enumeration of the possible subsystems that could be included in the
         the test harness configuration.

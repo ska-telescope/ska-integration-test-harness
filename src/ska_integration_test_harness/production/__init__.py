@@ -1,4 +1,4 @@
-"""A collection of production subsystems wrappers."""
+"""A collection of production subsystem wrappers."""
 
 from .csp_wrapper import ProductionCSPWrapper
 from .dishes_wrapper import ProductionDishesWrapper
