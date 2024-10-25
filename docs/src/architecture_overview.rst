@@ -51,8 +51,8 @@ This test harness comprises:
 
    -  Currently, emulators are those used in the TMC-Mid integration
       tests
-      (`Code <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common/-/tree/master/src/ska_tmc_common/test_helpers?ref_type=heads>`__,
-      `Documentation <https://developer.skao.int/projects/ska-tmc-common/en/latest/HelperDevices/TangoHelperDevices.html>`__).
+      (`code <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common/-/tree/master/src/ska_tmc_common/test_helpers?ref_type=heads>`__,
+      `documentation <https://developer.skao.int/projects/ska-tmc-common/en/latest/HelperDevices/TangoHelperDevices.html>`__).
       To use this test harness you have to deploy them in your
       environment and configure the test harness with the right device
       names.
@@ -193,12 +193,12 @@ or emulated) to perform a scan.
 The choice of having a different facade for each sub-system
 favours the separation of concerns and is a way to avoid bloating a
 single "Test Harness" class with too much unrelated functionality
-and too many responsibilities (`Single Responsibility Principle 
+and too many responsibilities (see `Single Responsibility Principle 
 <https://en.wikipedia.org/wiki/Single-responsibility_principle>`__).
 
-
-The facade is also a well known design pattern
-(`FACADE <https://refactoring.guru/design-patterns/facade>`__), whose
+The 
+`Facade <https://refactoring.guru/design-patterns/facade>`__
+is also a well known design pattern, whose
 core idea is to provide a simplified interface to a complex system. 
 In this case the complex system is the test harness itself, with all its
 internal mechanisms that sometimes may be too technical to be exposed in
@@ -283,13 +283,11 @@ command to the TMC Subarray Node:
    the Tango devices) to perform the operation.
 
 Actions general idea is based on the
-`COMMAND <https://refactoring.guru/design-patterns/command>`__ design pattern
+`Command <https://refactoring.guru/design-patterns/command>`__ design pattern
 and make heavy use of
-`TEMPLATE
-METHODS <https://refactoring.guru/design-patterns/template-method>`__. A
-a sequence of actions is also implemented through the
-`COMPOSITE <https://refactoring.guru/design-patterns/composite>`__
-design pattern.
+`Template Method <https://refactoring.guru/design-patterns/template-method>`__.
+A a sequence of actions is also a design pattern, since it is implemented
+through `Composite <https://refactoring.guru/design-patterns/composite>`__.
 
 To implement an action, you have to extend the
 :py:class:`~ska_integration_test_harness.actions.TelescopeAction`
@@ -328,7 +326,8 @@ The main access point to the wrappers is a class called
 :py:class:`~ska_integration_test_harness.structure.TelescopeWrapper`,
 which is intended to represent the entire SUT and internally holds
 references to all the sub-systems wrappers. Since the SUT is one, the
-telescope wrapper is a `SINGLETON <https://refactoring.guru/design-patterns/singleton>`__,
+telescope wrapper is a
+`Singleton <https://refactoring.guru/design-patterns/singleton>`__,
 so once it’s initialised, you can access it from everywhere in the code
 just by accessing its unique instance. The sub-systems wrappers are
 instead dedicated abstract classes, which may have a "production" and an
@@ -405,11 +404,11 @@ input (e.g., for unhappy paths tests) and sometimes we want to just
 ignore that (an action that just sends a commands wants to deal the same
 way with valid and invalid input).
 
-The main inspiration behind this mechanism is the `FACTORY
-METHOD <https://refactoring.guru/design-patterns/factory-method>`__,
-`ABSTRACT
-FACTORY <https://refactoring.guru/design-patterns/abstract-factory>`__
-and `BUILDER <https://refactoring.guru/design-patterns/builder>`__ are
+The main inspiration behind this mechanism is the 
+`Factory Method <https://refactoring.guru/design-patterns/factory-method>`__
+design pattern,
+`Abstract Factory <https://refactoring.guru/design-patterns/abstract-factory>`__
+and `Builder <https://refactoring.guru/design-patterns/builder>`__ are
 indirect inspirations too.
 
 In ``inputs`` folder you can find some examples of JSON input classes,
@@ -477,11 +476,11 @@ a default initialisation procedure is encoded in a builder class, which:
 To do each of those steps, the builder uses a set of classes that
 potentially can be extended to support custom initialisation procedures.
 
-The initialisation procedure makes heavy use of the `ABSTRACT
-FACTORY <https://refactoring.guru/design-patterns/abstract-factory>`__
-and `BUILDER <https://refactoring.guru/design-patterns/builder>`__
+The initialisation procedure makes heavy use of the
+`Abstract Factory <https://refactoring.guru/design-patterns/abstract-factory>`__
+and `Builder <https://refactoring.guru/design-patterns/builder>`__
 design patterns. In a certain sense, then the various internal tools are
-`STRATEGIES <https://refactoring.guru/design-patterns/strategy>`__ used
+`Strategies <https://refactoring.guru/design-patterns/strategy>`__ used
 by the builder to compose the test harness.
 
 Other tools
