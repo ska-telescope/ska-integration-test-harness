@@ -38,7 +38,7 @@ This test harness comprises:
    sending a command to a device)
 -  **wrappers**, which wrap sub-systems of the SUT and provide a
    structured interface to them and to their devices, eventually
-   providing an abstraction over some operations (e.g., operations that
+   providing an abstraction for some operations (e.g., operations that
    may differ between a production device and an emulator)
 -  **inputs**, which are used to generate the JSON input data for the
    various commands that are sent to the SUT
@@ -212,7 +212,7 @@ Why use actions?
 ~~~~~~~~~~~~~~~~~~
 
 The general idea of the **actions** is - in brief - to encode an operation
-you perform over the telescope in a single class. One may ask, why not
+you perform on the telescope in a single class. One may ask, why not
 just a single method in a facade or a wrapper? Or also, why not
 just directly call Tango commands from the test script? Here there follow
 some reasons.
@@ -227,7 +227,7 @@ there are a lot of complexities that justifies the existence of actions:
 - since the telescope is a distributed system, most command calls are
   asynchronous and the test script has to synchronize with the devices;
 - in a more general sense, when performing an operation (in your GIVEN steps)
-  you may want to synchronize over a desired transient or quiescent state
+  you may want to synchronize on a desired transient or quiescent state
 - very often, the operations implicitly involve devices that are part of
   different sub-systems, so the synchronization may need to involve them all;
 - if something changes about the command (e.g., the name, the input,
@@ -264,7 +264,7 @@ From the base class they inherit:
 At the moment, the actions are generally called by facades (or by other
 actions, or by wrappers specific implementations) and they are used to
 perform the operations that are needed to
-be done over the telescope. For example, let’s consider a
+be done on the telescope. For example, let’s consider a
 test script that wants to send a scan ``Scan``
 command to the TMC Subarray Node:
 
@@ -316,11 +316,11 @@ sub-systems and the devices. Concretely, the wrappers are classes that:
 
 - encode the structure of the SUT (i.e. which sub-systems are part of it
   and which devices are part of each sub-system);
-- support the performing of "technical actions" over the devices (like
+- support the performing of "technical actions" on the devices (like
   the tear-down to a "base state", the logging of the device versions,
   etc.);
 - encapsulate the technical details related to the *emulated* or *production*
-  status of the devices (permitting to abstract over that from the test
+  status of the devices (permitting to abstract from that from the test
   scripts and from the actions);
 - support a certain level of configuration.
 
@@ -348,7 +348,7 @@ for different purposes.
 - The facades are used in the test scripts to provide a high-level interface
   to the SUT. They are mean to be 100% agnostic to technical details and
   instead they are focused on exposing the operations (meaningful to the business)
-  that can be performed over the SUT and the devices that are part of it.
+  that can be performed on the SUT and the devices that are part of it.
 
 - The wrappers instead are the opposite, they are an internal
   technical representation of the SUT, which may include details
@@ -376,7 +376,7 @@ more business-oriented and high-level.
 Why use a JSON data builder?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Some actions over the telescope (such as the *scan*, *configure*,
+Some actions on the telescope (such as the *scan*, *configure*,
 *assign resources* commands) require an input argument that is a JSON
 string. Also some *reset* procedures require default arguments to be
 used to call the various commands.

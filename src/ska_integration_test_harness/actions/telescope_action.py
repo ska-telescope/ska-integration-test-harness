@@ -1,4 +1,4 @@
-"""A generic action executed over the telescope and its subsystems."""
+"""A generic action executed on the telescope and its subsystems."""
 
 import abc
 import logging
@@ -17,7 +17,7 @@ T = TypeVar("T", bound=object)
 
 
 class TelescopeAction(abc.ABC, Generic[T]):
-    """A generic action executed over the telescope and its subsystems.
+    """A generic action executed on the telescope and its subsystems.
 
     An action is made by:
 

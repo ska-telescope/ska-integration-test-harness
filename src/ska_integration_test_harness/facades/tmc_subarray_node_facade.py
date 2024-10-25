@@ -135,7 +135,7 @@ class TMCSubarrayNodeFacade:
         self._telescope.set_subarray_id(requested_subarray_id)
 
     # -----------------------------------------------------------
-    # Actions over subarray telescope state
+    # Actions on subarray telescope state
 
     def move_to_on(self, wait_termination: bool = True):
         """Move subarray to ON state.
@@ -164,7 +164,7 @@ class TMCSubarrayNodeFacade:
         return action.execute()
 
     # -----------------------------------------------------------
-    # Actions over subarray obs state
+    # Actions on subarray obs state
 
     # @sync_configure(device_dict=device_dict)
     def configure(

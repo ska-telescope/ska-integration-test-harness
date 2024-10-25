@@ -122,7 +122,7 @@ class DevicesInfoProvider:
         self.port = port
         """Port where the service is listening."""
         self.path = path
-        """Path to interrogate over the service to get all devices."""
+        """Path to interrogate on the service to get all devices."""
 
         # -----------------------------------------------------------------
         # devices information

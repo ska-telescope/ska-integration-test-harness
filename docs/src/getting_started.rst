@@ -388,7 +388,7 @@ with them like in this simplified example:
    """Simple demonstration of how to use the test harness to write a test script.
 
    NOTE: this is not a complete test script, but just a demonstration of how to
-   use the test harness to make actions over the SUT and access the devices
+   use the test harness to make actions on the SUT and access the devices
    to make event subscriptions and assertions.
    This also is not necessarily a good example of how to write a test script. 
    """
