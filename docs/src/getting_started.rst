@@ -25,7 +25,7 @@ IMPORTANT: What this repository is about (and what it is not)
 
 A second important thing is to understand what this specific repository
 is about and what it is not. While the term **ITH** sometimes may be
-used to refer a wider concept and a large collection of tools, this
+used to refer to a wider concept and a large collection of tools, this
 repository contains a specific subset
 of tools. So, let’s quickly clarify what you can find here (and what you
 cannot).
@@ -111,13 +111,13 @@ To install this test harness you can follow two paths:
 2. The second is to import it always via ``poetry``, but pointing
    directly to the GitLab repository.
 
-We point out also this second approach since this test harness is is
+We point out also this second approach since this test harness is
 supposed to evolve quickly, together with the evolution of the
 subsystems and the integration tests. This second approach could be
 particularly useful in case you want to contribute to the project and
 need to apply your own changes quickly.
 
-To point directly the GitLab repo (potentially also to a specific
+To point directly to the GitLab repo (potentially also to a specific
 branch) and bypass the semantic versioning, add the following to your
 ``pyproject.toml`` file:
 
@@ -222,7 +222,8 @@ Now we will not deep dive too much into the details of what they are,
 but essentially you can think of the ``TelescopeWrapper`` as a singleton
 representation of the *SUT*, and the *facades* as “views” of that system
 that will allow you to access the devices and interact with them
-performing (potentially auto-synchronised) actions. E.g.,
+performing (potentially auto-synchronised) actions. Here an example of
+how you can use the facades to interact with the devices:
 
 .. code:: python
 
@@ -235,7 +236,7 @@ performing (potentially auto-synchronised) actions. E.g.,
    # an informative assertion error will be raised)
    tmc_central_node.move_to_on(wait_termination=True)
 
-So, just to be clear, the ``TelescopeWrapper`` is something you have to
+To be clear, the ``TelescopeWrapper`` is something you have to
 initialise to have a test harness, and the facades are just views which
 simplify your interaction with the test harness. Inspecting the
 facade implementations is a good way to explore the mechanisms behind
@@ -274,7 +275,7 @@ Your fixtures code may look like this:
    def default_commands_inputs() -> TestHarnessInputs:
        """Declare some JSON inputs for TMC commands."""
        return TestHarnessInputs(
-           # assign and release, right now, are called on central node
+           # assign and release, right now, are called on the central node
            assign_input=FileJSONInput(
                "json-inputs/centralnode/assign_resources.json"
            ),
@@ -382,7 +383,7 @@ Interact with the test harness
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In your test script, use the facades to access the devices and interact
-with them like in this simplified example:
+with them as shown in this simplified example:
 
 .. code:: python
 
