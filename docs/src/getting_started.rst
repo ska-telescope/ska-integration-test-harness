@@ -4,10 +4,10 @@ Overview and Getting Started
 Overview
 --------
 
-Currently (October 2024), a test harness for TMC in Mid integration
+Currently (October 2024), there is a test harness for TMC in Mid integration
 tests, centred around the TMC subsystem and its interactions with CSP,
-SDP and the Dishes. In future, a generic test harness integration
-testing an arbitrary combination of production or emulated SKA
+SDP and the Dishes. In future, there will be a generic test harness for
+integration tests on an arbitrary combination of production or emulated SKA
 subsystems.
 
 More information will be added here as the project progresses.
@@ -42,8 +42,8 @@ More specifically:
    or it is not;
 -  simplify complex procedures to bring the SUT into a specific state
    before running the tests (e.g., call the commands to put the telescope
-   in the desired state, synchronise when the events have finished, and ensure the state
-   is effectively reached);
+   in the desired state, synchronise when the events have finished, and
+   ensure that the state is effectively reached);
 -  simplify teardown procedures, to bring the SUT back to a known state
    after the tests are completed;
 -  overview of the active devices and their versions.
@@ -230,7 +230,7 @@ how you can use the facades to interact with the devices:
    # if tmc_central_node is a correctly initialised facade
    # to the TMC central node, calling such a command will permit you
    # to move the telescope to the ON state, ignoring any details about
-   # interaction with other emulated/not-emulated devices and also
+   # interaction with other emulated and not-emulated devices and also
    # ignoring the synchronisation (the ITH will guarantee that the
    # telescope will be in an ON state after the call, otherwise
    # an informative assertion error will be raised)
