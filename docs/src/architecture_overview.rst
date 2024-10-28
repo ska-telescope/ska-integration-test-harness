@@ -118,7 +118,7 @@ The test harness files are organised in the following way:
    wrappers for the emulated and production subsystems.
 -  Input-related classes have to be added in the
    :py:mod:`~ska_integration_test_harness.inputs` folder
--  configuration-related classes have to be added in the
+-  Configuration-related classes have to be added in the
    :py:mod:`~ska_integration_test_harness.config` folder
 -  The :py:mod:`~ska_integration_test_harness.init` folder
    contains all the factories needed to initialise the test harness.
@@ -154,7 +154,7 @@ facade to perform operations on the subsystem. The two main advantages
 of using facades are the following:
 
 1. they are a semantic-oriented way to represent the SUT
-   and its subsystems and they can be used encode structured interface
+   and its subsystems and they can provide a structured interface
    to something that is a bit more complex than a single Tango device;
 
 2. they permit you to hide some technical details about
@@ -235,7 +235,7 @@ there are a lot of complexities that justifies the existence of actions:
   different subsystems, so the synchronisation may need to involve them all;
 - if something changes about the command (e.g., the name, the input,
   the expected events, the expected state of the devices), you may want to
-  update only in one place and have all the dependencies as much explicit
+  update only in one place and make all the dependencies as explicit
   as possible;
 - you may want to automatically log the operations you run and their results
   in a transparent way.
@@ -275,7 +275,7 @@ command to the TMC Subarray Node:
   facade of the TMC Subarray Node (see :doc:`./getting_started` for
   more details on how to use a facade);
 - the facade exposes a ``scan()`` method, which can be called by the tests;
-- the ``scan()`` method which instantiates an action called
+- the ``scan()`` method instantiates an action called
   ``SubarrayScan``, adds to it the necessary arguments and then calls
   its ``execute()`` method;
 - the action class defines the logic to send the ``Scan``
@@ -284,9 +284,9 @@ command to the TMC Subarray Node:
 - the action interacts with the correct wrappers (and consequently to
   the Tango devices) to perform the operation.
 
-Actions general idea is based on the
+The general idea of Actions is based on the
 `Command <https://refactoring.guru/design-patterns/command>`__ design pattern
-and make heavy use of
+and makes heavy use of
 `Template Method <https://refactoring.guru/design-patterns/template-method>`__.
 A a sequence of actions is also a design pattern, since it is implemented
 through `Composite <https://refactoring.guru/design-patterns/composite>`__.
@@ -310,8 +310,8 @@ The actions mechanism is represented (high level) in the following UML.
 Why use wrappers? (and differences from facades)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In the Integration Test Harness, the **wrappers** can be seen as the
-way we *internally* use to represent the SUT (a telescope), it's
+In the Integration Test Harness, the **wrappers** can be seen as 
+what we use *internally* to represent the SUT (a telescope), its
 subsystems and the devices. Concretely, the wrappers are classes that:
 
 - encode the structure of the SUT (i.e. which subsystems are part of it
@@ -327,11 +327,11 @@ subsystems and the devices. Concretely, the wrappers are classes that:
 The main access point to the wrappers is a class called
 :py:class:`~ska_integration_test_harness.structure.TelescopeWrapper`,
 which is intended to represent the entire SUT and internally holds
-references to all the subsystem wrappers. Since the SUT is one, the
+references to all the subsystem wrappers. Since we have one SUT, the
 telescope wrapper is a
 `Singleton <https://refactoring.guru/design-patterns/singleton>`__,
 so once it’s initialised, you can access it from everywhere in the code
-just by accessing its unique instance. The subsystem wrappers are
+just by using its unique instance. The subsystem wrappers are
 instead dedicated abstract classes, which may have a "production" and an
 "emulated" concrete implementation. Each subsystem extends a common base
 abstract class (which provides a common interface for some recurrent
@@ -368,7 +368,7 @@ target is a facade, we would have two problems:
 - the actions occasionally need to access something more "internal" and
   technical (e.g., a method that differentiates between production and
   emulated devices) and exposing that in the facade would make them
-  be less business-oriented.
+  less business-oriented.
 
 In other words, the wrappers are the internal representation of the SUT
 which permits the more external representation (the facades) to be
@@ -431,17 +431,17 @@ the proper instances of the test harness.
 The test harness to be initialised needs a lot of configuration data, such as:
 
 - the names of the devices that are part of the subsystems;
-- the flags that tell what is emulated and what is production.
+- the flags that tell it what is emulated and what is production.
 
-To give structure to this data and to provide a consistent interface to
-it, we use configuration classes. Generally, foreach subsystem we want
+To give structure to these data and to provide a consistent interface to
+them, we use configuration classes. Generally, for each subsystem we want
 to have a configuration class that represents the configuration data
 needed to initialise the subsystem (e.g., for the TMC configuration
 we have a
 :py:class:`~ska_integration_test_harness.config.TMCConfiguration`
-class). All subsystems configuration are then collected in a common class
+class). All subsystem configurations are then collected in a common class
 (:py:class:`~ska_integration_test_harness.config.TestHarnessConfiguration`)
-which serves as entry point to the configuration.
+which serves as the entry point to the configuration.
 
 This configuration instance can be filled in programmatically and passed to
 the test harness initialisation procedures, or - more commonly - can be

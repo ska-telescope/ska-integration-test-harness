@@ -17,7 +17,7 @@ IMPORTANT: Scope and purpose
 
 Before diving into the (technical) details, it is important to
 understand the purpose of this project and its scope. For this reason,
-we strongly suggest you to read the `dedicated Confluence
+we strongly suggest you read the `dedicated Confluence
 page <https://confluence.skatelescope.org/pages/viewpage.action?pageId=289699655>`__
 
 IMPORTANT: What this repository is about (and what it is not)
@@ -48,7 +48,7 @@ More specifically:
    after the tests are completed;
 -  overview of the active devices and their versions.
 
-At the moment, the SUT consists off:
+At the moment, the SUT consists of:
 
 -  a production TMC, which is the “protagonist” of the tests (the
    subsystem which receives most of the commands);
@@ -73,8 +73,8 @@ This repository does not contain and will likely never contain:
    and `SKA Software Integration
    Tests <https://gitlab.com/ska-telescope/ska-sw-integration-testing>`__);
 -  the Helm charts to deploy the devices in a Kubernetes environment, or
-   the pipelines and Make commands to run the tests (see previous point
-   repos);
+   the pipelines and Make commands to run the tests (see repos in the
+   previous point);
 -  the specific “low-level” tools to track Tango events and make
    assertions on them (see
    `ska-tango-testing <https://gitlab.com/ska-telescope/ska-tango-testing>`__);
@@ -109,7 +109,7 @@ To install this test harness you can follow two paths:
       poetry add --group test ska-integration-test-harness
 
 2. The second is to import it always via ``poetry``, but pointing
-   directly to the Gitlab repository.
+   directly to the GitLab repository.
 
 We point out also this second approach since this test harness is is
 supposed to evolve quickly, together with the evolution of the
@@ -117,8 +117,8 @@ subsystems and the integration tests. This second approach could be
 particularly useful in case you want to contribute to the project and
 need to apply your own changes quickly.
 
-To point directly the Gitlab repo (potentially also on a specific
-branch) and by-pass the semantic versioning, add the following to your
+To point directly the GitLab repo (potentially also to a specific
+branch) and bypass the semantic versioning, add the following to your
 ``pyproject.toml`` file:
 
 .. code:: toml
@@ -163,7 +163,7 @@ Configuration
 ~~~~~~~~~~~~~
 
 To configure the test harness using the default method, you need to
-create a YAML file that specifies a few configuration such as the
+create a YAML file that specifies things like the
 expected device names and whether the devices are emulated or not. The
 file will look like this:
 
@@ -236,8 +236,8 @@ performing (potentially auto-synchronised) actions. E.g.,
    tmc_central_node.move_to_on(wait_termination=True)
 
 So, just to be clear, the ``TelescopeWrapper`` is something you have to
-initialise to have a test harness, and the facades just views which
-simplify your interaction with such a test harness. Inspecting the
+initialise to have a test harness, and the facades are just views which
+simplify your interaction with the test harness. Inspecting the
 facade implementations is a good way to explore the mechanisms behind
 the test harness, the interaction with the actual Tango devices and the
 verified conditions in case you enable the synchronisation.
