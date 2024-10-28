@@ -1,8 +1,8 @@
 Architecture Design Decisions
 ==============================
 
-This document provides an overview of the architecture of the SKA
-Integration Test Harness and the principles behind it. 
+This document provides an overview of the SKA
+Integration Test Harness architecture and its principles. 
 It is intentionally written as a high-level document,
 to provide a general understanding of
 the design decisions and the conventions used in the test harness, more
@@ -61,8 +61,9 @@ This test harness comprises:
       environment and configure the test harness with the right device
       names.
 
-Integration Test Harness principles
------------------------------------
+Principles of the Integration Test Harness
+-------------------------------------------
+
 
 PRINCIPLE 1: Tests are agnostic to the test environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -86,7 +87,7 @@ emulated devices.
 Of course, somewhere one needs to say that a device is emulated and what
 should its behaviour be. This is done in the configuration files/flags
 and, because emulated devices are de facto Tango devices, they should be
-defined, implemented and deployed prior to the execution of the test
+deployed prior to the execution of the test
 script (and hence prior to the execution of the test harness).
 
 In some cases it may be necessary for the test script to make assertions
