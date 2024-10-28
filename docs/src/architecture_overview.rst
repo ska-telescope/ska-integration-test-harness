@@ -2,8 +2,9 @@ Architecture Design Decisions
 ==============================
 
 This document provides an overview of the architecture of the SKA
-Integration Test Harness and the principles behind it. It is
-written as a high-level document on purpose, to provide a general understanding of
+Integration Test Harness and the principles behind it. 
+It is intentionally written as a high-level document,
+to provide a general understanding of
 the design decisions and the conventions used in the test harness, more
 than a detailed description of the code.
 
@@ -11,7 +12,7 @@ Since the test harness is still in development, both the code and the
 design may change in the future. The overall principles, however, will
 likely remain the same.
 
-This document is updated the last time in October 2024.
+This document was last updated in October 2024.
 
 What glues the test scripts to the SUT?
 ----------------------------------------
@@ -27,7 +28,7 @@ and **reliable** (so that tests can be trusted).
 The test harness is designed to work with SKA subsystems' Tango devices,
 specifically to support integration tests where you have one or more SKA
 subsystems (e.g., TMC, CSP, etc.) deployed as a production component or as
-an emulator. At the moment the test harness is specifically designed to
+an emulator. At the moment, the test harness is specifically designed to
 work with the TMC subsystem, integrated with CSP, SDP and the dishes
 (TMC in Mid); in the future, it may be extended to support other
 subsystems and other SUT variants.
@@ -100,7 +101,7 @@ emulators without knowing which is which. See below for examples.
 Conventions (where to find the code)
 --------------------------------------
 
-Before starting to understand the idea behind each kind of component
+Before exploring the idea behind each component
 in the test harness (facades, actions, wrappers, etc.), it is
 useful to know where to find the code.
 
@@ -114,7 +115,7 @@ The test harness files are organised in the following way:
    :py:mod:`~ska_integration_test_harness.structure` folder,
    while :py:mod:`~ska_integration_test_harness.emulated`
    and :py:mod:`~ska_integration_test_harness.production`
-   folders contains respectively the concrete implementations of the
+   folders contains the concrete implementations of the
    wrappers for the emulated and production subsystems.
 -  Input-related classes have to be added in the
    :py:mod:`~ska_integration_test_harness.inputs` folder
@@ -159,7 +160,7 @@ of using facades are the following:
 
 2. they permit you to hide some technical details about
    the interaction with the devices, especially if there are set-up or
-   tear-down interactions which are not the main point of the test.
+   teardown interactions which are not the main point of the test.
 
 Let's see the advantages through the following example: you have to
 test the capability of TMC integrated with the other subsystems (production
@@ -235,7 +236,7 @@ there are a lot of complexities that justifies the existence of actions:
   different subsystems, so the synchronisation may need to involve them all;
 - if something changes about the command (e.g., the name, the input,
   the expected events, the expected state of the devices), you may want to
-  update only in one place and make all the dependencies as explicit
+  update only one place and make all the dependencies as explicit
   as possible;
 - you may want to automatically log the operations you run and their results
   in a transparent way.
@@ -288,7 +289,7 @@ The general idea of Actions is based on the
 `Command <https://refactoring.guru/design-patterns/command>`__ design pattern
 and makes heavy use of
 `Template Method <https://refactoring.guru/design-patterns/template-method>`__.
-A a sequence of actions is also a design pattern, since it is implemented
+A sequence of actions is also a design pattern, since it is implemented
 through `Composite <https://refactoring.guru/design-patterns/composite>`__.
 
 To implement an action, you have to extend the
@@ -388,23 +389,21 @@ conversions, explicit file reading, etc.) and so less readable. The idea
 of argument factories is to provide a structured object-oriented
 representation of those arguments.
 
-An abstract base class (``JSONInput``) defines what is expected from a
-JSON input (return a string or a dictionary, create a copy of itself
-with some values changed, etc.). Through a concrete implementation of
-this class, one can specify how to generate this JSON (e.g., accessing
-your own test data folders, associating keywords to each or your
-specific input, through a hardcoded dictionary, etc.). A few
-ready-to-use implementations are provided in the ``inputs`` folder.
+Starting from a common base class
+(:py:class:`~ska_integration_test_harness.inputs.JSONInput`), there are
+defined a set of classes to represent JSON coming from different sources
+(a file, a dictionary and a string), which share the same common interface
+and can be used interchangeably. The common interface permits to do
+operations such as:
 
-We chose to use this infrastructure because a JSON input, normally, can
-be represented in many ways (a string, a dictionary, a reference to a
-file, etc.) and we want a consistent way to represent it in the test
-harness context. Moreover, sometimes we want to be able to deal with
-guaranteed and validated input (e.g., when we set the initial default
-input), sometimes we want to explicitly handle the case of invalid
-input (e.g., for unhappy paths tests) and sometimes we want to just
-ignore that (an action that just sends a commands wants to deal the same
-way with valid and invalid input).
+- obtaining the JSON as a string (e.g., to send it to the device);
+- obtaining the JSON as a dictionary (e.g., to perform manipulations on it);
+- change some values in the JSON (e.g., set a subarray ID in a subarray
+  command input);
+- compare two JSONs and check if they are equal;
+- check if JSON syntax is correct (it will always be for dicts, but not
+  necessarily for strings and files);
+- etc.
 
 The main inspiration behind this mechanism is the 
 `Factory Method <https://refactoring.guru/design-patterns/factory-method>`__
@@ -415,7 +414,9 @@ indirect inspirations too.
 
 In ``inputs`` folder you can find some examples of JSON input classes,
 but also other input-output related classes. One of the most important
-is the ``TestHarnessInputs`` class, which is a structured representation
+is the
+:py:class:`~ska_integration_test_harness.inputs.TestHarnessInputs`
+class, which is a structured representation 
 of the input data needed to initialise the test harness (and sometimes
 to do other operations). This class is used by the initialisation
 procedures to load and validate the JSON input for the commands used in
