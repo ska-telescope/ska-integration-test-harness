@@ -71,7 +71,7 @@ class JSONInput(abc.ABC):
         if isinstance(other, JSONInput):
             return self.as_dict() == other.as_dict()
 
-        if isinstance(other, dict, str):
+        if isinstance(other, (dict, str)):
             return self.is_equal_to_json(other)
 
         return False
