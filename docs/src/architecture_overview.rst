@@ -391,20 +391,19 @@ of argument factories is to provide a structured object-oriented
 representation of those arguments.
 
 Starting from a common base class
-(:py:class:`~ska_integration_test_harness.inputs.JSONInput`), there are
-defined a set of classes to represent JSON coming from different sources
+(:py:class:`~ska_integration_test_harness.inputs.JSONInput`), we
+define a set of classes to represent JSON coming from different sources
 (a file, a dictionary and a string), which share the same common interface
-and can be used interchangeably. The common interface permits to do
+and can be used interchangeably. The common interface permits us to do
 operations such as:
 
-- obtaining the JSON as a string (e.g., to send it to the device);
-- obtaining the JSON as a dictionary (e.g., to perform manipulations on it);
+- obtain the JSON as a string (e.g., to send it to the device);
+- obtain the JSON as a dictionary (e.g., to perform manipulations on it);
 - change some values in the JSON (e.g., set a subarray ID in a subarray
   command input);
-- compare two JSONs and check if they are equal;
-- check if JSON syntax is correct (it will always be for dicts, but not
+- compare two JSON inputs and check if they are equal;
+- check if the JSON syntax is correct (it will always be for dicts, but not
   necessarily for strings and files);
-- etc.
 
 The main inspiration behind this mechanism is the 
 `Factory Method <https://refactoring.guru/design-patterns/factory-method>`__
