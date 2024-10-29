@@ -1,4 +1,4 @@
-"""A generic action executed over the telescope and its subsystems."""
+"""A generic action executed on the telescope and its subsystems."""
 
 import abc
 import logging
@@ -17,7 +17,7 @@ T = TypeVar("T", bound=object)
 
 
 class TelescopeAction(abc.ABC, Generic[T]):
-    """A generic action executed over the telescope and its subsystems.
+    """A generic action executed on the telescope and its subsystems.
 
     An action is made by:
 
@@ -89,7 +89,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
                 return []
 
         # create an action that - if necessary - runs
-        # a certain tango command on TMC central node and terminates
+        # a certain Tango command on TMC central node and terminates
         # when that device reaches a certain state. The action then
         # returns true or false depending if the command was necessary or not.
         # Some further logging is done if the command wasn't necessary.
@@ -125,7 +125,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
       a TimeoutError is raised.
 
 
-    Before calling the :py:meth:`execute` method, you can customize some
+    Before calling the :py:meth:`execute` method, you can customise some
     configurations of the action:
 
     - you can change the timeout for the termination condition by calling
@@ -147,7 +147,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
         # create an instance of the action
         action = MyAction(my_parameter=42)
 
-        # [optional] customize the timeout for the termination condition
+        # [optional] customise the timeout for the termination condition
         action.set_termination_condition_timeout(10)
 
         # [optional] execute the action without waiting for the
@@ -202,7 +202,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
 
         self.telescope = TelescopeWrapper()
         """The telescope instance, which you can use to access all the
-        subsystems devices (TMC, CSP, SDP, Dishes)."""
+        subsystem devices (TMC, CSP, SDP, Dishes)."""
 
         self._state_change_waiter = StateChangeWaiter()
         """The state change waiter, which is used to wait for the
@@ -268,7 +268,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
         - if the termination condition does not occur within a timeout,
           a TimeoutError is raised.
 
-        Before calling the :py:meth:`execute` method, you can customize some
+        Before calling the :py:meth:`execute` method, you can customise some
         configurations of the action:
 
         - you can change the timeout for the termination condition by calling
@@ -290,7 +290,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
             # create an instance of the action
             action = MyAction(my_parameter=42)
 
-            # [optional] customize the timeout for the termination condition
+            # [optional] customise the timeout for the termination condition
             action.set_termination_condition_timeout(10)
 
             # [optional] execute the action without waiting for the
@@ -311,7 +311,15 @@ class TelescopeAction(abc.ABC, Generic[T]):
         """
 
         # Log the beginning of the action execution
-        self._log("Starting action execution")
+        log_msg = "Starting action execution"
+        if self.wait_termination:
+            log_msg += (
+                f" (wait_termination=True, "
+                f"timeout={self.termination_condition_timeout})"
+            )
+        else:
+            log_msg += " (wait_termination=False)"
+        self._log(log_msg)
 
         if self.wait_termination:
             # Subscribe to the expected state changes
@@ -354,7 +362,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
         (i.e., your interaction with the SUT components). Remember
         you already have available the telescope instance
         as ``self.telescope`` (which you can use to access all the
-        subsystems devices).
+        subsystem devices).
 
         If you need to return something from the action, you can
         do it. Else you can also return nothing.

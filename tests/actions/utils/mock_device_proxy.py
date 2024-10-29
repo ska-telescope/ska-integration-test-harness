@@ -25,7 +25,7 @@ class DeviceProxyMock(MagicMock):
 
 
 def create_device_proxy_mock(
-    device_name: str, attribute_name: str, attribute_value
+    device_name: str, attribute_name: str | None = None, attribute_value=None
 ) -> MagicMock:
     """Create a mock for a DeviceProxy object.
 
@@ -41,7 +41,9 @@ def create_device_proxy_mock(
     """
     mock_device_proxy = DeviceProxyMock(spec=tango.DeviceProxy)
     mock_device_proxy.dev_name.return_value = device_name
-    setattr(mock_device_proxy, attribute_name, attribute_value)
+
+    if attribute_name is not None and attribute_value is not None:
+        setattr(mock_device_proxy, attribute_name, attribute_value)
 
     return mock_device_proxy
 

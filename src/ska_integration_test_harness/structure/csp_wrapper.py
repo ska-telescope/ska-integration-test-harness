@@ -7,23 +7,42 @@ import tango
 from ska_integration_test_harness.config.components_config import (
     CSPConfiguration,
 )
+from ska_integration_test_harness.structure.subsystem_wrapper import (
+    SubsystemWrapper,
+)
 
 
-class CSPWrapper(abc.ABC):
+class CSPWrapper(SubsystemWrapper, abc.ABC):
     """A test wrapper for the CSP."""
 
     def __init__(self, csp_configuration: CSPConfiguration):
-        """Initialise the CSP wrapper."""
+        """Initialise the CSP wrapper.
+
+        :param csp_configuration: The CSP configuration.
+        """
+        super().__init__()
         self.csp_master = tango.DeviceProxy(csp_configuration.csp_master_name)
         self.csp_subarray = tango.DeviceProxy(
             csp_configuration.csp_subarray1_name
         )
 
-    # NOTE: this is not that much a real "move_to_on" command, instead
-    # it seems to be "an action that must be done when on TMC central node
-    # is called a move_to_on command". This is a detail, but I guess this
-    # is important to think about a different more event or command oriented
-    # design.
+    # --------------------------------------------------------------
+    # Subsystem properties definition
+
+    def get_subsystem_name(self) -> str:
+        """Get the name of the subsystem."""
+        return "CSP"
+
+    def get_all_devices(self) -> dict[str, tango.DeviceProxy]:
+        """Get all the subsystem devices as a dictionary."""
+        return {
+            "csp_master": self.csp_master,
+            "csp_subarray": self.csp_subarray,
+        }
+
+    # --------------------------------------------------------------
+    # Specific CSP methods and properties
+
     @abc.abstractmethod
     def move_to_on(self) -> None:
         """Move the CSP to the ON state."""

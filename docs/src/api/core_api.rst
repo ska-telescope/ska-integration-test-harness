@@ -71,12 +71,20 @@ Config validation
     :members:
     :undoc-members:
 
-Init(ialization) module
+Init(ialisation) module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: ska_integration_test_harness.init
     :members:
     :undoc-members:
+
+Common utils module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: ska_integration_test_harness.common_utils
+    :members:
+    :undoc-members:
+
 
 
 

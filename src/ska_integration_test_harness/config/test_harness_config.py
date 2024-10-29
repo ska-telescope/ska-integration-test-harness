@@ -23,19 +23,19 @@ class TestHarnessConfiguration:
     Each field of this class is a configuration for a different subsystem of
     the test harness, such as the TMC, CSP, SDP, and the dishes. Even if they
     are marked as optional, for now they are all required, as the test harness
-    is strictly built for TMC-MID integration tests. In the future, we may
+    is strictly built for TMC-Mid integration tests. In the future, we may
     support an elastic choice of which subsystems to include, so this
     configuration may be useful to select only the needed subsystems.
 
-    A support enum is provided to specify the subsystems names, and
-    permit to access in a parametric way the configurations.
+    A support enum is provided to specify the subsystem names, and
+    allow access to the configurations in a parametric way.
     """
 
     # (this is not a pytest test class)
     __test__ = False
 
     class SubsystemName(Enum):
-        """An enumeration of the possible subsystems names.
+        """An enumeration of the possible subsystem names.
 
         An enumeration of the possible subsystems that could be included in the
         the test harness configuration.

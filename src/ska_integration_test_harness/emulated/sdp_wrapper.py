@@ -17,6 +17,15 @@ class EmulatedSDPWrapper(SDPWrapper):
         super().__init__(*args, **kwargs)
         self._configure_transitions()
 
+    # --------------------------------------------------------------
+    # Subsystem properties definition
+
+    def is_emulated(self) -> bool:
+        return True
+
+    # --------------------------------------------------------------
+    # Specific SDP methods and properties
+
     def _configure_transitions(self) -> None:
         """Configure the needed for SDP emulated subarray."""
         # SDP should do the ABORTING transition

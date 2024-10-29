@@ -34,7 +34,7 @@ class TestExpectedEvent:
         - an introductory message,
         - the device name,
         - the attribute name,
-        - a reference that the expected event is recognized by
+        - a reference that the expected event is recognised by
             a custom predicate.
         """
 

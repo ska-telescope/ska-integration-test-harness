@@ -1,5 +1,7 @@
 """A configuration reader that reads from a YAML file."""
 
+import re
+
 import yaml
 
 from ska_integration_test_harness.config.components_config import (
@@ -106,6 +108,34 @@ class YAMLConfigurationReader(ConfigurationReader):
     # -------------------------------------------------------------------------
     # Subsystems configuration readers
 
+    @staticmethod
+    def _extract_numbered_attributes(
+        subsystem_config_data: dict,
+        regex_pattern: str,
+        default_number: int = 1,
+    ) -> dict[int, str]:
+        """Extract the numbered attributes from the configuration.
+
+        :param subsystem_config_data: The configuration data for the subsystem.
+        :param regex_pattern: The regex pattern to match
+            the numbered attributes
+            (e.g., ``r"tmc_subarraynode(\\d*)_name")``).
+        :param default_number: The default number to use if the attribute
+            doesn't have a number.
+        :return: A dictionary with the subarray number as key and the
+            name as value.
+        """
+        regex_pattern_compiled = re.compile(regex_pattern)
+        result = {}
+        for key in subsystem_config_data.keys():
+            match = regex_pattern_compiled.match(key)
+            if match:
+                attribute_number = (
+                    int(match.group(1)) if match.group(1) else default_number
+                )
+                result[attribute_number] = subsystem_config_data[key]
+        return result
+
     def get_tmc_configuration(self) -> TMCConfiguration | None:
         tmc = self._get_subsystem_dict("tmc")
 
@@ -115,23 +145,32 @@ class YAMLConfigurationReader(ConfigurationReader):
         return TMCConfiguration(
             is_emulated=tmc.get("is_emulated", False),
             centralnode_name=tmc.get("centralnode_name"),
-            tmc_subarraynode1_name=tmc.get("tmc_subarraynode1_name"),
             tmc_csp_master_leaf_node_name=tmc.get(
                 "tmc_csp_master_leaf_node_name"
             ),
-            tmc_csp_subarray_leaf_node_name=tmc.get(
-                "tmc_csp_subarray_leaf_node_name"
-            ),
             tmc_sdp_master_leaf_node_name=tmc.get(
                 "tmc_sdp_master_leaf_node_name"
-            ),
-            tmc_sdp_subarray_leaf_node_name=tmc.get(
-                "tmc_sdp_subarray_leaf_node_name"
             ),
             tmc_dish_leaf_node1_name=tmc.get("tmc_dish_leaf_node1_name"),
             tmc_dish_leaf_node2_name=tmc.get("tmc_dish_leaf_node2_name"),
             tmc_dish_leaf_node3_name=tmc.get("tmc_dish_leaf_node3_name"),
             tmc_dish_leaf_node4_name=tmc.get("tmc_dish_leaf_node4_name"),
+            # Extract the subarrays names from the configuration
+            # (potentially, more than one. If the number is not specified,
+            # it defaults to 1)
+            subarrays_names=self._extract_numbered_attributes(
+                tmc, r"tmc_subarraynode(\d*)_name"
+            ),
+            tmc_csp_subarrays_leaf_nodes_names=(
+                self._extract_numbered_attributes(
+                    tmc, r"tmc_csp_subarray(\d*)_leaf_node_name"
+                )
+            ),
+            tmc_sdp_subarrays_leaf_nodes_names=(
+                self._extract_numbered_attributes(
+                    tmc, r"tmc_sdp_subarray(\d*)_leaf_node_name"
+                )
+            ),
         )
 
     def get_csp_configuration(self) -> CSPConfiguration | None:
@@ -143,7 +182,9 @@ class YAMLConfigurationReader(ConfigurationReader):
         return CSPConfiguration(
             is_emulated=csp.get("is_emulated", True),
             csp_master_name=csp.get("csp_master_name"),
-            csp_subarray1_name=csp.get("csp_subarray1_name"),
+            csp_subarrays_names=self._extract_numbered_attributes(
+                csp, r"csp_subarray(\d*)_name"
+            ),
         )
 
     def get_sdp_configuration(self) -> SDPConfiguration | None:
@@ -155,7 +196,9 @@ class YAMLConfigurationReader(ConfigurationReader):
         return SDPConfiguration(
             is_emulated=sdp.get("is_emulated", True),
             sdp_master_name=sdp.get("sdp_master_name"),
-            sdp_subarray1_name=sdp.get("sdp_subarray1_name"),
+            sdp_subarrays_names=self._extract_numbered_attributes(
+                sdp, r"sdp_subarray(\d*)_name"
+            ),
         )
 
     def get_dish_configuration(self) -> DishesConfiguration | None:

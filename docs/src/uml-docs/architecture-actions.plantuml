@@ -68,7 +68,7 @@ package "actions" {
     An action encapsulates an operation that has to be done on a telescope
     wrapper.
     It includes commands and their arguments as well as
-    possible termination conditions (aka synchronization conditions).
+    possible termination conditions (aka synchronisation conditions).
 
     Input classes (e.g. JSONInput) are used to pass arguments to the action.
     end note

@@ -24,6 +24,15 @@ class EmulatedDishesWrapper(DishesWrapper):
         super().__init__(dishes_configuration)
         self._setup_attributes()
 
+    # --------------------------------------------------------------
+    # Subsystem properties definition
+
+    def is_emulated(self) -> bool:
+        return True
+
+    # --------------------------------------------------------------
+    # Specific Dishes methods and properties
+
     def _pre_init_dish_names(
         self, dishes_configuration: DishesConfiguration
     ) -> None:

@@ -5,25 +5,16 @@ import logging
 from ska_control_model import ObsState
 from tango import DevState
 
-from ska_integration_test_harness.actions.central_node.central_node_load_dish_config import (  # pylint: disable=line-too-long # noqa E501
+from ..actions.central_node.central_node_load_dish_config import (
     CentralNodeLoadDishConfig,
 )
-from ska_integration_test_harness.actions.central_node.central_node_release_resources import (  # pylint: disable=line-too-long # noqa E501
+from ..actions.central_node.central_node_release_resources import (
     CentralNodeReleaseResources,
 )
-from ska_integration_test_harness.actions.central_node.move_to_off import (
-    MoveToOff,
-)
-from ska_integration_test_harness.actions.subarray.force_change_of_obs_state import (  # pylint: disable=line-too-long # noqa E501
-    ForceChangeOfObsState,
-)
-from ska_integration_test_harness.actions.subarray.subarray_move_to_off import (  # pylint: disable=line-too-long # noqa E501
-    SubarrayMoveToOff,
-)
-from ska_integration_test_harness.inputs.test_harness_inputs import (
-    TestHarnessInputs,
-)
-from ska_integration_test_harness.structure.tmc_wrapper import TMCWrapper
+from ..actions.central_node.move_to_off import MoveToOff
+from ..actions.subarray.force_change_of_obs_state import ForceChangeOfObsState
+from ..inputs.test_harness_inputs import TestHarnessInputs
+from ..structure.tmc_wrapper import TMCWrapper
 
 
 class ProductionTMCWrapper(TMCWrapper):
@@ -49,6 +40,15 @@ class ProductionTMCWrapper(TMCWrapper):
 
         # configure logging (used also in tear down)
         self.logger = logging.getLogger(__name__)
+
+    # --------------------------------------------------------------
+    # Subsystem properties definition
+
+    def is_emulated(self) -> bool:
+        return False
+
+    # --------------------------------------------------------------
+    # Specific TMC methods and properties
 
     def tear_down(self) -> None:
         """Tear down the TMC devices.
@@ -82,7 +82,7 @@ class ProductionTMCWrapper(TMCWrapper):
             MoveToOff().execute()
 
         # NOTE: is it really needed?
-        SubarrayMoveToOff().execute()
+        # SubarrayMoveToOff().execute()
 
         # if source dish vcc config is empty or not matching with default
         # dish vcc then load default dish vcc config

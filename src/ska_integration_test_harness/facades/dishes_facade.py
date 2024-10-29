@@ -1,4 +1,4 @@
-"""A facade to expose the dishes devices to the tests."""
+"""A facade to expose the Dish devices to the tests."""
 
 import tango
 
@@ -8,7 +8,7 @@ from ska_integration_test_harness.structure.telescope_wrapper import (
 
 
 class DishesFacade:
-    """A facade to expose the dishes devices to the tests."""
+    """A facade to expose the Dish devices to the tests."""
 
     def __init__(self, telescope: TelescopeWrapper) -> None:
         self._telescope = telescope

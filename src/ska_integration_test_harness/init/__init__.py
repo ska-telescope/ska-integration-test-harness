@@ -1,6 +1,6 @@
 """Tools to initialise the test harness.
 
-(see main README.md for more information on how to use them)
+(see :doc:`../getting_started` for more information on how to use them)
 """
 
 from .test_harness_builder import TestHarnessBuilder

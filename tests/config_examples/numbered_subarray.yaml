@@ -1,0 +1,50 @@
+# Variant of the valid_test_harness_config.yaml where we play a bit with
+# the numbering of the subarray nodes 
+
+tmc:
+  is_emulated: false # Not supported otherwise, default is false
+
+  # Expected device names (Required)
+  centralnode_name: "ska_mid/tm_central/central_node"
+  tmc_subarraynode1_name: "ska_mid/tm_subarray_node/1"
+  tmc_subarraynode4_name: "ska_mid/tm_subarray_node/4"
+
+
+  tmc_csp_master_leaf_node_name: "ska_mid/tm_leaf_node/csp_master"
+  tmc_csp_subarray_leaf_node_name: "ska_mid/tm_leaf_node/csp_subarray01"
+  tmc_csp_subarray4_leaf_node_name: "ska_mid/tm_leaf_node/csp_subarray04"
+
+
+  tmc_sdp_master_leaf_node_name: "ska_mid/tm_leaf_node/sdp_master"
+  tmc_sdp_subarray1_leaf_node_name: "ska_mid/tm_leaf_node/sdp_subarray01"
+  tmc_sdp_subarray4_leaf_node_name: "ska_mid/tm_leaf_node/sdp_subarray04"
+
+  tmc_dish_leaf_node1_name: "ska_mid/tm_leaf_node/d0001"
+  tmc_dish_leaf_node2_name: "ska_mid/tm_leaf_node/d0036"
+  tmc_dish_leaf_node3_name: "ska_mid/tm_leaf_node/d0063"
+  tmc_dish_leaf_node4_name: "ska_mid/tm_leaf_node/d0100"
+
+csp:
+  is_emulated: false # Supported true too, default is true
+
+  # Expected device names
+  csp_master_name: "mid-csp/control/0"
+  csp_subarray4_name: "mid-csp/subarray/04"
+  csp_subarray1_name: "mid-csp/subarray/01"
+
+sdp:
+  is_emulated: true # Supported false too, default is true
+
+  # Expected device names (Required)
+  sdp_master_name: "mid-sdp/control/0"
+  sdp_subarray_name: "mid-sdp/subarray/01"
+  sdp_subarray4_name: "mid-sdp/subarray/04"
+
+dishes:
+  is_emulated: true # Supported false too, default is true
+
+  # Expected device names (Required)
+  dish_master1_name: "ska001/elt/master"
+  dish_master2_name: "ska036/elt/master"
+  dish_master3_name: "ska063/elt/master"
+  dish_master4_name: "ska100/elt/master"

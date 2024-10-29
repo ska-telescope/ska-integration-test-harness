@@ -9,7 +9,7 @@ class JSONInput(abc.ABC):
     """Template for a generic JSON input.
 
     This class is an abstract class that defines a template for a JSON input
-    for a command over the telescope. It is meant to be used as a base class
+    for a command on the telescope. It is meant to be used as a base class
     to implement your own way to provide that JSON value.
 
     IMPORTANT NOTE: This class instances are meant to be immutable. If you need
@@ -71,7 +71,7 @@ class JSONInput(abc.ABC):
         if isinstance(other, JSONInput):
             return self.as_dict() == other.as_dict()
 
-        if isinstance(other, dict, str):
+        if isinstance(other, (dict, str)):
             return self.is_equal_to_json(other)
 
         return False

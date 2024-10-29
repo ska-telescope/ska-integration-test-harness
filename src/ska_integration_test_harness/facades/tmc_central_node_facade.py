@@ -1,8 +1,10 @@
+# pylint: disable=duplicate-code
 """A wrapper for TMC and all integration tests sub-components."""
 
 from typing import Tuple
 
 import tango
+from deprecated import deprecated
 from ska_control_model import ResultCode
 
 from ska_integration_test_harness.actions.central_node.central_node_assign_resources import (  # pylint: disable=line-too-long # noqa E501
@@ -32,10 +34,17 @@ from ska_integration_test_harness.structure.telescope_wrapper import (
 )
 
 
+@deprecated(
+    reason=(
+        "This facade is deprecated, since we want to use a facade "
+        "for each subsystem. Please use TMCFacade instead."
+    ),
+    version="0.2.0",
+)
 class TMCCentralNodeFacade:
     """A facade to TMC Central Node device and its actions.
 
-    A facade to TMC sub-system, providing a simplified interface to the
+    A facade to TMC subsystem, providing a simplified interface to the
     central node device and its actions. It contains:
 
     - references to central node device,
@@ -44,8 +53,20 @@ class TMCCentralNodeFacade:
     - actions to move the telescope to ON, OFF and STANDBY states,
     - actions to load dish VCC configuration, assign and release resources,
     - a generic action to perform any action on central node.
+
+    **IMPORTANT NOTE**: This facade is deprecated,
+    since we want to use a facade for each subsystem. Please use
+    :py:class:`~ska_integration_test_harness.facades.tmc_facade.TMCFacade`
+    instead.
     """
 
+    @deprecated(
+        reason=(
+            "This facade is deprecated, since we want to use a facade "
+            "for each subsystem. Please use TMCFacade instead."
+        ),
+        version="0.2.0",
+    )
     def __init__(self, telescope: TelescopeWrapper) -> None:
         self._telescope = telescope
 
@@ -111,7 +132,7 @@ class TMCCentralNodeFacade:
     ) -> Tuple[ResultCode, str]:
         """Invoke LoadDishCfg command on central Node.
 
-        :param dish_vcc_config: Dish vcc configuration json string.
+        :param dish_vcc_config: Dishes VCC configuration json.
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
             condition is waited.

@@ -11,9 +11,18 @@ from ska_integration_test_harness.structure.dishes_wrapper import DishesWrapper
 class ProductionDishesWrapper(DishesWrapper):
     """A wrapper for production dishes.
 
-    Different from the emulated dishes wrapper, this class initializes
-    in the Tango database the real dishes devices.
+    Different from the emulated dishes wrapper, this class initialises
+    in the Tango database the real Dish devices.
     """
+
+    # --------------------------------------------------------------
+    # Subsystem properties definition
+
+    def is_emulated(self) -> bool:
+        return False
+
+    # --------------------------------------------------------------
+    # Specific Dishes methods and properties
 
     def _pre_init_dish_names(
         self, dishes_configuration: DishesConfiguration

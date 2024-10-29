@@ -22,7 +22,7 @@ class ForceChangeOfObsState(TelescopeAction[None]):
     the necessary steps to reach it (e.g., assign, configure, scan) in a
     correct and consistent way.
 
-    This action has no termination condition, but you can customize:
+    This action has no termination condition, but you can customise:
 
     - the wait timeout of each of the steps, by calling the method
         ``set_termination_condition_timeout(timeout)``.

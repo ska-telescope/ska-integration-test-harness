@@ -20,7 +20,7 @@ class ConfigurationValidator(abc.ABC):
     It provides interfaces for two main validation steps:
 
     - a step to validate the presence of a coherent set of subsystems
-      (e.g., for TMC-MID tests, we need TMC, CSP, SDP, and Dishes)
+      (e.g., for TMC-Mid tests, we need TMC, CSP, SDP, and Dishes)
     - a step to validate the individual subsystems configurations
       (e.g., check the required fields, check the device are reachable, etc.)
 
