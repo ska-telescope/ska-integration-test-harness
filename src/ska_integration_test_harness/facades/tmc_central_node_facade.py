@@ -44,7 +44,7 @@ from ska_integration_test_harness.structure.telescope_wrapper import (
 class TMCCentralNodeFacade:
     """A facade to TMC Central Node device and its actions.
 
-    A facade to TMC sub-system, providing a simplified interface to the
+    A facade to TMC subsystem, providing a simplified interface to the
     central node device and its actions. It contains:
 
     - references to central node device,
@@ -55,8 +55,7 @@ class TMCCentralNodeFacade:
     - a generic action to perform any action on central node.
 
     **IMPORTANT NOTE**: This facade is deprecated,
-    since we want to use a facade for each
-    sub-system. Please use
+    since we want to use a facade for each subsystem. Please use
     :py:class:`~ska_integration_test_harness.facades.tmc_facade.TMCFacade`
     instead.
     """
@@ -133,7 +132,7 @@ class TMCCentralNodeFacade:
     ) -> Tuple[ResultCode, str]:
         """Invoke LoadDishCfg command on central Node.
 
-        :param dish_vcc_config: Dish vcc configuration json string.
+        :param dish_vcc_config: Dishes VCC configuration json.
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
             condition is waited.

@@ -14,7 +14,7 @@ class SubsystemWrapper(abc.ABC):
     (e.g. CSP, TMC, Dishes, etc.). A subsystem has the following properties:
 
     - has a name
-    - has tango devices
+    - has Tango devices
     - can be emulated or not
 
     On a subsystem, we can perform the following operations:
@@ -39,7 +39,7 @@ class SubsystemWrapper(abc.ABC):
 
     @abc.abstractmethod
     def get_all_devices(self) -> dict[str, tango.DeviceProxy]:
-        """Get all the sub-system devices as a dictionary.
+        """Get all the subsystem devices as a dictionary.
 
         :return: A dictionary of device proxies, where the key is an unique
             identifier of the device and the value is the device proxy.

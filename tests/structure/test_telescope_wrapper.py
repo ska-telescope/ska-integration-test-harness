@@ -239,7 +239,7 @@ class TestTelescopeWrapper:
         assert_that(recap).described_as(
             "The recap contains no subsystem when not set up."
         ).contains(
-            "No sub-systems are currently set up.",
+            "No subsystems are currently set up.",
         ).does_not_contain(
             "TMC",
             "SDP",

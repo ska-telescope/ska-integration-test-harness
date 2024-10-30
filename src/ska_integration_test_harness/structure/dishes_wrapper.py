@@ -50,7 +50,7 @@ class DishesWrapper(SubsystemWrapper, abc.ABC):
         return "Dishes"
 
     def get_all_devices(self) -> dict[str, tango.DeviceProxy]:
-        """Get all the sub-system devices as a dictionary."""
+        """Get all the subsystem devices as a dictionary."""
         return self.dish_master_dict
 
     # --------------------------------------------------------------

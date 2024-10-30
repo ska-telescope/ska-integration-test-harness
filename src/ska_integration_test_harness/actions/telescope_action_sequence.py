@@ -15,7 +15,7 @@ class TelescopeActionSequence(TelescopeAction[T], Generic[T]):
 
     This action is used to group a sequence of actions together, so that the
     can be executed as a single action. The sub-actions are executed in
-    the order they are provided and the synchronization is done after
+    the order they are provided and the synchronisation is done after
     each sub action (step). By default, this action does not have further
     termination conditions.
 
@@ -68,7 +68,7 @@ class TelescopeActionSequence(TelescopeAction[T], Generic[T]):
     def _action(self) -> T:
         """Execute the sequence of actions.
 
-        The steps are executed in order. The synchronization is done after
+        The steps are executed in order. The synchronisation is done after
         each step. The result of the last step is returned.
 
         :return: The result of the last step."""

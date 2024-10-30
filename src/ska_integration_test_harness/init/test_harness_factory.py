@@ -82,7 +82,7 @@ class TestHarnessFactory:
         self.default_inputs = default_inputs
 
     # --------------------------------------------------------------
-    # Subsystems wrappers creation
+    # Subsystem wrappers creation
 
     def create_telescope_wrapper(self) -> TelescopeWrapper:
         """Create a telescope wrapper with the given configuration.
@@ -99,7 +99,7 @@ class TestHarnessFactory:
         return telescope
 
     # --------------------------------------------------------------
-    # Subsystems wrappers creation
+    # Subsystem wrappers creation
 
     def create_tmc_wrapper(self) -> TMCWrapper:
         """Create a TMC wrapper with the given configuration.

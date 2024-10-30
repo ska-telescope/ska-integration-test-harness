@@ -36,8 +36,7 @@ version = "0.2.0"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
-    "sphinx_autodoc_typehints",
-    "m2r",
+    "sphinx_autodoc_typehints", 
 ]
 
 source_suffix = [".rst", ".md"]
@@ -78,11 +77,6 @@ html_context = {}
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3.10", None),
     "pytest": ("https://docs.pytest.org/en/7.1.x/", None),
-    "tango": ("https://pytango.readthedocs.io/en/v9.4.2/", None),
-}
-
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3.10", None),
     "tango": ("https://pytango.readthedocs.io/en/v9.4.2/", None),
     "ska_tango_testing": (
         "https://developer.skao.int/projects/ska-tango-testing/en/latest/",

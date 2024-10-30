@@ -1,13 +1,13 @@
-SKA Integration Test Harness (ITH) - Overview & Getting started
-===================================================================
+Overview and Getting Started
+===============================
 
 Overview
 --------
 
-Currently (October 2024), a test harness for TMC in Mid integration
+Currently (October 2024), there is a test harness for TMC in Mid integration
 tests, centred around the TMC subsystem and its interactions with CSP,
-SDP and the Dishes. In future, a generic test harness integration
-testing an arbitrary combination of production or emulated SKA
+SDP and the Dishes. In future, there will be a generic test harness for
+integration tests on an arbitrary combination of production or emulated SKA
 subsystems.
 
 More information will be added here as the project progresses.
@@ -17,7 +17,7 @@ IMPORTANT: Scope and purpose
 
 Before diving into the (technical) details, it is important to
 understand the purpose of this project and its scope. For this reason,
-we strongly suggest you to read the `dedicated Confluence
+we strongly suggest you read the `dedicated Confluence
 page <https://confluence.skatelescope.org/pages/viewpage.action?pageId=289699655>`__
 
 IMPORTANT: What this repository is about (and what it is not)
@@ -25,8 +25,8 @@ IMPORTANT: What this repository is about (and what it is not)
 
 A second important thing is to understand what this specific repository
 is about and what it is not. While the term **ITH** sometimes may be
-used to refer a wider concept and a large collection of tools, this
-repository (at the moment, October 2024) contains a specific subset
+used to refer to a wider concept and a large collection of tools, this
+repository contains a specific subset
 of tools. So, let’s quickly clarify what you can find here (and what you
 cannot).
 
@@ -38,17 +38,17 @@ SUT, its subsystems and devices and the actions you can perform on them.
 More specifically:
 
 -  represent and allow access to the subsystems and the Tango devices
-   in a structured way, potentially ignoring which subsystem is emulated
-   and which is not;
--  simplify complex procedures to bring the SUT in a specific state
-   before running the tests (e.g., call the commands to set the telescope
-   in a specific desired state, synchronizing on events end ensuring the state
-   is effectively reached);
+   in a structured way, regardless of whether a subsystem is emulated
+   or it is not;
+-  simplify complex procedures to bring the SUT into a specific state
+   before running the tests (e.g., call the commands to put the telescope
+   in the desired state, synchronise when the events have finished, and
+   ensure that the state is effectively reached);
 -  simplify teardown procedures, to bring the SUT back to a known state
    after the tests are completed;
--  overview on the active devices and their versions.
+-  overview of the active devices and their versions.
 
-At the moment (October 2024), the SUT consist in:
+At the moment, the SUT consists of:
 
 -  a production TMC, which is the “protagonist” of the tests (the
    subsystem which receives most of the commands);
@@ -57,10 +57,10 @@ At the moment (October 2024), the SUT consist in:
 -  a set of production or emulated Dishes.
 
 **NOTE:** for the purposes of this test harness, we use the term
-*"production"* to refer to the real software that needs to be tested, and
-*"emulated"* to refer to a software that just “replicate” the behaviour of
-the real devices, without actually having a complex logic behind. The term
-*"production"* doesn't mean we are using the real hardware.
+*production* to refer to real software that needs to be tested, and
+*emulated* to refer to software that replicates the behaviour of
+the real devices without having complex logic behind it. The term
+*production* doesn't mean we are using the real hardware.
 
 What you cannot find (and likely will remain in separate places)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -73,14 +73,14 @@ This repository does not contain and will likely never contain:
    and `SKA Software Integration
    Tests <https://gitlab.com/ska-telescope/ska-sw-integration-testing>`__);
 -  the Helm charts to deploy the devices in a Kubernetes environment, or
-   the pipelines and Make commands to run the tests (see previous point
-   repos);
--  the specific “low-level” tools to track tango events and make
+   the pipelines and Make commands to run the tests (see repos in the
+   previous point);
+-  the specific “low-level” tools to track Tango events and make
    assertions on them (see
    `ska-tango-testing <https://gitlab.com/ska-telescope/ska-tango-testing>`__);
 -  pipeline support tools, such as the Jira integration scripts (see
    `ska-ser-xray <https://gitlab.com/ska-telescope/ska-ser-xray>`__);
--  the code of the emulators for the non-production subsystems devices (see
+-  the code of the emulators for the non-production subsystem devices (see
    `ska-tmc-simulators <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators>`__);
 -  the code of the production devices.
 
@@ -88,13 +88,11 @@ What you cannot find (yet)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Instead, this framework may (*and will likely*) support in the future
-(**but not at the moment, October 2024**):
+(**but not at the moment**):
 
 - TMC Low integration tests;
-- integration tests where TMC is not the
-  protagonist (i.e., you can call commands not only on TMC but also on
-  CSP, SDP, etc. and check the interactions between them, without
-  having TMC involved);
+- integration tests where TMC is not involved (e.g.,
+  stand-alone tests of a single subsystem);
 - tests with multiple subarrays.
 
 Stay tuned for updates!
@@ -111,16 +109,16 @@ To install this test harness you can follow two paths:
       poetry add --group test ska-integration-test-harness
 
 2. The second is to import it always via ``poetry``, but pointing
-   directly to the Gitlab repository.
+   directly to the GitLab repository.
 
-We point out also this second approach since this test harness is is
+We point out also this second approach since this test harness is
 supposed to evolve quickly, together with the evolution of the
 subsystems and the integration tests. This second approach could be
 particularly useful in case you want to contribute to the project and
 need to apply your own changes quickly.
 
-To point directly the Gitlab repo (potentially also on a specific
-branch) and by-pass the semantic versioning, add the following to your
+To point directly to the GitLab repo (potentially also to a specific
+branch) and bypass the semantic versioning, add the following to your
 ``pyproject.toml`` file:
 
 .. code:: toml
@@ -133,7 +131,11 @@ When you added that, you can run ``poetry lock --no-update`` to update
 the ``poetry.lock`` file with the new dependency and ``poetry install``
 to install it. If you make changes to your code and want them reflected
 in your project, you can run
-``poetry update ska-integration-test-harness && poetry install``.
+
+.. code:: bash
+
+   poetry update ska-integration-test-harness && poetry install
+
 
 Usage
 -----
@@ -146,14 +148,14 @@ Prerequisites
 To use this test harness, first of all, you need a Kubernetes cluster
 with all the production and emulated devices running. This part is not
 covered by this project, which in fact assumes an environment equivalent
-to what is used in the test repository `SKA TMC-MID
+to that used in the test repository `SKA TMC-Mid
 Integration <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/>`__
 (`docs <https://developer.skao.int/projects/ska-tmc-mid-integration/en/latest/getting_started/getting_started.html>`__).
 
 Since some of the devices are emulators, you might also want to check
 `this documentation page <https://developer.skao.int/projects/ska-tmc-common/en/latest/HelperDevices/TangoHelperDevices.html>`__
 and - if necessary - 
-`the emulators implementation <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common/-/tree/master/src/ska_tmc_common/test_helpers?ref_type=heads>`__.
+`the emulator implementations <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common/-/tree/master/src/ska_tmc_common/test_helpers?ref_type=heads>`__.
 
 .. _configuration_example:
 
@@ -161,7 +163,7 @@ Configuration
 ~~~~~~~~~~~~~
 
 To configure the test harness using the default method, you need to
-create a YAML file that specifies a few configuration such as the
+create a YAML file that specifies things like the
 expected device names and whether the devices are emulated or not. The
 file will look like this:
 
@@ -220,25 +222,26 @@ Now we will not deep dive too much into the details of what they are,
 but essentially you can think of the ``TelescopeWrapper`` as a singleton
 representation of the *SUT*, and the *facades* as “views” of that system
 that will allow you to access the devices and interact with them
-performing (potentially auto-synchronized) actions. E.g.,
+performing (potentially auto-synchronised) actions. Here an example of
+how you can use the facades to interact with the devices:
 
 .. code:: python
 
    # if tmc_central_node is a correctly initialised facade
    # to the TMC central node, calling such a command will permit you
    # to move the telescope to the ON state, ignoring any details about
-   # interaction with other emulated/not-emulated devices and also
-   # ignoring the synchronization (the ITH will guarantee that the
+   # interaction with other emulated and not-emulated devices and also
+   # ignoring the synchronisation (the ITH will guarantee that the
    # telescope will be in an ON state after the call, otherwise
    # an informative assertion error will be raised)
    tmc_central_node.move_to_on(wait_termination=True)
 
-So, just to be clear, the ``TelescopeWrapper`` is something you have to
-initialise to have a test harness, and the facades just views which
-simplify your interaction with such a test harness. Inspecting the
+To be clear, the ``TelescopeWrapper`` is something you have to
+initialise to have a test harness, and the facades are just views which
+simplify your interaction with the test harness. Inspecting the
 facade implementations is a good way to explore the mechanisms behind
 the test harness, the interaction with the actual Tango devices and the
-verified conditions in case you enable the synchronization.
+verified conditions in case you enable the synchronisation.
 
 Your fixtures code may look like this:
 
@@ -272,7 +275,7 @@ Your fixtures code may look like this:
    def default_commands_inputs() -> TestHarnessInputs:
        """Declare some JSON inputs for TMC commands."""
        return TestHarnessInputs(
-           # assign and release, right now, are called on central node
+           # assign and release, right now, are called on the central node
            assign_input=FileJSONInput(
                "json-inputs/centralnode/assign_resources.json"
            ),
@@ -312,11 +315,11 @@ Your fixtures code may look like this:
        # set the kubernetes namespace where the devices are running
        # (so we can access
        # https://gitlab.com/ska-telescope/ska-k8s-config-exporter
-       # to log Tango devices versions)
+       # to log Tango device versions)
        test_harness_builder.set_kubernetes_namespace(os.getenv("KUBE_NAMESPACE"))
 
 
-       # build the wrapper of the telescope and its sub-systems
+       # build the wrapper of the telescope and its subsystems
        telescope = test_harness_builder.build()
        yield telescope
 
@@ -324,7 +327,7 @@ Your fixtures code may look like this:
        # (obsState=READY, telescopeState=OFF, no resources assigned)
        telescope.tear_down()
 
-       # NOTE: As the code is organized now, I cannot anticipate the
+       # NOTE: As the code is organised now, I cannot anticipate the
        # teardown of the telescope structure. To run reset now I should
        # init subarray node (with SetSubarrayId), but to do that I need
        # to know subarray_id, which is a parameter of the Gherkin steps.
@@ -351,7 +354,7 @@ Your fixtures code may look like this:
 
    @pytest.fixture
    def dishes(telescope_wrapper: TelescopeWrapper):
-       """Create a facade to dishes devices."""
+       """Create a facade to Dish devices."""
        return DishesFacade(telescope_wrapper)
 
 Other than the fixtures, you may also want to create a fixture for the
@@ -369,8 +372,8 @@ for more details.
    def event_tracer() -> TangoEventTracer:
        """Create a TangoEventTracer to track the events of the devices."""
        return TangoEventTracer({
-           # add here an eventual mapping between attribute names and
-           # Enum types they are associated to, so assertion errors
+           # add here the mapping between attribute names and the
+           # Enum types they are associated with, so assertion errors
            # will display meaningful labels
            # E.g. "obsState": ObsState
            # (NOTE: DevState is not needed)
@@ -380,7 +383,7 @@ Interact with the test harness
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In your test script, use the facades to access the devices and interact
-with them like in this simplified example:
+with them as shown in this simplified example:
 
 .. code:: python
 
@@ -388,7 +391,7 @@ with them like in this simplified example:
    """Simple demonstration of how to use the test harness to write a test script.
 
    NOTE: this is not a complete test script, but just a demonstration of how to
-   use the test harness to make actions over the SUT and access the devices
+   use the test harness to make actions on the SUT and access the devices
    to make event subscriptions and assertions.
    This also is not necessarily a good example of how to write a test script. 
    """
@@ -407,7 +410,7 @@ with them like in this simplified example:
        implemented interacting with the TMC central node facade.
        """
        # NOTE: the ``wait_termination=True`` flag is used to make the action
-       # synchronous, i.e. the call will block until all the synchronizations
+       # synchronous, i.e. the call will block until all the synchronisation
        # conditions are met (explore the method and the action implementation
        # for more details) or, in other words, when the method call execution
        # is completed, you are sure the telescope is in the ON state.
@@ -428,8 +431,8 @@ with them like in this simplified example:
        NOTE: the ``wait_termination=False`` flag is used to not block the call,
        so the tracer can be used separately to check the events.
        """
-       # using the facades, I can access the
-       # device proxies and subscribe to the devices
+       # using the facades, I have access to the
+       # device proxies and I can subscribe to the events
        event_tracer.subscribe_event(
            tmc.central_node, "telescopeState"
        )
@@ -437,7 +440,7 @@ with them like in this simplified example:
        # (etc.)
 
        # Then I can issue the command, explicitly telling the call to
-       # not wait for the synchronization conditions to be met, 
+       # not wait for the synchronisation conditions to be met, 
        # since in the following steps I want to check the events
        # manually (since they are the "object" of this test).
        tmc.move_to_off(wait_termination=False)

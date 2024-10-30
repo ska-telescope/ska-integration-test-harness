@@ -25,7 +25,7 @@ class DevicesInfoServiceException(Exception):
     """
 
     def __init__(self, message: str = ""):
-        """Initializes the exception."""
+        """Initialises the exception."""
         self.message = (
             "Something went wrong when interrogating the devices information."
         )
@@ -101,7 +101,7 @@ class DevicesInfoProvider:
         port: int = DEFAULT_PORT,
         path: str = DEFAULT_PATH,
     ):
-        """Initializes the DevicesInfoProvider with connection parameters.
+        """Initialises the DevicesInfoProvider with connection parameters.
 
         :param kube_namespace: Kubernetes namespace where the
             service is running.
@@ -122,7 +122,7 @@ class DevicesInfoProvider:
         self.port = port
         """Port where the service is listening."""
         self.path = path
-        """Path to interrogate over the service to get all devices."""
+        """Path to interrogate on the service to get all devices."""
 
         # -----------------------------------------------------------------
         # devices information

@@ -174,7 +174,7 @@ class TestTestHarnessFactory:
         mock_device_proxy.assert_called()
 
     def test_create_telescope_wrapper(self, config: TestHarnessConfiguration):
-        """Creates a telescope wrapper set up for TMC-CSP MID testing.
+        """Creates a telescope wrapper set up for TMC-CSP Mid testing.
 
         The call is expected to create a TelescopeWrapper with:
         - production TMC and CSP

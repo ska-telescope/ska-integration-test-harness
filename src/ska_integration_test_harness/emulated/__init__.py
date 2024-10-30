@@ -1,4 +1,4 @@
-"""A collection of wrapper of emulated subsystems wrappers (+ utils)."""
+"""A collection of wrapper of emulated subsystem wrappers (+ utils)."""
 
 from .csp_wrapper import EmulatedCSPWrapper
 from .dishes_wrapper import EmulatedDishesWrapper

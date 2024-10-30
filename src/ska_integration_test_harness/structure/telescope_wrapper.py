@@ -1,4 +1,4 @@
-"""A wrapper class that contains all the telescope sub-systems."""
+"""A wrapper class that contains all the telescope subsystems."""
 
 from assertpy import assert_that
 from ska_control_model import ObsState
@@ -18,23 +18,23 @@ from ska_integration_test_harness.structure.tmc_wrapper import TMCWrapper
 
 
 class TelescopeWrapper:
-    """A wrapper class that contains all the telescope sub-systems.
+    """A wrapper class that contains all the telescope subsystems.
 
     This infrastructural class is used as an unique entry point to access
-    all the telescope sub-systems and its devices. Given an instance of this
+    all the telescope subsystems and its devices. Given an instance of this
     class, using its properties, it is possible to access the TMC, SDP, CSP,
-    and Dishes sub-systems.
+    and Dishes subsystems.
 
     This class is a *Singleton*, so this mean that there is only one instance
     of it in the entire code. This is done to avoid the creation of multiple
     "telescope" instances, potentially inconsistently initialised with
-    different sub-subsystems (which may be configured differently).
+    different subsystem instances (which may be configured differently).
 
     To initialise the telescope test structure, create an instance of this
     class and call the `set_up` method with the instances of the TMC, SDP, CSP,
-    and Dishes sub-systems. After the initialisation, in any point of the
+    and Dishes subsystems. After the initialisation, in any point of the
     code you can create an instance of this class and have it already
-    initialised with the sub-systems.
+    initialised with the subsystems.
 
     .. code-block:: python
 
@@ -44,7 +44,7 @@ class TelescopeWrapper:
 
         # ...
 
-        # In any point of the code, you can access the sub-systems
+        # In any point of the code, you have access to the subsystems
         # (and their devices) using the properties of the telescope instance.
         telescope = TelescopeWrapper()
         do_something(telescope.tmc.central_node)
@@ -92,52 +92,52 @@ class TelescopeWrapper:
 
     @property
     def tmc(self) -> TMCWrapper:
-        """A wrapper for the TMC sub-system and its devices.
+        """A wrapper for the TMC subsystem and its devices.
 
         :return: The TMCDevices instance.
 
-        :raises ValueError: If one or more sub-systems are missing.
+        :raises ValueError: If one or more subsystems are missing.
         """
         self.fail_if_not_set_up()
         return self._tmc
 
     @property
     def sdp(self) -> SDPWrapper:
-        """A wrapper for the SDP sub-system and its devices.
+        """A wrapper for the SDP subsystem and its devices.
 
-        :raises ValueError: If one or more sub-systems are missing.
+        :raises ValueError: If one or more subsystems are missing.
         """
         self.fail_if_not_set_up()
         return self._sdp
 
     @property
     def csp(self) -> CSPWrapper:
-        """A wrapper for the CSP sub-system and its devices.
+        """A wrapper for the CSP subsystem and its devices.
 
-        :raises ValueError: If one or more sub-systems are missing.
+        :raises ValueError: If one or more subsystems are missing.
         """
         self.fail_if_not_set_up()
         return self._csp
 
     @property
     def dishes(self) -> DishesWrapper:
-        """A wrapper for the dishes sub-system and its devices.
+        """A wrapper for the dishes subsystem and its devices.
 
         :return: The DishesDevices instance.
 
-        :raises ValueError: If one or more sub-systems are missing.
+        :raises ValueError: If one or more subsystems are missing.
         """
         self.fail_if_not_set_up()
         return self._dishes
 
     def get_subsystems_recap(self, update_devices_info: bool = True) -> str:
-        """Get a recap of the active sub-systems and their devices.
+        """Get a recap of the active subsystems and their devices.
 
-        Get a recap of the active sub-systems, their production-emulated
+        Get a recap of the active subsystems, their production-emulated
         status, and the devices they contain.
 
         :param update_devices_info: If True, the devices info provider
-            is updated before getting the sub-systems recaps.
+            is updated before getting the subsystems recaps.
 
         :return: The recap string.
         """
@@ -158,7 +158,7 @@ class TelescopeWrapper:
                 recap += subsystem.get_recap(self.devices_info_provider) + "\n"
 
         if recap == "":
-            recap = "No sub-systems are currently set up."
+            recap = "No subsystems are currently set up."
 
         return recap
 
@@ -174,10 +174,10 @@ class TelescopeWrapper:
     ) -> None:
         """Initialise the telescope test structure with the given devices.
 
-        :param tmc: The TMC sub-system wrapper.
-        :param sdp: The SDP sub-system wrapper.
-        :param csp: The CSP sub-system wrapper.
-        :param dishes: The Dishes sub-system wrapper.
+        :param tmc: The TMC subsystem wrapper.
+        :param sdp: The SDP subsystem wrapper.
+        :param csp: The CSP subsystem wrapper.
+        :param dishes: The Dishes subsystem wrapper.
         """
         self._tmc = tmc
         self._sdp = sdp
@@ -191,7 +191,7 @@ class TelescopeWrapper:
     def tear_down(self) -> None:
         """Tear down the entire telescope test structure.
 
-        :raises ValueError: If one or more sub-systems are missing.
+        :raises ValueError: If one or more subsystems are missing.
         """
         self.fail_if_not_set_up()
 
@@ -236,14 +236,14 @@ class TelescopeWrapper:
     def fail_if_not_set_up(self) -> None:
         """Fail if the telescope test structure is not set up.
 
-        :raises ValueError: If one or more sub-systems are missing.
+        :raises ValueError: If one or more subsystems are missing.
         """
         if self._tmc and self._sdp and self._csp and self._dishes:
             return
 
         raise ValueError(
             "Telescope test structure is not set up "
-            "(one or more sub-systems are missing). Sub-systems: "
+            "(one or more subsystems are missing). subsystems: "
             f"TMC={self._tmc}, SDP={self._sdp}, "
             f"CSP={self._csp}, Dishes={self._dishes}.\n"
             "Please set up the telescope test structure first calling the "
@@ -258,7 +258,7 @@ class TelescopeWrapper:
     def clear_command_call(self) -> None:
         """Clear the command call on the telescope (if needed).
 
-        :raises ValueError: If one or more sub-systems are missing.
+        :raises ValueError: If one or more subsystems are missing.
         """
         self.fail_if_not_set_up()
 
@@ -271,7 +271,7 @@ class TelescopeWrapper:
 
         :param subarray_id: The Subarray ID to set.
 
-        :raises ValueError: If one or more sub-systems are missing.
+        :raises ValueError: If one or more subsystems are missing.
         """
         self.fail_if_not_set_up()
 

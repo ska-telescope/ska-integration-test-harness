@@ -53,7 +53,7 @@ class TMCWrapper(SubsystemWrapper, abc.ABC):
         return "TMC"
 
     def get_all_devices(self) -> dict[str, tango.DeviceProxy]:
-        """Get all the sub-system devices as a dictionary."""
+        """Get all the subsystem devices as a dictionary."""
         res = {
             "central_node": self.central_node,
             "subarray_node": self.subarray_node,

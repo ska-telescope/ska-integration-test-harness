@@ -79,17 +79,17 @@ class StateChangeWaiter:
         )
 
     def _assert_that_sync_occurred(self, timeout: int | float) -> None:
-        """Assert that the given synchronization events occurred.
+        """Assert that the given synchronisation events occurred.
 
         Using TangoEventTracer assertions, this method waits for the
-        synchronization events to occur and raises an exception if
+        synchronisation events to occur and raises an exception if
         they do not occur within the timeout. An assertion error is
-        raised if the synchronization events do not occur within the
+        raised if the synchronisation events do not occur within the
         timeout.
 
         :param timeout: The maximum time (in seconds) to wait for
-            the synchronization events.
-        :raises AssertionError: If the synchronization events do not
+            the synchronisation events.
+        :raises AssertionError: If the synchronisation events do not
             occur within the timeout.
         """
         shared_timeout_context = assert_that(self.event_tracer).within_timeout(

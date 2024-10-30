@@ -1,8 +1,8 @@
 """A structure for performing actions on the telescope system.
 
-This module contains the structure for implementing actions over the telescope.
+This module contains the structure for implementing actions on the telescope.
 An action is essentially an abstraction of a procedure that can be executed
-over the telescope system and - essentially - it is made by a business logic
+on the telescope system and - essentially - it is made by a business logic
 and a termination condition to synchronise the execution. Actions then can be
 represented through a hierarchy of classes, which have as a root the
 :class:`~ska_integration_test_harness.actions.telescope_action.TelescopeAction`.

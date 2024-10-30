@@ -34,7 +34,7 @@ class CSPWrapper(SubsystemWrapper, abc.ABC):
         return "CSP"
 
     def get_all_devices(self) -> dict[str, tango.DeviceProxy]:
-        """Get all the sub-system devices as a dictionary."""
+        """Get all the subsystem devices as a dictionary."""
         return {
             "csp_master": self.csp_master,
             "csp_subarray": self.csp_subarray,
