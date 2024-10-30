@@ -16,6 +16,9 @@ from ska_integration_test_harness.actions.subarray.subarray_clear_obs_state impo
 from ska_integration_test_harness.actions.subarray.subarray_configure import (  # pylint: disable=line-too-long # noqa: E501
     SubarrayConfigure,
 )
+from ska_integration_test_harness.actions.subarray.subarray_restart import (
+    SubarrayRestart,
+)
 from ska_integration_test_harness.actions.subarray.subarray_scan import (  # pylint: disable=line-too-long # noqa: E501
     SubarrayScan,
 )
@@ -116,35 +119,6 @@ class SubarrayObsStateResetterFactory:
             ],
         )
 
-    def create_action_to_reset_subarray_to_aborting(self) -> TelescopeAction:
-        """Create a `TelescopeAction` to reset the subarray to `ABORTING`.
-
-        :return: A `TelescopeAction` to reset the subarray to
-            the `ObsState.ABORTING` state.
-        """
-        abort_action = SubarrayAbort()
-        abort_action.set_synchronise_on_transient_state(True)
-
-        return TelescopeActionSequence(
-            [
-                self.create_action_to_reset_subarray_to_idle(),
-                abort_action,
-            ],
-        )
-
-    def create_action_to_reset_subarray_to_aborted(self) -> TelescopeAction:
-        """Create a `TelescopeAction` to reset the subarray to `ABORTED`.
-
-        :return: A `TelescopeAction` to reset the subarray to the
-            `ObsState.ABORTED` state.
-        """
-        return TelescopeActionSequence(
-            [
-                self.create_action_to_reset_subarray_to_idle(),
-                SubarrayAbort(),
-            ],
-        )
-
     def create_action_to_reset_subarray_to_configuring(
         self,
     ) -> TelescopeAction:
@@ -202,6 +176,51 @@ class SubarrayObsStateResetterFactory:
             ],
         )
 
+    def create_action_to_reset_subarray_to_aborting(self) -> TelescopeAction:
+        """Create a `TelescopeAction` to reset the subarray to `ABORTING`.
+
+        :return: A `TelescopeAction` to reset the subarray to
+            the `ObsState.ABORTING` state.
+        """
+        abort_action = SubarrayAbort()
+        abort_action.set_synchronise_on_transient_state(True)
+
+        return TelescopeActionSequence(
+            [
+                self.create_action_to_reset_subarray_to_idle(),
+                abort_action,
+            ],
+        )
+
+    def create_action_to_reset_subarray_to_aborted(self) -> TelescopeAction:
+        """Create a `TelescopeAction` to reset the subarray to `ABORTED`.
+
+        :return: A `TelescopeAction` to reset the subarray to the
+            `ObsState.ABORTED` state.
+        """
+        return TelescopeActionSequence(
+            [
+                self.create_action_to_reset_subarray_to_idle(),
+                SubarrayAbort(),
+            ],
+        )
+
+    def create_action_to_reset_subarray_to_resetting(self) -> TelescopeAction:
+        """Create a `TelescopeAction` to reset the subarray to `RESETTING`.
+
+        :return: A `TelescopeAction` to reset the subarray to
+            the `ObsState.RESETTING` state.
+        """
+        reset_action = SubarrayRestart()
+        reset_action.set_synchronise_on_transient_state(True)
+
+        return TelescopeActionSequence(
+            [
+                self.create_action_to_reset_subarray_to_aborted(),
+                reset_action,
+            ],
+        )
+
     @property
     def _map_state_to_method(
         self,
@@ -210,11 +229,12 @@ class SubarrayObsStateResetterFactory:
             ObsState.EMPTY: self.create_action_to_reset_subarray_to_empty,
             ObsState.RESOURCING: self.create_action_to_reset_subarray_to_resourcing,  # pylint: disable=line-too-long # noqa: E501
             ObsState.IDLE: self.create_action_to_reset_subarray_to_idle,
-            ObsState.ABORTING: self.create_action_to_reset_subarray_to_aborting,  # pylint: disable=line-too-long # noqa: E501
-            ObsState.ABORTED: self.create_action_to_reset_subarray_to_aborted,
             ObsState.CONFIGURING: self.create_action_to_reset_subarray_to_configuring,  # pylint: disable=line-too-long # noqa: E501
             ObsState.READY: self.create_action_to_reset_subarray_to_ready,
             ObsState.SCANNING: self.create_action_to_reset_subarray_to_scanning,  # pylint: disable=line-too-long # noqa: E501
+            ObsState.ABORTING: self.create_action_to_reset_subarray_to_aborting,  # pylint: disable=line-too-long # noqa: E501
+            ObsState.ABORTED: self.create_action_to_reset_subarray_to_aborted,
+            ObsState.RESETTING: self.create_action_to_reset_subarray_to_resetting,  # pylint: disable=line-too-long # noqa: E501
         }
 
     def create_action_to_reset_subarray_to_state(
