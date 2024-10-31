@@ -24,9 +24,9 @@ class SubarrayClearObsState(TelescopeAction[None]):
 
     def __init__(self) -> None:
         super().__init__()
-        # set a longer timeout for this action
+        # set a longer default timeout for this action
         # (since some actions may take longer to complete)
-        self.set_termination_condition_timeout(60)
+        self.set_termination_condition_timeout(100)
 
     def _action(self):
         if self.telescope.tmc.subarray_node.obsState in [
@@ -36,16 +36,28 @@ class SubarrayClearObsState(TelescopeAction[None]):
             ObsState.CONFIGURING,
             ObsState.SCANNING,
         ]:
-            SubarrayAbort().execute()
+            abort = SubarrayAbort()
+            abort.set_termination_condition_timeout(
+                self.termination_condition_timeout
+            )
+            abort.execute()
 
         # if there is an ongoing broken abort, ensure it ends before proceeding
         if self.telescope.tmc.subarray_node.obsState == ObsState.ABORTING:
-            SubarrayForceAbort().execute()
+            force_abort = SubarrayForceAbort()
+            force_abort.set_termination_condition_timeout(
+                self.termination_condition_timeout
+            )
+            force_abort.execute()
 
         if self.telescope.tmc.subarray_node.obsState in [
             ObsState.ABORTED,
         ]:
-            SubarrayRestart().execute()
+            restart = SubarrayRestart()
+            restart.set_termination_condition_timeout(
+                self.termination_condition_timeout
+            )
+            restart.execute()
 
     def termination_condition(self):
         """Ensure subarrays' final obs state is empty."""
