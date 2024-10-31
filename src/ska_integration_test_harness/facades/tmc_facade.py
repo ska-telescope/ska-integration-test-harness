@@ -1,9 +1,13 @@
 """A facade to TMC."""
 
-from typing import Tuple
+from typing import Any, Tuple
 
 import tango
 from ska_control_model import ObsState, ResultCode
+
+from ska_integration_test_harness.actions.telescope_action import (
+    TelescopeAction,
+)
 
 from ..actions.central_node.central_node_assign_resources import (
     CentralNodeAssignResources,
@@ -55,6 +59,12 @@ class TMCFacade:
 
     def __init__(self, telescope: TelescopeWrapper) -> None:
         self._telescope = telescope
+        self.actions_timeout: int | None = None
+        """The timeout to use for the actions.
+
+        If None, the default timeout is used
+        (actions timeout is left unchanged).
+        """
 
     # -----------------------------------------------------------
     # CENTRAL NODE DEVICES
@@ -114,6 +124,23 @@ class TMCFacade:
     # -----------------------------------------------------------
     # ACTIONS YOU CALL ON CENTRAL NODE
 
+    def _setup_and_run_action(
+        self, action: TelescopeAction, wait_termination: bool
+    ) -> Any:
+        """Setup and run a telescope action.
+
+        :param action: The action to run.
+        :param wait_termination: set to False if you don't want to
+            wait for the termination condition. By default the termination
+            condition is waited.
+
+        :return: The (eventual) result of the action.
+        """
+        action.set_termination_condition_policy(wait_termination)
+        if self.actions_timeout is not None:
+            action.set_termination_condition_timeout(self.actions_timeout)
+        return action.execute()
+
     def move_to_on(self, wait_termination: bool = True) -> None:
         """Move the telescope to ON state.
 
@@ -122,8 +149,7 @@ class TMCFacade:
             condition is waited.
         """
         action = MoveToOn()
-        action.set_termination_condition_policy(wait_termination)
-        action.execute()
+        self._setup_and_run_action(action, wait_termination)
 
     def move_to_off(self, wait_termination: bool = True) -> None:
         """Move the telescope to OFF state.
@@ -133,8 +159,7 @@ class TMCFacade:
             condition is waited.
         """
         action = MoveToOff()
-        action.set_termination_condition_policy(wait_termination)
-        action.execute()
+        self._setup_and_run_action(action, wait_termination)
 
     def set_standby(self, wait_termination: bool = True) -> None:
         """Set the telescope to STANDBY state.
@@ -144,8 +169,7 @@ class TMCFacade:
             condition is waited.
         """
         action = SetStandby()
-        action.set_termination_condition_policy(wait_termination)
-        action.execute()
+        self._setup_and_run_action(action, wait_termination)
 
     def load_dish_vcc_configuration(
         self, dish_vcc_config: str, wait_termination: bool = True
@@ -160,8 +184,7 @@ class TMCFacade:
         :return: result, message
         """
         action = CentralNodeLoadDishConfig(dish_vcc_config)
-        action.set_termination_condition_policy(wait_termination)
-        return action.execute()
+        return self._setup_and_run_action(action, wait_termination)
 
     def assign_resources(
         self, assign_input: JSONInput, wait_termination: bool = True
@@ -176,8 +199,7 @@ class TMCFacade:
         :return: result, message
         """
         action = CentralNodeAssignResources(assign_input)
-        action.set_termination_condition_policy(wait_termination)
-        return action.execute()
+        return self._setup_and_run_action(action, wait_termination)
 
     def release_resources(
         self, release_input: JSONInput, wait_termination: bool = True
@@ -192,8 +214,7 @@ class TMCFacade:
         :return: result, message
         """
         action = CentralNodeReleaseResources(release_input)
-        action.set_termination_condition_policy(wait_termination)
-        return action.execute()
+        return self._setup_and_run_action(action, wait_termination)
 
     # -----------------------------------------------------------
     # ACTIONS YOU CALL ON SUBARRAY NODE
@@ -213,8 +234,7 @@ class TMCFacade:
         :return: result, message
         """
         action = SubarrayConfigure(configure_input)
-        action.set_termination_condition_policy(wait_termination)
-        return action.execute()
+        return self._setup_and_run_action(action, wait_termination)
 
     def end_observation(
         self, wait_termination: bool = True
@@ -228,8 +248,7 @@ class TMCFacade:
         :return: result, message
         """
         action = SubarrayEndObservation()
-        action.set_termination_condition_policy(wait_termination)
-        return action.execute()
+        return self._setup_and_run_action(action, wait_termination)
 
     def end_scan(
         self, wait_termination: bool = True
@@ -243,8 +262,7 @@ class TMCFacade:
         :return: result, message
         """
         action = SubarrayEndScan()
-        action.set_termination_condition_policy(wait_termination)
-        return action.execute()
+        return self._setup_and_run_action(action, wait_termination)
 
     def scan(
         self, scan_input: JSONInput, wait_termination: bool = True
@@ -259,8 +277,7 @@ class TMCFacade:
         :return: result, message
         """
         action = SubarrayScan(scan_input)
-        action.set_termination_condition_policy(wait_termination)
-        return action.execute()
+        return self._setup_and_run_action(action, wait_termination)
 
     def abort(self, wait_termination: bool = True) -> Tuple[ResultCode, str]:
         """Invoke Abort command on subarray Node.
@@ -272,8 +289,7 @@ class TMCFacade:
         :return: result, message
         """
         action = SubarrayAbort()
-        action.set_termination_condition_policy(wait_termination)
-        return action.execute()
+        return self._setup_and_run_action(action, wait_termination)
 
     def restart(self, wait_termination: bool = True) -> Tuple[ResultCode, str]:
         """Invoke Restart command on subarray Node.
@@ -285,8 +301,7 @@ class TMCFacade:
         :return: result, message
         """
         action = SubarrayRestart()
-        action.set_termination_condition_policy(wait_termination)
-        return action.execute()
+        return self._setup_and_run_action(action, wait_termination)
 
     def force_change_of_obs_state(
         self,
@@ -311,8 +326,7 @@ class TMCFacade:
             condition is waited.
         """
         action = ForceChangeOfObsState(dest_state_name, commands_inputs)
-        action.set_termination_condition_policy(wait_termination)
-        action.execute()
+        self._setup_and_run_action(action, wait_termination)
 
     # -----------------------------------------------------------
     # GENERIC ACTIONS
@@ -359,4 +373,6 @@ class TMCFacade:
             expected_obs_state=expected_obs_state,
         )
         action.set_termination_condition_policy(expected_obs_state is not None)
+        if self.actions_timeout is not None:
+            action.set_termination_condition_timeout(self.actions_timeout)
         return action.execute()
