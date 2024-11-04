@@ -71,17 +71,6 @@ class TelescopeWrapper:
 
     _instance = None
 
-    _tmc: TMCWrapper | None = None
-    _sdp: SDPWrapper | None = None
-    _csp: CSPWrapper | None = None
-    _dishes: DishesWrapper | None = None
-
-    devices_info_provider: DevicesInfoProvider | None = None
-    """The devices info provider used to access the devices information.
-
-    (Used for recap purposes).
-    """
-
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(TelescopeWrapper, cls).__new__(cls)
@@ -89,6 +78,11 @@ class TelescopeWrapper:
 
     # -----------------------------------------------------------------
     # Subsystem access points
+
+    _tmc: TMCWrapper | None = None
+    _sdp: SDPWrapper | None = None
+    _csp: CSPWrapper | None = None
+    _dishes: DishesWrapper | None = None
 
     @property
     def tmc(self) -> TMCWrapper:
@@ -130,6 +124,15 @@ class TelescopeWrapper:
         self.fail_if_not_set_up()
         return self._dishes
 
+    # -----------------------------------------------------------------
+    # Recap generation tools
+
+    devices_info_provider: DevicesInfoProvider | None = None
+    """The devices info provider used to access the devices information.
+
+    (Used for recap purposes).
+    """
+
     def get_subsystems_recap(self, update_devices_info: bool = True) -> str:
         """Get a recap of the active subsystems and their devices.
 
@@ -165,6 +168,9 @@ class TelescopeWrapper:
     # -----------------------------------------------------------------
     # Initialisation and tear down methods
 
+    actions_default_timeout: int = 60
+    """The default timeout (in seconds) used in the telescope actions."""
+
     def set_up(
         self,
         tmc: TMCWrapper,
@@ -185,8 +191,8 @@ class TelescopeWrapper:
         self._dishes = dishes
         # TODO: Add here some "health checks" (?)
 
-    TEARDOWN_TIMEOUT = 50
-    """The timeout (in seconds) used in the teardown procedure."""
+    TEARDOWN_TIMEOUT = 100
+    """The overall timeout (in seconds) used in the teardown procedure."""
 
     def tear_down(self) -> None:
         """Tear down the entire telescope test structure.
