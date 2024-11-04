@@ -1,7 +1,9 @@
 """Clear TMC subarray obs state, putting it into the "EMPTY" state."""
 
+from assertpy import assert_that
 from ska_control_model import ObsState
 
+from ska_integration_test_harness.actions.expected_event import ExpectedEvent
 from ska_integration_test_harness.actions.subarray.subarray_abort import (
     SubarrayAbort,
 )
@@ -14,19 +16,14 @@ from ska_integration_test_harness.actions.subarray.subarray_restart import (
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
 )
-from ska_integration_test_harness.actions.utils.termination_conditions import (
-    all_subarrays_have_obs_state,
-)
 
 
 class SubarrayClearObsState(TelescopeAction[None]):
-    """Clear TMC subarray obs state, putting it into the "EMPTY" state."""
+    """Clear TMC subarray obs state, putting it into the "EMPTY" state.
 
-    def __init__(self) -> None:
-        super().__init__()
-        # set a longer default timeout for this action
-        # (since some actions may take longer to complete)
-        self.set_termination_condition_timeout(100)
+    NOTE: the timeout you set on this action is propagated to the
+    called sub-actions.
+    """
 
     def _action(self):
         if self.telescope.tmc.subarray_node.obsState in [
@@ -59,6 +56,25 @@ class SubarrayClearObsState(TelescopeAction[None]):
             )
             restart.execute()
 
-    def termination_condition(self):
-        """Ensure subarrays' final obs state is empty."""
-        return all_subarrays_have_obs_state(self.telescope, ObsState.EMPTY)
+        assert_that(self.telescope.tmc.subarray_node.obsState).described_as(
+            "UNEXPECTED ERROR: The TMC subarray should have reached "
+            "the EMPTY state by now. If this error occurs, "
+            "something may have gone wrong with "
+            "SubarrayClearObsState procedure."
+        ).is_equal_to(ObsState.EMPTY)
+        assert_that(self.telescope.csp.csp_subarray.obsState).described_as(
+            "UNEXPECTED ERROR: The CSP subarray should have reached "
+            "the EMPTY state by now. If this error occurs, "
+            "something may have gone wrong with "
+            "SubarrayClearObsState procedure."
+        ).is_equal_to(ObsState.EMPTY)
+        assert_that(self.telescope.sdp.sdp_subarray.obsState).described_as(
+            "UNEXPECTED ERROR: The SDP subarray should have reached "
+            "the EMPTY state by now. If this error occurs, "
+            "something may have gone wrong with "
+            "SubarrayClearObsState procedure."
+        ).is_equal_to(ObsState.EMPTY)
+
+    def termination_condition(self) -> list[ExpectedEvent]:
+        """No termination condition is needed for this action."""
+        return []
