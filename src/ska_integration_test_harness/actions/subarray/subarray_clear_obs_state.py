@@ -56,6 +56,8 @@ class SubarrayClearObsState(TelescopeAction[None]):
             )
             restart.execute()
 
+        # using separate checks, since this isn't a real "waiting" action
+        # but the state changes should have already happened
         assert_that(self.telescope.tmc.subarray_node.obsState).described_as(
             "UNEXPECTED ERROR: The TMC subarray should have reached "
             "the EMPTY state by now. If this error occurs, "
