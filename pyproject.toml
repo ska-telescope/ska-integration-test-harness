@@ -1,7 +1,7 @@
 [tool.poetry]
 include = ["MANIFEST.skao.int"]
 name = "ska-integration-test-harness"
-version = "0.2.0"
+version = "0.2.1"
 description = "Currently, a test harness for TMC-CSP integration tests. In future, a generic test harness integration testing an arbitrary combination of production or emulated SKA subsystems."
 authors = ["Emanuele Lena <emanuele.lena@designcoaching.net>"]
 license = "BSD-3-Clause"
