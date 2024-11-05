@@ -53,18 +53,19 @@ class TMCFacade:
       the subarray,
     - an action to force the subarray to a certain obs state,
     - a generic action to perform any action on central node or subarray node.
+
+    All the actions can be executed synchronously or asynchronously. When
+    executed synchronously, the action waits for the termination condition
+    to occur. When executed asynchronously, the action returns immediately
+    and the termination condition is not waited. The timeout for the
+    termination condition can be customized (otherwise the default action
+    timeout is used).
     """
 
     # pylint: disable=too-many-public-methods
 
     def __init__(self, telescope: TelescopeWrapper) -> None:
         self._telescope = telescope
-        self.actions_timeout: int | None = None
-        """The timeout to use for the actions.
-
-        If None, the default timeout is used
-        (actions timeout is left unchanged).
-        """
 
     # -----------------------------------------------------------
     # CENTRAL NODE DEVICES
@@ -125,7 +126,10 @@ class TMCFacade:
     # ACTIONS YOU CALL ON CENTRAL NODE
 
     def _setup_and_run_action(
-        self, action: TelescopeAction, wait_termination: bool
+        self,
+        action: TelescopeAction,
+        wait_termination: bool,
+        custom_timeout: int | None = None,
     ) -> Any:
         """Setup and run a telescope action.
 
@@ -133,46 +137,71 @@ class TMCFacade:
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
             condition is waited.
+        :param custom_timeout: A custom timeout (in seconds) to wait for
+            the termination condition to occur. If None, the default action
+            timeout is used. This parameter is useful only when
+            ``wait_termination=True``.
 
         :return: The (eventual) result of the action.
         """
         action.set_termination_condition_policy(wait_termination)
-        if self.actions_timeout is not None:
-            action.set_termination_condition_timeout(self.actions_timeout)
+        if custom_timeout is not None:
+            action.set_termination_condition_timeout(custom_timeout)
         return action.execute()
 
-    def move_to_on(self, wait_termination: bool = True) -> None:
+    def move_to_on(
+        self, wait_termination: bool = True, custom_timeout: int | None = None
+    ) -> None:
         """Move the telescope to ON state.
 
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
             condition is waited.
+        :param custom_timeout: A custom timeout (in seconds) to wait for
+            the termination condition to occur. If None, the default action
+            timeout is used. This parameter is useful only when
+            ``wait_termination=True``.
         """
         action = MoveToOn()
-        self._setup_and_run_action(action, wait_termination)
+        self._setup_and_run_action(action, wait_termination, custom_timeout)
 
-    def move_to_off(self, wait_termination: bool = True) -> None:
+    def move_to_off(
+        self, wait_termination: bool = True, custom_timeout: int | None = None
+    ) -> None:
         """Move the telescope to OFF state.
 
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
             condition is waited.
+        :param custom_timeout: A custom timeout (in seconds) to wait for
+            the termination condition to occur. If None, the default action
+            timeout is used. This parameter is useful only when
+            ``wait_termination=True``.
         """
         action = MoveToOff()
-        self._setup_and_run_action(action, wait_termination)
+        self._setup_and_run_action(action, wait_termination, custom_timeout)
 
-    def set_standby(self, wait_termination: bool = True) -> None:
+    def set_standby(
+        self, wait_termination: bool = True, custom_timeout: int | None = None
+    ) -> None:
         """Set the telescope to STANDBY state.
 
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
             condition is waited.
+        :param custom_timeout: A custom timeout (in seconds) to wait for
+            the termination condition to occur. If None, the default action
+            timeout is used. This parameter is useful only when
+            ``wait_termination=True``.
         """
         action = SetStandby()
-        self._setup_and_run_action(action, wait_termination)
+        self._setup_and_run_action(action, wait_termination, custom_timeout)
 
     def load_dish_vcc_configuration(
-        self, dish_vcc_config: str, wait_termination: bool = True
+        self,
+        dish_vcc_config: str,
+        wait_termination: bool = True,
+        custom_timeout: int | None = None,
     ) -> Tuple[ResultCode, str]:
         """Invoke LoadDishCfg command on central Node.
 
@@ -180,14 +209,23 @@ class TMCFacade:
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
             condition is waited.
+        :param custom_timeout: A custom timeout (in seconds) to wait for
+            the termination condition to occur. If None, the default action
+            timeout is used. This parameter is useful only when
+            ``wait_termination=True``.
 
         :return: result, message
         """
         action = CentralNodeLoadDishConfig(dish_vcc_config)
-        return self._setup_and_run_action(action, wait_termination)
+        return self._setup_and_run_action(
+            action, wait_termination, custom_timeout
+        )
 
     def assign_resources(
-        self, assign_input: JSONInput, wait_termination: bool = True
+        self,
+        assign_input: JSONInput,
+        wait_termination: bool = True,
+        custom_timeout: int | None = None,
     ) -> Tuple[ResultCode, str]:
         """Invoke Assign Resource command on central Node.
 
@@ -195,14 +233,23 @@ class TMCFacade:
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
             condition is waited.
+        :param custom_timeout: A custom timeout (in seconds) to wait for
+            the termination condition to occur. If None, the default action
+            timeout is used. This parameter is useful only when
+            ``wait_termination=True``.
 
         :return: result, message
         """
         action = CentralNodeAssignResources(assign_input)
-        return self._setup_and_run_action(action, wait_termination)
+        return self._setup_and_run_action(
+            action, wait_termination, custom_timeout
+        )
 
     def release_resources(
-        self, release_input: JSONInput, wait_termination: bool = True
+        self,
+        release_input: JSONInput,
+        wait_termination: bool = True,
+        custom_timeout: int | None = None,
     ) -> Tuple[ResultCode, str]:
         """Invoke Release Resource command on central Node.
 
@@ -210,11 +257,17 @@ class TMCFacade:
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
             condition is waited.
+        :param custom_timeout: A custom timeout (in seconds) to wait for
+            the termination condition to occur. If None, the default action
+            timeout is used. This parameter is useful only when
+            ``wait_termination=True``.
 
         :return: result, message
         """
         action = CentralNodeReleaseResources(release_input)
-        return self._setup_and_run_action(action, wait_termination)
+        return self._setup_and_run_action(
+            action, wait_termination, custom_timeout
+        )
 
     # -----------------------------------------------------------
     # ACTIONS YOU CALL ON SUBARRAY NODE
@@ -223,6 +276,7 @@ class TMCFacade:
         self,
         configure_input: JSONInput,
         wait_termination: bool = True,
+        custom_timeout: int | None = None,
     ) -> Tuple[ResultCode, str]:
         """Invoke configure command on subarray Node.
 
@@ -230,42 +284,63 @@ class TMCFacade:
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
             condition is waited.
+        :param custom_timeout: A custom timeout (in seconds) to wait for
+            the termination condition to occur. If None, the default action
+            timeout is used. This parameter is useful only when
+            ``wait_termination=True``.
 
         :return: result, message
         """
         action = SubarrayConfigure(configure_input)
-        return self._setup_and_run_action(action, wait_termination)
+        return self._setup_and_run_action(
+            action, wait_termination, custom_timeout
+        )
 
     def end_observation(
-        self, wait_termination: bool = True
+        self, wait_termination: bool = True, custom_timeout: int | None = None
     ) -> Tuple[ResultCode, str]:
         """Invoke End command on subarray Node.
 
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
             condition is waited.
+        :param custom_timeout: A custom timeout (in seconds) to wait for
+            the termination condition to occur. If None, the default action
+            timeout is used. This parameter is useful only when
+            ``wait_termination=True``.
 
         :return: result, message
         """
         action = SubarrayEndObservation()
-        return self._setup_and_run_action(action, wait_termination)
+        return self._setup_and_run_action(
+            action, wait_termination, custom_timeout
+        )
 
     def end_scan(
-        self, wait_termination: bool = True
+        self, wait_termination: bool = True, custom_timeout: int | None = None
     ) -> Tuple[ResultCode, str]:
         """Invoke EndScan command on subarray Node.
 
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
             condition is waited.
+        :param custom_timeout: A custom timeout (in seconds) to wait for
+            the termination condition to occur. If None, the default action
+            timeout is used. This parameter is useful only when
+            ``wait_termination=True``.
 
         :return: result, message
         """
         action = SubarrayEndScan()
-        return self._setup_and_run_action(action, wait_termination)
+        return self._setup_and_run_action(
+            action, wait_termination, custom_timeout
+        )
 
     def scan(
-        self, scan_input: JSONInput, wait_termination: bool = True
+        self,
+        scan_input: JSONInput,
+        wait_termination: bool = True,
+        custom_timeout: int | None = None,
     ) -> Tuple[ResultCode, str]:
         """Invoke Scan command on subarray Node.
 
@@ -273,48 +348,65 @@ class TMCFacade:
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
             condition is waited.
+        :param custom_timeout: A custom timeout (in seconds) to wait for
+            the termination condition to occur. If None, the default action
+            timeout is used.
 
         :return: result, message
         """
         action = SubarrayScan(scan_input)
-        return self._setup_and_run_action(action, wait_termination)
+        return self._setup_and_run_action(
+            action, wait_termination, custom_timeout
+        )
 
-    def abort(self, wait_termination: bool = True) -> Tuple[ResultCode, str]:
+    def abort(
+        self, wait_termination: bool = True, custom_timeout: int | None = None
+    ) -> Tuple[ResultCode, str]:
         """Invoke Abort command on subarray Node.
 
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
             condition is waited.
+        :param custom_timeout: A custom timeout (in seconds) to wait for
+            the termination condition to occur. If None, the default action
+            timeout is used. This parameter is useful only when
+            ``wait_termination=True``.
 
         :return: result, message
         """
         action = SubarrayAbort()
-        return self._setup_and_run_action(action, wait_termination)
+        return self._setup_and_run_action(
+            action, wait_termination, custom_timeout
+        )
 
-    def restart(self, wait_termination: bool = True) -> Tuple[ResultCode, str]:
+    def restart(
+        self, wait_termination: bool = True, custom_timeout: int | None = None
+    ) -> Tuple[ResultCode, str]:
         """Invoke Restart command on subarray Node.
 
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
             condition is waited.
+        :param custom_timeout: A custom timeout (in seconds) to wait for
+            the termination condition to occur. If None, the default action
+            timeout is used. This parameter is useful only when
+            ``wait_termination=True``.
 
         :return: result, message
         """
         action = SubarrayRestart()
-        return self._setup_and_run_action(action, wait_termination)
+        return self._setup_and_run_action(
+            action, wait_termination, custom_timeout
+        )
 
     def force_change_of_obs_state(
         self,
         dest_state_name: ObsState,
         commands_inputs: TestHarnessInputs,
         wait_termination: bool = True,
+        custom_timeout: int | None = None,
     ) -> None:
         """Force SubarrayNode obsState to provided obsState.
-
-        :param commands_inputs: The JSON inputs for the commands to bring
-            the subarray in a certain obs state. You can pass just the
-            JSON inputs you need, but if one of them is missing, you may
-            occur in an error.
 
         :param dest_state_name: Name of the destination obsState.
         :param commands_inputs: The JSON inputs for the commands to bring
@@ -324,9 +416,13 @@ class TMCFacade:
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
             condition is waited.
+        :param custom_timeout: A custom timeout (in seconds) to wait for
+            the termination condition to occur. If None, the default action
+            timeout is used. This parameter is useful only when
+            ``wait_termination=True``.
         """
         action = ForceChangeOfObsState(dest_state_name, commands_inputs)
-        self._setup_and_run_action(action, wait_termination)
+        self._setup_and_run_action(action, wait_termination, custom_timeout)
 
     # -----------------------------------------------------------
     # GENERIC ACTIONS
@@ -352,6 +448,7 @@ class TMCFacade:
         command_name: str,
         command_input: JSONInput | None = None,
         expected_obs_state: "ObsState | None" = None,
+        custom_timeout: int | None = None,
     ) -> Tuple[ResultCode, str]:
         """Run a generic command on subarray node.
 
@@ -364,6 +461,10 @@ class TMCFacade:
         :param expected_obs_state: Expected obsState after command execution.
             By default no expected obsState (=> no waiting for termination
             condition).
+        :param custom_timeout: A custom timeout (in seconds) to wait for
+            the termination condition to occur. If None, the default action
+            timeout is used. This parameter is useful only when
+            ``expected_obs_state`` is specified.
 
         :return: result, message
         """
@@ -373,6 +474,6 @@ class TMCFacade:
             expected_obs_state=expected_obs_state,
         )
         action.set_termination_condition_policy(expected_obs_state is not None)
-        if self.actions_timeout is not None:
-            action.set_termination_condition_timeout(self.actions_timeout)
+        if custom_timeout is not None:
+            action.set_termination_condition_timeout(custom_timeout)
         return action.execute()
