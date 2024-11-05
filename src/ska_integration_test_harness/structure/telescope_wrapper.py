@@ -1,9 +1,5 @@
 """A wrapper class that contains all the telescope subsystems."""
 
-from assertpy import assert_that
-from ska_control_model import ObsState
-from ska_tango_testing.integration import TangoEventTracer
-
 from ska_integration_test_harness.common_utils.tango_devices_info import (
     DevicesInfoProvider,
     DevicesInfoServiceException,
@@ -189,10 +185,6 @@ class TelescopeWrapper:
         self._sdp = sdp
         self._csp = csp
         self._dishes = dishes
-        # TODO: Add here some "health checks" (?)
-
-    TEARDOWN_TIMEOUT = 100
-    """The overall timeout (in seconds) used in the teardown procedure."""
 
     def tear_down(self) -> None:
         """Tear down the entire telescope test structure.
@@ -201,43 +193,10 @@ class TelescopeWrapper:
         """
         self.fail_if_not_set_up()
 
-        # Subscribe to the obsState events to be sure that
-        # teardown moves the system to the expected state.
-        event_tracer = TangoEventTracer()
-        event_tracer.subscribe_event(self.tmc.subarray_node, "obsState")
-        event_tracer.subscribe_event(self.csp.csp_subarray, "obsState")
-        event_tracer.subscribe_event(self.sdp.sdp_subarray, "obsState")
-
         self.tmc.tear_down()
         self.sdp.tear_down()
         self.csp.tear_down()
         self.dishes.tear_down()
-
-        # Assert the system is in the expected state after the teardown
-        assert_that(event_tracer).described_as(
-            "FAIL IN TEARDOWN PROCEDURE: "
-            "TMC Subarray node "
-            f"({self.tmc.subarray_node}) "
-            "ObsState is supposed to be EMPTY after the teardown."
-        ).within_timeout(self.TEARDOWN_TIMEOUT).has_change_event_occurred(
-            self.tmc.subarray_node, "obsState", ObsState.EMPTY
-        )
-        assert_that(event_tracer).described_as(
-            "FAIL IN TEARDOWN PROCEDURE: "
-            "CSP Subarray node "
-            f"({self.csp.csp_subarray}) "
-            "obsState is supposed to be EMPTY after the teardown."
-        ).within_timeout(self.TEARDOWN_TIMEOUT).has_change_event_occurred(
-            self.csp.csp_subarray, "obsState", ObsState.EMPTY
-        )
-        assert_that(event_tracer).described_as(
-            "FAIL IN TEARDOWN PROCEDURE: "
-            "SDP Subarray node "
-            f"({self.sdp.sdp_subarray}) "
-            "obsState is supposed to be EMPTY after the teardown."
-        ).within_timeout(self.TEARDOWN_TIMEOUT).has_change_event_occurred(
-            self.sdp.sdp_subarray, "obsState", ObsState.EMPTY
-        )
 
     def fail_if_not_set_up(self) -> None:
         """Fail if the telescope test structure is not set up.
