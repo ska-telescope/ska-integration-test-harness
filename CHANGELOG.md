@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.1 (5th November 2024)
+
+- **SST-981**: observation state reset permits to reach ABORTING, ABORTED
+  and RESETTING states.
+- **SST-982**: actions default timeout is now configurable, and also
+  the timeout is now specifiable in the action call from the TMC facade.
+
 ## v0.2.0 (25th October 2024)
 
 - **SST-975**: Add a mechanism to console log the Tango device versions

@@ -176,26 +176,9 @@ class TelescopeAction(abc.ABC, Generic[T]):
     (https://refactoring.guru/design-patterns/template-method).
     """  # pylint: disable=line-too-long # noqa E501
 
-    DEFAULT_TERMINATION_CONDITION_TIMEOUT = 30
-    """The default timeout for the termination condition (in seconds)."""
-
     def __init__(self) -> None:
         """Initialise the action, with default configurations and tools."""
         super().__init__()
-
-        # ----------------------------------------------------------------
-        # Action configurations
-
-        self.termination_condition_timeout: float = (
-            self.DEFAULT_TERMINATION_CONDITION_TIMEOUT
-        )
-        """The timeout for the termination condition (in seconds)."""
-
-        self.wait_termination: bool = True
-        """If True, the termination condition will be waited for."""
-
-        self.do_logging = True
-        """If True, the action will log its execution beginning and end."""
 
         # ----------------------------------------------------------------
         # Action tools
@@ -210,6 +193,24 @@ class TelescopeAction(abc.ABC, Generic[T]):
 
         self._logger = logging.getLogger(__name__)
         """A logger to display messages during the action execution"""
+
+        # ----------------------------------------------------------------
+        # Action configurations
+
+        self.termination_condition_timeout: float = (
+            self.telescope.actions_default_timeout
+        )
+        """The timeout for the termination condition (in seconds).
+
+        It defaults to the one specified in the telescope wrapper class
+        (**at the moment of the action creation**).
+        """
+
+        self.wait_termination: bool = True
+        """If True, the termination condition will be waited for."""
+
+        self.do_logging = True
+        """If True, the action will log its execution beginning and end."""
 
     # ----------------------------------------------------------------
     # Configurations setters

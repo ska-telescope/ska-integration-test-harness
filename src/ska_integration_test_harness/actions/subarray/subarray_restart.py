@@ -2,22 +2,32 @@
 
 from ska_control_model import ObsState
 
-from ska_integration_test_harness.actions.telescope_action import (
-    TelescopeAction,
+from ska_integration_test_harness.actions.command_action import (
+    TransientQuiescentCommandAction,
 )
+from ska_integration_test_harness.actions.expected_event import ExpectedEvent
 from ska_integration_test_harness.actions.utils.termination_conditions import (
     all_subarrays_have_obs_state,
 )
 
 
-class SubarrayRestart(TelescopeAction):
-    """Invoke Restart command on subarray Node."""
+class SubarrayRestart(TransientQuiescentCommandAction):
+    """Invoke Restart command on subarray Node.
+
+    This action is expected to be called when the subarray is in ABORTED state.
+    This action will move the subarray to the RESETTING state (transient)
+    and then to the EMPTY state (quiescent and stable).
+    """
 
     def _action(self):
         self._log("Invoking Restart on TMC SubarrayNode")
         result, message = self.telescope.tmc.subarray_node.Restart()
         return result, message
 
-    def termination_condition(self):
-        """All subarrays are in EMPTY state."""
+    def termination_condition_for_quiescent_state(self) -> list[ExpectedEvent]:
+        """All subarrays must be in EMPTY state."""
         return all_subarrays_have_obs_state(self.telescope, ObsState.EMPTY)
+
+    def termination_condition_for_transient_state(self) -> list[ExpectedEvent]:
+        """All subarrays must be in RESETTING state."""
+        return all_subarrays_have_obs_state(self.telescope, ObsState.RESETTING)

@@ -27,6 +27,7 @@ class MockTelescopeWrapper:
             attribute_name="State",
             attribute_value="OFF",
         )
+        self.actions_default_timeout = 100
 
 
 class SimpleAction(TelescopeAction[bool]):
@@ -41,13 +42,23 @@ class SimpleAction(TelescopeAction[bool]):
 
 
 class TestTelescopeAction:
-    """Unit tests for TelescopeAction class."""
+    """Unit tests for TelescopeAction class.
+
+    IMPORTANT: it requires a fixture that ensures the telescope wrapper is
+    not yet defined. This is to avoid the singleton pattern to interfere
+    with the tests. The fixture is defined in the conftest.py file.
+    """
 
     @staticmethod
     def create_simple_action() -> SimpleAction:
         """Create a simple action for testing."""
-        action = SimpleAction()
-        action.telescope = MockTelescopeWrapper()
+        with patch(
+            "ska_integration_test_harness.actions.telescope_action"
+            ".TelescopeWrapper",
+            return_value=MockTelescopeWrapper(),
+        ):
+            action = SimpleAction()
+
         # pylint: disable=protected-access
         action._state_change_waiter = MockStateChangeWaiter()
         return action
@@ -75,7 +86,7 @@ class TestTelescopeAction:
                 "%s: %s",
                 "SimpleAction",
                 "Starting action execution "
-                "(wait_termination=True, timeout=30)",
+                "(wait_termination=True, timeout=100)",
             ),
             call("%s: %s", "SimpleAction", "Executing simple action"),
             call("%s: %s", "SimpleAction", "Action execution completed"),
