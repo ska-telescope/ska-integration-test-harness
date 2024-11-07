@@ -15,7 +15,7 @@ class SubarrayRestart(TransientQuiescentCommandAction):
     """Invoke Restart command on subarray Node.
 
     This action is expected to be called when the subarray is in ABORTED state.
-    This action will move the subarray to the RESETTING state (transient)
+    This action will move the subarray to the RESTARTING state (transient)
     and then to the EMPTY state (quiescent and stable).
     """
 
@@ -29,5 +29,7 @@ class SubarrayRestart(TransientQuiescentCommandAction):
         return all_subarrays_have_obs_state(self.telescope, ObsState.EMPTY)
 
     def termination_condition_for_transient_state(self) -> list[ExpectedEvent]:
-        """All subarrays must be in RESETTING state."""
-        return all_subarrays_have_obs_state(self.telescope, ObsState.RESETTING)
+        """All subarrays must be in RESTARTING state."""
+        return all_subarrays_have_obs_state(
+            self.telescope, ObsState.RESTARTING
+        )
