@@ -245,7 +245,8 @@ class SubarrayObsStateResetterFactory:
         :param target_state: The target state to which the subarray should
             be reset.
         :return: A `TelescopeAction` to reset the subarray to the given state.
-        :raises NotImplementedError: If the target state is not implemented.
+        :raises NotImplementedError: If the procedure to reach the
+            target state is not implemented.
         """
         if target_state not in self._map_state_to_method:
             raise NotImplementedError(
