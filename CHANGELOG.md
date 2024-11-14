@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.2 (14th November 2024)
+
+- **SST-981**: small fix from the previous release, the observation state
+  we support to reach is "RESTARTING", not "RESETTING". RESETTING is not
+  (yet) supported.
+
 ## v0.2.1 (5th November 2024)
 
 - **SST-981**: observation state reset permits to reach ABORTING, ABORTED

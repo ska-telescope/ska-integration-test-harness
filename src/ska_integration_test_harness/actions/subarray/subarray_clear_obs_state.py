@@ -49,6 +49,7 @@ class SubarrayClearObsState(TelescopeAction[None]):
 
         if self.telescope.tmc.subarray_node.obsState in [
             ObsState.ABORTED,
+            ObsState.RESTARTING,
         ]:
             restart = SubarrayRestart()
             restart.set_termination_condition_timeout(

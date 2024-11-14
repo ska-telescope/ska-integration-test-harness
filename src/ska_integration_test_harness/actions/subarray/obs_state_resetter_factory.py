@@ -205,11 +205,11 @@ class SubarrayObsStateResetterFactory:
             ],
         )
 
-    def create_action_to_reset_subarray_to_resetting(self) -> TelescopeAction:
-        """Create a `TelescopeAction` to reset the subarray to `RESETTING`.
+    def create_action_to_reset_subarray_to_restarting(self) -> TelescopeAction:
+        """Create a `TelescopeAction` to reset the subarray to `RESTARTING`.
 
         :return: A `TelescopeAction` to reset the subarray to
-            the `ObsState.RESETTING` state.
+            the `ObsState.RESTARTING` state.
         """
         reset_action = SubarrayRestart()
         reset_action.set_synchronise_on_transient_state(True)
@@ -234,7 +234,7 @@ class SubarrayObsStateResetterFactory:
             ObsState.SCANNING: self.create_action_to_reset_subarray_to_scanning,  # pylint: disable=line-too-long # noqa: E501
             ObsState.ABORTING: self.create_action_to_reset_subarray_to_aborting,  # pylint: disable=line-too-long # noqa: E501
             ObsState.ABORTED: self.create_action_to_reset_subarray_to_aborted,
-            ObsState.RESETTING: self.create_action_to_reset_subarray_to_resetting,  # pylint: disable=line-too-long # noqa: E501
+            ObsState.RESTARTING: self.create_action_to_reset_subarray_to_restarting,  # pylint: disable=line-too-long # noqa: E501
         }
 
     def create_action_to_reset_subarray_to_state(
@@ -245,5 +245,12 @@ class SubarrayObsStateResetterFactory:
         :param target_state: The target state to which the subarray should
             be reset.
         :return: A `TelescopeAction` to reset the subarray to the given state.
+        :raises NotImplementedError: If the procedure to reach the
+            target state is not implemented.
         """
+        if target_state not in self._map_state_to_method:
+            raise NotImplementedError(
+                f"Resetting subarray to {target_state} is not implemented."
+            )
+
         return self._map_state_to_method[target_state]()

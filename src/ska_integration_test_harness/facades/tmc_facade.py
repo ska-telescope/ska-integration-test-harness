@@ -420,6 +420,8 @@ class TMCFacade:
             the termination condition to occur. If None, the default action
             timeout is used. This parameter is useful only when
             ``wait_termination=True``.
+        :raises NotImplementedError: If the procedure to reach the
+            target state is not implemented.
         """
         action = ForceChangeOfObsState(dest_state_name, commands_inputs)
         self._setup_and_run_action(action, wait_termination, custom_timeout)

@@ -34,6 +34,9 @@ class ForceChangeOfObsState(TelescopeAction[None]):
 
     By default each step will keep the default wait termination condition
     and each step will wait for its termination condition.
+
+    If the procedure to reach the target state is not implemented,
+    the action will raise a ``NotImplementedError``.
     """
 
     def __init__(
