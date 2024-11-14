@@ -1,5 +1,6 @@
 """A wrapper class that contains all the telescope subsystems."""
 
+import logging
 from ska_integration_test_harness.common_utils.tango_devices_info import (
     DevicesInfoProvider,
     DevicesInfoServiceException,
@@ -193,10 +194,25 @@ class TelescopeWrapper:
         """
         self.fail_if_not_set_up()
 
-        self.tmc.tear_down()
+        first_attempt_failed = False
+        try:
+            self.tmc.tear_down()
+        except Exception as error:  # pylint: disable=broad-except
+            logging.error(
+                "Error during first attempt of TMC tear down: %s", error)
+
         self.sdp.tear_down()
         self.csp.tear_down()
         self.dishes.tear_down()
+
+        if first_attempt_failed:
+            try:
+                self.tmc.tear_down()
+            except Exception as error:
+                logging.error(
+                    "Error during second attempt of TMC tear down: %s", error)
+                raise error
+            
 
     def fail_if_not_set_up(self) -> None:
         """Fail if the telescope test structure is not set up.
