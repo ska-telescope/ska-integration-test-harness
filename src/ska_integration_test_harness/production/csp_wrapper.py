@@ -1,10 +1,10 @@
 """A wrapper for a production CSP."""
 
+import tango
 from assertpy import assert_that
 from ska_control_model import ObsState
 from ska_tango_testing.integration import TangoEventTracer
 from tango import DevState
-import tango
 
 from ska_integration_test_harness.config.components_config import (
     CSPConfiguration,
@@ -74,29 +74,29 @@ class ProductionCSPWrapper(CSPWrapper):
     def tear_down(self) -> None:
         """Tear down the CSP (not needed)."""
         if self.csp_subarray.obsState != ObsState.EMPTY:
-            # set adminMode to 1 so devices 
+            # set adminMode to 1 so devices
+            self._hard_reset()
 
     def _hard_reset(self) -> None:
         """Hard reset the CSP."""
         # set adminMode to 1 so devices are offline
         self.csp_master.adminMode = 1
-        
+
         # call init first on CBF devices, then on CSPLMC
         for device in [
-            tango.DeviceProxy('mid_csp_cbf/sub_elt/subarray_01'), 
-            tango.DeviceProxy('mid_csp_cbf/sub_elt/subarray_02'),
-            tango.DeviceProxy('mid_csp_cbf/sub_elt/subarray_03'),
-            tango.DeviceProxy('mid_csp_cbf/sub_elt/controller'),
-            tango.DeviceProxy('mid-csp/subarray/01'),
-            tango.DeviceProxy('mid-csp/subarray/02'),
-            tango.DeviceProxy('mid-csp/subarray/03'),
-            tango.DeviceProxy('mid-csp/control/0')
+            tango.DeviceProxy("mid_csp_cbf/sub_elt/subarray_01"),
+            tango.DeviceProxy("mid_csp_cbf/sub_elt/subarray_02"),
+            tango.DeviceProxy("mid_csp_cbf/sub_elt/subarray_03"),
+            tango.DeviceProxy("mid_csp_cbf/sub_elt/controller"),
+            tango.DeviceProxy("mid-csp/subarray/01"),
+            tango.DeviceProxy("mid-csp/subarray/02"),
+            tango.DeviceProxy("mid-csp/subarray/03"),
+            tango.DeviceProxy("mid-csp/control/0"),
         ]:
             device.init()
 
         # set adminMode to 0 so devices are online
         self.csp_master.adminMode = 0
-
 
     def clear_command_call(self) -> None:
         """Clear the command call on the CSP (not needed)."""
