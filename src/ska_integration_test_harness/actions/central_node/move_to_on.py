@@ -16,10 +16,9 @@ class MoveToOn(TelescopeCommandAction):
     """An action to move the central node to ON State."""
 
     def __init__(self) -> None:
-        super().__init__(
-            target_device=self.telescope.tmc.central_node,
-            is_long_running_command=True,
-        )
+        super().__init__()
+        self.target_device = self.telescope.tmc.central_node
+        self.is_long_running_command = True
 
     def _action(self):
         self._log("Moving the central node to ON state")

@@ -27,10 +27,9 @@ class SubarrayConfigure(TransientQuiescentCommandAction):
     """
 
     def __init__(self, configure_input: JSONInput):
-        super().__init__(
-            target_device=self.telescope.tmc.subarray_node,
-            is_long_running_command=True,
-        )
+        super().__init__()
+        self.target_device = self.telescope.tmc.subarray_node
+        self.is_long_running_command = True
         self.configure_input = configure_input
 
     def _action(self):

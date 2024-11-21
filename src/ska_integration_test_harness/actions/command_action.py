@@ -34,8 +34,8 @@ class TelescopeCommandAction(TelescopeAction[tuple]):
 
     def __init__(
         self,
-        target_device: tango.DeviceProxy,
-        is_long_running_command: bool,
+        target_device: tango.DeviceProxy = None,
+        is_long_running_command: bool = False,
     ) -> None:
         super().__init__()
         self.target_device = target_device
@@ -53,8 +53,7 @@ class TelescopeCommandAction(TelescopeAction[tuple]):
         override the ``termination_condition`` method without calling the
         superclass method. You can extend the termination condition to wait
         more things by overriding the ``termination_condition`` method and
-        including the result of the superclass method in your own
-        returned list.
+        including the result of the superclass method in your ownreturned list.
 
         :return: A list of ExpectedEvent objects to wait for.
         """
@@ -98,8 +97,8 @@ class TransientQuiescentCommandAction(TelescopeCommandAction):
 
     def __init__(
         self,
-        target_device: tango.DeviceProxy,
-        is_long_running_command: bool,
+        target_device: tango.DeviceProxy = None,
+        is_long_running_command: bool = False,
     ) -> None:
         super().__init__(target_device, is_long_running_command)
 
