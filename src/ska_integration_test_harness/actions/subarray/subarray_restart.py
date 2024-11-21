@@ -19,6 +19,12 @@ class SubarrayRestart(TransientQuiescentCommandAction):
     and then to the EMPTY state (quiescent and stable).
     """
 
+    def __init__(self) -> None:
+        super().__init__(
+            target_device=self.telescope.tmc.subarray_node,
+            is_long_running_command=True,
+        )
+
     def _action(self):
         self._log("Invoking Restart on TMC SubarrayNode")
         result, message = self.telescope.tmc.subarray_node.Restart()

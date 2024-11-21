@@ -10,7 +10,6 @@ from ska_integration_test_harness.actions.utils.generate_eb_pb_ids import (
 )
 from ska_integration_test_harness.actions.utils.termination_conditions import (
     all_subarrays_have_obs_state,
-    long_running_command_is_completed,
 )
 from ska_integration_test_harness.inputs.json_input import JSONInput
 
@@ -26,7 +25,10 @@ class SubarrayAssignResources(TransientQuiescentCommandAction):
     """
 
     def __init__(self, assign_input: JSONInput):
-        super().__init__()
+        super().__init__(
+            target_device=self.telescope.tmc.subarray_node,
+            is_long_running_command=True,
+        )
         self.assign_input = assign_input
 
     def _action(self):
@@ -45,8 +47,4 @@ class SubarrayAssignResources(TransientQuiescentCommandAction):
 
     def termination_condition_for_quiescent_state(self):
         """All subarrays must reach the IDLE state and LRC must terminate."""
-        res = long_running_command_is_completed(
-            self.telescope.tmc.subarray_node, self.get_last_execution_result
-        )
-        res += all_subarrays_have_obs_state(self.telescope, ObsState.IDLE)
-        return res
+        return all_subarrays_have_obs_state(self.telescope, ObsState.IDLE)

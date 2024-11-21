@@ -41,7 +41,11 @@ class SubarrayExecuteTransition(TelescopeCommandAction):
             the command is executed.
         :param command_input: The JSON input for the command.
         """
-        super().__init__()
+        # TODO: is this a LRC?
+        super().__init__(
+            target_device=self.telescope.tmc.subarray_node,
+            is_long_running_command=False,
+        )
 
         self.command_name = command_name
         """The name of the command to be executed (e.g., "Configure")."""

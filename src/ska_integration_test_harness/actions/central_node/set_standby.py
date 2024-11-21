@@ -2,11 +2,11 @@
 
 from tango import DevState
 
+from ska_integration_test_harness.actions.command_action import (
+    TelescopeCommandAction,
+)
 from ska_integration_test_harness.actions.expected_event import (
     ExpectedStateChange,
-)
-from ska_integration_test_harness.actions.telescope_action import (
-    TelescopeAction,
 )
 from ska_integration_test_harness.actions.utils.termination_conditions import (
     dishes_have_dish_mode,
@@ -14,21 +14,27 @@ from ska_integration_test_harness.actions.utils.termination_conditions import (
 from ska_integration_test_harness.inputs.dish_mode import DishMode
 
 
-class SetStandby(TelescopeAction[None]):
+class SetStandby(TelescopeCommandAction):
     """An action to set the central node to STANDBY State."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            target_device=self.telescope.tmc.central_node,
+            is_long_running_command=True,
+        )
 
     def _action(self):
         self._log("Setting the central node to STANDBY state")
-        self.telescope.tmc.central_node.TelescopeStandby()
+        res = self.telescope.tmc.central_node.TelescopeStandby()
         self.telescope.csp.move_to_off()
+        return res
 
     def termination_condition(self):
         """Central node should be in STANDBY state and so also SDP
-        all dishes should be in STANDBY_LP mode."""
-
-        # subarrays must be in OFF state,
-        # master devices must be in STANDBY state
-        res = [
+        all dishes should be in STANDBY_LP mode and LRC must terminate.
+        """
+        # The central node should be in STANDBY state
+        expected_events = [
             ExpectedStateChange(
                 self.telescope.tmc.central_node,
                 "telescopeState",
@@ -37,6 +43,8 @@ class SetStandby(TelescopeAction[None]):
         ]
 
         # All dishes should be in STANDBY_LP mode
-        res.extend(dishes_have_dish_mode(self.telescope, DishMode.STANDBY_LP))
+        expected_events += dishes_have_dish_mode(
+            self.telescope, DishMode.STANDBY_LP
+        )
 
-        return res
+        return expected_events

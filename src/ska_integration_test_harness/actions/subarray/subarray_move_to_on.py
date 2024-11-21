@@ -3,13 +3,19 @@
 from assertpy import assert_that
 from tango import DevState
 
-from ska_integration_test_harness.actions.telescope_action import (
-    TelescopeAction,
+from ska_integration_test_harness.actions.command_action import (
+    TelescopeCommandAction,
 )
 
 
-class SubarrayMoveToOn(TelescopeAction):
+class SubarrayMoveToOn(TelescopeCommandAction):
     """Invoke MoveToOn command on subarray Node."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            target_device=self.telescope.tmc.subarray_node,
+            is_long_running_command=True,
+        )
 
     def _action(self):
         if self.telescope.tmc.subarray_node.State != DevState.ON:

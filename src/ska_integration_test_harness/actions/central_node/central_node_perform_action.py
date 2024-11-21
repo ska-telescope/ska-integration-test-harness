@@ -12,7 +12,11 @@ class CentralNodePerformAction(TelescopeCommandAction):
     def __init__(
         self, command_name: str, command_input: JSONInput | None = None
     ):
-        super().__init__()
+        # TODO: is this a LRC?
+        super().__init__(
+            target_device=self.telescope.tmc.central_node,
+            is_long_running_command=False,
+        )
         self.command_name = command_name
         self.command_input = command_input
 

@@ -2,8 +2,8 @@
 
 from ska_control_model import ObsState
 
-from ska_integration_test_harness.actions.telescope_action import (
-    TelescopeAction,
+from ska_integration_test_harness.actions.command_action import (
+    TelescopeCommandAction,
 )
 from ska_integration_test_harness.actions.utils.termination_conditions import (
     all_subarrays_have_obs_state,
@@ -11,13 +11,16 @@ from ska_integration_test_harness.actions.utils.termination_conditions import (
 from ska_integration_test_harness.inputs.json_input import JSONInput
 
 
-class SubarrayScan(TelescopeAction):
+class SubarrayScan(TelescopeCommandAction):
     """Invoke Scan command on subarray Node."""
 
     # TODO: scan may be too a TransientQuiescentCommandAction
 
     def __init__(self, scan_input: JSONInput):
-        super().__init__()
+        super().__init__(
+            target_device=self.telescope.tmc.subarray_node,
+            is_long_running_command=True,
+        )
         self.scan_input = scan_input
 
     def _action(self):

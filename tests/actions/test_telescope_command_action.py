@@ -1,5 +1,7 @@
 """Unit tests for TelescopeCommandAction class and its subclasses."""
 
+from unittest.mock import Mock
+
 from assertpy import assert_that
 
 from ska_integration_test_harness.actions.command_action import (
@@ -9,6 +11,8 @@ from ska_integration_test_harness.actions.expected_event import (
     ExpectedStateChange,
 )
 
+# TODO: test TelescopeCommandAction too
+
 
 class DummyTransientQuiescentCommand(TransientQuiescentCommandAction):
     """A dummy TransientQuiescentCommandAction subclass for testing purposes.
@@ -16,6 +20,9 @@ class DummyTransientQuiescentCommand(TransientQuiescentCommandAction):
     It simply returns two different termination conditions
     for the transient and quiescent states.
     """
+
+    def __init__(self):
+        super().__init__(Mock(), is_long_running_command=False)
 
     def _action(self):
         """A dummy action that does nothing."""

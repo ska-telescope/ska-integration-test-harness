@@ -11,7 +11,11 @@ class CentralNodeLoadDishConfig(TelescopeCommandAction):
     """Invoke LoadDishCfg command on CentralNode."""
 
     def __init__(self, dish_vcc_config: JSONInput):
-        super().__init__()
+        # TODO: is this a LRC?
+        super().__init__(
+            target_device=self.telescope.tmc.central_node,
+            is_long_running_command=False,
+        )
         self.dish_vcc_config = dish_vcc_config
 
     def _action(self):
