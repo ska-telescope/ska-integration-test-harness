@@ -1,7 +1,9 @@
 """Generate some termination conditions for the subarray."""
 
+from typing import Any, Callable
+
 import tango
-from ska_control_model import ObsState
+from ska_control_model import ObsState, ResultCode
 
 from ska_integration_test_harness.actions.expected_event import (
     ExpectedEvent,
@@ -114,11 +116,10 @@ def dishes_have_dish_mode(
 
 
 def resources_are_released(telescope: TelescopeWrapper) -> list[ExpectedEvent]:
-    """Termination condition for resources are released.
+    """Termination condition to check that resources are released.
 
-    Since it's repeated three times in different actions, we encapsulate it
-    here. The termination condition is that all subarrays must be in EMPTY
-    state and the assigned resources should have changed.
+    It extracts the assignedResources attribute value before and after the
+    action and checks that they are different.
 
     :param telescope: The telescope wrapper.
 
@@ -126,12 +127,41 @@ def resources_are_released(telescope: TelescopeWrapper) -> list[ExpectedEvent]:
     """
     pre_action_attr_value = telescope.tmc.subarray_node.assignedResources
 
-    # all subarrays must be in EMPTY state
     return [
         ExpectedEvent(
             device=telescope.tmc.subarray_node,
             attribute="assignedResources",
             predicate=lambda event: event.attribute_value
             != pre_action_attr_value,
+        )
+    ]
+
+
+def long_running_command_is_completed(
+    target_device: tango.DeviceProxy | str,
+    command_result_getter: Callable[[], Any],
+) -> list[ExpectedEvent]:
+    """Termination condition to check a long running command is completed.
+
+    Termination condition to verify that a long running command is completed
+    on a certain target device. This is done
+    by subscribing to longRunningCommandResult attribute and verifying that
+    there is an event with result code ``ResultCode.OK``.
+
+    :param target_device: The target device.
+    :param command_result_getter: A getter for an updated command result
+        (which we suppose to be available not yet, but after the command
+        is called).
+    :return: The termination condition, as a sequence of expected events.
+    """
+    return [
+        ExpectedEvent(
+            device=target_device,
+            attribute="longRunningCommandResult",
+            predicate=lambda e: e.attribute_value
+            == (
+                command_result_getter()[1][0],
+                f'[{ResultCode.OK.value}, "Command Completed"]',
+            ),
         )
     ]

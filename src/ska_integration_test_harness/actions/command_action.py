@@ -16,6 +16,9 @@ class TelescopeCommandAction(TelescopeAction[tuple[ResultCode, str]]):
     It is expected to return the tuple of result code and message.
     """
 
+    # NOTE: what is exactly the type of the return value of a command?
+    # From what I see, it may not be a tuple of ResultCode and str...
+
 
 class TransientQuiescentCommandAction(TelescopeCommandAction):
     """An action which can be synchronised on quiescent or transient state.
