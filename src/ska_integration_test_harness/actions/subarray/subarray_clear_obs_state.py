@@ -55,6 +55,14 @@ class SubarrayClearObsState(TelescopeAction[None]):
             restart.set_termination_condition_timeout(
                 self.termination_condition_timeout
             )
+            # if a restarting process is ongoing, I don't want it to be
+            # treated as a long running command
+            if (
+                self.telescope.tmc.subarray_node.obsState
+                == ObsState.RESTARTING
+            ):
+                restart.is_long_running_command = False
+
             restart.execute()
 
         # using separate checks, since this isn't a real "waiting" action
