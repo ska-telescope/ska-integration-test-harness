@@ -31,7 +31,7 @@ from .subarray_assign_resources import SubarrayAssignResources
 from .subarray_configure import SubarrayConfigure
 from .subarray_end_observation import SubarrayEndObservation
 from .subarray_end_scan import SubarrayEndScan
-from .subarray_execute_transition import SubarrayExecuteTransition
+from .subarray_execute_transition import SubarrayRunCommand
 from .subarray_force_abort import SubarrayForceAbort
 from .subarray_move_to_off import SubarrayMoveToOff
 from .subarray_move_to_on import SubarrayMoveToOn
@@ -51,7 +51,7 @@ __all__ = [
     "SubarrayEndScan",
     "SubarrayRestart",
     "SubarrayForceAbort",
-    "SubarrayExecuteTransition",
+    "SubarrayRunCommand",
     "SubarrayMoveToOn",
     "SubarrayMoveToOff",
 ]

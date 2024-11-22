@@ -16,7 +16,7 @@ from ..actions.central_node.central_node_load_dish_config import (
     CentralNodeLoadDishConfig,
 )
 from ..actions.central_node.central_node_perform_action import (
-    CentralNodePerformAction,
+    CentralNodeRunCommand,
 )
 from ..actions.central_node.central_node_release_resources import (
     CentralNodeReleaseResources,
@@ -29,9 +29,7 @@ from ..actions.subarray.subarray_abort import SubarrayAbort
 from ..actions.subarray.subarray_configure import SubarrayConfigure
 from ..actions.subarray.subarray_end_observation import SubarrayEndObservation
 from ..actions.subarray.subarray_end_scan import SubarrayEndScan
-from ..actions.subarray.subarray_execute_transition import (
-    SubarrayExecuteTransition,
-)
+from ..actions.subarray.subarray_execute_transition import SubarrayRunCommand
 from ..actions.subarray.subarray_restart import SubarrayRestart
 from ..actions.subarray.subarray_scan import SubarrayScan
 from ..inputs.json_input import JSONInput
@@ -442,7 +440,7 @@ class TMCFacade:
         :param command_name: Name of command to execute.
         :param command_input: Json send as input to execute command.
         """
-        action = CentralNodePerformAction(command_name, command_input)
+        action = CentralNodeRunCommand(command_name, command_input)
         return action.execute()
 
     def run_command_on_subarray_node(
@@ -470,7 +468,7 @@ class TMCFacade:
 
         :return: result, message
         """
-        action = SubarrayExecuteTransition(
+        action = SubarrayRunCommand(
             command_name,
             command_input=command_input,
             expected_obs_state=expected_obs_state,
