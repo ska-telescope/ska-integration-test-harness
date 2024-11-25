@@ -13,11 +13,11 @@ class CentralNodeLoadDishConfig(TelescopeCommandAction):
     def __init__(self, dish_vcc_config: JSONInput):
         super().__init__()
         self.target_device = self.telescope.tmc.central_node
-        self.is_long_running_command = True
+        # NOTE: this is a long running command, but in practice it is not
+        self.is_long_running_command = False
         self.dish_vcc_config = dish_vcc_config
 
     def _action(self):
-        # AttributeError: LoadDishConfig. Did you mean: 'LoadDishCfg'?
         self._log("Invoking LoadDishCfg on CentralNode")
         result, message = self.telescope.tmc.central_node.LoadDishCfg(
             self.dish_vcc_config.as_str()
