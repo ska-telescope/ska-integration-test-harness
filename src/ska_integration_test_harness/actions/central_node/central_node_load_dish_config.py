@@ -13,7 +13,8 @@ class CentralNodeLoadDishConfig(TelescopeCommandAction):
     def __init__(self, dish_vcc_config: JSONInput):
         super().__init__()
         self.target_device = self.telescope.tmc.central_node
-        self.is_long_running_command = True
+        # Is a LRC, but right now it raises err. code 3. TODO: fix this
+        self.is_long_running_command = False 
         self.dish_vcc_config = dish_vcc_config
 
     def _action(self):
