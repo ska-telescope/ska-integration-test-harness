@@ -1,13 +1,9 @@
 """A facade to TMC."""
 
-from typing import Any, Tuple
+from typing import Any
 
 import tango
-from ska_control_model import ObsState, ResultCode
-
-from ska_integration_test_harness.actions.telescope_action import (
-    TelescopeAction,
-)
+from ska_control_model import ObsState
 
 from ..actions.central_node.central_node_assign_resources import (
     CentralNodeAssignResources,
@@ -32,6 +28,7 @@ from ..actions.subarray.subarray_end_scan import SubarrayEndScan
 from ..actions.subarray.subarray_execute_transition import SubarrayRunCommand
 from ..actions.subarray.subarray_restart import SubarrayRestart
 from ..actions.subarray.subarray_scan import SubarrayScan
+from ..actions.telescope_action import TelescopeAction
 from ..inputs.json_input import JSONInput
 from ..inputs.test_harness_inputs import TestHarnessInputs
 from ..structure.telescope_wrapper import TelescopeWrapper
@@ -149,8 +146,11 @@ class TMCFacade:
 
     def move_to_on(
         self, wait_termination: bool = True, custom_timeout: int | None = None
-    ) -> None:
+    ) -> None | tuple[Any, list[str]]:
         """Move the telescope to ON state.
+
+        NOTE: if the telescope is already in ON state, the action returns
+        immediately without sending the command to the central node.
 
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
@@ -161,12 +161,17 @@ class TMCFacade:
             ``wait_termination=True``.
         """
         action = MoveToOn()
-        self._setup_and_run_action(action, wait_termination, custom_timeout)
+        return self._setup_and_run_action(
+            action, wait_termination, custom_timeout
+        )
 
     def move_to_off(
         self, wait_termination: bool = True, custom_timeout: int | None = None
-    ) -> None:
+    ) -> None | tuple[Any, list[str]]:
         """Move the telescope to OFF state.
+
+        NOTE: if the telescope is already in OFF state, the action returns
+        immediately without sending the command to the central node.
 
         :param wait_termination: set to False if you don't want to
             wait for the termination condition. By default the termination
@@ -177,11 +182,13 @@ class TMCFacade:
             ``wait_termination=True``.
         """
         action = MoveToOff()
-        self._setup_and_run_action(action, wait_termination, custom_timeout)
+        return self._setup_and_run_action(
+            action, wait_termination, custom_timeout
+        )
 
     def set_standby(
         self, wait_termination: bool = True, custom_timeout: int | None = None
-    ) -> None:
+    ) -> tuple[Any, list[str]]:
         """Set the telescope to STANDBY state.
 
         :param wait_termination: set to False if you don't want to
@@ -200,7 +207,7 @@ class TMCFacade:
         dish_vcc_config: str,
         wait_termination: bool = True,
         custom_timeout: int | None = None,
-    ) -> Tuple[ResultCode, str]:
+    ) -> tuple[Any, list[str]]:
         """Invoke LoadDishCfg command on central Node.
 
         :param dish_vcc_config: dish vcc configuration json string.
@@ -224,7 +231,7 @@ class TMCFacade:
         assign_input: JSONInput,
         wait_termination: bool = True,
         custom_timeout: int | None = None,
-    ) -> Tuple[ResultCode, str]:
+    ) -> tuple[Any, list[str]]:
         """Invoke Assign Resource command on central Node.
 
         :param assign_input: Assign resource input json.
@@ -248,7 +255,7 @@ class TMCFacade:
         release_input: JSONInput,
         wait_termination: bool = True,
         custom_timeout: int | None = None,
-    ) -> Tuple[ResultCode, str]:
+    ) -> tuple[Any, list[str]]:
         """Invoke Release Resource command on central Node.
 
         :param release_input: Release resource input json.
@@ -275,7 +282,7 @@ class TMCFacade:
         configure_input: JSONInput,
         wait_termination: bool = True,
         custom_timeout: int | None = None,
-    ) -> Tuple[ResultCode, str]:
+    ) -> tuple[Any, list[str]]:
         """Invoke configure command on subarray Node.
 
         :param configure_input: json input for configure command.
@@ -296,7 +303,7 @@ class TMCFacade:
 
     def end_observation(
         self, wait_termination: bool = True, custom_timeout: int | None = None
-    ) -> Tuple[ResultCode, str]:
+    ) -> tuple[Any, list[str]]:
         """Invoke End command on subarray Node.
 
         :param wait_termination: set to False if you don't want to
@@ -316,7 +323,7 @@ class TMCFacade:
 
     def end_scan(
         self, wait_termination: bool = True, custom_timeout: int | None = None
-    ) -> Tuple[ResultCode, str]:
+    ) -> tuple[Any, list[str]]:
         """Invoke EndScan command on subarray Node.
 
         :param wait_termination: set to False if you don't want to
@@ -339,7 +346,7 @@ class TMCFacade:
         scan_input: JSONInput,
         wait_termination: bool = True,
         custom_timeout: int | None = None,
-    ) -> Tuple[ResultCode, str]:
+    ) -> tuple[Any, list[str]]:
         """Invoke Scan command on subarray Node.
 
         :param scan_input: json input for scan command.
@@ -359,7 +366,7 @@ class TMCFacade:
 
     def abort(
         self, wait_termination: bool = True, custom_timeout: int | None = None
-    ) -> Tuple[ResultCode, str]:
+    ) -> tuple[Any, list[str]]:
         """Invoke Abort command on subarray Node.
 
         :param wait_termination: set to False if you don't want to
@@ -379,7 +386,7 @@ class TMCFacade:
 
     def restart(
         self, wait_termination: bool = True, custom_timeout: int | None = None
-    ) -> Tuple[ResultCode, str]:
+    ) -> tuple[Any, list[str]]:
         """Invoke Restart command on subarray Node.
 
         :param wait_termination: set to False if you don't want to
@@ -431,7 +438,7 @@ class TMCFacade:
         self,
         command_name: str,
         command_input: JSONInput | None = None,
-    ) -> Tuple[ResultCode, str]:
+    ) -> tuple[Any, list[str]]:
         """Run a generic command on central node.
 
         NOTE: the termination condition is empty, so the action will
@@ -449,7 +456,7 @@ class TMCFacade:
         command_input: JSONInput | None = None,
         expected_obs_state: "ObsState | None" = None,
         custom_timeout: int | None = None,
-    ) -> Tuple[ResultCode, str]:
+    ) -> tuple[Any, list[str]]:
         """Run a generic command on subarray node.
 
         NOTE: the termination condition by default is empty. You can
