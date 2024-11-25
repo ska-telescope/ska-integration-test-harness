@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.3 (14th November 2024)
+
+- **SST-982**: add stricter checks for many actions, which now verifies
+  some LongRunningCommands completion status.
+
 ## v0.2.2 (14th November 2024)
 
 - **SST-981**: small fix from the previous release, the observation state
