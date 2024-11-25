@@ -98,7 +98,7 @@ class MoveToOff(TelescopeAction[None | tuple[Any, list[str]]]):
 
     def _action(self):
         # Check if the central node is already in OFF state
-        if self.telescope.tmc.central_node.state() == DevState.OFF:
+        if self.telescope.tmc.central_node.telescopeState == DevState.OFF:
             self._log("Central node is already in OFF state")
             return None
 
@@ -109,6 +109,7 @@ class MoveToOff(TelescopeAction[None | tuple[Any, list[str]]]):
         self.move_to_off.set_termination_condition_timeout(
             self.termination_condition_timeout
         )
+        self.move_to_off.set_logging_policy(self.do_logging)
 
         return self.move_to_off.execute()
 

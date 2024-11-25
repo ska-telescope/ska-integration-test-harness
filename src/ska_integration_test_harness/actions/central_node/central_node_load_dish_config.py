@@ -13,8 +13,7 @@ class CentralNodeLoadDishConfig(TelescopeCommandAction):
     def __init__(self, dish_vcc_config: JSONInput):
         super().__init__()
         self.target_device = self.telescope.tmc.central_node
-        # NOTE: this is a long running command, but in practice it is not
-        self.is_long_running_command = False
+        self.is_long_running_command = True
         self.dish_vcc_config = dish_vcc_config
 
     def _action(self):

@@ -96,7 +96,7 @@ class MoveToOn(TelescopeAction[None | tuple[Any, list[str]]]):
 
     def _action(self):
         # Check if the central node is already in ON state
-        if self.telescope.tmc.central_node.state() == DevState.ON:
+        if self.telescope.tmc.central_node.telescopeState == DevState.ON:
             self._log("Central node is already in ON state")
             return None
 
@@ -107,7 +107,7 @@ class MoveToOn(TelescopeAction[None | tuple[Any, list[str]]]):
         )
         self.move_to_on.set_logging_policy(self.do_logging)
 
-        return MoveToOnCommand().execute()
+        return self.move_to_on.execute()
 
     def termination_condition(self):
         """Master and subarray devices are in ON state.
