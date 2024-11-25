@@ -91,12 +91,12 @@ class ProductionTMCWrapper(TMCWrapper):
         expected_vcc_config = (
             self.default_commands_input.default_vcc_config_input
         )
-        if (
+        if self.central_node.isDishVccConfigSet and (
             not self.csp_master_leaf_node.sourceDishVccConfig
             or not expected_vcc_config.is_equal_to_json(
                 self.csp_master_leaf_node.sourceDishVccConfig
             )
-        ) and self.central_node.isDishVccConfigSet:
+        ):
             CentralNodeLoadDishConfig(expected_vcc_config).execute()
 
         self.logger.info("TMC tear down completed.")
