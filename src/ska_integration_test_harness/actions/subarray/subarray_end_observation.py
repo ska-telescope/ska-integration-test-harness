@@ -24,5 +24,13 @@ class SubarrayEndObservation(TelescopeCommandAction):
         return result, message
 
     def termination_condition(self):
-        """All subarrays must be in IDLE state."""
-        return all_subarrays_have_obs_state(self.telescope, ObsState.IDLE)
+        """All subarrays must be in IDLE state (and LRC must terminate)."""
+        # LRC must terminate
+        expected_events = super().termination_condition()
+
+        # All subarrays must be in IDLE state
+        expected_events += all_subarrays_have_obs_state(
+            self.telescope, ObsState.IDLE
+        )
+
+        return expected_events

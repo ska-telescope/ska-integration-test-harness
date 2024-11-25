@@ -7,7 +7,6 @@ from ska_integration_test_harness.actions.command_action import (
 )
 from ska_integration_test_harness.actions.utils.termination_conditions import (
     dishes_have_dish_mode,
-    long_running_command_is_completed,
     master_and_subarray_devices_have_state,
 )
 from ska_integration_test_harness.inputs.dish_mode import DishMode
@@ -35,9 +34,7 @@ class MoveToOff(TelescopeCommandAction):
         should be in STANDBY_LP mode and LRC must terminate.
         """
         # LRC must terminate
-        expected_events = long_running_command_is_completed(
-            self.telescope.tmc.central_node, self.get_last_execution_result
-        )
+        expected_events = super().termination_condition()
 
         # The central node, SDP subarray, SDP master, CSP subarray, CSP master
         # and all dishes should be in OFF state.

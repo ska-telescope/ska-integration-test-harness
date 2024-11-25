@@ -17,7 +17,3 @@ class SubarrayMoveToOff(TelescopeCommandAction):
         self._log("Invoking Off on SubarrayNode")
         result, message = self.telescope.tmc.subarray_node.Off()
         return (result, message)
-
-    def termination_condition(self):
-        """No termination condition is provided for this action."""
-        return []

@@ -88,16 +88,20 @@ class SubarrayRunCommand(TelescopeCommandAction):
         return result, message
 
     def termination_condition(self):
-        if self.expected_obs_state is None:
-            self._log(
-                "No expected obsState provided, no termination condition."
-            )
-            return []
+        """Eventual LRC termination check + eventual expected obsState check.
 
-        self._log(
-            "Expecting all subarrays to have "
-            f"obsState {self.expected_obs_state}"
-        )
-        return all_subarrays_have_obs_state(
-            self.telescope, self.expected_obs_state
-        )
+        This action may have those two termination conditions:
+
+        - The LRC must terminate (if the command is a LRC).
+        - All subarrays must have the expected obsState (if provided).
+        """
+        # LRC must terminate (if the command is a LRC, superclass deal with it)
+        expected_events = super().termination_condition()
+
+        if self.expected_obs_state:
+            # All subarrays must have the expected obsState
+            expected_events += all_subarrays_have_obs_state(
+                self.telescope, self.expected_obs_state
+            )
+
+        return expected_events

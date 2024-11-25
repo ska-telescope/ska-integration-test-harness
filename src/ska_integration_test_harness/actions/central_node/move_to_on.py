@@ -27,14 +27,17 @@ class MoveToOn(TelescopeCommandAction):
         return res
 
     def termination_condition(self):
-        """Master and subarray devices should be in ON state.
+        """Master and subarray devices are in ON state (+ LRC terminates).
 
         Master and subarray devices should be in ON state, while
         all dishes should be in STANDBY_FP mode and LRC must terminate.
         """
+        # LRC must terminate
+        expected_events = super().termination_condition()
+
         # The central node, SDP subarray, SDP master, CSP subarray, CSP master
         # and all dishes should be in ON state.
-        expected_events = master_and_subarray_devices_have_state(
+        expected_events += master_and_subarray_devices_have_state(
             self.telescope,
             DevState.ON,
         )

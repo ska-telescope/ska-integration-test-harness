@@ -24,5 +24,13 @@ class SubarrayEndScan(TelescopeCommandAction):
         return result, message
 
     def termination_condition(self):
-        """All subarrays must be in READY state."""
-        return all_subarrays_have_obs_state(self.telescope, ObsState.READY)
+        """All subarrays must be in READY state and LRC must terminate."""
+        # LRC must terminate
+        expected_events = super().termination_condition()
+
+        # All subarrays must be in READY state
+        expected_events += all_subarrays_have_obs_state(
+            self.telescope, ObsState.READY
+        )
+
+        return expected_events

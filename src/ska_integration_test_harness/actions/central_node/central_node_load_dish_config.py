@@ -27,6 +27,7 @@ class CentralNodeLoadDishConfig(TelescopeCommandAction):
 
     def termination_condition(self):
         """Check if sourceDishVccConfig attribute contains new JSON."""
+        expected_events = super().termination_condition()
 
         def _is_source_dish_cfg_changed(event):
             """Check if sourceDishVccConfig attribute contains new JSON."""
@@ -34,10 +35,14 @@ class CentralNodeLoadDishConfig(TelescopeCommandAction):
                 event.attribute_value
             )
 
-        return [
+        # the expected event is that the sourceDishVccConfig attribute has
+        # been changed and so is different from the previous value
+        expected_events += [
             ExpectedEvent(
-                device=self.telescope.tmc.csp_master_leaf_node,
+                device=self.telescope.tmc.central_node,
                 attribute="sourceDishVccConfig",
                 predicate=_is_source_dish_cfg_changed,
             )
         ]
+
+        return expected_events

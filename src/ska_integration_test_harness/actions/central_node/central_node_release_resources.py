@@ -33,8 +33,11 @@ class CentralNodeReleaseResources(TelescopeCommandAction):
 
         (and LRC must terminate).
         """
+        # LRC must terminate
+        expected_events = super().termination_condition()
+
         # All subarrays must reach the EMPTY state
-        expected_events = all_subarrays_have_obs_state(
+        expected_events += all_subarrays_have_obs_state(
             self.telescope, ObsState.EMPTY
         )
 

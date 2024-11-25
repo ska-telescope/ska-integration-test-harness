@@ -32,8 +32,11 @@ class SetStandby(TelescopeCommandAction):
         """Central node should be in STANDBY state and so also SDP
         all dishes should be in STANDBY_LP mode and LRC must terminate.
         """
+        # LRC must terminate
+        expected_events = super().termination_condition()
+
         # The central node should be in STANDBY state
-        expected_events = [
+        expected_events += [
             ExpectedStateChange(
                 self.telescope.tmc.central_node,
                 "telescopeState",

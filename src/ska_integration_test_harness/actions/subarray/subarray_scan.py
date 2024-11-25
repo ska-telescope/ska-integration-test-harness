@@ -24,11 +24,16 @@ class SubarrayScan(TelescopeCommandAction):
 
     def _action(self):
         self._log("Invoking Scan on TMC SubarrayNode")
-        result, message = self.telescope.tmc.subarray_node.Scan(
-            self.scan_input.as_str()
-        )
-        return result, message
+        return self.telescope.tmc.subarray_node.Scan(self.scan_input.as_str())
 
     def termination_condition(self):
-        """All subarrays must be in SCANNING state."""
-        return all_subarrays_have_obs_state(self.telescope, ObsState.SCANNING)
+        """All subarrays must be in SCANNING state (and LRC must terminate)."""
+        # LRC must terminate
+        expected_events = super().termination_condition()
+
+        # All subarrays must be in SCANNING state
+        expected_events += all_subarrays_have_obs_state(
+            self.telescope, ObsState.SCANNING
+        )
+
+        return expected_events
