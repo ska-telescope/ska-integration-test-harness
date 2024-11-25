@@ -105,6 +105,7 @@ class MoveToOn(TelescopeAction[None | tuple[Any, list[str]]]):
         self.move_to_on.set_termination_condition_timeout(
             self.termination_condition_timeout
         )
+        self.move_to_on.set_logging_policy(self.do_logging)
 
         return MoveToOnCommand().execute()
 

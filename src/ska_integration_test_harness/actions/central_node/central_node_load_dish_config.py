@@ -38,7 +38,7 @@ class CentralNodeLoadDishConfig(TelescopeCommandAction):
         # been changed and so is different from the previous value
         expected_events += [
             ExpectedEvent(
-                device=self.telescope.tmc.central_node,
+                device=self.telescope.tmc.csp_master_leaf_node,
                 attribute="sourceDishVccConfig",
                 predicate=_is_source_dish_cfg_changed,
             )
