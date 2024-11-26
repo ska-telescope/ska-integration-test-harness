@@ -3,7 +3,7 @@
 import abc
 from typing import Any
 
-import tango
+import tango  # pylint: disable=unused-import
 from ska_control_model import ResultCode
 
 from ska_integration_test_harness.actions.expected_event import ExpectedEvent
