@@ -137,31 +137,3 @@ def resources_are_released(telescope: TelescopeWrapper) -> list[ExpectedEvent]:
     ]
 
 
-def long_running_command_is_completed(
-    target_device: tango.DeviceProxy | str,
-    command_result_getter: Callable[[], Any],
-) -> list[ExpectedEvent]:
-    """Termination condition to check a long running command is completed.
-
-    Termination condition to verify that a long running command is completed
-    on a certain target device. This is done
-    by subscribing to longRunningCommandResult attribute and verifying that
-    there is an event with result code ``ResultCode.OK``.
-
-    :param target_device: The target device.
-    :param command_result_getter: A getter for an updated command result
-        (which we suppose to be available not yet, but after the command
-        is called).
-    :return: The termination condition, as a sequence of expected events.
-    """
-    return [
-        ExpectedEvent(
-            device=target_device,
-            attribute="longRunningCommandResult",
-            predicate=lambda e: e.attribute_value
-            == (
-                command_result_getter()[1][0],
-                f'[{ResultCode.OK.value}, "Command Completed"]',
-            ),
-        )
-    ]
