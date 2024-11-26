@@ -40,7 +40,7 @@ class SubarrayConfigure(TransientQuiescentCommandAction):
         return result, message
 
     def termination_condition_for_quiescent_state(self) -> list[ExpectedEvent]:
-        """All subarrays must reach the READY state.
+        """All subarrays must reach the READY state (and LRC must terminate).
 
         Also, all dishes must be in OPERATE dishMode and TRACK pointingState.
         """

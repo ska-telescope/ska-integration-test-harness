@@ -58,7 +58,10 @@ class MoveToOnCommand(TelescopeCommandAction):
         return super().termination_condition() + self.expected_side_effects()
 
     def expected_side_effects(self):
-        """Devices are in ON state, dishes are in STANDBY_FP mode."""
+        """Expected command side-effects, excluding LRC termination.
+
+        Devices are in ON state, dishes are in STANDBY_FP mode.
+        """
         # The central node, SDP subarray, SDP master, CSP subarray, CSP master
         # and all dishes should be in ON state.
         expected_events = master_and_subarray_devices_have_state(

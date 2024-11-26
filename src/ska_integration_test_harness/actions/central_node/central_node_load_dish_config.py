@@ -27,7 +27,7 @@ class CentralNodeLoadDishConfig(TelescopeCommandAction):
         return result, message
 
     def termination_condition(self):
-        """Check if sourceDishVccConfig attribute contains new JSON."""
+        """The dishes configuration has been changed and LRC has terminated."""
         expected_events = super().termination_condition()
 
         def _is_source_dish_cfg_changed(event):

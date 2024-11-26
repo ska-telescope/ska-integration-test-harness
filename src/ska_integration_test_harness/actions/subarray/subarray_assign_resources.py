@@ -45,5 +45,5 @@ class SubarrayAssignResources(TransientQuiescentCommandAction):
         )
 
     def termination_condition_for_quiescent_state(self):
-        """All subarrays must reach the IDLE state and LRC must terminate."""
+        """All subarrays must reach the IDLE state (and LRC must terminate)."""
         return all_subarrays_have_obs_state(self.telescope, ObsState.IDLE)

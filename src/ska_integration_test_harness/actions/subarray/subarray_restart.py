@@ -30,7 +30,7 @@ class SubarrayRestart(TransientQuiescentCommandAction):
         return result, message
 
     def termination_condition_for_quiescent_state(self) -> list[ExpectedEvent]:
-        """All subarrays must be in EMPTY state."""
+        """All subarrays must be in EMPTY state (and LRC must terminate)."""
         return all_subarrays_have_obs_state(self.telescope, ObsState.EMPTY)
 
     def termination_condition_for_transient_state(self) -> list[ExpectedEvent]:
