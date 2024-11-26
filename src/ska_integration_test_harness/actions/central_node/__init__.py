@@ -11,8 +11,8 @@ from .central_node_assign_resources import CentralNodeAssignResources
 from .central_node_load_dish_config import CentralNodeLoadDishConfig
 from .central_node_perform_action import CentralNodeRunCommand
 from .central_node_release_resources import CentralNodeReleaseResources
-from .move_to_off import MoveToOff
-from .move_to_on import MoveToOn
+from .move_to_off import MoveToOff, MoveToOffCommand
+from .move_to_on import MoveToOn, MoveToOnCommand
 from .set_standby import SetStandby
 
 __all__ = [
@@ -23,4 +23,6 @@ __all__ = [
     "MoveToOff",
     "MoveToOn",
     "SetStandby",
+    "MoveToOffCommand",
+    "MoveToOnCommand",
 ]

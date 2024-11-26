@@ -55,7 +55,20 @@ class TMCFacade:
     and the termination condition is not waited. The timeout for the
     termination condition can be customized (otherwise the default action
     timeout is used).
-    """
+
+    Some of the given actions can be long running commands (LRC). In most
+    of the cases when you call them and you decide to wait for the termination
+    also the LRC successful completion is waited. In two tricky cases
+    (:py:class:`ska_integration_test_harness.actions.central_node.move_to_on.MoveToOn`
+    and :py:class:`ska_integration_test_harness.actions.central_node.central_node_load_dish_config.CentralNodeLoadDishConfig`)
+    the LRC completion is not waited by default, since at the moment failures
+    can be observed (TODO: solve the issue and set to True). In any case,
+    you can always set the argument ``is_long_running_command`` to ``True``
+    or to ``False`` to include or exclude the LRC completion in the
+    synchronisation. At the moment the customisation of this possibility
+    is not instead available for actions called in
+    ``force_change_of_obs_state`` method and in the system teardown.
+    """  # pylint: disable=line-too-long # noqa: E501
 
     # pylint: disable=too-many-public-methods
 
