@@ -145,7 +145,10 @@ class TMCFacade:
         return action.execute()
 
     def move_to_on(
-        self, wait_termination: bool = True, custom_timeout: int | None = None
+        self,
+        wait_termination: bool = True,
+        custom_timeout: int | None = None,
+        is_long_running_command: bool = False,
     ) -> None | tuple[Any, list[str]]:
         """Move the telescope to ON state.
 
@@ -159,14 +162,23 @@ class TMCFacade:
             the termination condition to occur. If None, the default action
             timeout is used. This parameter is useful only when
             ``wait_termination=True``.
+        :param is_long_running_command: set to True if you want to include
+            in the synchronisation the long running command. This parameter
+            is useful only when ``wait_termination=True``. By default is False
+            for MoveToOn action, since at the moment a failure can be
+            observed. TODO: solve the issue and set to True.
         """
         action = MoveToOn()
+        action.move_to_on.is_long_running_command = is_long_running_command
         return self._setup_and_run_action(
             action, wait_termination, custom_timeout
         )
 
     def move_to_off(
-        self, wait_termination: bool = True, custom_timeout: int | None = None
+        self,
+        wait_termination: bool = True,
+        custom_timeout: int | None = None,
+        is_long_running_command: bool = True,
     ) -> None | tuple[Any, list[str]]:
         """Move the telescope to OFF state.
 
@@ -180,14 +192,21 @@ class TMCFacade:
             the termination condition to occur. If None, the default action
             timeout is used. This parameter is useful only when
             ``wait_termination=True``.
+        :param is_long_running_command: set to True if you want to include
+            in the synchronisation the long running command. This parameter
+            is useful only when ``wait_termination=True``. By default is True.
         """
         action = MoveToOff()
+        action.move_to_off.is_long_running_command = is_long_running_command
         return self._setup_and_run_action(
             action, wait_termination, custom_timeout
         )
 
     def set_standby(
-        self, wait_termination: bool = True, custom_timeout: int | None = None
+        self,
+        wait_termination: bool = True,
+        custom_timeout: int | None = None,
+        is_long_running_command: bool = True,
     ) -> tuple[Any, list[str]]:
         """Set the telescope to STANDBY state.
 
@@ -198,8 +217,12 @@ class TMCFacade:
             the termination condition to occur. If None, the default action
             timeout is used. This parameter is useful only when
             ``wait_termination=True``.
+        :param is_long_running_command: set to True if you want to include
+            in the synchronisation the long running command. This parameter
+            is useful only when ``wait_termination=True``. By default is True.
         """
         action = SetStandby()
+        action.is_long_running_command = is_long_running_command
         self._setup_and_run_action(action, wait_termination, custom_timeout)
 
     def load_dish_vcc_configuration(
@@ -207,6 +230,7 @@ class TMCFacade:
         dish_vcc_config: str,
         wait_termination: bool = True,
         custom_timeout: int | None = None,
+        is_long_running_command: bool = False,
     ) -> tuple[Any, list[str]]:
         """Invoke LoadDishCfg command on central Node.
 
@@ -218,10 +242,16 @@ class TMCFacade:
             the termination condition to occur. If None, the default action
             timeout is used. This parameter is useful only when
             ``wait_termination=True``.
+        :param is_long_running_command: set to True if you want to include
+            in the synchronisation the long running command. This parameter
+            is useful only when ``wait_termination=True``. By default is False
+            for LoadDishVccConfiguration action, since at the moment a failure
+            can be observed. TODO: solve the issue and set to True.
 
         :return: result, message
         """
         action = CentralNodeLoadDishConfig(dish_vcc_config)
+        action.is_long_running_command = is_long_running_command
         return self._setup_and_run_action(
             action, wait_termination, custom_timeout
         )
@@ -231,6 +261,7 @@ class TMCFacade:
         assign_input: JSONInput,
         wait_termination: bool = True,
         custom_timeout: int | None = None,
+        is_long_running_command: bool = True,
     ) -> tuple[Any, list[str]]:
         """Invoke Assign Resource command on central Node.
 
@@ -242,10 +273,14 @@ class TMCFacade:
             the termination condition to occur. If None, the default action
             timeout is used. This parameter is useful only when
             ``wait_termination=True``.
+        :param is_long_running_command: set to True if you want to include
+            in the synchronisation the long running command. This parameter
+            is useful only when ``wait_termination=True``. By default is True.
 
         :return: result, message
         """
         action = CentralNodeAssignResources(assign_input)
+        action.is_long_running_command = is_long_running_command
         return self._setup_and_run_action(
             action, wait_termination, custom_timeout
         )
@@ -255,6 +290,7 @@ class TMCFacade:
         release_input: JSONInput,
         wait_termination: bool = True,
         custom_timeout: int | None = None,
+        is_long_running_command: bool = True,
     ) -> tuple[Any, list[str]]:
         """Invoke Release Resource command on central Node.
 
@@ -266,10 +302,14 @@ class TMCFacade:
             the termination condition to occur. If None, the default action
             timeout is used. This parameter is useful only when
             ``wait_termination=True``.
+        :param is_long_running_command: set to True if you want to include
+            in the synchronisation the long running command. This parameter
+            is useful only when ``wait_termination=True``. By default is True.
 
         :return: result, message
         """
         action = CentralNodeReleaseResources(release_input)
+        action.is_long_running_command = is_long_running_command
         return self._setup_and_run_action(
             action, wait_termination, custom_timeout
         )
@@ -282,6 +322,7 @@ class TMCFacade:
         configure_input: JSONInput,
         wait_termination: bool = True,
         custom_timeout: int | None = None,
+        is_long_running_command: bool = True,
     ) -> tuple[Any, list[str]]:
         """Invoke configure command on subarray Node.
 
@@ -293,16 +334,23 @@ class TMCFacade:
             the termination condition to occur. If None, the default action
             timeout is used. This parameter is useful only when
             ``wait_termination=True``.
+        :param is_long_running_command: set to True if you want to include
+            in the synchronisation the long running command. This parameter
+            is useful only when ``wait_termination=True``. By default is True.
 
         :return: result, message
         """
         action = SubarrayConfigure(configure_input)
+        action.is_long_running_command = is_long_running_command
         return self._setup_and_run_action(
             action, wait_termination, custom_timeout
         )
 
     def end_observation(
-        self, wait_termination: bool = True, custom_timeout: int | None = None
+        self,
+        wait_termination: bool = True,
+        custom_timeout: int | None = None,
+        is_long_running_command: bool = True,
     ) -> tuple[Any, list[str]]:
         """Invoke End command on subarray Node.
 
@@ -313,16 +361,23 @@ class TMCFacade:
             the termination condition to occur. If None, the default action
             timeout is used. This parameter is useful only when
             ``wait_termination=True``.
+        :param is_long_running_command: set to True if you want to include
+            in the synchronisation the long running command. This parameter
+            is useful only when ``wait_termination=True``. By default is True.
 
         :return: result, message
         """
         action = SubarrayEndObservation()
+        action.is_long_running_command = is_long_running_command
         return self._setup_and_run_action(
             action, wait_termination, custom_timeout
         )
 
     def end_scan(
-        self, wait_termination: bool = True, custom_timeout: int | None = None
+        self,
+        wait_termination: bool = True,
+        custom_timeout: int | None = None,
+        is_long_running_command: bool = True,
     ) -> tuple[Any, list[str]]:
         """Invoke EndScan command on subarray Node.
 
@@ -333,10 +388,14 @@ class TMCFacade:
             the termination condition to occur. If None, the default action
             timeout is used. This parameter is useful only when
             ``wait_termination=True``.
+        :param is_long_running_command: set to True if you want to include
+            in the synchronisation the long running command. This parameter
+            is useful only when ``wait_termination=True``. By default is True.
 
         :return: result, message
         """
         action = SubarrayEndScan()
+        action.is_long_running_command = is_long_running_command
         return self._setup_and_run_action(
             action, wait_termination, custom_timeout
         )
@@ -346,6 +405,7 @@ class TMCFacade:
         scan_input: JSONInput,
         wait_termination: bool = True,
         custom_timeout: int | None = None,
+        is_long_running_command: bool = True,
     ) -> tuple[Any, list[str]]:
         """Invoke Scan command on subarray Node.
 
@@ -356,10 +416,14 @@ class TMCFacade:
         :param custom_timeout: A custom timeout (in seconds) to wait for
             the termination condition to occur. If None, the default action
             timeout is used.
+        :param is_long_running_command: set to True if you want to include
+            in the synchronisation the long running command. This parameter
+            is useful only when ``wait_termination=True``. By default is True.
 
         :return: result, message
         """
         action = SubarrayScan(scan_input)
+        action.is_long_running_command = is_long_running_command
         return self._setup_and_run_action(
             action, wait_termination, custom_timeout
         )
@@ -385,7 +449,10 @@ class TMCFacade:
         )
 
     def restart(
-        self, wait_termination: bool = True, custom_timeout: int | None = None
+        self,
+        wait_termination: bool = True,
+        custom_timeout: int | None = None,
+        is_long_running_command: bool = True,
     ) -> tuple[Any, list[str]]:
         """Invoke Restart command on subarray Node.
 
@@ -396,10 +463,14 @@ class TMCFacade:
             the termination condition to occur. If None, the default action
             timeout is used. This parameter is useful only when
             ``wait_termination=True``.
+        :param is_long_running_command: set to True if you want to include
+            in the synchronisation the long running command. This parameter
+            is useful only when ``wait_termination=True``. By default is True.
 
         :return: result, message
         """
         action = SubarrayRestart()
+        action.is_long_running_command = is_long_running_command
         return self._setup_and_run_action(
             action, wait_termination, custom_timeout
         )
@@ -438,6 +509,7 @@ class TMCFacade:
         self,
         command_name: str,
         command_input: JSONInput | None = None,
+        is_long_running_command: bool = False,
     ) -> tuple[Any, list[str]]:
         """Run a generic command on central node.
 
@@ -446,22 +518,30 @@ class TMCFacade:
 
         :param command_name: Name of command to execute.
         :param command_input: Json send as input to execute command.
+        :param is_long_running_command: set to True if you want to include
+            in the synchronisation the long running command. This parameter
+            is useful only when ``wait_termination=True``. By default is False
+            (we assume the command is not a LRC).
         """
-        action = CentralNodeRunCommand(command_name, command_input)
+        action = CentralNodeRunCommand(
+            command_name, command_input, is_long_running_command
+        )
         return action.execute()
 
+    # pylint: disable=too-many-arguments disable=too-many-positional-arguments
     def run_command_on_subarray_node(
         self,
         command_name: str,
         command_input: JSONInput | None = None,
         expected_obs_state: "ObsState | None" = None,
         custom_timeout: int | None = None,
+        is_long_running_command: bool = False,
     ) -> tuple[Any, list[str]]:
         """Run a generic command on subarray node.
 
         NOTE: the termination condition by default is empty. You can
         although wait for a certain obsState to be reached setting
-        expected_obs_state.
+        expected_obs_state or the LRC completion.
 
         :param command_name: Name of command to execute
         :param command_input: JSON input for the command. By default None.
@@ -471,7 +551,12 @@ class TMCFacade:
         :param custom_timeout: A custom timeout (in seconds) to wait for
             the termination condition to occur. If None, the default action
             timeout is used. This parameter is useful only when
-            ``expected_obs_state`` is specified.
+            ``expected_obs_state`` is specified or when
+            ``is_long_running_command=True``.
+        :param is_long_running_command: set to True if you want to include
+            in the synchronisation the long running command. This parameter
+            is useful only when ``wait_termination=True``. By default is False
+            (we assume the command is not a LRC).
 
         :return: result, message
         """
@@ -479,6 +564,7 @@ class TMCFacade:
             command_name,
             command_input=command_input,
             expected_obs_state=expected_obs_state,
+            is_long_running_command=is_long_running_command,
         )
         action.set_termination_condition_policy(expected_obs_state is not None)
         if custom_timeout is not None:

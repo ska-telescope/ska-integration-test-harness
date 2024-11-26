@@ -37,6 +37,9 @@ class MoveToOnCommand(TelescopeCommandAction):
         super().__init__()
         self.target_device = self.telescope.tmc.central_node
         # Is a LRC, but right now it raises err. code 3. TODO: fix this
+        # PERSONAL NOTE: it looks like it depends from the starting state,
+        # because if it's not exactly the expected one, it completes the
+        # operation but the final result is an error
         self.is_long_running_command = False
 
     def _action(self):
