@@ -1,9 +1,7 @@
 """Generate some termination conditions for the subarray."""
 
-from typing import Any, Callable
-
 import tango
-from ska_control_model import ObsState, ResultCode
+from ska_control_model import ObsState
 
 from ska_integration_test_harness.actions.expected_event import (
     ExpectedEvent,
@@ -135,5 +133,3 @@ def resources_are_released(telescope: TelescopeWrapper) -> list[ExpectedEvent]:
             != pre_action_attr_value,
         )
     ]
-
-
