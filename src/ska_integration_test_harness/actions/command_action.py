@@ -55,7 +55,7 @@ class TelescopeCommandAction(TelescopeAction[tuple[Any, list[str]]]):
 
     def __init__(
         self,
-        target_device: tango.DeviceProxy | None = None,
+        target_device: "tango.DeviceProxy | None" = None,
         is_long_running_command: bool = False,
     ) -> None:
         """Set a few (optional) attributes of the action.
@@ -139,7 +139,7 @@ class TransientQuiescentCommandAction(TelescopeCommandAction):
 
     def __init__(
         self,
-        target_device: tango.DeviceProxy | None = None,
+        target_device: "tango.DeviceProxy | None" = None,
         is_long_running_command: bool = False,
         synchronise_on_transient_state: bool = False,
     ) -> None:
