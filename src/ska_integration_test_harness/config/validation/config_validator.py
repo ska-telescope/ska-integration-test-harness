@@ -93,7 +93,7 @@ class BasicConfigurationValidator(ConfigurationValidator):
             TestHarnessConfiguration.SubsystemName.TMC,
             TestHarnessConfiguration.SubsystemName.CSP,
             TestHarnessConfiguration.SubsystemName.SDP,
-            TestHarnessConfiguration.SubsystemName.DISHES,
+            # TestHarnessConfiguration.SubsystemName.DISHES,
         ]
         """Required subsystems."""
 
