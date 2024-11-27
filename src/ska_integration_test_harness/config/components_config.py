@@ -100,7 +100,7 @@ class TMCConfiguration(SubsystemConfiguration):
     # or by device type?
 
     def get_device_names(self) -> dict[str, str]:
-        return {
+        all_devices = {
             "centralnode_name": self.centralnode_name,
             "tmc_subarraynode1_name": self.tmc_subarraynode1_name,
             "tmc_csp_master_leaf_node_name": (
@@ -115,11 +115,16 @@ class TMCConfiguration(SubsystemConfiguration):
             "tmc_sdp_subarray_leaf_node_name": (
                 self.tmc_sdp_subarray_leaf_node_name
             ),
-            "tmc_dish_leaf_node1_name": self.tmc_dish_leaf_node1_name,
-            "tmc_dish_leaf_node2_name": self.tmc_dish_leaf_node2_name,
-            "tmc_dish_leaf_node3_name": self.tmc_dish_leaf_node3_name,
-            "tmc_dish_leaf_node4_name": self.tmc_dish_leaf_node4_name,
         }
+
+        # Add the dish leaf nodes only if they are set
+        for i in range(1, 5):
+            dish_name = f"tmc_dish_leaf_node{i}_name"
+            dish_value = getattr(self, dish_name)
+            if dish_value:
+                all_devices[dish_name] = dish_value
+
+        return all_devices
 
     def mandatory_attributes(self) -> list[str]:
 
