@@ -97,6 +97,8 @@ class BasicConfigurationValidator(ConfigurationValidator):
         ]
         """Required subsystems."""
 
+        # TODO Low: either DISHES or MCCS should be required
+
         self.subsystem_validators: SubsystemConfigurationValidator = [
             RequiredFieldsValidator(logger),
             DeviceNamesValidator(logger),

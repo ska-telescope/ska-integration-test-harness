@@ -51,6 +51,8 @@ class TestHarnessConfiguration:
     sdp_config: SDPConfiguration | None = None
     dishes_config: DishesConfiguration | None = None
 
+    # TODO Low: Add MCCS configuration
+
     def get_included_subsystems(self) -> list[SubsystemConfiguration]:
         """Get the list of subsystems that are included in the configuration.
 

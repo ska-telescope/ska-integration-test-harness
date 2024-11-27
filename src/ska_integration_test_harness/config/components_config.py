@@ -122,7 +122,18 @@ class TMCConfiguration(SubsystemConfiguration):
         }
 
     def mandatory_attributes(self) -> list[str]:
-        return self.get_device_names().keys()
+
+        # TODO Low: if we are in Low, should we check for the MCCS leaf nodes
+        # or something like that?
+
+        return [
+            "centralnode_name",
+            "tmc_subarraynode1_name",
+            "tmc_csp_master_leaf_node_name",
+            "tmc_csp_subarray_leaf_node_name",
+            "tmc_sdp_master_leaf_node_name",
+            "tmc_sdp_subarray_leaf_node_name",
+        ]
 
 
 @dataclass
