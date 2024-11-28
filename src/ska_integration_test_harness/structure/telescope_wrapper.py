@@ -135,6 +135,17 @@ class TelescopeWrapper:
     (Used for recap purposes).
     """
 
+    def get_active_subsystems(self) -> list[SubsystemWrapper]:
+        """Get all the active subsystems.
+
+        :return: The list of all the subsystems.
+        """
+        return [
+            subsystem
+            for subsystem in [self._tmc, self._sdp, self._csp, self._dishes]
+            if subsystem and isinstance(subsystem, SubsystemWrapper)
+        ]
+
     def get_subsystems_recap(self, update_devices_info: bool = True) -> str:
         """Get a recap of the active subsystems and their devices.
 
@@ -157,10 +168,8 @@ class TelescopeWrapper:
                     f"error:\n{error}\n\n"
                 )
 
-        for subsystem in [self._tmc, self._sdp, self._csp, self._dishes]:
-            if subsystem:
-                assert isinstance(subsystem, SubsystemWrapper)
-                recap += subsystem.get_recap(self.devices_info_provider) + "\n"
+        for subsystem in self.get_active_subsystems():
+            recap += subsystem.get_recap(self.devices_info_provider) + "\n"
 
         if recap == "":
             recap = "No subsystems are currently set up."
