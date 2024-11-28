@@ -14,6 +14,7 @@ from ska_integration_test_harness.config.reader.config_reader import (
     ConfigurationReader,
 )
 
+
 # REFACTOR NOTE: an hardcoded reader such as this one is a bit
 # of a boilerplate. At the moment there are at least 2-3 places where the
 # configuration parameters are hardcoded.

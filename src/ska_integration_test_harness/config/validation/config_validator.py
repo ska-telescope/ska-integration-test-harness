@@ -13,7 +13,7 @@ from ska_integration_test_harness.config.validation.subsys_config_validator impo
     SubsystemConfigurationValidator,
 )
 
-# NOTE: this configuration validator mechanism maybe it's a bit
+# REFACTOR NOTE: this configuration validator mechanism maybe it's a bit
 # of a overkill (or maybe also boilerplate). In the big refactoring
 # we could consider simplifying it (maybe just letting the configurations
 # validate themselves)
@@ -118,10 +118,8 @@ class BasicConfigurationValidator(ConfigurationValidator):
                 f"The configuration for the subsystem '{subsystem_name}' "
                 "is missing which instead is required."
             )
-        
-        self._log_info(
-            f"Required configuration for '{subsystem_name}': OK."
-        )
+
+        self._log_info(f"Required configuration for '{subsystem_name}': OK.")
 
     def validate_subsystems_presence(
         self, config: TestHarnessConfiguration
