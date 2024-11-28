@@ -146,8 +146,11 @@ class YAMLConfigurationReader(ConfigurationReader):
             return None
 
         return TMCConfiguration(
+            # REFACTOR NOTE: this is not a good place to have default values.
+            # They are also awkwardly duplicated both in configuration
+            # classes and in the configuration reader.
             is_emulated=tmc.get("is_emulated", False),
-            target=tmc.get("target"),
+            target=tmc.get("target", "mid"),
             centralnode_name=tmc.get("centralnode_name"),
             tmc_csp_master_leaf_node_name=tmc.get(
                 "tmc_csp_master_leaf_node_name"
