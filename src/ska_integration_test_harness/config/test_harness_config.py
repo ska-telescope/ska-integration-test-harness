@@ -51,8 +51,6 @@ class TestHarnessConfiguration:
     sdp_config: SDPConfiguration | None = None
     dishes_config: DishesConfiguration | None = None
 
-    # TODO Low: Add MCCS configuration
-
     def get_included_subsystems(self) -> list[SubsystemConfiguration]:
         """Get the list of subsystems that are included in the configuration.
 
@@ -95,4 +93,30 @@ class TestHarnessConfiguration:
         """
         return all(
             not config.is_emulated for config in self.get_included_subsystems()
+        )
+
+    def is_mid_config(self) -> bool:
+        """Check if the configuration is for a TMC-Mid test harness.
+
+        :return: True if the configuration is for a TMC-Mid test harness,
+            False otherwise.
+        """
+        return (
+            self.tmc_config is not None
+            and self.csp_config is not None
+            and self.sdp_config is not None
+            and self.dishes_config is not None
+        )
+
+    def is_low_config(self) -> bool:
+        """Check if the configuration is for a TMC-Low test harness.
+
+        :return: True if the configuration is for a TMC-Low test harness,
+            False otherwise.
+        """
+        return (
+            self.tmc_config is not None
+            and self.csp_config is not None
+            and self.sdp_config is not None
+            # TODO Low: MCCS should be included
         )

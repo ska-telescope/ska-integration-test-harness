@@ -96,8 +96,18 @@ class TMCConfiguration(SubsystemConfiguration):
     tmc_dish_leaf_node3_name: str = None
     tmc_dish_leaf_node4_name: str = None
 
-    # NOTE: in TMC hierarchy, is it more sensed to group by master/subarray
-    # or by device type?
+    target: str = "mid"
+    """
+    The target environment for the TMC. It can be "mid" (default) or "low".
+    """
+
+    def supports_mid(self) -> bool:
+        """Check if the configuration supports the mid target environment."""
+        return self.target == "mid"
+
+    def supports_low(self) -> bool:
+        """Check if the configuration supports the low target environment."""
+        return self.target == "low"
 
     def get_device_names(self) -> dict[str, str]:
         all_devices = {
@@ -117,21 +127,22 @@ class TMCConfiguration(SubsystemConfiguration):
             ),
         }
 
-        # Add the dish leaf nodes only if they are set
-        for i in range(1, 5):
-            dish_name = f"tmc_dish_leaf_node{i}_name"
-            dish_value = getattr(self, dish_name)
-            if dish_value:
-                all_devices[dish_name] = dish_value
+        if self.supports_mid():
+            all_devices.update(
+                {
+                    "tmc_dish_leaf_node1_name": self.tmc_dish_leaf_node1_name,
+                    "tmc_dish_leaf_node2_name": self.tmc_dish_leaf_node2_name,
+                    "tmc_dish_leaf_node3_name": self.tmc_dish_leaf_node3_name,
+                    "tmc_dish_leaf_node4_name": self.tmc_dish_leaf_node4_name,
+                }
+            )
+
+        # TODO Low: add TMC-Low nodes here
 
         return all_devices
 
     def mandatory_attributes(self) -> list[str]:
-
-        # TODO Low: if we are in Low, should we check for the MCCS leaf nodes
-        # or something like that?
-
-        return [
+        mandatory_device_names = [
             "centralnode_name",
             "tmc_subarraynode1_name",
             "tmc_csp_master_leaf_node_name",
@@ -139,6 +150,20 @@ class TMCConfiguration(SubsystemConfiguration):
             "tmc_sdp_master_leaf_node_name",
             "tmc_sdp_subarray_leaf_node_name",
         ]
+
+        if self.supports_mid():
+            mandatory_device_names.extend(
+                [
+                    "tmc_dish_leaf_node1_name",
+                    "tmc_dish_leaf_node2_name",
+                    "tmc_dish_leaf_node3_name",
+                    "tmc_dish_leaf_node4_name",
+                ]
+            )
+
+        # TODO Low: add TMC-Low nodes here
+
+        return mandatory_device_names
 
 
 @dataclass

@@ -18,6 +18,8 @@ from ska_integration_test_harness.structure.subsystem_wrapper import (
 class TMCWrapper(SubsystemWrapper, abc.ABC):
     """A wrapper for the TMC component."""
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, tmc_configuration: TMCConfiguration):
         """Initialise the TMC wrapper.
 
@@ -36,14 +38,22 @@ class TMCWrapper(SubsystemWrapper, abc.ABC):
         self.sdp_master_leaf_node = tango.DeviceProxy(
             tmc_configuration.tmc_sdp_master_leaf_node_name
         )
-        self.dish_leaf_node_list = [
-            tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node1_name),
-            tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node2_name),
-            tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node3_name),
-            tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node4_name),
-        ]
+
+        # TODO: they could be already initialised at the beginning...
         self.csp_subarray_leaf_node = None
         self.sdp_subarray_leaf_node = None
+
+        if tmc_configuration.supports_mid():
+            self.dish_leaf_node_list = [
+                tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node1_name),
+                tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node2_name),
+                tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node3_name),
+                tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node4_name),
+            ]
+
+        # TODO Low: add TMC-Low nodes here
+
+        self._config = tmc_configuration
 
     # --------------------------------------------------------------
     # Subsystem properties definition
@@ -114,3 +124,11 @@ class TMCWrapper(SubsystemWrapper, abc.ABC):
         self.sdp_subarray_leaf_node = tango.DeviceProxy(
             f"ska_mid/tm_leaf_node/sdp_subarray{subarray_id}"
         )
+
+    def supports_low(self) -> bool:
+        """Check if the configuration supports the low target environment."""
+        return self._config.supports_low()
+
+    def supports_mid(self) -> bool:
+        """Check if the configuration supports the mid target environment."""
+        return self._config.supports_mid()
