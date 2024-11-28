@@ -31,6 +31,8 @@ from tests.actions.utils.mock_device_proxy import create_device_proxy_mock
 class MockProductionTMCWrapper(ProductionTMCWrapper):
     """Mock implementation of ProductionTMCWrapper for testing."""
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self) -> None:
         """Init does nothing."""
         # pylint: disable=super-init-not-called
@@ -54,6 +56,8 @@ class MockProductionTMCWrapper(ProductionTMCWrapper):
         ]
         self.csp_subarray_leaf_node = None
         self.sdp_subarray_leaf_node = None
+        self._config = MagicMock()
+        self._config.supports_mid.return_value = True
 
 
 class MockEmulatedSDPWrapper(EmulatedSDPWrapper):

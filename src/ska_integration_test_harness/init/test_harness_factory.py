@@ -90,11 +90,16 @@ class TestHarnessFactory:
         :return: The telescope wrapper.
         """
         telescope = TelescopeWrapper()
+
         telescope.set_up(
             tmc=self.create_tmc_wrapper(),
             csp=self.create_csp_wrapper(),
             sdp=self.create_sdp_wrapper(),
-            dishes=self.create_dishes_wrapper(),
+            dishes=(
+                self.create_dishes_wrapper()
+                if self.config.tmc_config.supports_mid()
+                else None
+            ),
         )
         return telescope
 

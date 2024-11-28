@@ -118,6 +118,12 @@ class TelescopeWrapper:
         :raises ValueError: If one or more subsystems are missing.
         """
         self.fail_if_not_set_up()
+
+        if not self.tmc.supports_mid():
+            raise ValueError(
+                "Dishes subsystem is not available in the current setup."
+            )
+
         return self._dishes
 
     # -----------------------------------------------------------------
@@ -172,14 +178,14 @@ class TelescopeWrapper:
         tmc: TMCWrapper,
         sdp: SDPWrapper,
         csp: CSPWrapper,
-        dishes: DishesWrapper,
+        dishes: DishesWrapper | None = None,
     ) -> None:
         """Initialise the telescope test structure with the given devices.
 
         :param tmc: The TMC subsystem wrapper.
         :param sdp: The SDP subsystem wrapper.
         :param csp: The CSP subsystem wrapper.
-        :param dishes: The Dishes subsystem wrapper.
+        :param dishes: The Dishes subsystem wrapper (optional for low).
         """
         self._tmc = tmc
         self._sdp = sdp
@@ -198,14 +204,14 @@ class TelescopeWrapper:
         self.csp.tear_down()
         self.dishes.tear_down()
 
-    def fail_if_not_set_up(self) -> None:
-        """Fail if the telescope test structure is not set up.
+    def _raise_wrong_environment_failure(self) -> None:
+        """Raise a"""
+
+    def _raise_not_setup_failure(self) -> None:
+        """Raise a ValueError if the telescope test structure is not set up.
 
         :raises ValueError: If one or more subsystems are missing.
         """
-        if self._tmc and self._sdp and self._csp and self._dishes:
-            return
-
         raise ValueError(
             "Telescope test structure is not set up "
             "(one or more subsystems are missing). subsystems: "
@@ -214,6 +220,21 @@ class TelescopeWrapper:
             "Please set up the telescope test structure first calling the "
             "`set_up` method."
         )
+
+    def fail_if_not_set_up(self) -> None:
+        """Fail if a valid structure is not set up.
+
+        At the moment, a valid structure includes TMC, SDP, CSP, and Dishes.
+
+        :raises ValueError: If one or more subsystems are missing.
+        """
+        if not (self._tmc and self._sdp and self._csp):
+            self._raise_not_setup_failure()
+
+        if self._tmc.supports_mid() and not self._dishes:
+            self._raise_not_setup_failure()
+
+        # TODO Low: if we support low, MCCS should be set up too
 
     # -----------------------------------------------------------------
     # Other "technical" commands
