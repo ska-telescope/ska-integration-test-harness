@@ -211,10 +211,9 @@ class TelescopeWrapper:
         self.tmc.tear_down()
         self.sdp.tear_down()
         self.csp.tear_down()
-        self.dishes.tear_down()
 
-    def _raise_wrong_environment_failure(self) -> None:
-        """Raise a"""
+        if self.tmc.supports_mid():
+            self.dishes.tear_down()
 
     def _raise_not_setup_failure(self) -> None:
         """Raise a ValueError if the telescope test structure is not set up.
@@ -259,7 +258,9 @@ class TelescopeWrapper:
 
         self.sdp.clear_command_call()
         self.csp.clear_command_call()
-        self.dishes.clear_command_call()
+
+        if self.tmc.supports_mid():
+            self.dishes.clear_command_call()
 
     def set_subarray_id(self, subarray_id: int) -> None:
         """Create subarray devices for the requested subarray.

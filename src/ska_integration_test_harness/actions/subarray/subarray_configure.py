@@ -46,15 +46,18 @@ class SubarrayConfigure(TransientQuiescentCommandAction):
         """
         res = all_subarrays_have_obs_state(self.telescope, ObsState.READY)
 
-        for device in self.telescope.dishes.dish_master_list:
-            res.extend(
-                [
-                    ExpectedStateChange(device, "dishMode", DishMode.OPERATE),
-                    ExpectedStateChange(
-                        device, "pointingState", PointingState.TRACK
-                    ),
-                ]
-            )
+        if self.telescope.tmc.supports_mid():
+            for device in self.telescope.dishes.dish_master_list:
+                res.extend(
+                    [
+                        ExpectedStateChange(
+                            device, "dishMode", DishMode.OPERATE
+                        ),
+                        ExpectedStateChange(
+                            device, "pointingState", PointingState.TRACK
+                        ),
+                    ]
+                )
 
         return res
 

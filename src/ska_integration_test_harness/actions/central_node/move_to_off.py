@@ -25,7 +25,7 @@ from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
 )
 from ska_integration_test_harness.actions.utils.termination_conditions import (
-    dishes_have_dish_mode,
+    if_mid_dishes_have_dish_mode,
     master_and_subarray_devices_have_state,
 )
 from ska_integration_test_harness.inputs.dish_mode import DishMode
@@ -68,7 +68,7 @@ class MoveToOffCommand(TelescopeCommandAction):
         )
 
         # All dishes should be in STANDBY_LP mode
-        expected_events += dishes_have_dish_mode(
+        expected_events += if_mid_dishes_have_dish_mode(
             self.telescope, DishMode.STANDBY_LP
         )
 
