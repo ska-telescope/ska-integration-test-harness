@@ -67,7 +67,7 @@ def master_and_subarray_devices_have_state(
     state. The involved devices are:
 
     - TMC Central Node (telescopeState attribute)
-    - CSP Master Node (State attribute)
+    - CSP Master Node (State attribute, only if Mid is supported)
     - SDP Subarray Node (State attribute)
     - SDP Master Node (State attribute)
 
@@ -85,10 +85,16 @@ def master_and_subarray_devices_have_state(
         ExpectedStateChange(
             telescope.sdp.sdp_subarray, "State", expected_state
         ),
-        ExpectedStateChange(telescope.csp.csp_master, "State", expected_state),
         ExpectedStateChange(telescope.sdp.sdp_master, "State", expected_state),
     ]
 
+    # CSP is supposed to change state only if Mid is supported
+    if telescope.tmc.supports_mid():
+        res.append(
+            ExpectedStateChange(
+                telescope.csp.csp_master, "State", expected_state
+            ),
+        )
     return res
 
 
