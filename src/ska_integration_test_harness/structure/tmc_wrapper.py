@@ -69,10 +69,6 @@ class TMCWrapper(SubsystemWrapper, abc.ABC):
             "subarray_node": self.subarray_node,
             "csp_master_leaf_node": self.csp_master_leaf_node,
             "sdp_master_leaf_node": self.sdp_master_leaf_node,
-            "dish_leaf_node_001": self.dish_leaf_node_list[0],
-            "dish_leaf_node_036": self.dish_leaf_node_list[1],
-            "dish_leaf_node_063": self.dish_leaf_node_list[2],
-            "dish_leaf_node_100": self.dish_leaf_node_list[3],
         }
 
         if self.csp_subarray_leaf_node is not None:
@@ -80,6 +76,14 @@ class TMCWrapper(SubsystemWrapper, abc.ABC):
 
         if self.sdp_subarray_leaf_node is not None:
             res["sdp_subarray_leaf_node"] = self.sdp_subarray_leaf_node
+
+        if self.supports_mid():
+            res["dish_leaf_node_001"] = self.dish_leaf_node_list[0]
+            res["dish_leaf_node_036"] = self.dish_leaf_node_list[1]
+            res["dish_leaf_node_063"] = self.dish_leaf_node_list[2]
+            res["dish_leaf_node_100"] = self.dish_leaf_node_list[3]
+
+        # TODO Low: add TMC-Low nodes here
 
         return res
 
