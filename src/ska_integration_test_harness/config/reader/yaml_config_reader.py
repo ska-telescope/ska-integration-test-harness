@@ -14,7 +14,9 @@ from ska_integration_test_harness.config.reader.config_reader import (
     ConfigurationReader,
 )
 
-
+# REFACTOR NOTE: an hardcoded reader such as this one is a bit
+# of a boilerplate. At the moment there are at least 2-3 places where the
+# configuration parameters are hardcoded.
 class YAMLConfigurationReader(ConfigurationReader):
     """A configuration reader that reads from a YAML file.
 
@@ -144,6 +146,7 @@ class YAMLConfigurationReader(ConfigurationReader):
 
         return TMCConfiguration(
             is_emulated=tmc.get("is_emulated", False),
+            target=tmc.get("target"),
             centralnode_name=tmc.get("centralnode_name"),
             tmc_csp_master_leaf_node_name=tmc.get(
                 "tmc_csp_master_leaf_node_name"
