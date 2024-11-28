@@ -3,10 +3,8 @@
 import abc
 import logging
 
-from ska_integration_test_harness.config.test_harness_config import (
-    TestHarnessConfiguration,
-)
-from ska_integration_test_harness.config.validation.subsys_config_validator import (  # pylint: disable=line-too-long # noqa: E501
+from ..test_harness_config import TestHarnessConfiguration
+from .subsys_config_validator import (
     DeviceNamesValidator,
     EmulationConsistencyValidator,
     RequiredFieldsValidator,
