@@ -56,8 +56,9 @@ class MockProductionTMCWrapper(ProductionTMCWrapper):
         ]
         self.csp_subarray_leaf_node = None
         self.sdp_subarray_leaf_node = None
-        self._config = MagicMock()
-        self._config.supports_mid.return_value = True
+        self.config = MagicMock()
+        self.config.supports_mid.return_value = True
+        self.config.supports_low.return_value = False
 
 
 class MockEmulatedSDPWrapper(EmulatedSDPWrapper):
@@ -68,6 +69,9 @@ class MockEmulatedSDPWrapper(EmulatedSDPWrapper):
         # pylint: disable=super-init-not-called
         self.sdp_master = create_device_proxy_mock("mid-sdp/control/0")
         self.sdp_subarray = create_device_proxy_mock("mid-sdp/subarray/1")
+        self.config = MagicMock()
+        self.config.supports_mid.return_value = True
+        self.config.supports_low.return_value = False
 
 
 class MockProductionCSPWrapper(ProductionCSPWrapper):
@@ -78,6 +82,9 @@ class MockProductionCSPWrapper(ProductionCSPWrapper):
         # pylint: disable=super-init-not-called
         self.csp_master = create_device_proxy_mock("mid-csp/elt/master")
         self.csp_subarray = create_device_proxy_mock("mid-csp/elt/subarray_1")
+        self.config = MagicMock()
+        self.config.supports_mid.return_value = True
+        self.config.supports_low.return_value = False
 
 
 class MockEmulatedDishesWrapper(EmulatedDishesWrapper):
@@ -109,6 +116,9 @@ class MockEmulatedDishesWrapper(EmulatedDishesWrapper):
         self.dish_master_dict["dish_100"].dev_name.return_value = (
             "ska100/elt/master"
         )
+        self.config = MagicMock()
+        self.config.supports_mid.return_value = True
+        self.config.supports_low.return_value = False
 
 
 class TestTelescopeWrapper:
