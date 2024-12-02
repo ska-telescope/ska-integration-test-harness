@@ -1,7 +1,9 @@
 """A wrapper for a production CSP."""
 
 import tango
+from assertpy import assert_that
 from ska_control_model import AdminMode
+from ska_tango_testing.integration import TangoEventTracer
 
 from ska_integration_test_harness.config.components_config import (
     CSPConfiguration,
@@ -33,13 +35,27 @@ class ProductionCSPWrapper(CSPWrapper):
         # When in Low, the PST device is needed and
         # the admin mode must be set to ONLINE
         if self.config.supports_low():
-            self.pst = tango.DeviceProxy(self.config.pst_name)
             self.ensure_admin_mode_online()
+            self.pst = tango.DeviceProxy(self.config.pst_name)
 
     def ensure_admin_mode_online(self) -> None:
         """Ensure the CSP master is in ONLINE admin mode."""
         if self.csp_master.adminMode != AdminMode.ONLINE:
+
+            tracer = TangoEventTracer()
+            tracer.subscribe_event(self.csp_master, "isCommunicating")
+
             self.csp_master.adminMode = AdminMode.ONLINE
+
+            assert_that(tracer).described_as(
+                "FAIL IN CSP SETUP: "
+                "The CSP admin doesn't transition to ONLINE."
+            ).within_timeout(10).has_change_event_occurred(
+                self.csp_master, "isCommunicating", True
+            )
+        assert_that(self.csp_master.adminMode).described_as(
+            "FAIL IN CSP SETUP: The CSP admin mode is supposed to be ONLINE."
+        ).is_equal_to(AdminMode.ONLINE)
 
     # --------------------------------------------------------------
     # Subsystem properties definition
