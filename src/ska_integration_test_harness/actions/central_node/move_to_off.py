@@ -42,7 +42,7 @@ class MoveToOffCommand(TelescopeCommandAction):
     def _action(self):
         self._log("Moving the central node to OFF state")
         res = self.telescope.tmc.central_node.TelescopeOff()
-        self.telescope.csp.move_to_off()
+        # self.telescope.csp.move_to_off()
         return res
 
     def termination_condition(self):

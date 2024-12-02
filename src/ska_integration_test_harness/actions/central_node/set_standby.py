@@ -25,7 +25,7 @@ class SetStandby(TelescopeCommandAction):
     def _action(self):
         self._log("Setting the central node to STANDBY state")
         res = self.telescope.tmc.central_node.TelescopeStandby()
-        self.telescope.csp.move_to_off()
+        # self.telescope.csp.move_to_off()
         return res
 
     def termination_condition(self):

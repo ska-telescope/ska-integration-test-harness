@@ -1,7 +1,5 @@
 """A wrapper for an emulated CSP."""
 
-from tango import DevState
-
 from ska_integration_test_harness.emulated.utils.teardown_helper import (  # pylint: disable=line-too-long # noqa: E501
     EmulatedTeardownHelper,
 )
@@ -28,14 +26,8 @@ class EmulatedCSPWrapper(CSPWrapper):
     # --------------------------------------------------------------
     # Specific CSP methods and properties
 
-    def move_to_on(self) -> None:
-        # NOTE: in old code this line was AFTER
-        # self.central_node.TelescopeOn(). Empirically,
-        # it seems the order not to matter, but I am not sure.
-        self.csp_subarray.SetDirectState(DevState.ON)
-
-    def move_to_off(self) -> None:
-        self.csp_subarray.SetDirectState(DevState.OFF)
+    def before_telescope_state_command(self) -> None:
+        """Nothing to do before a telescope state command."""
 
     def tear_down(self) -> None:
         """Tear down the CSP.
