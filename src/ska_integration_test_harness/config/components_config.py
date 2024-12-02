@@ -32,6 +32,21 @@ class SubsystemConfiguration(abc.ABC):
 
     is_emulated: bool = True
 
+    target: str = "mid"
+    """
+    The target environment for the subsystem.
+
+    It can be "mid" (default) or "low".
+    """
+
+    def supports_mid(self) -> bool:
+        """Check if the configuration supports the mid target environment."""
+        return self.target == "mid"
+
+    def supports_low(self) -> bool:
+        """Check if the configuration supports the low target environment."""
+        return self.target == "low"
+
     @abc.abstractmethod
     def get_device_names(self) -> dict[str, str]:
         """Return all the device names.
