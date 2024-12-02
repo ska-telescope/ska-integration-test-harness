@@ -1,5 +1,6 @@
 """A wrapper for a production CSP."""
 
+import tango
 from ska_control_model import AdminMode
 
 from ska_integration_test_harness.config.components_config import (
@@ -29,6 +30,17 @@ class ProductionCSPWrapper(CSPWrapper):
         self.all_production = all_production
         self.config = csp_configuration
 
+        # When in Low, the PST device is needed and
+        # the admin mode must be set to ONLINE
+        if self.config.supports_low():
+            self.pst = tango.DeviceProxy(self.config.pst_name)
+            self.ensure_admin_mode_online()
+
+    def ensure_admin_mode_online(self) -> None:
+        """Ensure the CSP master is in ONLINE admin mode."""
+        if self.csp_master.adminMode != AdminMode.ONLINE:
+            self.csp_master.adminMode = AdminMode.ONLINE
+
     # --------------------------------------------------------------
     # Subsystem properties definition
 
@@ -38,16 +50,10 @@ class ProductionCSPWrapper(CSPWrapper):
     # --------------------------------------------------------------
     # Specific CSP methods and properties
 
-    WAIT_FOR_OFF_TIMEOUT = 50
-
-    def before_telescope_state_command(self) -> None:
-        """If in Low, adminMode must be set to ONLINE."""
-
-        if (
-            self.config.supports_low()
-            and self.csp_master.adminMode != AdminMode.ONLINE
-        ):
-            self.csp_master.adminMode = AdminMode.ONLINE
+    def before_move_to_on(self) -> None:
+        """If in Low, the PST On command must be called."""
+        if self.config.supports_low():
+            self.pst.On()
 
     def tear_down(self) -> None:
         """Tear down the CSP (not needed)."""

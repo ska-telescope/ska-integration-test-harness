@@ -192,19 +192,36 @@ class CSPConfiguration(SubsystemConfiguration):
     csp_master_name: str = None
     csp_subarrays_names: dict[int, str] = field(default_factory=dict)
 
+    pst_name: str | None = None
+
     @property
     def csp_subarray1_name(self) -> str:
         """Get the name of the first subarray."""
         return self.csp_subarrays_names.get(1)
 
     def get_device_names(self) -> dict[str, str]:
-        return {
+        dev_names = {
             "csp_master_name": self.csp_master_name,
             "csp_subarray1_name": self.csp_subarray1_name,
         }
 
+        # PST is required when in Low and CSP is not emulated
+        if self.pst_name:
+            dev_names["pst_name"] = self.pst_name
+
+        return dev_names
+
     def mandatory_attributes(self) -> list[str]:
-        return self.get_device_names().keys()
+        attrs = [
+            "csp_master_name",
+            "csp_subarray1_name",
+        ]
+
+        # PST is required when in Low and CSP is not emulated
+        if not self.is_emulated and self.supports_low():
+            attrs.append("pst_name")
+
+        return attrs
 
 
 @dataclass

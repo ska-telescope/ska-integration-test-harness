@@ -26,8 +26,8 @@ class EmulatedCSPWrapper(CSPWrapper):
     # --------------------------------------------------------------
     # Specific CSP methods and properties
 
-    def before_telescope_state_command(self) -> None:
-        """Nothing to do before a telescope state command."""
+    def before_move_to_on(self) -> None:
+        """Nothing to do before moving to ON."""
 
     def tear_down(self) -> None:
         """Tear down the CSP.

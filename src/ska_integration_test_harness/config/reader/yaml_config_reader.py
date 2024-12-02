@@ -197,6 +197,7 @@ class YAMLConfigurationReader(ConfigurationReader):
             csp_subarrays_names=self._extract_numbered_attributes(
                 csp, r"csp_subarray(\d*)_name"
             ),
+            pst_name=csp.get("pst_name"),
         )
 
     def get_sdp_configuration(self) -> SDPConfiguration | None:

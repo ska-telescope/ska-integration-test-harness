@@ -44,8 +44,8 @@ class CSPWrapper(SubsystemWrapper, abc.ABC):
     # Specific CSP methods and properties
 
     @abc.abstractmethod
-    def before_telescope_state_command(self) -> None:
-        """Prepare the CSP for a telescope state command."""
+    def before_move_to_on(self) -> None:
+        """Nothing to do before moving to ON."""
 
     @abc.abstractmethod
     def tear_down(self) -> None:

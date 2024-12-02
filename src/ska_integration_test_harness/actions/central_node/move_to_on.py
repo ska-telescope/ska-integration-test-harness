@@ -44,7 +44,7 @@ class MoveToOnCommand(TelescopeCommandAction):
 
     def _action(self):
         self._log("Moving the central node to ON state")
-        self.telescope.csp.before_telescope_state_command()
+        self.telescope.csp.before_move_to_on()
         res = self.telescope.tmc.central_node.TelescopeOn()
         return res
 
