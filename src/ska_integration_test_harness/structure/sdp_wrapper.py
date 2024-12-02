@@ -25,6 +25,7 @@ class SDPWrapper(SubsystemWrapper, abc.ABC):
         self.sdp_subarray = tango.DeviceProxy(
             sdp_configuration.sdp_subarray1_name
         )
+        self.config = sdp_configuration
 
     # --------------------------------------------------------------
     # Subsystem properties definition
@@ -46,8 +47,10 @@ class SDPWrapper(SubsystemWrapper, abc.ABC):
     def set_subarray_id(self, subarray_id: str) -> None:
         """Set the subarray ID on the SDP subarray."""
         subarray_id = str(subarray_id).zfill(2)
+        target = "low" if self.config.supports_low() else "mid"
+
         self.sdp_subarray = tango.DeviceProxy(
-            f"mid-sdp/subarray/{subarray_id}"
+            f"{target}-sdp/subarray/{subarray_id}"
         )
 
     @abc.abstractmethod

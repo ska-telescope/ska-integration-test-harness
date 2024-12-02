@@ -30,7 +30,6 @@ class ProductionCSPWrapper(CSPWrapper):
         """
         super().__init__(csp_configuration)
         self.all_production = all_production
-        self.config = csp_configuration
 
         # When in Low, the PST device is needed and
         # the admin mode must be set to ONLINE

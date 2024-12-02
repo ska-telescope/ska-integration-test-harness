@@ -53,7 +53,7 @@ class TMCWrapper(SubsystemWrapper, abc.ABC):
 
         # TODO Low: add TMC-Low nodes here
 
-        self._config = tmc_configuration
+        self.config = tmc_configuration
 
     # --------------------------------------------------------------
     # Subsystem properties definition
@@ -114,25 +114,25 @@ class TMCWrapper(SubsystemWrapper, abc.ABC):
 
     def set_subarray_id(self, subarray_id: int):
         """Set subarray ID"""
-
+        target = "low" if self.config.supports_low() else "mid"
         self.subarray_node = tango.DeviceProxy(
-            f"ska_mid/tm_subarray_node/{subarray_id}"
+            f"ska_{target}/tm_subarray_node/{subarray_id}"
         )
 
         # NOTE: why zfill(2) after the first DeviceProxy creation?
         subarray_id = str(subarray_id).zfill(2)
 
         self.csp_subarray_leaf_node = tango.DeviceProxy(
-            f"ska_mid/tm_leaf_node/csp_subarray{subarray_id}"
+            f"ska_{target}/tm_leaf_node/csp_subarray{subarray_id}"
         )
         self.sdp_subarray_leaf_node = tango.DeviceProxy(
-            f"ska_mid/tm_leaf_node/sdp_subarray{subarray_id}"
+            f"ska_{target}/tm_leaf_node/sdp_subarray{subarray_id}"
         )
 
     def supports_low(self) -> bool:
         """Check if the configuration supports the low target environment."""
-        return self._config.supports_low()
+        return self.config.supports_low()
 
     def supports_mid(self) -> bool:
         """Check if the configuration supports the mid target environment."""
-        return self._config.supports_mid()
+        return self.config.supports_mid()
