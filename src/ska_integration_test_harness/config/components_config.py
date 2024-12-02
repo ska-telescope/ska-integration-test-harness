@@ -206,8 +206,11 @@ class CSPConfiguration(SubsystemConfiguration):
         }
 
         # PST is required when in Low and CSP is not emulated
-        if self.pst_name:
-            dev_names["pst_name"] = self.pst_name
+        # if self.pst_name:
+        #     dev_names["pst_name"] = self.pst_name
+
+        # NOTE: maybe PST is available only after the Online mode thing
+        # removed that check for now, since it fails.
 
         return dev_names
 

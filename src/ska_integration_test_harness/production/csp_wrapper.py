@@ -36,6 +36,9 @@ class ProductionCSPWrapper(CSPWrapper):
         # the admin mode must be set to ONLINE
         if self.config.supports_low():
             self.ensure_admin_mode_online()
+            # TODO: connection to PST crashed before, we have to
+            # check if it continues to crash even after the synchronization
+            # on the admin mode
             # self.pst = tango.DeviceProxy(self.config.pst_name)
 
     def ensure_admin_mode_online(self) -> None:
