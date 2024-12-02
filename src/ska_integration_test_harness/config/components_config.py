@@ -206,8 +206,8 @@ class CSPConfiguration(SubsystemConfiguration):
         }
 
         # PST is required when in Low and CSP is not emulated
-        # if self.pst_name:
-        #     dev_names["pst_name"] = self.pst_name
+        if self.pst_name:
+            dev_names["pst_name"] = self.pst_name
 
         return dev_names
 
@@ -218,8 +218,8 @@ class CSPConfiguration(SubsystemConfiguration):
         ]
 
         # PST is required when in Low and CSP is not emulated
-        # if not self.is_emulated and self.supports_low():
-        #     attrs.append("pst_name")
+        if not self.is_emulated and self.supports_low():
+            attrs.append("pst_name")
 
         return attrs
 

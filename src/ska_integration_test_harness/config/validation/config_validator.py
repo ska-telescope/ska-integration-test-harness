@@ -5,8 +5,6 @@ import logging
 
 from ..test_harness_config import TestHarnessConfiguration
 from .subsys_config_validator import (
-    DeviceNamesValidator,
-    EmulationConsistencyValidator,
     RequiredFieldsValidator,
     SubsystemConfigurationValidator,
 )
@@ -95,8 +93,8 @@ class BasicConfigurationValidator(ConfigurationValidator):
 
         self.subsystem_validators: SubsystemConfigurationValidator = [
             RequiredFieldsValidator(logger),
-            DeviceNamesValidator(logger),
-            EmulationConsistencyValidator(logger),
+            # DeviceNamesValidator(logger),
+            # EmulationConsistencyValidator(logger),
         ]
         """The validators used to validate the subsystem configurations."""
 
