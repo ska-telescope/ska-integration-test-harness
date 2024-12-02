@@ -1,6 +1,6 @@
 """A wrapper for a production CSP."""
 
-import tango
+# import tango
 from assertpy import assert_that
 from ska_control_model import AdminMode
 from ska_tango_testing.integration import TangoEventTracer
@@ -36,7 +36,7 @@ class ProductionCSPWrapper(CSPWrapper):
         # the admin mode must be set to ONLINE
         if self.config.supports_low():
             self.ensure_admin_mode_online()
-            self.pst = tango.DeviceProxy(self.config.pst_name)
+            # self.pst = tango.DeviceProxy(self.config.pst_name)
 
     def ensure_admin_mode_online(self) -> None:
         """Ensure the CSP master is in ONLINE admin mode."""
@@ -68,8 +68,8 @@ class ProductionCSPWrapper(CSPWrapper):
 
     def before_move_to_on(self) -> None:
         """If in Low, the PST On command must be called."""
-        if self.config.supports_low():
-            self.pst.On()
+        # if self.config.supports_low():
+        # self.pst.On()
 
     def tear_down(self) -> None:
         """Tear down the CSP (not needed)."""
