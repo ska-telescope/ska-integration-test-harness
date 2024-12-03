@@ -60,7 +60,7 @@ class ProductionTMCWrapper(TMCWrapper):
         - Force the subarray state to EMPTY.
         - Move the central node to OFF.
         - Move the subarray to OFF.
-        - Load the default dish VCC configuration (if needed).
+        - Load the default dish VCC configuration (if needed and if in Mid).
         """
         self.logger.info(
             "Calling tear down for TMC (Starting subarray state: %s)",
@@ -81,22 +81,20 @@ class ProductionTMCWrapper(TMCWrapper):
         if self.central_node.telescopeState != DevState.OFF:
             MoveToOff().execute()
 
-        # NOTE: is it really needed?
-        # SubarrayMoveToOff().execute()
-
-        # if source dish vcc config is empty or not matching with default
-        # dish vcc then load default dish vcc config
-        # CSP_SIMULATION_ENABLED condition will be removed after testing
-        # with real csp
-        expected_vcc_config = (
-            self.default_commands_input.default_vcc_config_input
-        )
-        if self.central_node.isDishVccConfigSet and (
-            not self.csp_master_leaf_node.sourceDishVccConfig
-            or not expected_vcc_config.is_equal_to_json(
-                self.csp_master_leaf_node.sourceDishVccConfig
+        if self.supports_mid():
+            # if source dish vcc config is empty or not matching with default
+            # dish vcc then load default dish vcc config
+            # CSP_SIMULATION_ENABLED condition will be removed after testing
+            # with real csp
+            expected_vcc_config = (
+                self.default_commands_input.default_vcc_config_input
             )
-        ):
-            CentralNodeLoadDishConfig(expected_vcc_config).execute()
+            if self.central_node.isDishVccConfigSet and (
+                not self.csp_master_leaf_node.sourceDishVccConfig
+                or not expected_vcc_config.is_equal_to_json(
+                    self.csp_master_leaf_node.sourceDishVccConfig
+                )
+            ):
+                CentralNodeLoadDishConfig(expected_vcc_config).execute()
 
         self.logger.info("TMC tear down completed.")
