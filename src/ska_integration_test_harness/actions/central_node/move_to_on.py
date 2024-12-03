@@ -83,13 +83,11 @@ class MoveToOnCommand(TelescopeCommandAction):
 
         if self.telescope.tmc.supports_mid():
             # (in Mid) CSP controller is supposed to be in ON state
-            expected_events += (
-                [
-                    ExpectedStateChange(
-                        self.telescope.csp.csp_master, "State", DevState.ON
-                    )
-                ],
-            )
+            expected_events += [
+                ExpectedStateChange(
+                    self.telescope.csp.csp_master, "State", DevState.ON
+                )
+            ]
 
             # (in Mid) All dishes should be in STANDBY_FP mode
             expected_events += dishes_have_dish_mode(
