@@ -21,12 +21,14 @@ from tango import DevState
 from ska_integration_test_harness.actions.command_action import (
     TelescopeCommandAction,
 )
+from ska_integration_test_harness.actions.expected_event import (
+    ExpectedStateChange,
+)
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
 )
 from ska_integration_test_harness.actions.utils.termination_conditions import (
-    if_mid_dishes_have_dish_mode,
-    master_and_subarray_devices_have_state,
+    dishes_have_dish_mode,
 )
 from ska_integration_test_harness.inputs.dish_mode import DishMode
 
@@ -60,17 +62,36 @@ class MoveToOffCommand(TelescopeCommandAction):
 
         Devices are in OFF state, dishes are in STANDBY_LP mode.
         """
-        # The central node, SDP subarray, SDP master, CSP subarray, CSP master
-        # and all dishes should be in OFF state.
-        expected_events = master_and_subarray_devices_have_state(
-            self.telescope,
-            DevState.OFF,
-        )
+        expected_events = [
+            # The SDP controller and subarray nodes should be in OFF state
+            ExpectedStateChange(
+                self.telescope.sdp.sdp_subarray, "State", DevState.OFF
+            ),
+            ExpectedStateChange(
+                self.telescope.sdp.sdp_master, "State", DevState.OFF
+            ),
+        ]
 
-        # All dishes should be in STANDBY_LP mode
-        expected_events += if_mid_dishes_have_dish_mode(
-            self.telescope, DishMode.STANDBY_LP
-        )
+        if self.telescope.tmc.supports_mid():
+            expected_events += [
+                # (in Mid) CSP controller should be in OFF state
+                ExpectedStateChange(
+                    self.telescope.csp.csp_master,
+                    "State",
+                    DevState.OFF,
+                ),
+                # (in Mid) central node should be in OFF state
+                ExpectedStateChange(
+                    self.telescope.tmc.central_node,
+                    "telescopeState",
+                    DevState.OFF,
+                ),
+            ]
+
+            # (in Mid) All dishes should be in STANDBY_LP mode
+            expected_events += dishes_have_dish_mode(
+                self.telescope, DishMode.STANDBY_LP
+            )
 
         return expected_events
 
