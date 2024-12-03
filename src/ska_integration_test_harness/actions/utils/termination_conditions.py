@@ -131,10 +131,13 @@ def resources_are_released(telescope: TelescopeWrapper) -> list[ExpectedEvent]:
     pre_action_attr_value = telescope.tmc.subarray_node.assignedResources
 
     return [
-        ExpectedEvent(
-            device=telescope.tmc.subarray_node,
-            attribute="assignedResources",
-            predicate=lambda event: event.attribute_value
-            != pre_action_attr_value,
+        # ExpectedEvent(
+        #     device=telescope.tmc.subarray_node,
+        #     attribute="assignedResources",
+        #     predicate=lambda event: event.attribute_value
+        #     != pre_action_attr_value,
+        # )
+        ExpectedStateChange(
+            telescope.tmc.subarray_node, "assignedResources", None
         )
     ]
