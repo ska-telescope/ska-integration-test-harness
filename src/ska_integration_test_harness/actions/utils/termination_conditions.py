@@ -128,7 +128,7 @@ def resources_are_released(telescope: TelescopeWrapper) -> list[ExpectedEvent]:
 
     :return: The termination condition, as a sequence of expected events.
     """
-    pre_action_attr_value = telescope.tmc.subarray_node.assignedResources
+    # pre_action_attr_value = telescope.tmc.subarray_node.assignedResources
 
     return [
         # ExpectedEvent(
