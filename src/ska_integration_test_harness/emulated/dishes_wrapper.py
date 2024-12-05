@@ -45,6 +45,7 @@ class EmulatedDishesWrapper(DishesWrapper):
         """Tear down the dishes.
 
         The procedure is the following:
+
         - Reset the health state for the dishes.
         - Clear the command call on the dishes.
         - Reset the transitions data for the dishes.

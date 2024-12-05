@@ -9,6 +9,9 @@ from ska_integration_test_harness.emulated.csp_wrapper import (
 from ska_integration_test_harness.emulated.dishes_wrapper import (
     EmulatedDishesWrapper,
 )
+from ska_integration_test_harness.emulated.mccs_wrapper import (
+    EmulatedMCCSWrapper,
+)
 from ska_integration_test_harness.emulated.sdp_wrapper import (
     EmulatedSDPWrapper,
 )
@@ -21,6 +24,9 @@ from ska_integration_test_harness.production.csp_wrapper import (
 from ska_integration_test_harness.production.dishes_wrapper import (
     ProductionDishesWrapper,
 )
+from ska_integration_test_harness.production.mccs_wrapper import (
+    ProductionMCCSWrapper,
+)
 from ska_integration_test_harness.production.sdp_wrapper import (
     ProductionSDPWrapper,
 )
@@ -29,6 +35,7 @@ from ska_integration_test_harness.production.tmc_wrapper import (
 )
 from ska_integration_test_harness.structure.csp_wrapper import CSPWrapper
 from ska_integration_test_harness.structure.dishes_wrapper import DishesWrapper
+from ska_integration_test_harness.structure.mccs_wrapper import MCCSWrapper
 from ska_integration_test_harness.structure.sdp_wrapper import SDPWrapper
 from ska_integration_test_harness.structure.telescope_wrapper import (
     TelescopeWrapper,
@@ -100,6 +107,11 @@ class TestHarnessFactory:
                 if self.config.tmc_config.supports_mid()
                 else None
             ),
+            mccs=(
+                self.create_mccs_wrapper()
+                if self.config.tmc_config.supports_low()
+                else None
+            ),
         )
         return telescope
 
@@ -150,3 +162,14 @@ class TestHarnessFactory:
             return EmulatedDishesWrapper(dish_config)
 
         return ProductionDishesWrapper(dish_config)
+
+    def create_mccs_wrapper(self) -> MCCSWrapper:
+        """Create a MCCS wrapper with the given configuration.
+
+        :return: The MCCS wrapper.
+        """
+        mccs_config = self.config.mccs_config
+        if mccs_config.is_emulated:
+            return EmulatedMCCSWrapper(mccs_config)
+
+        return ProductionMCCSWrapper(mccs_config)

@@ -183,8 +183,9 @@ class TestTelescopeWrapper:
 
         assert_that(str(exc_info.value)).described_as(
             "TMC is expected to be set up, but not SDP, CSP, and Dishes."
-        ).contains("SDP=None", "CSP=None", "Dishes=None").does_not_contain(
-            "TMC=None"
+        ).contains("are missing: ['SDP', 'CSP', 'Dishes']").contains(
+            "ensure the following subsystems are added: "
+            "['TMC', 'SDP', 'CSP', 'Dishes']"
         )
 
         with pytest.raises(ValueError):

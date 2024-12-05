@@ -277,3 +277,29 @@ class DishesConfiguration(SubsystemConfiguration):
 
     def mandatory_attributes(self) -> list[str]:
         return self.get_device_names().keys()
+
+
+@dataclass
+class MCCSConfiguration(SubsystemConfiguration):
+    """Configuration for the MCCS.
+
+    It contains the names of the various devices that make up the MCCS.
+    It is initialised with default values.
+    """
+
+    mccs_controller_name: str = None
+    mccs_subarrays_names: dict[int, str] = field(default_factory=dict)
+
+    @property
+    def mccs_subarray1_name(self) -> str:
+        """Get the name of the first subarray."""
+        return self.mccs_subarrays_names.get(1)
+
+    def get_device_names(self) -> dict[str, str]:
+        return {
+            "mccs_controller_name": self.mccs_controller_name,
+            "mccs_subarray1_name": self.mccs_subarray1_name,
+        }
+
+    def mandatory_attributes(self) -> list[str]:
+        return self.get_device_names().keys()

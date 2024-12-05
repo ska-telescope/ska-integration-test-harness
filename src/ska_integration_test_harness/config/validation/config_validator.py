@@ -139,7 +139,17 @@ class BasicConfigurationValidator(ConfigurationValidator):
                 config, TestHarnessConfiguration.SubsystemName.DISHES
             )
 
-        # TODO Low: either DISHES or MCCS should be required
+        # MCCS is required only for the low target
+        elif config.tmc_config.supports_low():
+            self._check_subsystems_presence(
+                config, TestHarnessConfiguration.SubsystemName.MCCS
+            )
+        else:
+            raise ValueError(
+                f"Invalid 'target' field: {config.tmc_config.target}. "
+                "It must be 'mid' or 'low'. You can leave it empty to "
+                "use the default value ('mid')."
+            )
 
         self._log_info("All the required subsystems are present.")
 

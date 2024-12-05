@@ -7,6 +7,7 @@ import yaml
 from ska_integration_test_harness.config.components_config import (
     CSPConfiguration,
     DishesConfiguration,
+    MCCSConfiguration,
     SDPConfiguration,
     TMCConfiguration,
 )
@@ -109,6 +110,16 @@ class YAMLConfigurationReader(ConfigurationReader):
         return self.config_as_dict.get(subsystem, None)
 
     # -------------------------------------------------------------------------
+    # Target reader
+
+    def get_target(self) -> str:
+        """Get the target environment for the subsystem ("mid" or "low").
+
+        return: The "mid" or "low" target environment. Default is "mid".
+        """
+        return self.config_as_dict.get("target", "mid")
+
+    # -------------------------------------------------------------------------
     # Subsystems configuration readers
 
     @staticmethod
@@ -139,10 +150,6 @@ class YAMLConfigurationReader(ConfigurationReader):
                 result[attribute_number] = subsystem_config_data[key]
         return result
 
-    def _get_target(self) -> str:
-        """Get the target environment for the subsystem ("mid" or "low")."""
-        return self.config_as_dict.get("target", "mid")
-
     def get_tmc_configuration(self) -> TMCConfiguration | None:
         tmc = self._get_subsystem_dict("tmc")
 
@@ -154,7 +161,7 @@ class YAMLConfigurationReader(ConfigurationReader):
             # They are also awkwardly duplicated both in configuration
             # classes and in the configuration reader.
             is_emulated=tmc.get("is_emulated", False),
-            target=self._get_target(),
+            target=self.get_target(),
             centralnode_name=tmc.get("centralnode_name"),
             tmc_csp_master_leaf_node_name=tmc.get(
                 "tmc_csp_master_leaf_node_name"
@@ -192,7 +199,7 @@ class YAMLConfigurationReader(ConfigurationReader):
 
         return CSPConfiguration(
             is_emulated=csp.get("is_emulated", True),
-            target=self._get_target(),
+            target=self.get_target(),
             csp_master_name=csp.get("csp_master_name"),
             csp_subarrays_names=self._extract_numbered_attributes(
                 csp, r"csp_subarray(\d*)_name"
@@ -208,7 +215,7 @@ class YAMLConfigurationReader(ConfigurationReader):
 
         return SDPConfiguration(
             is_emulated=sdp.get("is_emulated", True),
-            target=self._get_target(),
+            target=self.get_target(),
             sdp_master_name=sdp.get("sdp_master_name"),
             sdp_subarrays_names=self._extract_numbered_attributes(
                 sdp, r"sdp_subarray(\d*)_name"
@@ -227,4 +234,18 @@ class YAMLConfigurationReader(ConfigurationReader):
             dish_master2_name=dish.get("dish_master2_name"),
             dish_master3_name=dish.get("dish_master3_name"),
             dish_master4_name=dish.get("dish_master4_name"),
+        )
+
+    def get_mccs_configuration(self) -> MCCSConfiguration | None:
+        mccs = self._get_subsystem_dict("mccs")
+
+        if mccs is None:
+            return None
+
+        return MCCSConfiguration(
+            is_emulated=mccs.get("is_emulated", True),
+            mccs_controller_name=mccs.get("mccs_controller_name"),
+            mccs_subarrays_names=self._extract_numbered_attributes(
+                mccs, r"mccs_subarray(\d*)_name"
+            ),
         )
