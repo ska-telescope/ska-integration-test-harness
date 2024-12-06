@@ -6,6 +6,7 @@ from ska_integration_test_harness.actions.expected_event import (
     ExpectedEvent,
     ExpectedStateChange,
 )
+from ska_integration_test_harness.inputs.json_input import StrJSONInput
 from ska_integration_test_harness.structure.telescope_wrapper import (
     TelescopeWrapper,
 )
@@ -133,6 +134,7 @@ def resources_are_released(telescope: TelescopeWrapper) -> list[ExpectedEvent]:
         ExpectedEvent(
             device=telescope.tmc.subarray_node,
             attribute="assignedResources",
-            predicate=lambda event: not event.attribute_value,
+            # predicate=lambda event: not event.attribute_value,
+            predicate=lambda event: StrJSONInput(event.attribute_value) == {},
         )
     ]
