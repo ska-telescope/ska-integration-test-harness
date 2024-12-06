@@ -1,9 +1,9 @@
 """A wrapper for a production CSP."""
 
-# import tango
 from assertpy import assert_that
-from ska_control_model import AdminMode
+from ska_control_model import AdminMode, HealthState
 from ska_tango_testing.integration import TangoEventTracer
+from tango import DevState
 
 from ska_integration_test_harness.config.components_config import (
     CSPConfiguration,
@@ -49,13 +49,26 @@ class ProductionCSPWrapper(CSPWrapper):
             # wait for the CSP admin to transition to ONLINE
             # NOTE: for some reason, the subscription to the event
             # should be done after the admin mode is set to ONLINE
-            tracer = TangoEventTracer()
-            tracer.subscribe_event(self.csp_master, "isCommunicating")
+            tracer = TangoEventTracer(
+                {
+                    "healthState": HealthState,
+                }
+            )
+            tracer.subscribe_event(self.csp_master, "state")
+            tracer.subscribe_event(self.csp_master, "healthState")
+            tracer.subscribe_event(self.csp_subarray, "state")
+            tracer.subscribe_event(self.csp_subarray, "healthState")
             assert_that(tracer).described_as(
                 "FAIL IN CSP SETUP: "
                 "The CSP admin doesn't transition to ONLINE."
             ).within_timeout(10).has_change_event_occurred(
-                self.csp_master, "isCommunicating", True
+                self.csp_master, "state", DevState.ON
+            ).has_change_event_occurred(
+                self.csp_subarray, "state", DevState.ON
+            ).has_change_event_occurred(
+                self.csp_master, "healthState", HealthState.UNKNOWN
+            ).has_change_event_occurred(
+                self.csp_subarray, "healthState", HealthState.UNKNOWN
             )
         assert_that(self.csp_master.adminMode).described_as(
             "FAIL IN CSP SETUP: The CSP admin mode is supposed to be ONLINE."
