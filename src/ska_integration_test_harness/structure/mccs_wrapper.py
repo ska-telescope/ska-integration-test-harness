@@ -37,6 +37,10 @@ class MCCSWrapper(SubsystemWrapper, abc.ABC):
 
     def get_all_devices(self) -> dict[str, tango.DeviceProxy]:
         """Get all the subsystem devices as a dictionary."""
+        return {
+            "mccs_controller": self.mccs_controller,
+            "mccs_subarray": self.mccs_subarray,
+        }
 
     # --------------------------------------------------------------
     # Specific MCCS methods and properties
