@@ -43,12 +43,14 @@ class ProductionCSPWrapper(CSPWrapper):
     def ensure_admin_mode_online(self) -> None:
         """Ensure the CSP master is in ONLINE admin mode."""
         if self.csp_master.adminMode != AdminMode.ONLINE:
-
-            tracer = TangoEventTracer()
-            tracer.subscribe_event(self.csp_master, "isCommunicating")
-
+            # set ADMIN mode to ONLINE
             self.csp_master.adminMode = AdminMode.ONLINE
 
+            # wait for the CSP admin to transition to ONLINE
+            # NOTE: for some reason, the subscription to the event
+            # should be done after the admin mode is set to ONLINE
+            tracer = TangoEventTracer()
+            tracer.subscribe_event(self.csp_master, "isCommunicating")
             assert_that(tracer).described_as(
                 "FAIL IN CSP SETUP: "
                 "The CSP admin doesn't transition to ONLINE."
