@@ -135,6 +135,9 @@ def resources_are_released(telescope: TelescopeWrapper) -> list[ExpectedEvent]:
             device=telescope.tmc.subarray_node,
             attribute="assignedResources",
             # predicate=lambda event: not event.attribute_value,
-            predicate=lambda event: StrJSONInput(event.attribute_value) == {},
+            predicate=lambda event: StrJSONInput(
+                event.attribute_value
+            ).as_dict()
+            == {},
         )
     ]
