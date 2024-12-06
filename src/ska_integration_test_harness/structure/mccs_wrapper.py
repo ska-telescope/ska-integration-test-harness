@@ -25,7 +25,7 @@ class MCCSWrapper(SubsystemWrapper, abc.ABC):
             mccs_configuration.mccs_controller_name
         )
         self.mccs_subarray = tango.DeviceProxy(
-            mccs_configuration.mccs_subarray_name
+            mccs_configuration.mccs_subarray1_name
         )
 
     # --------------------------------------------------------------
