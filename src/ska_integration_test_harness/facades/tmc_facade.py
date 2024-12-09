@@ -163,7 +163,7 @@ class TMCFacade:
         self,
         wait_termination: bool = True,
         custom_timeout: int | None = None,
-        is_long_running_command: bool = True,
+        is_long_running_command: bool = False,
     ) -> None | tuple[Any, list[str]]:
         """Move the telescope to ON state.
 
