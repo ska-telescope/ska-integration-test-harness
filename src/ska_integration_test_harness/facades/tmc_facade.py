@@ -236,7 +236,9 @@ class TMCFacade:
         """
         action = SetStandby()
         action.is_long_running_command = is_long_running_command
-        self._setup_and_run_action(action, wait_termination, custom_timeout)
+        return self._setup_and_run_action(
+            action, wait_termination, custom_timeout
+        )
 
     def load_dish_vcc_configuration(
         self,
