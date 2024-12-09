@@ -18,6 +18,11 @@ class SubarrayAbort(TransientQuiescentCommandAction):
     (transient) and then to the ABORTED state (quiescent and stable).
     """
 
+    def __init__(self):
+        super().__init__()
+        self.target_device = self.telescope.tmc.subarray_node
+        self.is_long_running_command = False
+
     def _action(self):
         self._log("Invoking Abort on TMC SubarrayNode")
         result, message = self.telescope.tmc.subarray_node.Abort()

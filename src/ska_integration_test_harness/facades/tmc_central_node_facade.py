@@ -13,7 +13,7 @@ from ska_integration_test_harness.actions.central_node.central_node_load_dish_co
     CentralNodeLoadDishConfig,
 )
 from ska_integration_test_harness.actions.central_node.central_node_perform_action import (  # pylint: disable=line-too-long # noqa E501
-    CentralNodePerformAction,
+    CentralNodeRunCommand,
 )
 from ska_integration_test_harness.actions.central_node.central_node_release_resources import (  # pylint: disable=line-too-long # noqa E501
     CentralNodeReleaseResources,
@@ -180,6 +180,6 @@ class TMCCentralNodeFacade(metaclass=DeprecatedMeta):
             wait for the termination condition. By default the termination
             condition is waited.
         """
-        action = CentralNodePerformAction(command_name, input_json)
+        action = CentralNodeRunCommand(command_name, input_json)
         action.set_termination_condition_policy(wait_termination)
         return action.execute()

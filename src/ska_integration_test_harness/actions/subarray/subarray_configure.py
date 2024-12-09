@@ -28,6 +28,8 @@ class SubarrayConfigure(TransientQuiescentCommandAction):
 
     def __init__(self, configure_input: JSONInput):
         super().__init__()
+        self.target_device = self.telescope.tmc.subarray_node
+        self.is_long_running_command = True
         self.configure_input = configure_input
 
     def _action(self):
@@ -38,7 +40,7 @@ class SubarrayConfigure(TransientQuiescentCommandAction):
         return result, message
 
     def termination_condition_for_quiescent_state(self) -> list[ExpectedEvent]:
-        """All subarrays must reach the READY state.
+        """All subarrays must reach the READY state (and LRC must terminate).
 
         Also, all dishes must be in OPERATE dishMode and TRACK pointingState.
         """

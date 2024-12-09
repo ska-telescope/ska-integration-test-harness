@@ -181,7 +181,7 @@ class TelescopeAction(abc.ABC, Generic[T]):
         super().__init__()
 
         # ----------------------------------------------------------------
-        # Action tools
+        # Action internal tools
 
         self.telescope = TelescopeWrapper()
         """The telescope instance, which you can use to access all the
@@ -193,6 +193,12 @@ class TelescopeAction(abc.ABC, Generic[T]):
 
         self._logger = logging.getLogger(__name__)
         """A logger to display messages during the action execution"""
+
+        # ----------------------------------------------------------------
+        # Action data
+
+        self._last_execution_result: T | None = None
+        """The result of the last execution of the action."""
 
         # ----------------------------------------------------------------
         # Action configurations
@@ -256,7 +262,14 @@ class TelescopeAction(abc.ABC, Generic[T]):
         self.do_logging = do_logging
 
     # ----------------------------------------------------------------
-    # Actions execution
+    # Actions execution & result getter
+
+    def get_last_execution_result(self) -> T | None:
+        """Get the result of the last execution of the action (if any).
+
+        :return: The result of the last execution of the action (if any).
+        """
+        return self._last_execution_result
 
     def execute(self) -> Any | None:
         """Execute the action.
@@ -329,8 +342,8 @@ class TelescopeAction(abc.ABC, Generic[T]):
                 self.termination_condition()
             )
 
-        # Execute the action
-        res = self._action()
+        # Execute the action and store the result
+        self._last_execution_result = self._action()
 
         if self.wait_termination:
             # Wait for the expected state changes to occur within a timeout
@@ -350,7 +363,8 @@ class TelescopeAction(abc.ABC, Generic[T]):
         # Log the end of the action execution
         self._log("Action execution completed")
 
-        return res
+        # Return the result of the action
+        return self.get_last_execution_result()
 
     # ----------------------------------------------------------------
     # Extension points
@@ -380,8 +394,14 @@ class TelescopeAction(abc.ABC, Generic[T]):
         The termination condition is a list of expected events. Override
         this method to define the expected events that should occur. Remember
         that by default this method is called *BEFORE* the action is executed,
-        so you can use the telescope instance to access the devices
-        and get any information you need to define the termination condition.
+        so you can access the devices states and attributes and store
+        some useful information to define the termination condition.
+
+        Also remember that the termination condition is being waited *AFTER*
+        the action procedure is executed. So, you can define
+        a termination condition that is based on the action result
+        (through the use opportune lambda functions based on the
+        call of the action result getter ``get_last_execution_result``).
 
         :return: A list of expected events that define the termination
             condition of the action. They should be instances of

@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.3 (9th November 2024)
+
+- **SST-982**: make various actions support the check for the LRC completion.
+
 ## v0.2.2 (14th November 2024)
 
 - **SST-981**: small fix from the previous release, the observation state

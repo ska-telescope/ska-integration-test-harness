@@ -19,6 +19,8 @@ class CentralNodeAssignResources(TransientQuiescentCommandAction):
 
     def __init__(self, assign_input: JSONInput):
         super().__init__()
+        self.target_device = self.telescope.tmc.central_node
+        self.is_long_running_command = True
         self.assign_input = assign_input
 
     def _action(self):
@@ -37,5 +39,5 @@ class CentralNodeAssignResources(TransientQuiescentCommandAction):
         )
 
     def termination_condition_for_quiescent_state(self):
-        """All subarrays must reach the IDLE state."""
+        """All subarrays must reach the IDLE state and LRC must terminate."""
         return all_subarrays_have_obs_state(self.telescope, ObsState.IDLE)

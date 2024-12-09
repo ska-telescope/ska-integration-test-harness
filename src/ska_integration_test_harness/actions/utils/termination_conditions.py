@@ -114,11 +114,10 @@ def dishes_have_dish_mode(
 
 
 def resources_are_released(telescope: TelescopeWrapper) -> list[ExpectedEvent]:
-    """Termination condition for resources are released.
+    """Termination condition to check that resources are released.
 
-    Since it's repeated three times in different actions, we encapsulate it
-    here. The termination condition is that all subarrays must be in EMPTY
-    state and the assigned resources should have changed.
+    It extracts the assignedResources attribute value before and after the
+    action and checks that they are different.
 
     :param telescope: The telescope wrapper.
 
@@ -126,7 +125,6 @@ def resources_are_released(telescope: TelescopeWrapper) -> list[ExpectedEvent]:
     """
     pre_action_attr_value = telescope.tmc.subarray_node.assignedResources
 
-    # all subarrays must be in EMPTY state
     return [
         ExpectedEvent(
             device=telescope.tmc.subarray_node,

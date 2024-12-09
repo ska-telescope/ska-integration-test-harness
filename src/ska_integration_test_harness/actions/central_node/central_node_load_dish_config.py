@@ -12,10 +12,14 @@ class CentralNodeLoadDishConfig(TelescopeCommandAction):
 
     def __init__(self, dish_vcc_config: JSONInput):
         super().__init__()
+        self.target_device = self.telescope.tmc.central_node
+        # Is a LRC, but right now it raises err. code 3. TODO: fix this
+        # With the currently used data, it reports some errors, but it
+        # still completes the operation
+        self.is_long_running_command = False
         self.dish_vcc_config = dish_vcc_config
 
     def _action(self):
-        # AttributeError: LoadDishConfig. Did you mean: 'LoadDishCfg'?
         self._log("Invoking LoadDishCfg on CentralNode")
         result, message = self.telescope.tmc.central_node.LoadDishCfg(
             self.dish_vcc_config.as_str()
@@ -23,7 +27,8 @@ class CentralNodeLoadDishConfig(TelescopeCommandAction):
         return result, message
 
     def termination_condition(self):
-        """Check if sourceDishVccConfig attribute contains new JSON."""
+        """The dishes configuration has been changed and LRC has terminated."""
+        expected_events = super().termination_condition()
 
         def _is_source_dish_cfg_changed(event):
             """Check if sourceDishVccConfig attribute contains new JSON."""
@@ -31,10 +36,14 @@ class CentralNodeLoadDishConfig(TelescopeCommandAction):
                 event.attribute_value
             )
 
-        return [
+        # the expected event is that the sourceDishVccConfig attribute has
+        # been changed and so is different from the previous value
+        expected_events += [
             ExpectedEvent(
                 device=self.telescope.tmc.csp_master_leaf_node,
                 attribute="sourceDishVccConfig",
                 predicate=_is_source_dish_cfg_changed,
             )
         ]
+
+        return expected_events

@@ -14,21 +14,27 @@ from ska_integration_test_harness.actions.utils.termination_conditions import (
 class SubarrayReleaseAllResources(TelescopeCommandAction):
     """Invoke Release Resource command on subarray Node."""
 
+    def __init__(self) -> None:
+        super().__init__()
+        self.target_device = self.telescope.tmc.subarray_node
+        self.is_long_running_command = True
+
     def _action(self):
         self._log("Invoking ReleaseAllResources on TMC SubarrayNode")
-        (
-            result,
-            message,
-        ) = self.telescope.tmc.subarray_node.ReleaseAllResources()
-        return result, message
+        return self.telescope.tmc.subarray_node.ReleaseAllResources()
 
+    # pylint: disable=duplicate-code
     def termination_condition(self):
-        """All subarrays are in EMPTY state and resources are released."""
+        """Subarrays are in EMPTY, resources are released, LRC terminates."""
+        # LRC must terminate
+        expected_events = super().termination_condition()
 
         # subarray devices are expected to be in EMPTY state
-        res = all_subarrays_have_obs_state(self.telescope, ObsState.EMPTY)
+        expected_events += all_subarrays_have_obs_state(
+            self.telescope, ObsState.EMPTY
+        )
 
         # resources should be released
-        res += resources_are_released(self.telescope)
+        expected_events += resources_are_released(self.telescope)
 
-        return res
+        return expected_events

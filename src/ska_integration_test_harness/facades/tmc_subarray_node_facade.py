@@ -22,7 +22,7 @@ from ska_integration_test_harness.actions.subarray.subarray_end_scan import (  #
     SubarrayEndScan,
 )
 from ska_integration_test_harness.actions.subarray.subarray_execute_transition import (  # pylint: disable=line-too-long # noqa: E501
-    SubarrayExecuteTransition,
+    SubarrayRunCommand,
 )
 from ska_integration_test_harness.actions.subarray.subarray_move_to_off import (  # pylint: disable=line-too-long # noqa: E501
     SubarrayMoveToOff,
@@ -290,7 +290,7 @@ class TMCSubarrayNodeFacade(metaclass=DeprecatedMeta):
 
         :return: result, message
         """
-        action = SubarrayExecuteTransition(
+        action = SubarrayRunCommand(
             command_name,
             command_input=command_input,
             expected_obs_state=expected_obs_state,

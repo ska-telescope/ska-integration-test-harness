@@ -19,13 +19,18 @@ class SubarrayRestart(TransientQuiescentCommandAction):
     and then to the EMPTY state (quiescent and stable).
     """
 
+    def __init__(self) -> None:
+        super().__init__()
+        self.target_device = self.telescope.tmc.subarray_node
+        self.is_long_running_command = True
+
     def _action(self):
         self._log("Invoking Restart on TMC SubarrayNode")
         result, message = self.telescope.tmc.subarray_node.Restart()
         return result, message
 
     def termination_condition_for_quiescent_state(self) -> list[ExpectedEvent]:
-        """All subarrays must be in EMPTY state."""
+        """All subarrays must be in EMPTY state (and LRC must terminate)."""
         return all_subarrays_have_obs_state(self.telescope, ObsState.EMPTY)
 
     def termination_condition_for_transient_state(self) -> list[ExpectedEvent]:
