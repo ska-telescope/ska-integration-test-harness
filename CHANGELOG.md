@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.2.3 (26th November 2024)
+## v0.2.3 (9th November 2024)
 
 - **SST-982**: make various actions support the check for the LRC completion.
 
