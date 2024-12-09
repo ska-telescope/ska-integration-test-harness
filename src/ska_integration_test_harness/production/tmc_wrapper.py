@@ -3,7 +3,6 @@
 import logging
 
 from ska_control_model import ObsState
-from tango import DevState
 
 from ..actions.central_node.central_node_load_dish_config import (
     CentralNodeLoadDishConfig,
@@ -67,6 +66,7 @@ class ProductionTMCWrapper(TMCWrapper):
             str(ObsState(self.subarray_node.obsState)),
         )
 
+        # eventually release resources from the central node
         if self.subarray_node.obsState == ObsState.IDLE:
             CentralNodeReleaseResources(
                 self.default_commands_input.get_input(
@@ -74,15 +74,10 @@ class ProductionTMCWrapper(TMCWrapper):
                 )
             ).execute()
 
+        # reset the subarray state to EMPTY
         ForceChangeOfObsState(
             ObsState.EMPTY, self.default_commands_input
         ).execute()
-
-        if self.central_node.telescopeState != DevState.OFF:
-            MoveToOff().execute()
-
-        # NOTE: is it really needed?
-        # SubarrayMoveToOff().execute()
 
         # if source dish vcc config is empty or not matching with default
         # dish vcc then load default dish vcc config
@@ -98,5 +93,8 @@ class ProductionTMCWrapper(TMCWrapper):
             )
         ):
             CentralNodeLoadDishConfig(expected_vcc_config).execute()
+
+        # ensure the central node is in OFF state
+        MoveToOff().execute()
 
         self.logger.info("TMC tear down completed.")
