@@ -15,6 +15,8 @@ from ska_integration_test_harness.structure.subsystem_wrapper import (
 class SDPWrapper(SubsystemWrapper, abc.ABC):
     """A test wrapper for the SDP."""
 
+    # NOTE: same for mid and low (great)
+
     def __init__(self, sdp_configuration: SDPConfiguration):
         """Initialise the SDP wrapper.
 

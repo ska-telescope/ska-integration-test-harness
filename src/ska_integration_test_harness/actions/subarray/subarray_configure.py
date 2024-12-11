@@ -59,6 +59,8 @@ class SubarrayConfigure(TransientQuiescentCommandAction):
                     ]
                 )
 
+        # TODO: MCCS has obs state, just that is fine
+
         return res
 
     def termination_condition_for_transient_state(self) -> list[ExpectedEvent]:

@@ -93,6 +93,11 @@ class MoveToOffCommand(TelescopeCommandAction):
                 self.telescope, DishMode.STANDBY_LP
             )
 
+        # In Low:
+        # - TMC and CSP are always ON
+        # - MCCS maybe also (?)
+        # - probably nothing more
+
         return expected_events
 
 

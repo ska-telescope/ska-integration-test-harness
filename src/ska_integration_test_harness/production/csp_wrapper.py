@@ -40,8 +40,24 @@ class ProductionCSPWrapper(CSPWrapper):
             # on the admin mode
             # self.pst = tango.DeviceProxy(self.config.pst_name)
 
+    # def set_serial_number_of_cbf_processor(self):
+    #     """Sets serial number for cbf processor"""
+    #     cbf_proc1 = DeviceProxy("low-cbf/processor/0.0.0")
+    #     cbf_proc2 = DeviceProxy("low-cbf/processor/0.0.1")
+
+    #     cbf_proc1.serialnumber = "XFL14SLO1LIF"
+    #     cbf_proc1.subscribetoallocator("low-cbf/allocator/0")
+    #     cbf_proc1.register()
+
+    #     cbf_proc2.serialnumber = "XFL1HOOQ1Y44"
+    #     cbf_proc2.subscribetoallocator("low-cbf/allocator/0")
+    #     cbf_proc2.register()
+
     def ensure_admin_mode_online(self) -> None:
         """Ensure the CSP master is in ONLINE admin mode."""
+
+        # TODO: this probably is needed for MCSS too
+
         if self.csp_master.adminMode != AdminMode.ONLINE:
             # set ADMIN mode to ONLINE
             self.csp_master.adminMode = AdminMode.ONLINE

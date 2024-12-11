@@ -68,4 +68,7 @@ class SetStandby(TelescopeCommandAction):
                 self.telescope, DishMode.STANDBY_LP
             )
 
+        # In Low:
+        # (nothing)
+
         return expected_events

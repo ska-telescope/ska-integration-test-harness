@@ -94,6 +94,9 @@ class MoveToOnCommand(TelescopeCommandAction):
                 self.telescope, DishMode.STANDBY_FP
             )
 
+        # in Low:
+        # - (nothing)
+
         return expected_events
 
 

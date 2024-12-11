@@ -51,7 +51,9 @@ class TMCWrapper(SubsystemWrapper, abc.ABC):
                 tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node4_name),
             ]
 
-        # TODO Low: add TMC-Low nodes here
+        # TODO Low: add MCCS leaf nodes
+
+        # TODO: Use a tango dev factory instead of DeviceProxy
 
         self.config = tmc_configuration
 

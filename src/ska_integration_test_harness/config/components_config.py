@@ -151,8 +151,11 @@ class TMCConfiguration(SubsystemConfiguration):
                     "tmc_dish_leaf_node4_name": self.tmc_dish_leaf_node4_name,
                 }
             )
+            #
 
         # TODO Low: add TMC-Low nodes here
+        # - MCCS subarray leaf node
+        # - MCCS master/controller leaf node
 
         return all_devices
 
@@ -192,6 +195,8 @@ class CSPConfiguration(SubsystemConfiguration):
     csp_master_name: str = None
     csp_subarrays_names: dict[int, str] = field(default_factory=dict)
 
+    # something just for low
+    # (maybe ask CSP teams more about it)
     pst_name: str | None = None
 
     @property
