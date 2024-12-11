@@ -1,8 +1,12 @@
 # Changelog
 
-## v0.3.0
 
-## v0.2.3 (26th November 2024)
+## v0.2.4 (11th November 2024)
+
+- **SST-982**: make various actions support the check for the LRC completion
+  (pt. 2 - also dishes load configuration command).
+
+## v0.2.3 (9th November 2024)
 
 - **SST-982**: make various actions support the check for the LRC completion.
 

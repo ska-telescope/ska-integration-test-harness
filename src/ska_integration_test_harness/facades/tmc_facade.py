@@ -58,9 +58,11 @@ class TMCFacade:
 
     Some of the given actions can be long running commands (LRC). In most
     of the cases when you call them and you decide to wait for the termination
-    also the LRC successful completion is waited. In two tricky cases
-    (:py:class:`~ska_integration_test_harness.actions.central_node.move_to_on.MoveToOn`
-    and :py:class:`~ska_integration_test_harness.actions.central_node.central_node_load_dish_config.CentralNodeLoadDishConfig`)
+    also the LRC successful completion is waited. In two tricky cases:
+
+    - :py:class:`~ska_integration_test_harness.actions.central_node.move_to_on.MoveToOn`
+    - :py:class:`~ska_integration_test_harness.actions.central_node.central_node_load_dish_config.CentralNodeLoadDishConfig`
+
     the LRC completion is not waited by default, since at the moment failures
     can be observed (TODO: solve the issue and set to True). In any case,
     you can always set the argument ``is_long_running_command`` to ``True``
@@ -236,14 +238,16 @@ class TMCFacade:
         """
         action = SetStandby()
         action.is_long_running_command = is_long_running_command
-        self._setup_and_run_action(action, wait_termination, custom_timeout)
+        return self._setup_and_run_action(
+            action, wait_termination, custom_timeout
+        )
 
     def load_dish_vcc_configuration(
         self,
         dish_vcc_config: str,
         wait_termination: bool = True,
         custom_timeout: int | None = None,
-        is_long_running_command: bool = False,
+        is_long_running_command: bool = True,
     ) -> tuple[Any, list[str]]:
         """Invoke LoadDishCfg command on central Node.
 
@@ -257,9 +261,7 @@ class TMCFacade:
             ``wait_termination=True``.
         :param is_long_running_command: set to True if you want to include
             in the synchronisation the long running command. This parameter
-            is useful only when ``wait_termination=True``. By default is False
-            for LoadDishVccConfiguration action, since at the moment a failure
-            can be observed. TODO: solve the issue and set to True.
+            is useful only when ``wait_termination=True``. By default is True.
 
         :return: result, message
         """
