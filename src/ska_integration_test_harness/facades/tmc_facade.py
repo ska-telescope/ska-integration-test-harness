@@ -247,7 +247,7 @@ class TMCFacade:
         dish_vcc_config: str,
         wait_termination: bool = True,
         custom_timeout: int | None = None,
-        is_long_running_command: bool = False,
+        is_long_running_command: bool = True,
     ) -> tuple[Any, list[str]]:
         """Invoke LoadDishCfg command on central Node.
 
@@ -261,9 +261,7 @@ class TMCFacade:
             ``wait_termination=True``.
         :param is_long_running_command: set to True if you want to include
             in the synchronisation the long running command. This parameter
-            is useful only when ``wait_termination=True``. By default is False
-            for LoadDishVccConfiguration action, since at the moment a failure
-            can be observed. TODO: solve the issue and set to True.
+            is useful only when ``wait_termination=True``. By default is True.
 
         :return: result, message
         """
