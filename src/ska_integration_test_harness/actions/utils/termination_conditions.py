@@ -128,8 +128,9 @@ def resources_are_released(telescope: TelescopeWrapper) -> list[ExpectedEvent]:
 
     :return: The termination condition, as a sequence of expected events.
     """
-    # pre_action_attr_value = telescope.tmc.subarray_node.assignedResources
-
+    # there is an event that tells that resources are empty, as an empty tuple
+    # or as a tuple with an empty json string
+    # () or ('{}')
     return [
         ExpectedEvent(
             device=telescope.tmc.subarray_node,
@@ -138,7 +139,7 @@ def resources_are_released(telescope: TelescopeWrapper) -> list[ExpectedEvent]:
             predicate=lambda event: len(event.attribute_value) == 0
             or (
                 len(event.attribute_value) == 1
-                and StrJSONInput(event.attribute_value[0]).as_dict()
+                and not StrJSONInput(event.attribute_value[0]).as_dict()
             ),
         )
     ]
