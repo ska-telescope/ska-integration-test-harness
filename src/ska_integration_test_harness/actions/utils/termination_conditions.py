@@ -54,6 +54,13 @@ def all_subarrays_have_obs_state(
             ]
         )
 
+    if telescope.tmc.supports_low():
+        res.append(
+            ExpectedStateChange(
+                telescope.mccs.mccs_subarray, "obsState", expected_obs_state
+            )
+        )
+
     return res
 
 

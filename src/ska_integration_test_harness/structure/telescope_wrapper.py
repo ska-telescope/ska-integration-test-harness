@@ -328,6 +328,9 @@ class TelescopeWrapper:
 
         self.sdp.set_subarray_id(subarray_id)
         self.csp.set_subarray_id(subarray_id)
-        self.tmc.set_subarray_id(subarray_id)
 
-        # TODO: add mccs
+        # if we are in low, also MCCS has a subarray
+        if self.tmc.supports_low():
+            self.mccs.set_subarray_id(subarray_id)
+
+        self.tmc.set_subarray_id(subarray_id)

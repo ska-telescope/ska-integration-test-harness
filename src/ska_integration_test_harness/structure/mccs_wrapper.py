@@ -45,6 +45,13 @@ class MCCSWrapper(SubsystemWrapper, abc.ABC):
     # --------------------------------------------------------------
     # Specific MCCS methods and properties
 
+    def set_subarray_id(self, subarray_id: int) -> None:
+        """Set the subarray ID."""
+        subarray_id = str(subarray_id).zfill(2)
+        self.mccs_subarray = tango.DeviceProxy(
+            f"low-mccs/subarray/{subarray_id}"
+        )
+
     @abc.abstractmethod
     def tear_down(self) -> None:
         """Tear down the dishes (if needed)."""
