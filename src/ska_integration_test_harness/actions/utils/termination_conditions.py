@@ -138,7 +138,7 @@ def resources_are_released(telescope: TelescopeWrapper) -> list[ExpectedEvent]:
             predicate=lambda event: len(event.attribute_value) == 0
             or (
                 len(event.attribute_value) == 1
-                and StrJSONInput(event.attribute_value[1]).as_dict()
+                and StrJSONInput(event.attribute_value[0]).as_dict()
             ),
         )
     ]
