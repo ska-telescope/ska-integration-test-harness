@@ -20,7 +20,7 @@ class ResetPSTLow(TelescopeAction[None]):
 
     def _action(self) -> None:
         if self.telescope.csp.pst.obsState != ObsState.IDLE:
-            self._log("Resetting the PST Low device")
+            self._log("Resetting the PST Low device to IDLE state")
             self.telescope.csp.pst.obsreset()
         else:
             self._log("PST Low device is already in IDLE state")
