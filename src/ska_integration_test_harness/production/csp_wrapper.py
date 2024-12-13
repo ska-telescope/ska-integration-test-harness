@@ -6,6 +6,7 @@ from ska_control_model import AdminMode, HealthState
 from ska_tango_testing.integration import TangoEventTracer
 from tango import DevState
 
+from ska_integration_test_harness.actions.various import ResetPSTLow
 from ska_integration_test_harness.config.components_config import (
     CSPConfiguration,
 )
@@ -109,7 +110,14 @@ class ProductionCSPWrapper(CSPWrapper):
             self.pst.On()
 
     def tear_down(self) -> None:
-        """Tear down the CSP (not needed)."""
+        """Tear down the CSP.
+
+        This method will:
+
+        - reset PST (if in Low) obsState to IDLE
+        """
+        if self.config.supports_low():
+            ResetPSTLow().execute()
 
     def clear_command_call(self) -> None:
         """Clear the command call on the CSP (not needed)."""
