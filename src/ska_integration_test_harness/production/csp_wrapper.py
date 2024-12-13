@@ -41,10 +41,8 @@ class ProductionCSPWrapper(CSPWrapper):
             # When in Low, set the serial numbers in the CBF processor
             self.set_serial_number_of_cbf_processor()
 
-            # TODO: connection to PST crashed before, we have to
-            # check if it continues to crash even after the synchronization
-            # on the admin mode
-            # self.pst = tango.DeviceProxy(self.config.pst_name)
+            # set the PST device too
+            self.pst = tango.DeviceProxy(self.config.pst_name)
 
     def ensure_admin_mode_online(self) -> None:
         """Ensure the CSP master is in ONLINE admin mode."""
@@ -107,8 +105,8 @@ class ProductionCSPWrapper(CSPWrapper):
 
     def before_move_to_on(self) -> None:
         """If in Low, the PST On command must be called."""
-        # if self.config.supports_low():
-        # self.pst.On()
+        if self.config.supports_low():
+            self.pst.On()
 
     def tear_down(self) -> None:
         """Tear down the CSP (not needed)."""
