@@ -39,11 +39,12 @@ class ProductionCSPWrapper(CSPWrapper):
             # the admin mode must be set to ONLINE
             self.ensure_admin_mode_online()
 
-            # When in Low, set the serial numbers in the CBF processor
-            self.set_serial_number_of_cbf_processor()
-
             # set the PST device too
             self.pst = tango.DeviceProxy(self.config.pst_name)
+
+            # set the CBF processor devices too
+            self.cbf_proc1 = tango.DeviceProxy("low-cbf/processor/0.0.0")
+            self.cbf_proc2 = tango.DeviceProxy("low-cbf/processor/0.0.1")
 
     def ensure_admin_mode_online(self) -> None:
         """Ensure the CSP master is in ONLINE admin mode."""
@@ -52,8 +53,6 @@ class ProductionCSPWrapper(CSPWrapper):
             self.csp_master.adminMode = AdminMode.ONLINE
 
             # wait for the CSP admin to transition to ONLINE
-            # NOTE: for some reason, the subscription to the event
-            # should be done after the admin mode is set to ONLINE
             tracer = TangoEventTracer(
                 {
                     "healthState": HealthState,
@@ -84,16 +83,13 @@ class ProductionCSPWrapper(CSPWrapper):
 
         TODO: is this something that should be parametrised?
         """
-        cbf_proc1 = tango.DeviceProxy("low-cbf/processor/0.0.0")
-        cbf_proc2 = tango.DeviceProxy("low-cbf/processor/0.0.1")
+        self.cbf_proc1.serialnumber = "XFL14SLO1LIF"
+        self.cbf_proc1.subscribetoallocator("low-cbf/allocator/0")
+        self.cbf_proc1.register()
 
-        cbf_proc1.serialnumber = "XFL14SLO1LIF"
-        cbf_proc1.subscribetoallocator("low-cbf/allocator/0")
-        cbf_proc1.register()
-
-        cbf_proc2.serialnumber = "XFL1HOOQ1Y44"
-        cbf_proc2.subscribetoallocator("low-cbf/allocator/0")
-        cbf_proc2.register()
+        self.cbf_proc2.serialnumber = "XFL1HOOQ1Y44"
+        self.cbf_proc2.subscribetoallocator("low-cbf/allocator/0")
+        self.cbf_proc2.register()
 
     # --------------------------------------------------------------
     # Subsystem properties definition
@@ -108,6 +104,11 @@ class ProductionCSPWrapper(CSPWrapper):
         """If in Low, the PST On command must be called."""
         if self.config.supports_low():
             self.pst.On()
+
+    def after_move_to_on(self) -> None:
+        """If in Low, set the serial numbers in the CBF processor"""
+        if self.config.supports_low():
+            self.set_serial_number_of_cbf_processor()
 
     def tear_down(self) -> None:
         """Tear down the CSP.
