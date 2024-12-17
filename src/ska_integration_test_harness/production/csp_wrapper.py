@@ -46,7 +46,7 @@ class ProductionCSPWrapper(CSPWrapper):
             self.ensure_admin_mode_online()
 
             # move to ON PST
-            MoveToOnPST().execute()
+            MoveToOnPST(self.pst).execute()
 
             # set the CBF processor devices too
             self.cbf_proc1 = tango.DeviceProxy("low-cbf/processor/0.0.0")
@@ -152,8 +152,8 @@ class ProductionCSPWrapper(CSPWrapper):
         - reset PST (if in Low) obsState to IDLE
         """
         if self.config.supports_low():
-            ResetPSTObsState().execute()
-            MoveToOffPST().execute()
+            ResetPSTObsState(self.pst).execute()
+            MoveToOffPST(self.pst).execute()
 
     def clear_command_call(self) -> None:
         """Clear the command call on the CSP (not needed)."""

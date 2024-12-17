@@ -6,6 +6,7 @@ At the moment, it contains:
 - the procedure to reset PST Low
 """
 
+import tango
 from ska_control_model import ObsState
 from tango import DevState
 
@@ -20,11 +21,14 @@ from ska_integration_test_harness.actions.telescope_action import (
 class MoveToOnPST(TelescopeAction[None]):
     """Move the PST Low device to the ON state (if not already there)."""
 
+    def __init__(self, pst_device: tango.DeviceProxy):
+        super().__init__()
+        self.pst_device = pst_device
+
     def _action(self) -> None:
-        assert self.telescope.csp.pst is not None
-        if self.telescope.csp.pst.state != DevState.ON:
+        if self.pst_device != DevState.ON:
             self._log("Moving the PST Low device to ON state")
-            self.telescope.csp.pst.On()
+            self.pst_device.On()
         else:
             self._log("PST Low device is already in ON state")
 
@@ -32,7 +36,7 @@ class MoveToOnPST(TelescopeAction[None]):
         """The PST Low device is in the ON state."""
         return [
             ExpectedStateChange(
-                self.telescope.csp.pst,
+                self.pst_device,
                 "state",
                 DevState.ON,
             )
@@ -42,11 +46,14 @@ class MoveToOnPST(TelescopeAction[None]):
 class MoveToOffPST(TelescopeAction[None]):
     """Move the PST Low device to the OFF state (if not already there)."""
 
+    def __init__(self, pst_device: tango.DeviceProxy):
+        super().__init__()
+        self.pst_device = pst_device
+
     def _action(self) -> None:
-        assert self.telescope.csp.pst is not None
-        if self.telescope.csp.pst.state != DevState.OFF:
+        if self.pst_device.state != DevState.OFF:
             self._log("Moving the PST Low device to OFF state")
-            self.telescope.csp.pst.Off()
+            self.pst_device.Off()
         else:
             self._log("PST Low device is already in OFF state")
 
@@ -54,7 +61,7 @@ class MoveToOffPST(TelescopeAction[None]):
         """The PST Low device is in the OFF state."""
         return [
             ExpectedStateChange(
-                self.telescope.csp.pst,
+                self.pst_device,
                 "state",
                 DevState.OFF,
             )
@@ -64,10 +71,14 @@ class MoveToOffPST(TelescopeAction[None]):
 class ResetPSTObsState(TelescopeAction[None]):
     """Reset the PST Low device to the default obs state (IDLE)."""
 
+    def __init__(self, pst_device: tango.DeviceProxy):
+        super().__init__()
+        self.pst_device = pst_device
+
     def _action(self) -> None:
-        if self.telescope.csp.pst.obsState != ObsState.IDLE:
+        if self.pst_device.obsState != ObsState.IDLE:
             self._log("Resetting the PST Low device to IDLE state")
-            self.telescope.csp.pst.obsreset()
+            self.pst_device.obsreset()
         else:
             self._log("PST Low device is already in IDLE state")
 
@@ -75,7 +86,7 @@ class ResetPSTObsState(TelescopeAction[None]):
         """The PST Low device is in the ON state."""
         return [
             ExpectedStateChange(
-                self.telescope.csp.pst,
+                self.pst_device,
                 "obsState",
                 ObsState.IDLE,
             )
