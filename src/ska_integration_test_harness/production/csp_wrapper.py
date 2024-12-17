@@ -35,16 +35,18 @@ class ProductionCSPWrapper(CSPWrapper):
 
         if self.config.supports_low():
 
-            # When in Low, the PST device is needed and
-            # the admin mode must be set to ONLINE
-            self.ensure_admin_mode_online()
-
-            # set the PST device too
+            # (at the moment only in Low) PST is needed
             self.pst = tango.DeviceProxy(self.config.pst_name)
+
+            # ensure the Admin mode is ONLINE
+            self.ensure_admin_mode_online()
 
             # set the CBF processor devices too
             self.cbf_proc1 = tango.DeviceProxy("low-cbf/processor/0.0.0")
             self.cbf_proc2 = tango.DeviceProxy("low-cbf/processor/0.0.1")
+
+            # set the serial numbers for the CBF processors
+            self.set_serial_number_of_cbf_processor()
 
     def ensure_admin_mode_online(self) -> None:
         """Ensure the CSP master is in ONLINE admin mode."""
@@ -58,10 +60,17 @@ class ProductionCSPWrapper(CSPWrapper):
                     "healthState": HealthState,
                 }
             )
+
+            # NOTE: in this case, the subscriptions should be deferred
+            # it's an interesting case to investigate when thinking about
+            # refactoring actions
             tracer.subscribe_event(self.csp_master, "state")
             tracer.subscribe_event(self.csp_master, "healthState")
             tracer.subscribe_event(self.csp_subarray, "state")
             tracer.subscribe_event(self.csp_subarray, "healthState")
+            tracer.subscribe_event(self.pst, "state")
+            tracer.subscribe_event(self.pst, "healthState")
+
             assert_that(tracer).described_as(
                 "FAIL IN CSP SETUP: "
                 "The CSP admin doesn't transition to ONLINE."
@@ -70,12 +79,26 @@ class ProductionCSPWrapper(CSPWrapper):
             ).has_change_event_occurred(
                 self.csp_subarray, "state", DevState.ON
             ).has_change_event_occurred(
+                self.pst, "state", DevState.ON
+            ).has_change_event_occurred(
                 self.csp_master, "healthState", HealthState.UNKNOWN
             ).has_change_event_occurred(
                 self.csp_subarray, "healthState", HealthState.UNKNOWN
+            ).has_change_event_occurred(
+                self.pst, "healthState", HealthState.UNKNOWN
             )
+
         assert_that(self.csp_master.adminMode).described_as(
-            "FAIL IN CSP SETUP: The CSP admin mode is supposed to be ONLINE."
+            "FAIL IN CSP SETUP: The CSP LMC controller "
+            "admin mode is supposed to be ONLINE."
+        ).is_equal_to(AdminMode.ONLINE)
+        assert_that(self.csp_subarray.adminMode).described_as(
+            "FAIL IN CSP SETUP: The CSP LMC subarray "
+            "admin mode is supposed to be ONLINE."
+        ).is_equal_to(AdminMode.ONLINE)
+        assert_that(self.pst.adminMode).described_as(
+            "FAIL IN CSP SETUP: The CSP PST admin mode "
+            "is supposed to be ONLINE."
         ).is_equal_to(AdminMode.ONLINE)
 
     def set_serial_number_of_cbf_processor(self):
@@ -100,15 +123,15 @@ class ProductionCSPWrapper(CSPWrapper):
     # --------------------------------------------------------------
     # Specific CSP methods and properties
 
-    def before_move_to_on(self) -> None:
-        """If in Low, the PST On command must be called."""
-        if self.config.supports_low():
-            self.pst.On()
+    # def before_move_to_on(self) -> None:
+    #     """If in Low, the PST On command must be called."""
+    #     if self.config.supports_low():
+    #         self.pst.On()
 
-    def after_move_to_on(self) -> None:
-        """If in Low, set the serial numbers in the CBF processor"""
-        if self.config.supports_low():
-            self.set_serial_number_of_cbf_processor()
+    # def after_move_to_on(self) -> None:
+    #     """If in Low, set the serial numbers in the CBF processor"""
+    #     if self.config.supports_low():
+    #         self.set_serial_number_of_cbf_processor()
 
     def tear_down(self) -> None:
         """Tear down the CSP.
