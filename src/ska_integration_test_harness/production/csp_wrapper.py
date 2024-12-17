@@ -6,7 +6,11 @@ from ska_control_model import AdminMode, HealthState
 from ska_tango_testing.integration import TangoEventTracer
 from tango import DevState
 
-from ska_integration_test_harness.actions.various import ResetPSTLow
+from ska_integration_test_harness.actions.various import (
+    MoveToOffPST,
+    MoveToOnPST,
+    ResetPSTObsState,
+)
 from ska_integration_test_harness.config.components_config import (
     CSPConfiguration,
 )
@@ -41,6 +45,9 @@ class ProductionCSPWrapper(CSPWrapper):
             # ensure the Admin mode is ONLINE
             self.ensure_admin_mode_online()
 
+            # move to ON PST
+            MoveToOnPST().execute()
+
             # set the CBF processor devices too
             self.cbf_proc1 = tango.DeviceProxy("low-cbf/processor/0.0.0")
             self.cbf_proc2 = tango.DeviceProxy("low-cbf/processor/0.0.1")
@@ -51,6 +58,7 @@ class ProductionCSPWrapper(CSPWrapper):
     def ensure_admin_mode_online(self) -> None:
         """Ensure the CSP master is in ONLINE admin mode."""
         if self.csp_master.adminMode != AdminMode.ONLINE:
+
             # set ADMIN mode to ONLINE
             self.csp_master.adminMode = AdminMode.ONLINE
 
@@ -61,9 +69,11 @@ class ProductionCSPWrapper(CSPWrapper):
                 }
             )
 
-            # NOTE: in this case, the subscriptions should be deferred
-            # it's an interesting case to investigate when thinking about
-            # refactoring actions
+            # NOTE: in this case, the subscriptions should be deferred since
+            # before setting the admin mode to ONLINE devices are
+            # not reachable. This is a special case, and it's an interesting
+            # to investigate how the refactoring may handle it.
+
             tracer.subscribe_event(self.csp_master, "state")
             tracer.subscribe_event(self.csp_master, "healthState")
             tracer.subscribe_event(self.csp_subarray, "state")
@@ -73,13 +83,14 @@ class ProductionCSPWrapper(CSPWrapper):
 
             assert_that(tracer).described_as(
                 "FAIL IN CSP SETUP: "
-                "The CSP admin doesn't transition to ONLINE."
+                "The CSP components are supposed to be reachable and in "
+                "their expected state."
             ).within_timeout(10).has_change_event_occurred(
                 self.csp_master, "state", DevState.ON
             ).has_change_event_occurred(
                 self.csp_subarray, "state", DevState.ON
             ).has_change_event_occurred(
-                self.pst, "state", DevState.ON
+                self.pst, "state", DevState.OFF
             ).has_change_event_occurred(
                 self.csp_master, "healthState", HealthState.UNKNOWN
             ).has_change_event_occurred(
@@ -141,7 +152,8 @@ class ProductionCSPWrapper(CSPWrapper):
         - reset PST (if in Low) obsState to IDLE
         """
         if self.config.supports_low():
-            ResetPSTLow().execute()
+            ResetPSTObsState().execute()
+            MoveToOffPST().execute()
 
     def clear_command_call(self) -> None:
         """Clear the command call on the CSP (not needed)."""
