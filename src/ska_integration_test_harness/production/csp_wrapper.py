@@ -145,6 +145,17 @@ class ProductionCSPWrapper(CSPWrapper):
     def after_move_to_on(self) -> None:
         """If in Low, set the serial numbers in the CBF processor"""
         if self.config.supports_low():
+            # manually wait for reportVCCState to be ready
+            tracer = TangoEventTracer()
+            tracer.subscribe_event(self.cbf_controller, "reportVccState")
+            assert_that(tracer).described_as(
+                "FAIL IN CSP MOVE TO ON: The CBF controller is supposed to "
+                "be ready to report the VCC state."
+            ).within_timeout(30).has_change_event_occurred(
+                self.cbf_controller, "reportVccState", [0, 0, 0, 0]
+            )
+
+            # set the serial numbers for the CBF processors
             self.set_serial_number_of_cbf_processor()
 
     def tear_down(self) -> None:
