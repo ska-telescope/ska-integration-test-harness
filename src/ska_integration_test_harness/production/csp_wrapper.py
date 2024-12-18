@@ -46,7 +46,7 @@ class ProductionCSPWrapper(CSPWrapper):
             self.ensure_admin_mode_online()
 
             # move to ON PST
-            MoveToOnPST(self.pst).execute()
+            # MoveToOnPST(self.pst).execute()
 
             # set the CBF devices devices too
             # TODO: read them from configuration
@@ -56,7 +56,7 @@ class ProductionCSPWrapper(CSPWrapper):
             self.cbf_subarray1 = tango.DeviceProxy("low-cbf/subarray/01")
 
             # set the serial numbers for the CBF processors
-            self.set_serial_number_of_cbf_processor()
+            # self.set_serial_number_of_cbf_processor()
 
     def ensure_admin_mode_online(self) -> None:
         """Ensure the CSP master is in ONLINE admin mode."""
@@ -137,15 +137,15 @@ class ProductionCSPWrapper(CSPWrapper):
     # --------------------------------------------------------------
     # Specific CSP methods and properties
 
-    # def before_move_to_on(self) -> None:
-    #     """If in Low, the PST On command must be called."""
-    #     if self.config.supports_low():
-    #         self.pst.On()
+    def before_move_to_on(self) -> None:
+        """If in Low, the PST On command must be called."""
+        if self.config.supports_low():
+            MoveToOnPST(self.pst).execute()
 
-    # def after_move_to_on(self) -> None:
-    #     """If in Low, set the serial numbers in the CBF processor"""
-    #     if self.config.supports_low():
-    #         self.set_serial_number_of_cbf_processor()
+    def after_move_to_on(self) -> None:
+        """If in Low, set the serial numbers in the CBF processor"""
+        if self.config.supports_low():
+            self.set_serial_number_of_cbf_processor()
 
     def tear_down(self) -> None:
         """Tear down the CSP.
