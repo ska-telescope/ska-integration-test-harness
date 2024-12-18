@@ -195,14 +195,22 @@ class CSPConfiguration(SubsystemConfiguration):
     csp_master_name: str = None
     csp_subarrays_names: dict[int, str] = field(default_factory=dict)
 
-    # something just for low
-    # (maybe ask CSP teams more about it)
+    # At the moment the following are required just for low
     pst_name: str | None = None
+    # cbf_proc1_name: str | None = None
+    # cbf_proc2_name: str | None = None
+    # cbf_controller_name: str | None = None
+    # cbf_subarrays_names: dict[int, str] = field(default_factory=dict)
 
     @property
     def csp_subarray1_name(self) -> str:
         """Get the name of the first subarray."""
         return self.csp_subarrays_names.get(1)
+
+    # @property
+    # def cbf_subarray1_name(self) -> str:
+    #     """Get the name of the first subarray."""
+    #     return self.cbf_subarrays_names.get(1)
 
     def get_device_names(self) -> dict[str, str]:
         dev_names = {
@@ -225,9 +233,14 @@ class CSPConfiguration(SubsystemConfiguration):
             "csp_subarray1_name",
         ]
 
-        # PST is required when in Low and CSP is not emulated
+        # PST, CBF processors and controllers are required when in Low
+        # and CSP is not emulated
         if not self.is_emulated and self.supports_low():
             attrs.append("pst_name")
+            # attrs.append("cbf_proc1_name")
+            # attrs.append("cbf_proc2_name")
+            # attrs.append("cbf_controller_name")
+            # attrs.append("cbf_subarray1_name")
 
         return attrs
 

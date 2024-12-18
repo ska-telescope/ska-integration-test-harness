@@ -48,9 +48,12 @@ class ProductionCSPWrapper(CSPWrapper):
             # move to ON PST
             MoveToOnPST(self.pst).execute()
 
-            # set the CBF processor devices too
+            # set the CBF devices devices too
+            # TODO: read them from configuration
             self.cbf_proc1 = tango.DeviceProxy("low-cbf/processor/0.0.0")
             self.cbf_proc2 = tango.DeviceProxy("low-cbf/processor/0.0.1")
+            self.cbf_controller = tango.DeviceProxy("low-cbf/control/0")
+            self.cbf_subarray1 = tango.DeviceProxy("low-cbf/subarray/01")
 
             # set the serial numbers for the CBF processors
             self.set_serial_number_of_cbf_processor()
