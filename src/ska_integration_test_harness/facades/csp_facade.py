@@ -24,12 +24,15 @@ class CSPFacade:
         return self._telescope.csp.csp_subarray
 
     @property
-    def pst(self) -> tango.DeviceProxy:
+    def pst(self) -> tango.DeviceProxy | None:
         """A Tango proxy to the PST device.
 
         It is available only when the target is 'low'.
         """
         if not self._telescope.tmc.supports_low():
             raise ValueError("PST is available only in 'low' mode")
-        assert isinstance(self._telescope.csp.pst, tango.DeviceProxy)
-        return self._telescope.csp.pst
+
+        if hasattr(self._telescope.csp, "pst"):
+            return self._telescope.csp.pst
+
+        return None
