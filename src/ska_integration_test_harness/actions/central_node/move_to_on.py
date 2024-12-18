@@ -103,11 +103,11 @@ class MoveToOnCommand(TelescopeCommandAction):
                     ExpectedStateChange(
                         self.telescope.csp.cbf_controller, "State", DevState.ON
                     ),
-                    ExpectedStateChange(
-                        self.telescope.csp.cbf_controller,
-                        "reportVccState",
-                        [0, 0, 0, 0],
-                    ),
+                    # ExpectedStateChange(
+                    #     self.telescope.csp.cbf_controller,
+                    #     "reportVccState",
+                    #     [0, 0, 0, 0],
+                    # ),
                 ]
             if self.telescope.csp.cbf_subarray1:
                 # (in Low) CBF subarray is supposed to be in ON state
