@@ -96,7 +96,7 @@ class MoveToOnCommand(TelescopeCommandAction):
             )
 
         if self.telescope.tmc.supports_low():
-            if self.telescope.csp.cbf_controller:
+            if hasattr(self.telescope.csp, "cbf_controller"):
                 # (in Low) CBF controller is supposed to be in ON state
                 # + all VCCs are supposed to be in ON state (?)
                 expected_events += [
@@ -109,7 +109,7 @@ class MoveToOnCommand(TelescopeCommandAction):
                     #     [0, 0, 0, 0],
                     # ),
                 ]
-            if self.telescope.csp.cbf_subarray1:
+            if hasattr(self.telescope.csp, "cbf_subarray1"):
                 # (in Low) CBF subarray is supposed to be in ON state
                 expected_events += [
                     ExpectedStateChange(
