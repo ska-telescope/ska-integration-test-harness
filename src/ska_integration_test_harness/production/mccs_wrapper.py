@@ -1,5 +1,8 @@
 """A production MCCS wrapper."""
 
+import tango
+from ska_control_model import AdminMode
+
 from ska_integration_test_harness.structure.mccs_wrapper import MCCSWrapper
 
 
@@ -45,6 +48,20 @@ class ProductionMCCSWrapper(MCCSWrapper):
     #                         )
     #                         retry += 1
     #                         time.sleep(0.1)
+
+    def __init__(self, mccs_configuration):
+        super().__init__(mccs_configuration)
+
+        # set admin mode values of MCCS devices
+        self.set_admin_mode_values_mccs()
+
+    def set_admin_mode_values_mccs(self):
+        """Set the adminMode values of MCCS devices."""
+        db = tango.Database()
+
+        for device_name in db.get_device_exported("low-mccs/*"):
+            device = tango.DeviceProxy(device_name)
+            device.adminMode = AdminMode.ONLINE
 
     def is_emulated(self) -> bool:
         return False
