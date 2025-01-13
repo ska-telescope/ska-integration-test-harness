@@ -6,11 +6,11 @@ from ska_control_model import AdminMode, HealthState
 from ska_tango_testing.integration import TangoEventTracer
 from tango import DevState
 
-from ska_integration_test_harness.actions.various import (
-    MoveToOffPST,
-    MoveToOnPST,
-    ResetPSTObsState,
-)
+# from ska_integration_test_harness.actions.various import (
+#     MoveToOffPST,
+#     MoveToOnPST,
+#     ResetPSTObsState,
+# )
 from ska_integration_test_harness.config.components_config import (
     CSPConfiguration,
 )
@@ -144,9 +144,9 @@ class ProductionCSPWrapper(CSPWrapper):
 
     def after_move_to_on(self) -> None:
         """If in Low, set the serial numbers in the CBF processor"""
-        if self.config.supports_low():
-            # set the serial numbers for the CBF processors
-            self.set_serial_number_of_cbf_processor()
+        # if self.config.supports_low():
+        #     # set the serial numbers for the CBF processors
+        #     self.set_serial_number_of_cbf_processor()
 
     def tear_down(self) -> None:
         """Tear down the CSP.
