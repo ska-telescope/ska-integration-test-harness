@@ -43,7 +43,7 @@ class ProductionCSPWrapper(CSPWrapper):
             self.pst = tango.DeviceProxy(self.config.pst_name)
 
             # ensure the Admin mode is ONLINE
-            # self.ensure_admin_mode_online()
+            self.ensure_admin_mode_online()
 
             # move to ON PST
             # MoveToOnPST(self.pst).execute()
