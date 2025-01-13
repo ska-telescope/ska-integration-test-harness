@@ -139,8 +139,8 @@ class ProductionCSPWrapper(CSPWrapper):
 
     def before_move_to_on(self) -> None:
         """If in Low, the PST On command must be called."""
-        if self.config.supports_low():
-            MoveToOnPST(self.pst).execute()
+        # if self.config.supports_low():
+        #     MoveToOnPST(self.pst).execute()
 
     def after_move_to_on(self) -> None:
         """If in Low, set the serial numbers in the CBF processor"""
@@ -155,9 +155,9 @@ class ProductionCSPWrapper(CSPWrapper):
 
         - reset PST (if in Low) obsState to IDLE
         """
-        if self.config.supports_low():
-            ResetPSTObsState(self.pst).execute()
-            MoveToOffPST(self.pst).execute()
+        # if self.config.supports_low():
+        #     ResetPSTObsState(self.pst).execute()
+        #     MoveToOffPST(self.pst).execute()
 
     def clear_command_call(self) -> None:
         """Clear the command call on the CSP (not needed)."""
