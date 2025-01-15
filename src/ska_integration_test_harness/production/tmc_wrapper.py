@@ -11,8 +11,10 @@ from ..actions.central_node.central_node_release_resources import (
     CentralNodeReleaseResources,
 )
 from ..actions.central_node.move_to_off import MoveToOff
+from ..actions.central_node.set_standby import SetStandby
 from ..actions.subarray.force_change_of_obs_state import ForceChangeOfObsState
 from ..inputs.test_harness_inputs import TestHarnessInputs
+from ..structure.telescope_wrapper import TelescopeWrapper
 from ..structure.tmc_wrapper import TMCWrapper
 
 
@@ -96,7 +98,12 @@ class ProductionTMCWrapper(TMCWrapper):
             ):
                 CentralNodeLoadDishConfig(expected_vcc_config).execute()
 
-        # ensure the central node is in OFF state
-        MoveToOff().execute()
+        # ensure the central node is in OFF state (except from a special
+        # case where we are in Low and CSP is production, where I
+        # have to call a stand by)
+        if self.supports_low() and not TelescopeWrapper().csp.is_emulated():
+            SetStandby().execute()
+        else:
+            MoveToOff().execute()
 
         self.logger.info("TMC tear down completed.")
