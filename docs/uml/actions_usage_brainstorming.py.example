@@ -1,0 +1,58 @@
+
+# Example of how to use the actions
+
+command = SKATangoCommandAction(
+    self.central_node, 
+    'AssignResources', 
+    command_input, 
+    sync_lrc_completion=True, 
+    # lrc_expected_result_code = ResultCode.OK,
+)
+use_for_verification(command, tracer)
+add_precondition(command, telescope_is_in_state(sut_wrapper, DevState.ON))
+add_precondition(command, telescope_is_in_obsstate(sut_wrapper, ObsState.EMPTY))
+
+add_postcondition(command, lcr_terminates(command))
+add_postcondition(command, telescope_passes_through_obsstate(sut_wrapper, ObsState.RESOURCING))
+add_postcondition(command, telescope_is_in_obsstate(sut_wrapper, ObsState.READY))
+
+add_early_fail_condition(command, obsstate_is_detected(sut_wrapper, ObsState.FAULT))
+add_early_fail_condition(command, obsstate_is_detected(sut_wrapper, ObsState.ABORTING))
+add_early_fail_condition(command, obsstate_is_detected(sut_wrapper, ObsState.ABORTED))
+
+
+command.execute()
+
+
+# Log should be like this:
+
+# 2021-10-14 15:00:00,000 - INFO - Starting action "AssignResources"
+# 2021-10-14 15:00:00,000 - INFO - Precondition: Telescope state is DevState.ON - OK
+# 2021-10-14 15:00:00,000 - INFO - Precondition: Telescope obsState is ObsState.EMPTY - OK
+# 2021-10-14 15:00:00,000 - INFO - Calling command "AssignResources" on device "test/tg/central_node" with input [TRUNCATED INPUT HERE, MAYBE] 
+# 2021-10-14 15:00:00,000 - INFO - Command "AssignResources" called
+# 2021-10-14 15:00:00,000 - INFO - Postcondition: waiting 10 seconds for AssignResources LRC to terminate
+# 2021-10-14 15:00:10,000 - INFO - Postcondition: AssignResources LRC terminated - OK (in 2.5 seconds)
+# 2021-10-14 15:00:10,000 - INFO - Postcondition: Telescope obsState is ObsState.RESOURCING - OK
+# 2021-10-14 15:00:10,000 - INFO - Postcondition: Telescope obsState is ObsState.READY - OK
+# 2021-10-14 15:00:10,000 - INFO - Action "AssignResources" completed successfully
+
+# Or if some early fail condition is detected:
+
+# 2021-10-14 15:00:00,000 - INFO - Starting action "AssignResources"
+# 2021-10-14 15:00:00,000 - INFO - Precondition: Telescope state is DevState.ON - OK
+# 2021-10-14 15:00:00,000 - INFO - Precondition: Telescope obsState is ObsState.EMPTY - OK
+# 2021-10-14 15:00:00,000 - INFO - Calling command "AssignResources" on device "test/tg/central_node" with input [TRUNCATED INPUT HERE, MAYBE]
+# 2021-10-14 15:00:00,000 - INFO - Command "AssignResources" called
+# 2021-10-14 15:00:00,000 - INFO - Postcondition: waiting 10 seconds for AssignResources LRC to terminate
+# 2021-10-14 15:00:00,000 - ERROR - action "AssignResources" failed: 
+# 
+
+
+
+
+
+
+
+
+
