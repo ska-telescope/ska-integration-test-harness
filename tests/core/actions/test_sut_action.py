@@ -58,6 +58,7 @@ class MockSUTAction(SUTAction):
     def description(self) -> str:
         return "Mock a SUT action and track calls"
 
+
 @pytest.mark.core
 class TestSUTAction:
     """Unit tests for the SUTAction class.
