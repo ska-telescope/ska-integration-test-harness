@@ -27,7 +27,7 @@ class TestAssertTangoAttribute:
         assertion.verify()
 
     def test_verify_attribute_fails_condition(self):
-        """Assertion fails when a Tango attribute does not satisfy a condition."""
+        """Assertion fails when a Tango attribute doesn't match."""
         device = MagicMock()
         device.dev_name.return_value = "test/device/01"
         device.read_attribute.return_value.value = 42
@@ -42,10 +42,14 @@ class TestAssertTangoAttribute:
             "A reference to the device and attribute name is included"
         ).contains("test/device/01").contains("test_attribute").described_as(
             "The assertion contains a reference to the fact it failed"
-        ).contains("FAILED").described_as(
+        ).contains(
+            "FAILED"
+        ).described_as(
             "The assertion contains a reference "
             "to the observed attribute value"
-        ).contains("Attribute value is instead 42")
+        ).contains(
+            "Attribute value is instead 42"
+        )
 
     def test_verify_attribute_read_fails(self):
         """Assertion fails when reading a Tango attribute fails."""
@@ -63,10 +67,14 @@ class TestAssertTangoAttribute:
             "A reference to the device and attribute name is included"
         ).contains("test/device/01").contains("test_attribute").described_as(
             "The assertion contains a reference to the fact it failed"
-        ).contains("FAILED").described_as(
+        ).contains(
+            "FAILED"
+        ).described_as(
             "The assertion contains a reference "
             "to the fact that the read failed"
-        ).contains("Failed to read the attribute")
+        ).contains(
+            "Failed to read the attribute"
+        )
 
     def test_describe_assumption_with_description(self):
         """Description of the assumption contains a custom description."""
@@ -98,6 +106,7 @@ class TestAssertTangoAttribute:
 
         description = assertion.describe_assumption()
         assert_that(description).does_not_contain("Custom description")
+
 
 @pytest.mark.core
 class TestAssertTangoAttributeHasValue:
