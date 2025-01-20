@@ -1,9 +1,6 @@
 """A base class for an assertion on the SUT."""
 
 import abc
-from typing import SupportsFloat
-
-# TODO: ma
 
 
 class SUTAssertion(abc.ABC):
@@ -110,70 +107,3 @@ class SUTAssertion(abc.ABC):
 
         :return: the description of the assumption
         """
-
-    def error_message(self, details: str = "") -> str:
-        """Produce the error message that describes the failure.
-
-        You can override this method if you want to customise the error
-        message produced by the assertion further, but probably you should
-        prefer to override just the :py:meth:`describe_assumption` method
-        and use the ``details`` parameter to provide more context to the
-        failure.
-
-        :param details: the details of the error message
-        """
-        error_msg = f"{self.describe_assumption()} - FAILED"
-        if details:
-            error_msg += f": {details}"
-        return error_msg
-
-    def fail(
-        self, details: str = "", exception: Exception | None = None
-    ) -> None:
-        """Fail the assertion with an error message.
-
-        This method is used to fail the assertion with an error message. You
-        can customise the error message by providing a
-        string in the ``details`` and you can also provide an exception
-        that caused the failure. Call it when you want to raise a failure
-        in your verification procedure.
-
-        You can override it if you want to raise something different.
-
-        :param details: the details of the error message
-        :raises AssertionError: always
-        """
-        if exception:
-            raise AssertionError(self.error_message(details)) from exception
-
-        raise AssertionError(self.error_message(details))
-
-
-class SUTAssertionWTimeout(SUTAssertion, abc.ABC):
-    """A base class for an assertion on the SUT with a timeout.
-
-    This class represents an assertion on the SUT that can be verified
-    within a timeout. It extends the :py:class:`SUTAssertion` class by
-    adding the possibility to specify a timeout for the verification.
-
-    The timeout can be initialised in the constructor or set later with
-    :py:meth:`reset_timeout`. By default, the timeout is 0.0 seconds, but you
-    can set any objects that supports the float interface.
-
-    If you extend this class, please check the documentation of the
-    base class :py:class:`SUTAssertion` to see how to extend it properly.
-    """
-
-    def __init__(self, timeout: SupportsFloat = 0.0):
-        """Initialise the assertion with a timeout.
-
-        :param timeout: the timeout in seconds (default is 0.0)
-        """
-        self.timeout = timeout
-
-    def reset_timeout(self, timeout: SupportsFloat = 0.0):
-        """Reset the timeout to a new value.
-
-        :param timeout: the new timeout in seconds (default is 0.0)
-        """
-        self.timeout = timeout

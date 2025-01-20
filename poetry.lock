@@ -1503,7 +1503,7 @@ pytango = ">=9.4.2 <11.0.0"
 type = "git"
 url = "https://gitlab.com/ska-telescope/ska-tango-testing.git"
 reference = "sst-1022-refactor-tracer-and-add-stop-condition"
-resolved_reference = "50cbaf85b5580cb2331d0ebd550500cb83cd3e24"
+resolved_reference = "69dbc080b23d1acf38ab128596220a6aa4f650a6"
 
 [[package]]
 name = "snowballstemmer"

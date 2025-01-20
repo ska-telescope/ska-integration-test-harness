@@ -3,15 +3,14 @@
 TODO: describe assertions idea.
 """
 
-from .sut_assertion import SUTAssertion, SUTAssertionWTimeout
-from .tango_attributes import (
-    AssertTangoAttribute,
-    AssertTangoAttributeHasValue,
-)
+from .devices_are_in_state import AssertDevicesAreInState
+from .devices_state_changes import AssertDevicesStateChanges
+from .sut_assertion import SUTAssertion
+from .tracer_assertion import TracerAssertion
 
 __all__ = [
     "SUTAssertion",
-    "SUTAssertionWTimeout",
-    "AssertTangoAttribute",
-    "AssertTangoAttributeHasValue",
+    "TracerAssertion",
+    "AssertDevicesStateChanges",
+    "AssertDevicesAreInState",
 ]
