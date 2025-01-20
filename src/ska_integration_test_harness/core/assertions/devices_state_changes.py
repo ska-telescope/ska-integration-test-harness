@@ -1,3 +1,5 @@
+"""Verify there are recorded state changes for the given devices."""
+
 from typing import Any, Callable
 
 import tango
@@ -21,6 +23,7 @@ class AssertDevicesStateChanges(TracerAssertion):
 
     """
 
+    # pylint: disable=too-many-arguments, too-many-positional-arguments
     def __init__(
         self,
         devices: list[tango.DeviceProxy],
