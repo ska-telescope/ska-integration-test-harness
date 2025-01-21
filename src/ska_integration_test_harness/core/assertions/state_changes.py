@@ -84,7 +84,10 @@ class AssertDevicesStateChanges(TracerAssertion):
 
         # foreach device, chain to the context an event check
         for device in self.devices:
-            context.has_change_event_occurred(
+            context.described_as(
+                f"{self.describe_assumption()} Events not found for "
+                f"{device.dev_name()}.{self.attribute_name}."
+            ).has_change_event_occurred(
                 device_name=device.dev_name(),
                 attribute_name=self.attribute_name,
                 attribute_value=self.attribute_value,
@@ -120,6 +123,6 @@ class AssertDevicesStateChanges(TracerAssertion):
             desc += f"(remaining {self._timeout.get_remaining_timeout()}) "
 
         if self.early_stop:
-            desc += f"using early stop sentinel {self.early_stop} "
+            desc += f"using early stop sentinel {self.early_stop.__name__} "
 
         return desc.strip() + "."
