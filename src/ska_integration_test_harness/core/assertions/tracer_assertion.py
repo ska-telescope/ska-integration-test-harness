@@ -36,7 +36,7 @@ class TracerAssertion(SUTAssertion, abc.ABC):
         self,
         tracer: TangoEventTracer | None = None,
         timeout: SupportsFloat = 0,
-        early_stop: Callable[[ReceivedEvent, bool]] | None = None,
+        early_stop: Callable[[ReceivedEvent], bool] | None = None,
     ):
         """Create a new TracerAssertion instance.
 

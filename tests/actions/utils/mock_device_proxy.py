@@ -44,6 +44,9 @@ def create_device_proxy_mock(
 
     if attribute_name is not None and attribute_value is not None:
         setattr(mock_device_proxy, attribute_name, attribute_value)
+        mock_device_proxy.read_attribute.return_value = MagicMock(
+            value=attribute_value
+        )
 
     return mock_device_proxy
 

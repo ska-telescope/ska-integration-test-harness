@@ -3,6 +3,7 @@
 from typing import Any, Callable
 
 import tango
+from ska_tango_testing.integration.event import ReceivedEvent
 
 from .tracer_assertion import TracerAssertion
 
@@ -30,7 +31,7 @@ class AssertDevicesStateChanges(TracerAssertion):
         attribute_name: str,
         attribute_value: Any | None = None,
         previous_value: Any | None = None,
-        custom_matcher: Callable[[Any], bool] | None = None,
+        custom_matcher: Callable[[ReceivedEvent], bool] | None = None,
         **kwargs,
     ) -> None:
         """Create a new AssertDevicesStateChanges instance.
