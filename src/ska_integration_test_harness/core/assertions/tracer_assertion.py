@@ -18,12 +18,24 @@ class TracerAssertion(SUTAssertion, abc.ABC):
     emitted by the TangoEventTracer. The assertion is event-based,
     so it needs to be configured with:
 
-    - a valid tracer instance (if omitted, a default one will be used);
-    - a timeout for the assertion to be verified (optional, if missing a
-      zero timeout is assumed).
-    - an early stop condition (optional, if missing the assertion will
-      just wait for the timeout to expire, but it will not stop early
-      in case of errors).
+    - a valid tracer instance
+    - a timeout for the assertion to be verified
+    - an optional early stop condition
+
+    The tracer instance and the timeout can be managed by the assertion
+    itself, or injected from the outside. A managed tracer will be
+    automatically cleared of events and subscriptions during the setup
+    phase, while an injected tracer will be left untouched.
+    A managed timeout will be re-generated as a new fresh timeout object
+    during the setup phase, while an injected timeout will be left
+    untouched.
+
+    To make the tracer unmanaged, you can pass a custom tracer instance
+    to the constructor. To make the timeout unmanaged, you can pass a
+    custom timeout object to the constructor (if you pass a numeric value,
+    the timeout object will be created for you and will be managed).
+
+    TODO: add a meaningful example of usage!
 
     NOTE: you still have to extend this class and implement the
     :py:meth:`verify` method to make it work. You can use
@@ -46,17 +58,21 @@ class TracerAssertion(SUTAssertion, abc.ABC):
             cleanup will be managed automatically during the setup phase,
             but if you pass a tracer the cleanup will be left to you!
         :param timeout: the timeout for the assertion to be verified.
-            If omitted, a zero timeout is assumed. You can pass a numeric
-            value to let this class create a timeout object for you, or
-            you can pass your own timeout object (maybe shared with other
-            assertions).
+            If omitted, a zero timeout is assumed. **IMPORTANT**: if you
+            don't pass a timeout or you pass a numeric value, a timeout
+            object will be created for you and managed automatically
+            during the setup phase, but if you pass a timeout object the
+            cleanup will be left to you!
         :param early_stop: whether to stop the assertion early
             in case of errors. If omitted, the assertion (if not passing)
             will wait for the timeout to expire before failing.
         """
         self.tracer = tracer
-        self.timeout: ChainedAssertionsTimeout = timeout
+        self.timeout = timeout
         self.early_stop = early_stop
+
+    # --------------------------------------------------------------------
+    # Tracer management
 
     @property
     def tracer(self) -> TangoEventTracer:
@@ -64,7 +80,7 @@ class TracerAssertion(SUTAssertion, abc.ABC):
 
         :return: the tracer instance to use for the assertion
         """
-        return self._injected_tracer or self._on_the_fly_tracer
+        return self._injected_tracer or self._managed_tracer
 
     @tracer.setter
     def tracer(self, value: TangoEventTracer | None) -> None:
@@ -73,10 +89,12 @@ class TracerAssertion(SUTAssertion, abc.ABC):
         :param value: the tracer instance to use for the assertion. If you
             pass None, an on-the-fly managed tracer will be created.
         """
-        self._injected_tracer = value
-        self._on_the_fly_tracer = (
-            None if value is not None else TangoEventTracer()
-        )
+        if isinstance(value, TangoEventTracer):
+            self._injected_tracer = value
+            self._managed_tracer = None
+        else:
+            self._injected_tracer = None
+            self._managed_tracer = TangoEventTracer()
 
     def is_tracer_managed(self) -> bool:
         """Check if the used tracer is managed by the assertion.
@@ -86,13 +104,16 @@ class TracerAssertion(SUTAssertion, abc.ABC):
         """
         return self._injected_tracer is None
 
+    # --------------------------------------------------------------------
+    # Timeout management
+
     @property
-    def timeout(self) -> SupportsFloat:
+    def timeout(self) -> ChainedAssertionsTimeout:
         """Get the timeout for the assertion to be verified.
 
         :return: the timeout for the assertion to be verified
         """
-        return self._timeout
+        return self._injected_timeout or self._managed_timeout
 
     @timeout.setter
     def timeout(self, value: SupportsFloat) -> None:
@@ -106,20 +127,48 @@ class TracerAssertion(SUTAssertion, abc.ABC):
 
         :param value: the timeout for the assertion to be verified
         """
-        self._timeout = ChainedAssertionsTimeout.get_timeout_object(value)
+        if isinstance(value, ChainedAssertionsTimeout):
+            # If the timeout is already a chained timeout, we just use it
+            # and we don't manage it.
+            self._injected_timeout = value
+            self._managed_timeout = None
+        else:
+            # Otherwise, we create a new chained timeout object and we
+            # manage it.
+            self._injected_timeout = None
+            self._managed_timeout = ChainedAssertionsTimeout(float(value))
+
+    def is_timeout_managed(self) -> bool:
+        """Check if the used timeout is managed by the assertion.
+
+        :return: True if the timeout is managed by the assertion, False
+            otherwise.
+        """
+        return self._injected_timeout is None
+
+    # --------------------------------------------------------------------
+    # Assertion lifecycle
 
     def setup(self) -> None:
-        """Clean up an eventual managed tracer instance.
+        """Reset managed resources before the assertion is verified.
 
-        If the tracer is managed by the assertion, the cleanup will be
-        handled automatically during the setup phase.
+        The resources that can be managed are:
+
+        - the tracer, which if managed will be cleared of events and
+          subscriptions;
+        - the timeout, which if managed will be re-generated as a new
+          fresh object (which still needs to be started).
 
         Please, override this and subscribe to the events you need to
         verify the assertion.
         """
         if self.is_tracer_managed():
-            self._on_the_fly_tracer.unsubscribe_all()
-            self._on_the_fly_tracer.clear_events()
+            self.tracer.unsubscribe_all()
+            self.tracer.clear_events()
+
+        if self.is_timeout_managed():
+            # reset the timeout to its initial value
+            self.timeout = self.timeout.initial_timeout
 
     def get_assertpy_context(self) -> Any:
         """Get the assertpy context to use for the assertion.
