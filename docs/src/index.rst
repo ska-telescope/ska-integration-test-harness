@@ -13,3 +13,4 @@ of production or emulated SKA subsystems.
    architecture_overview
    extend_and_apply_ith
    api/index
+   core
