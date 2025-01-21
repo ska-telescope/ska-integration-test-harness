@@ -1,7 +1,5 @@
 """Unit tests for the DevicesAreInState class."""
 
-from unittest.mock import MagicMock
-
 import pytest
 from assertpy import assert_that
 
