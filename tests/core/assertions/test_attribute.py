@@ -1,17 +1,17 @@
-"""Unit tests for the DevicesAreInState class."""
+"""Unit tests for the AssertDevicesAreInState class."""
 
 import pytest
 from assertpy import assert_that
 
-from ska_integration_test_harness.core.assertions.devices_are_in_state import (
+from ska_integration_test_harness.core.assertions.attribute import (
     AssertDevicesAreInState,
 )
 from tests.actions.utils.mock_device_proxy import create_device_proxy_mock
 
 
 @pytest.mark.core
-class TestDevicesAreInState:
-    """Unit tests for the DevicesAreInState class."""
+class TestAssertDevicesAreInState:
+    """Unit tests for the AssertDevicesAreInState class."""
 
     def test_all_devices_in_expected_state(self):
         """All devices are in the expected state."""

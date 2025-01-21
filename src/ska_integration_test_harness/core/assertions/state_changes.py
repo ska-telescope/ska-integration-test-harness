@@ -115,8 +115,10 @@ class AssertDevicesStateChanges(TracerAssertion):
             desc += f"to {self.attribute_value} "
         if self.custom_matcher is not None:
             desc += f"matching {self.custom_matcher.__name__} "
-        if self.timeout > 0:
+        if self.timeout.initial_timeout > 0:
             desc += f"within {self._timeout.initial_timeout} seconds "
+            desc += f"(remaining {self._timeout.get_remaining_timeout()}) "
+
         if self.early_stop:
             desc += f"using early stop sentinel {self.early_stop} "
 

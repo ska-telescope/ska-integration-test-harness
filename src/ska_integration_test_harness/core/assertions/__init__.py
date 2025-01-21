@@ -3,8 +3,8 @@
 TODO: describe assertions idea.
 """
 
-from .devices_are_in_state import AssertDevicesAreInState
-from .devices_state_changes import AssertDevicesStateChanges
+from .attribute import AssertDevicesAreInState
+from .state_changes import AssertDevicesStateChanges
 from .sut_assertion import SUTAssertion
 from .tracer_assertion import TracerAssertion
 
