@@ -41,10 +41,14 @@ class TestDevicesAreInState:
             "the attribute name and the expected value."
         ).contains("test/dev/1", "test/dev/2", "state", "ON").described_as(
             "The failure message includes a specific reference to the "
-            "device and attribute that failed." 
-        ).contains("test/dev/2.state").described_as(
+            "device and attribute that failed."
+        ).contains(
+            "test/dev/2.state"
+        ).described_as(
             "The failure message includes a reference to the observed value."
-        ).contains("OFF")
+        ).contains(
+            "OFF"
+        )
 
     def test_no_devices_provided(self):
         """No devices are provided."""
@@ -58,7 +62,7 @@ class TestDevicesAreInState:
         devices = [
             create_device_proxy_mock("test/dev/1"),
             create_device_proxy_mock("test/dev/2"),
-        ]   
+        ]
 
         assertion = AssertDevicesAreInState(devices, "state", "ON")
         description = assertion.describe_assumption()
@@ -67,4 +71,3 @@ class TestDevicesAreInState:
             "The description includes a reference to the devices, "
             "the attribute name and the expected value."
         ).contains("test/dev/1", "test/dev/2", "state", "ON")
-
