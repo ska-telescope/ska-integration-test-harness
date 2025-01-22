@@ -18,11 +18,12 @@ class TracerAction(SUTAction, abc.ABC):
     This class represents an action where the synchronisation is based on the
     events emitted by the TangoEventTracer. Concretely, this action:
 
-    - represents the preconditions and the postconditions of the action
-      as assertion objects TODO: add references to the classes
-    - while the preconditions are generic assertions, the postconditions
-      are event-based assertions, which are verified using a tracer and
-      with a postcondition
+    - accept a set of pre-conditions and post-conditions, expressed as
+      :py:class:`SUTAssertion` and :py:class:`TracerAssertion` instances;
+    - has a common tracer for all post-condition assertions (and also
+      for the pre-conditions, if they are event-based);
+    - has an unique shared timeout for all post-condition assertions;
+    - permits to add early stop conditions for the post-conditions.
 
     At the moment, the tracer and the timeout are managed exclusively by
     the action itself (i.e., this class takes care of creating the objects,
@@ -30,49 +31,29 @@ class TracerAction(SUTAction, abc.ABC):
     future we could make them injectable from the outside (and so potentially
     shared in different actions).
 
+    Usage example:
+
+    TODO: add a usage example
+
     The :py:meth:`verify` method needs to be overridden in the subclasses
     to implement the actual action.
     """
 
-    def __init__(
-        self,
-        postconditions_timeout: float = 0,
-        preconditions: list[SUTAssertion] | None = None,
-        postconditions: list[TracerAssertion] | None = None,
-    ):
-        """Create a new TracerAction instance.
-
-        :param postconditions_timeout: the timeout value that you
-            are going to wait for the postconditions to be verified. NOTE:
-            the given timeout will **ALWAYS** override the one eventually set
-            in the postconditions!
-        :param preconditions: the list of preconditions that need to be
-            verified before the action is executed.
-        :param postconditions: the list of postconditions that need to be
-            verified after the action is executed. NOTE: the given timeout
-            will **ALWAYS** override the one given in the postconditions!
-        """
+    def __init__(self):
+        """Create a new TracerAction instance."""
         super().__init__()
-        self.preconditions = []
-        self.postconditions = []
-        self.add_preconditions(*preconditions or [])
-        self.add_postconditions(*postconditions or [])
+        self._preconditions = []
+        self._postconditions = []
 
-        self.postconditions_timeout = postconditions_timeout
         self.tracer = TangoEventTracer()
-
-        # self.early_stop = early_stop
-        # :param postconditions_early_stop: an optional early stop condition
-        # to be used during the postconditions verification.
-        # If any event matches this predicate, the verification will
-        # stop immediately. If the postconditions already have an early stop,
-        # it will be combined with this one using a logical OR.
+        self.set_timeout(0)
+        self._early_stop = None
 
     # --------------------------------------------------------------------
     # Configure timeout, preconditions, postconditions and early stop
 
     @property
-    def postconditions_timeout(self) -> float:
+    def timeout(self) -> float:
         """The timeout value for the postconditions.
 
         NOTE: as timeout value, we intend the initial timeout value, not the
@@ -82,24 +63,48 @@ class TracerAction(SUTAction, abc.ABC):
         """
         return self._timeout.initial_timeout
 
-    @postconditions_timeout.setter
-    def postconditions_timeout(self, value: float):
+    def set_timeout(self, timeout: float) -> "TracerAction":
         """Set the timeout value for the postconditions.
 
-        NOTE: as timeout value, we intend the initial timeout value, not the
-        remaining one (which at the moment is managed exclusively internally).
+        This method sets the timeout value for the postconditions, and also
+        resets the timeout object to the new value.
 
-        Every time you execute this action, you may expect this timeout to be
-        reset to the given value.
-
-        :param value: the timeout value for the postconditions.
+        :param timeout: the new timeout value.
+        :return: the action itself, to allow chaining the calls.
         """
-        self._timeout = ChainedAssertionsTimeout(value)
+        self._timeout = ChainedAssertionsTimeout(timeout)
+
+        # set the timeout for the postconditions
+        for postcondition in self.postconditions:
+            postcondition.timeout = self._timeout
+        return self
+
+    @property
+    def preconditions(self) -> list[SUTAssertion]:
+        """The preconditions of the action.
+
+        The preconditions are the assertions that need to be verified before
+        the action is executed, that guarantee that the system is in
+        a state that supports the action.
+        Use :py:meth:`add_preconditions` to add new
+        preconditions. Eventual preconditions will use the same tracer.
+
+        :return: the preconditions of the action.
+        """
+        return self._preconditions
 
     def add_preconditions(
         self, *preconditions: SUTAssertion, put_them_at_beginning: bool = False
     ) -> "TracerAction":
         """Add one or more preconditions to the action.
+
+        Add more preconditions to the action, to be verified before the
+        action is executed. The preconditions are verified in the order
+        they are added, unless the ``put_them_at_beginning`` parameter is set
+        in which case they are verified before the ones already existing.
+
+        Try to add preconditions that terminate immediately. If a precondition
+        requires a tracer, it will use the same tracer as the action.
 
         NOTE: to favour a fluent interface, this method and
         also :py:meth:`add_postconditions` return the action itself, so that
@@ -109,9 +114,7 @@ class TracerAction(SUTAction, abc.ABC):
 
         .. code-block:: python
 
-            action = TracerAction(
-                postconditions_timeout=10
-            ).add_preconditions(
+            action = TracerAction().add_preconditions(
                 SUTAssertion1(), SUTAssertion2(), # ...
             .add_postconditions(
                 TracerAssertion1(), TracerAssertion2(), # ...
@@ -124,12 +127,34 @@ class TracerAction(SUTAction, abc.ABC):
             ones already existing.
         :return: the action itself, to allow chaining the calls.
         """
+        # eventual preconditions with a tracer will use the same tracer
+        for precondition in preconditions:
+            if isinstance(precondition, TracerAssertion):
+                precondition.tracer = self.tracer
+
+        # concatenate them at the beginning or at the end
         if put_them_at_beginning:
-            self.preconditions = list(preconditions) + self.preconditions
+            self._preconditions = list(preconditions) + self._preconditions
         else:
-            self.preconditions.extend(preconditions)
+            self._preconditions.extend(preconditions)
 
         return self
+
+    @property
+    def postconditions(self) -> list[TracerAssertion]:
+        """The postconditions of the action.
+
+        The postconditions are the assertions that need to be verified after
+        the action is executed, that guarantee that the system is in
+        the expected state after the action. Use :py:meth:`add_postconditions`
+        to add new postconditions.
+
+        Postconditions are all verified using the same tracer and they
+        share the :py:meth:`timeout` value.
+
+        :return: the postconditions of the action.
+        """
+        return self._postconditions
 
     def add_postconditions(
         self,
@@ -137,6 +162,15 @@ class TracerAction(SUTAction, abc.ABC):
         put_them_at_beginning: bool = False
     ) -> "TracerAction":
         """Add one or more postconditions to the action.
+
+        Add more postconditions to the action, to be verified after the
+        action is executed. The postconditions are verified in the order
+        they are added, unless the ``put_them_at_beginning`` parameter is set
+        in which case they are verified before the ones already existing.
+
+        Your postcondition tracer and timeout will be overridden by the
+        action's tracer and timeout. The post-condition eventual early stop
+        will be combined with the action's early stop.
 
         NOTE: to favour a fluent interface, this method and
         also :py:meth:`add_preconditions` return the action itself, so that
@@ -161,12 +195,59 @@ class TracerAction(SUTAction, abc.ABC):
             ones already existing.
         :return: the action itself, to allow chaining the calls.
         """
+        # all postconditions will use the same tracer and timeout
+        # + combine early stop
+        for postcondition in postconditions:
+            postcondition.tracer = self.tracer
+            postcondition.timeout = self._timeout
+            postcondition.early_stop = TracerAction._combine_early_stop(
+                postcondition.early_stop, self._early_stop
+            )
+
         # add the postconditions at the beginning or at the end
         if put_them_at_beginning:
-            self.postconditions = list(postconditions) + self.postconditions
+            self._postconditions = list(postconditions) + self._postconditions
         else:
-            self.postconditions.extend(postconditions)
+            self._postconditions.extend(postconditions)
 
+        return self
+
+    @property
+    def early_stop(self) -> Callable[[ReceivedEvent], bool]:
+        """The early stop condition for the postconditions.
+
+        This early stop condition is used to stop the verification of the
+        postconditions before the timeout expires if some kind of error
+        condition is detected. Each postcondition may have its own early
+        stop condition, but this one is applied to all of them.
+
+        Use :py:meth:`add_early_stop` to add a new early stop condition, which
+        will be combined with the existing one (if any) using a logical OR.
+
+        :return: the early stop condition for the postconditions.
+        """
+        return self._early_stop
+
+    def add_early_stop(
+        self, early_stop: Callable[[ReceivedEvent], bool]
+    ) -> "TracerAction":
+        """Add an early stop condition for the postconditions.
+
+        Add a new early stop condition for the postconditions, which will be
+        combined with the existing one (if any) using a logical OR.
+
+        :param early_stop: the early stop condition to add.
+        :return: the action itself, to allow chaining the calls.
+        """
+        self._early_stop = TracerAction._combine_early_stop(
+            self._early_stop, early_stop
+        )
+
+        # apply the new early stop to all the postconditions
+        for postcondition in self.postconditions:
+            postcondition.early_stop = TracerAction._combine_early_stop(
+                postcondition.early_stop, early_stop
+            )
         return self
 
     # --------------------------------------------------------------------
@@ -187,10 +268,11 @@ class TracerAction(SUTAction, abc.ABC):
         super().setup()
 
         # reset the tracer
-        self._reset_tracer()
+        self.tracer.unsubscribe_all()
+        self.tracer.clear_events()
 
         # reset the timeout
-        self._reset_timeout()
+        self.set_timeout(self.timeout)
 
         # setup the preconditions
         for precondition in self.preconditions:
@@ -236,78 +318,36 @@ class TracerAction(SUTAction, abc.ABC):
     # --------------------------------------------------------------------
     # Internal utilities
 
-    def _reset_tracer(self):
-        """Reset events and subscriptions and inject into the assertions.
-
-        This method resets the tracer, unsubscribing all the events and
-        clearing the event list, and injects the new object in all the
-        postconditions and also in all the preconditions that are
-        :py:class:`TracerAssertion` instances.
-        """
-        self.tracer.unsubscribe_all()
-        self.tracer.clear_events()
-
-        for precondition in self.preconditions:
-            if isinstance(precondition, TracerAssertion):
-                precondition.tracer = self.tracer
-
-        for postcondition in self.postconditions:
-            postcondition.tracer = self.tracer
-
-    def _reset_timeout(self):
-        """Reset the timeout to initial value and inject into the assertions.
-
-        This method resets the timeout to the initial value and injects the
-        new object in all the postconditions.
-        """
-        self._timeout = ChainedAssertionsTimeout(self.postconditions_timeout)
-
-        for postcondition in self.postconditions:
-            postcondition.timeout = self._timeout
-
     @staticmethod
-    def _create_combined_early_stop(
-        conditions: list[Callable[[ReceivedEvent], bool]]
-    ) -> Callable[[ReceivedEvent], bool]:
-        """Create a combined early stop condition from a list of conditions.
+    def _combine_early_stop(
+        condition1: Callable[[ReceivedEvent], bool] | None,
+        condition2: Callable[[ReceivedEvent], bool] | None,
+    ) -> Callable[[ReceivedEvent], bool] | None:
+        """Combine two early stop conditions using a logical OR.
 
-        This method creates a new early stop condition that is a combination
-        of all the given conditions, using a logical OR.
+        This method combines two early stop conditions using a logical OR,
+        creating a new early stop condition that is satisfied if at least
+        one of the two conditions is satisfied. If one of the conditions is
+        ``None``, the other one is returned as is.
 
-        :param conditions: the list of conditions to combine.
+        :param condition1: the first early stop condition.
+        :param condition2: the second early stop condition.
         :return: the combined early stop condition.
         """
+        # one of the conditions is None -> return the other one
+        if condition1 is None:
+            return condition2
 
+        if condition2 is None:
+            return condition1
+
+        # both conditions are not None -> combine them
         def combined_early_stop(event: ReceivedEvent) -> bool:
-            """A combination of multiple early stop conditions.
+            """A combination of two early stop conditions.
 
             :param event: the event to check.
             :return: whether the postconditions verification should stop.
             """
-            return any(condition(event) for condition in conditions)
+            return condition1(event) or condition2(event)
 
         return combined_early_stop
-
-    @staticmethod
-    def _apply_early_stop_to_tracer_conditions(
-        postconditions: list[TracerAssertion],
-        early_stop: Callable[[ReceivedEvent], bool],
-    ) -> None:
-        """Apply an early stop condition to a list of postconditions.
-
-        This method applies the given early stop condition to all the
-        postconditions, combining it with the one already set in the
-        postconditions (if any) using a logical OR.
-
-        :param postconditions: the postconditions to apply the early stop to.
-        :param early_stop: the early stop condition to apply.
-        """
-        for postcondition in postconditions:
-            if postcondition.early_stop is None:
-                postcondition.early_stop = early_stop
-            else:
-                postcondition.early_stop = (
-                    TracerAction._create_combined_early_stop(
-                        [postcondition.early_stop, early_stop]
-                    )
-                )

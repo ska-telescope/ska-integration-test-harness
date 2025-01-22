@@ -65,14 +65,13 @@ to check the state of the device after the command execution. To do so:
         target_device=target_device,
         command_name="AssignResources",
         command_input=json.read("low/input/assign_resources.json"),
-        synchronisation_timeout=60,
     )
     
     # Through pre-conditions I can specify the expected initial state
     # for the action to be run successfully. It's totally optional
     # and in many cases you will not need them (if not to have
     # "stronger" tests)
-    command.add_precondition(
+    command.add_preconditions(
         # I expect the devices to be in the EMPTY state
         AssertDevicesAreInState(
             devices=subarray_devices,
@@ -85,14 +84,13 @@ to check the state of the device after the command execution. To do so:
     # the state of the devices after the command is executed. Those
     # post-conditions will be used also for synchronisation
     # (within the given common timeout)
-    command.add_postcondition(
+    command.add_postconditions(
         # I expect a state change in the devices to the RESOURCING state
         AssertDevicesStateChanges(
             devices=subarray_devices,
             attribute_name="obsState",
             expected_value=ObsState.RESOURCING,
         ),
-    ).add_postcondition(
         # I expect a state change in the devices to the IDLE state
         AssertDevicesStateChanges(
             devices=subarray_devices,
@@ -100,11 +98,12 @@ to check the state of the device after the command execution. To do so:
             expected_value=ObsState.IDLE,
             previous_value=ObsState.RESOURCING,
         ),
-    ).add_postcondition(
         # I expect the LRC to complete successfully
         # (and I want the action to fail early if the LRC fails)
         AssertLRCCompletion(fail_early_if_failed=True),   
-    )
+    ).set_postconditions_timeout(60) # I can set a timeout for the action
+
+
     # DOUBT: should we really expose a AssertLRCCompletion? Wouldn't
     #        be better some kind of method like
     #        ``add_assert_lrc_completion_postcondition()``?
