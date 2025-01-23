@@ -107,3 +107,7 @@ class SUTAssertion(abc.ABC):
 
         :return: the description of the assumption
         """
+
+    def __str__(self):
+        """Describe the assumption to stringify the assertion."""
+        return self.describe_assumption()

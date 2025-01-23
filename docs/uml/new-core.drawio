@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="v-a5iRJR_e-lCV0AXOTa" name="IDEA 1">
-        <mxGraphModel dx="3217" dy="2544" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+        <mxGraphModel dx="2261" dy="1994" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -614,29 +614,44 @@
                 <mxCell id="yMMe7j_UTyrGYQPRYcxt-41" value="&lt;br&gt;Some asseritions are a bit more complex, because they are not just verifications on the system for how is right now, but they are &quot;assumptions on future states of the system&quot; (which may also serve as synchronisation points). To represent them we create a second assertion class which extend SUTAssertion and&lt;br&gt;&lt;br&gt;- gives the possibility to set a timeout" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" parent="yMMe7j_UTyrGYQPRYcxt-1" vertex="1">
                     <mxGeometry x="1130" y="-120" width="360" height="176" as="geometry"/>
                 </mxCell>
-                <mxCell id="yMMe7j_UTyrGYQPRYcxt-42" value="{abstract} SUTTracerAction" style="swimlane;fontStyle=3;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;" parent="yMMe7j_UTyrGYQPRYcxt-1" vertex="1">
-                    <mxGeometry x="80" y="320" width="240" height="190" as="geometry"/>
+                <mxCell id="yMMe7j_UTyrGYQPRYcxt-42" value="{abstract} TracerAction" style="swimlane;fontStyle=3;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;" parent="yMMe7j_UTyrGYQPRYcxt-1" vertex="1">
+                    <mxGeometry x="80" y="320" width="240" height="320" as="geometry"/>
                 </mxCell>
                 <mxCell id="yMMe7j_UTyrGYQPRYcxt-43" value="+ timeout: SupportFloat" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="yMMe7j_UTyrGYQPRYcxt-42" vertex="1">
                     <mxGeometry y="26" width="240" height="26" as="geometry"/>
                 </mxCell>
+                <mxCell id="U7j0rNbjTjg1dWbDpd6S-7" value="+ early_stop" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="yMMe7j_UTyrGYQPRYcxt-42">
+                    <mxGeometry y="52" width="240" height="26" as="geometry"/>
+                </mxCell>
                 <mxCell id="yMMe7j_UTyrGYQPRYcxt-44" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="yMMe7j_UTyrGYQPRYcxt-42" vertex="1">
-                    <mxGeometry y="52" width="240" height="8" as="geometry"/>
+                    <mxGeometry y="78" width="240" height="8" as="geometry"/>
                 </mxCell>
                 <mxCell id="yMMe7j_UTyrGYQPRYcxt-45" value="+ execute(): None" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="yMMe7j_UTyrGYQPRYcxt-42" vertex="1">
-                    <mxGeometry y="60" width="240" height="26" as="geometry"/>
-                </mxCell>
-                <mxCell id="yMMe7j_UTyrGYQPRYcxt-46" value="# _setup(): None" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=0" parent="yMMe7j_UTyrGYQPRYcxt-42" vertex="1">
                     <mxGeometry y="86" width="240" height="26" as="geometry"/>
                 </mxCell>
-                <mxCell id="yMMe7j_UTyrGYQPRYcxt-47" value="# _verify_preconditions(): None" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=0" parent="yMMe7j_UTyrGYQPRYcxt-42" vertex="1">
+                <mxCell id="U7j0rNbjTjg1dWbDpd6S-0" value="+ setup(): None" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=0" vertex="1" parent="yMMe7j_UTyrGYQPRYcxt-42">
                     <mxGeometry y="112" width="240" height="26" as="geometry"/>
                 </mxCell>
-                <mxCell id="yMMe7j_UTyrGYQPRYcxt-48" value="# _verify_postconditions(): None" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=0" parent="yMMe7j_UTyrGYQPRYcxt-42" vertex="1">
+                <mxCell id="U7j0rNbjTjg1dWbDpd6S-3" value="+ reset_timeout(SupportFloat): None" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=0" vertex="1" parent="yMMe7j_UTyrGYQPRYcxt-42">
                     <mxGeometry y="138" width="240" height="26" as="geometry"/>
                 </mxCell>
-                <mxCell id="yMMe7j_UTyrGYQPRYcxt-49" value="+ reset_timeout(SupportFloat): None" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=0" parent="yMMe7j_UTyrGYQPRYcxt-42" vertex="1">
+                <mxCell id="U7j0rNbjTjg1dWbDpd6S-2" value="+ verify_postconditions(): None" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=0" vertex="1" parent="yMMe7j_UTyrGYQPRYcxt-42">
                     <mxGeometry y="164" width="240" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="U7j0rNbjTjg1dWbDpd6S-1" value="+ verify_preconditions(): None" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=0" vertex="1" parent="yMMe7j_UTyrGYQPRYcxt-42">
+                    <mxGeometry y="190" width="240" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="U7j0rNbjTjg1dWbDpd6S-5" value="+ add_preconditions(*): TracerAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=0" vertex="1" parent="yMMe7j_UTyrGYQPRYcxt-42">
+                    <mxGeometry y="216" width="240" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="U7j0rNbjTjg1dWbDpd6S-6" value="+ add_postconditions(*): TracerAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=0" vertex="1" parent="yMMe7j_UTyrGYQPRYcxt-42">
+                    <mxGeometry y="242" width="240" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="U7j0rNbjTjg1dWbDpd6S-8" value="+ set_timeout(float): TracerAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=0" vertex="1" parent="yMMe7j_UTyrGYQPRYcxt-42">
+                    <mxGeometry y="268" width="240" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="U7j0rNbjTjg1dWbDpd6S-4" value="+ add_early_stop_condition(callable): TracerAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=0" vertex="1" parent="yMMe7j_UTyrGYQPRYcxt-42">
+                    <mxGeometry y="294" width="240" height="26" as="geometry"/>
                 </mxCell>
                 <mxCell id="yMMe7j_UTyrGYQPRYcxt-50" value="" style="endArrow=open;endFill=1;endSize=12;html=1;" parent="yMMe7j_UTyrGYQPRYcxt-1" source="yMMe7j_UTyrGYQPRYcxt-42" target="yMMe7j_UTyrGYQPRYcxt-32" edge="1">
                     <mxGeometry width="160" relative="1" as="geometry">
@@ -776,7 +791,7 @@
                     <mxGeometry x="1320" y="470" width="270" height="176" as="geometry"/>
                 </mxCell>
                 <mxCell id="yMMe7j_UTyrGYQPRYcxt-97" value="&lt;br&gt;A simple assertion that verifies that some Tango device attributes have certain values. In the most simple case, a simple == check is done, otherwise a custom matcher on the attribute value can be defined (and potentially the description overwritten)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" parent="yMMe7j_UTyrGYQPRYcxt-1" vertex="1">
-                    <mxGeometry x="234" y="692" width="360" height="116" as="geometry"/>
+                    <mxGeometry x="545" y="662" width="360" height="116" as="geometry"/>
                 </mxCell>
                 <mxCell id="yMMe7j_UTyrGYQPRYcxt-98" value="&lt;br&gt;An extension of an assertion over attributes that permits to monitor also a LRC completion.&amp;nbsp;&lt;br&gt;&lt;br&gt;If a list of accepted codes is given, not only the completion is asserted but also: 1) the result code is asserted 2) any other result code will be treated as an early stop event.&lt;br&gt;&lt;br&gt;Since each LRC is unique, the given LRC will be monitored only for the next verification." style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" parent="yMMe7j_UTyrGYQPRYcxt-1" vertex="1">
                     <mxGeometry x="1430" y="880" width="360" height="150" as="geometry"/>
@@ -880,7 +895,7 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="FzoC_nrIc7Pod5_VJ_6_-6" value="«external»&lt;br&gt;&lt;b&gt;TangoEventTracer&lt;/b&gt;" style="html=1;" parent="yMMe7j_UTyrGYQPRYcxt-1" vertex="1">
-                    <mxGeometry x="359" y="120" width="110" height="50" as="geometry"/>
+                    <mxGeometry x="370" y="180" width="110" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="FzoC_nrIc7Pod5_VJ_6_-7" value="" style="endArrow=open;endFill=1;endSize=12;html=1;" parent="yMMe7j_UTyrGYQPRYcxt-1" source="yMMe7j_UTyrGYQPRYcxt-42" target="FzoC_nrIc7Pod5_VJ_6_-6" edge="1">
                     <mxGeometry width="160" relative="1" as="geometry">

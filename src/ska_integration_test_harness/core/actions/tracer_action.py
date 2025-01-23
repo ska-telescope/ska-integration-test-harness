@@ -16,7 +16,9 @@ class TracerAction(SUTAction, abc.ABC):
     """An event-based action which uses TangoEventTracer to synchronise.
 
     This class represents an action where the synchronisation is based on the
-    events emitted by the TangoEventTracer. Concretely, this action:
+    events emitted by the
+    :class:`ska_tango_testing.integration.TangoEventTracer`.
+    Concretely, this action:
 
     - accept a set of pre-conditions and post-conditions, expressed as
       :py:class:`SUTAssertion` and :py:class:`TracerAssertion` instances;
@@ -39,15 +41,31 @@ class TracerAction(SUTAction, abc.ABC):
     to implement the actual action.
     """
 
-    def __init__(self):
-        """Create a new TracerAction instance."""
-        super().__init__()
+    def __init__(
+        self,
+        enable_logging: bool = True,
+        log_preconditions: bool = False,
+        log_postconditions: bool = True,
+    ) -> None:
+        """Create a new TracerAction instance.
+
+        :param enable_logging: whether to enable logging
+            (default is True).
+        :param log_preconditions: whether to log the preconditions when
+            verifying them (default is False).
+        :param log_postconditions: whether to log the postconditions
+            when verifying them (default is True).
+        """
+        super().__init__(enable_logging=enable_logging)
         self._preconditions = []
         self._postconditions = []
 
         self.tracer = TangoEventTracer()
         self.set_timeout(0)
         self._early_stop = None
+
+        self._log_preconditions = log_preconditions
+        self._log_postconditions = log_postconditions
 
     # --------------------------------------------------------------------
     # Configure timeout, preconditions, postconditions and early stop
@@ -289,11 +307,19 @@ class TracerAction(SUTAction, abc.ABC):
         one by one and in the given order. If one of the preconditions fails,
         the method raises an exception and stops the verification.
 
+        If specified in the initialisation, the preconditions will be logged
+        (By default, they are not logged).
+
         :raises AssertionError: if one of the preconditions fails.
         """
         super().verify_preconditions()
 
         for precondition in self.preconditions:
+            if self._log_preconditions:
+                self.logger.info(
+                    "Verifying precondition: %s",
+                    precondition.describe_assumption(),
+                )
             precondition.verify()
 
     def verify_postconditions(self):
@@ -304,12 +330,22 @@ class TracerAction(SUTAction, abc.ABC):
         the method raises an exception and stops the verification.
 
         NOTE: all the postconditions are verified within the given
+        timeout, using the same tracer and considering the early stop
+        condition.
+
+        If specified in the initialisation, the postconditions will be logged
+        (By default, they are logged).
 
         :raises AssertionError: if one of the postconditions fails.
         """
         super().verify_postconditions()
 
         for postcondition in self.postconditions:
+            if self._log_postconditions:
+                self.logger.info(
+                    "Verifying postcondition: %s",
+                    postcondition.describe_assumption(),
+                )
             postcondition.verify()
 
     # (the verify method needs to be overridden, as it is abstract in the

@@ -3,14 +3,16 @@
 import time
 from unittest.mock import MagicMock
 
-from assertpy import assert_that
 import pytest
+from assertpy import assert_that
 from ska_tango_testing.integration.tracer import TangoEventTracer
 
 from ska_integration_test_harness.core.actions.tracer_action import (
     TracerAction,
 )
-from ska_integration_test_harness.core.assertions.attribute import AssertDevicesAreInState
+from ska_integration_test_harness.core.assertions.attribute import (
+    AssertDevicesAreInState,
+)
 from ska_integration_test_harness.core.assertions.state_changes import (
     AssertDevicesStateChanges,
 )
@@ -32,7 +34,9 @@ class MockTracerAction(TracerAction):
         return "A dummy procedure that accomplishes nothing."
 
 
-def create_state_change_assertion(dev_name, expected_state="ON") -> AssertDevicesStateChanges:
+def create_state_change_assertion(
+    dev_name, expected_state="ON"
+) -> AssertDevicesStateChanges:
     """Create a state change assertion for the given device.
 
     :param dev_name: the name of the device
@@ -43,7 +47,10 @@ def create_state_change_assertion(dev_name, expected_state="ON") -> AssertDevice
         [create_device_proxy_mock(dev_name)], "state", expected_state
     )
 
-def create_simple_assertion(dev_name, expected_state="ON") -> AssertDevicesAreInState:
+
+def create_simple_assertion(
+    dev_name, expected_state="ON"
+) -> AssertDevicesAreInState:
     """Create a simple assertion for the given device.
 
     :param dev_name: the name of the device
@@ -54,17 +61,22 @@ def create_simple_assertion(dev_name, expected_state="ON") -> AssertDevicesAreIn
         [create_device_proxy_mock(dev_name)], "state", expected_state
     )
 
-def create_mock_assertion(duration: float = 0, fail: bool = False) -> MagicMock:
+
+def create_mock_assertion(
+    duration: float = 0, fail: bool = False
+) -> MagicMock:
     """Create a mock assertion."""
+
     def mock_verify():
         time.sleep(duration)
         if fail:
             raise AssertionError("Mock assertion failed")
-        
+
     mock = MagicMock()
     mock.verify = MagicMock(side_effect=mock_verify)
 
     return mock
+
 
 @pytest.mark.core
 class TestTracerAction:
@@ -82,6 +94,8 @@ class TestTracerAction:
       present at the time of their addition)
     - the capability of executing the action and verifying the
       preconditions and postconditions
+    - the capability of logging or not logging preconditions and postconditions
+      according to the initialisation parameters
     """
 
     @staticmethod
@@ -202,13 +216,17 @@ class TestTracerAction:
     @staticmethod
     def test_action_a_postcondition_can_be_added():
         """An action can add a postcondition.
-        
+
         - the tracer is shared with the action
         - the timeout is shared with the action
         - the early stop condition is shared with the action
         """
         action_mock_early_stop = MagicMock()
-        action = MockTracerAction().set_timeout(10).add_early_stop(action_mock_early_stop)
+        action = (
+            MockTracerAction()
+            .set_timeout(10)
+            .add_early_stop(action_mock_early_stop)
+        )
         post_cond = create_state_change_assertion("test/device/1")
         action.add_postconditions(post_cond)
 
@@ -219,7 +237,9 @@ class TestTracerAction:
         ).is_same_as(action.tracer)
         assert_that(post_cond.timeout).described_as(
             "The timeout is shared with the action"
-        ).is_same_as(action._timeout)
+        ).is_same_as(
+            action._timeout  # pylint: disable=protected-access
+        )
         assert_that(float(post_cond.timeout)).described_as(
             "The timeout value is the expected one"
         ).is_equal_to(10.0)
@@ -228,33 +248,38 @@ class TestTracerAction:
         ).is_same_as(action_mock_early_stop)
 
     @staticmethod
-    def test_action_a_postcondition_early_stop_is_combined_with_the_action_early_stop(): # pylint: disable=line-too-long # noqa
+    def test_action_a_postcondition_early_stop_is_combined_with_the_action_early_stop():  # pylint: disable=line-too-long # noqa
         """
         A postcondition early stop is combined with the action early stop.
         """
         action_mock_early_stop = MagicMock(return_value=False)
-        action = MockTracerAction().set_timeout(10).add_early_stop(action_mock_early_stop)
+        action = (
+            MockTracerAction()
+            .set_timeout(10)
+            .add_early_stop(action_mock_early_stop)
+        )
         post_cond = create_state_change_assertion("test/device/1")
         post_cond_mock_early_stop = MagicMock(return_value=False)
         post_cond.early_stop = post_cond_mock_early_stop
         action.add_postconditions(post_cond)
 
         assert_that(post_cond.early_stop).described_as(
-            "The postcondition early stop is combined with the action early stop"
+            "The postcondition early stop is combined "
+            "with the action early stop"
         ).is_not_same_as(action_mock_early_stop)
 
         # Test that both the early stop conditions are called
         mock_event = MagicMock()
         assert_that(post_cond.early_stop(mock_event)).described_as(
-            "The postcondition early stop is combined with the action early stop"
+            "The postcondition early stop is combined "
+            "with the action early stop"
             "(Action: False, Postcondition: False --> False)"
         ).is_false()
         action_mock_early_stop.assert_called_once_with(mock_event)
-        post_cond_mock_early_stop.assert_called_once_with(mock_event)\
-        
+        post_cond_mock_early_stop.assert_called_once_with(mock_event)
+
     # -----------------------------------------------------------------------
     # Action execution (relation with pre and post conditions)
-
 
     @staticmethod
     def test_action_execution_setups_pre_and_post_conditions():
@@ -335,9 +360,63 @@ class TestTracerAction:
             "We expect the timeout to not be started"
         ).is_false()
 
-        
+    # -----------------------------------------------------------------------
+    # Logging tests
 
+    @staticmethod
+    def test_action_executions_does_not_log_preconditions_by_default():
+        """An action execution does not log preconditions by default."""
+        action = MockTracerAction()
+        action.logger = MagicMock()
+        pre_cond = create_state_change_assertion("test/device/1")
+        pre_cond.verify = MagicMock()
+        action.add_preconditions(pre_cond)
 
+        action.verify_preconditions()
 
+        action.logger.info.assert_not_called()
 
+    @staticmethod
+    def test_action_executions_logs_postconditions_by_default():
+        """An action execution logs postconditions by default."""
+        action = MockTracerAction()
+        action.logger = MagicMock()
+        post_cond = create_state_change_assertion("test/device/1")
+        post_cond.verify = MagicMock()
+        action.add_postconditions(post_cond)
 
+        action.verify_postconditions()
+
+        action.logger.info.assert_called_once()
+        action.logger.info.assert_called_with(
+            "Verifying postcondition: %s", str(post_cond)
+        )
+
+    @staticmethod
+    def test_action_executions_can_enable_precondition_logging():
+        """An action execution can enable logging."""
+        action = MockTracerAction(log_preconditions=True)
+        action.logger = MagicMock()
+        pre_cond = create_state_change_assertion("test/device/1")
+        pre_cond.verify = MagicMock()
+        action.add_preconditions(pre_cond)
+
+        action.verify_preconditions()
+
+        action.logger.info.assert_called_once()
+        action.logger.info.assert_called_with(
+            "Verifying precondition: %s", str(pre_cond)
+        )
+
+    @staticmethod
+    def test_action_executions_can_disable_postcondition_logging():
+        """An action execution can disable logging."""
+        action = MockTracerAction(log_postconditions=False)
+        action.logger = MagicMock()
+        post_cond = create_state_change_assertion("test/device/1")
+        post_cond.verify = MagicMock()
+        action.add_postconditions(post_cond)
+
+        action.verify_postconditions()
+
+        action.logger.info.assert_not_called()
