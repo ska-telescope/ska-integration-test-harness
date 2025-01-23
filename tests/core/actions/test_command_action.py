@@ -2,8 +2,8 @@
 
 from unittest.mock import MagicMock
 
-from assertpy import assert_that
 import pytest
+from assertpy import assert_that
 
 from ska_integration_test_harness.core.actions.command_action import (
     TangoCommandAction,
@@ -13,7 +13,7 @@ from ska_integration_test_harness.core.actions.command_action import (
 @pytest.mark.core
 class TestTangoCommandAction:
     """Unit tests for the TangoCommandAction class."""
- 
+
     def test_execute_procedure_with_args_and_kwargs(self):
         """Execute procedure with command arguments and keyword arguments."""
         device = MagicMock()
