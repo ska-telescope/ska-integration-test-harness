@@ -97,12 +97,13 @@ to check the state of the device after the command execution. To do so:
             attribute_name="obsState",
             expected_value=ObsState.IDLE,
             previous_value=ObsState.RESOURCING,
-        ),
-        # I expect the LRC to complete successfully
-        # (and I want the action to fail early if the LRC fails)
-        AssertLRCCompletion(fail_early_if_failed=True),   
+        ), 
     ).set_postconditions_timeout(60) # I can set a timeout for the action
 
+    # I can also add a post-condition to check the LRC completion
+    # (and fail early if the LRC fails)
+    command.add_lrc_completion_to_postconditions()
+    command.add_lrc_errors_to_early_stop()
 
     # DOUBT: should we really expose a AssertLRCCompletion? Wouldn't
     #        be better some kind of method like
