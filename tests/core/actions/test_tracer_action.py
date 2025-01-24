@@ -10,14 +10,14 @@ from ska_tango_testing.integration.tracer import TangoEventTracer
 from ska_integration_test_harness.core.actions.tracer_action import (
     TracerAction,
 )
-from ska_integration_test_harness.core.assertions.attribute import (
-    AssertDevicesAreInState,
-)
-from ska_integration_test_harness.core.assertions.state_changes import (
-    AssertDevicesStateChanges,
-)
 from tests.actions.utils.mock_device_proxy import create_device_proxy_mock
 from tests.actions.utils.mock_event_tracer import add_event
+
+from .utils import (
+    create_mock_assertion,
+    create_simple_assertion,
+    create_state_change_assertion,
+)
 
 
 class MockTracerAction(TracerAction):
@@ -32,50 +32,6 @@ class MockTracerAction(TracerAction):
         :return: dummy description
         """
         return "A dummy procedure that accomplishes nothing."
-
-
-def create_state_change_assertion(
-    dev_name, expected_state="ON"
-) -> AssertDevicesStateChanges:
-    """Create a state change assertion for the given device.
-
-    :param dev_name: the name of the device
-    :param expected_state: the expected state (default: "ON")
-    :return: the state change assertion
-    """
-    return AssertDevicesStateChanges(
-        [create_device_proxy_mock(dev_name)], "state", expected_state
-    )
-
-
-def create_simple_assertion(
-    dev_name, expected_state="ON"
-) -> AssertDevicesAreInState:
-    """Create a simple assertion for the given device.
-
-    :param dev_name: the name of the device
-    :param expected_state: the expected state (default: "ON")
-    :return: the state change assertion
-    """
-    return AssertDevicesAreInState(
-        [create_device_proxy_mock(dev_name)], "state", expected_state
-    )
-
-
-def create_mock_assertion(
-    duration: float = 0, fail: bool = False
-) -> MagicMock:
-    """Create a mock assertion."""
-
-    def mock_verify():
-        time.sleep(duration)
-        if fail:
-            raise AssertionError("Mock assertion failed")
-
-    mock = MagicMock()
-    mock.verify = MagicMock(side_effect=mock_verify)
-
-    return mock
 
 
 @pytest.mark.core

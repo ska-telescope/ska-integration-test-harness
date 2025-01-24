@@ -231,7 +231,7 @@ class TracerAction(SUTAction, abc.ABC):
         return self
 
     @property
-    def early_stop(self) -> Callable[[ReceivedEvent], bool]:
+    def early_stop(self) -> Callable[[ReceivedEvent], bool] | None:
         """The early stop condition for the postconditions.
 
         This early stop condition is used to stop the verification of the
