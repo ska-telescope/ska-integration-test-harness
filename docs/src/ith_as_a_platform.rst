@@ -161,6 +161,15 @@ Some further comments on this code:
   subscriptions and the events resets are done automatically, as well as
   the memorisation of the LRC ID.
 
+**Do you want to try this approach?**
+Here some suggestions for further readings:
+
+- :py:class:`~ska_integration_test_harness.extensions.actions.TangoLRCAction`
+  to learn more about the action API
+- :py:mod:`~ska_integration_test_harness.core.assertions`
+  to learn more about the class you will use to define the pre and post
+  conditions (which are the existing ones, where to start to create new ones)
+
 Usage Example 2 (intermediate): Custom action
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -355,3 +364,15 @@ Some further comments on this code:
 - the ``description`` method is a semantic description of the action, it
   is used when the action fails to provide a meaningful error message
 - the retry loop is a simple way to retry the action up to 3 times
+
+**Do you want to try this approach?**
+Here some suggestions for further readings:
+
+- :py:class:`~ska_integration_test_harness.core.actions`
+  to learn more about the action idea
+- :py:class:`~ska_integration_test_harness.core.actions.SUTAction`
+  to learn more about the base class you will subclass to create
+  custom actions
+- `TangoEventTracer Getting Started Guide <https://developer.skao.int/projects/ska-tango-testing/en/latest/guide/integration/getting_started.html>`_
+  to learn more about the event tracer, the subscription mechanism and
+  the event assertions mechanisms

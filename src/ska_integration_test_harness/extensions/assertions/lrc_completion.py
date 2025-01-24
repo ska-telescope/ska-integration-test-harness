@@ -112,7 +112,7 @@ class AssertLRCCompletion(TracerAssertion):
         Expected attribute value format:
 
         .. code-block:: python
-        
+
             (lrc_id, '[RESULT_CODE, "result message"]')
 
         :param event: the event to check.

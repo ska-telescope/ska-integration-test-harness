@@ -16,13 +16,13 @@ class SUTAction(abc.ABC):
     operations have the following common features:
 
     - the core part is a procedure (e.g.¸ a sequence of one or more commands
-    but also a sequence of generic interaction, mostly with Tango devices
-    but not necessarily)
+      but also a sequence of generic interaction, mostly with Tango devices
+      but not necessarily)
     - to be executed, they may assume some preconditions (none by default)
     - after the procedure is executed, they may guarantee some postconditions
-    (none by default)
+      (none by default)
     - they have a name (by default, the class name) and a brief semantic
-    description of the operation (by default, nothing)
+      description of the operation (by default, nothing)
     - they may be run several times, given the preconditions are satisfied
     - the user may want to log their execution
 
