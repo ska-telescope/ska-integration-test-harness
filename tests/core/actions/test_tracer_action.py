@@ -272,6 +272,27 @@ class TestTracerAction:
 
         post_cond.verify.assert_called_once()
 
+    @staticmethod
+    def test_action_postcondition_passes_if_events_happened():
+        """An action postcondition passes if the events happened."""
+        action = MockTracerAction()
+        post_cond = create_state_change_assertion("test/device/1")
+        action.add_postconditions(post_cond)
+        add_event(action.tracer, "test/device/1", "state", "ON")
+
+        action.verify_postconditions()
+
+    @staticmethod
+    def test_action_postcondition_fails_if_events_did_not_happen():
+        """An action postcondition fails if the events did not happen."""
+        action = MockTracerAction()
+        post_cond = create_state_change_assertion("test/device/1")
+        action.add_postconditions(post_cond)
+        add_event(action.tracer, "test/device/1", "state", "OFF")
+
+        with pytest.raises(AssertionError):
+            action.verify_postconditions()
+
     # -----------------------------------------------------------------------
     # Action execution (setup resets tracer and timeout)
 
