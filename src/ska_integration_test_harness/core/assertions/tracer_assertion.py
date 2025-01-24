@@ -46,7 +46,7 @@ class TracerAssertion(SUTAssertion, abc.ABC):
 
     def __init__(
         self,
-        tracer: TangoEventTracer | None = None,
+        tracer: "TangoEventTracer | None" = None,
         timeout: SupportsFloat = 0,
         early_stop: Callable[[ReceivedEvent], bool] | None = None,
     ):
@@ -83,7 +83,7 @@ class TracerAssertion(SUTAssertion, abc.ABC):
         return self._injected_tracer or self._managed_tracer
 
     @tracer.setter
-    def tracer(self, value: TangoEventTracer | None) -> None:
+    def tracer(self, value: "TangoEventTracer | None") -> None:
         """Set the tracer instance to use for the assertion.
 
         :param value: the tracer instance to use for the assertion. If you

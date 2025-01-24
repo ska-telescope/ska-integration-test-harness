@@ -29,6 +29,7 @@ class SUTAssertion(abc.ABC):
     and then the :py:meth:`verify` method to verify the assertion. Example:
 
     .. code-block:: python
+
         assertion = MyAssertion()
         assertion.setup()
         logging.info(f"Verifying: {assertion.describe_assumption()}")
