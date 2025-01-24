@@ -45,7 +45,7 @@ class TestAssertLRCCompletion:
 
         add_event(
             assertion.tracer,
-            device,
+            "test/device/1",
             "longRunningCommandResult",
             ("lrc123", '[0, "Success"]'),
         )
@@ -61,7 +61,7 @@ class TestAssertLRCCompletion:
 
         add_event(
             assertion.tracer,
-            device,
+            "test/device/1",
             "longRunningCommandResult",
             ("lrc123", '[1, "Failure"]'),
         )
@@ -82,7 +82,7 @@ class TestAssertLRCCompletion:
             ("longRunningCommandResult", ("lrc123", "invalid")),
             ("longRunningCommandResult", ("lrc123", '["invalid"]')),
         ]:
-            add_event(assertion.tracer, device, attr_name, value)
+            add_event(assertion.tracer, "test/device/1", attr_name, value)
 
         with pytest.raises(AssertionError):
             assertion.verify()

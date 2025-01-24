@@ -113,6 +113,18 @@ class AssertLRCCompletion(TracerAssertion):
         :return: True if the event is a LRC completion event with the expected
             result code, False otherwise.
         """
+        # (for safety if this method is used as standalone matcher)
+        # check the LRC ID is set
+        if self.lrc_id is None:
+            raise ValueError("No LRC ID to monitor")
+
+        # (for safety if this method is used as standalone matcher)
+        # check again device and attribute
+        if not event.has_device(self.device) or not event.has_attribute(
+            "longRunningCommandResult"
+        ):
+            return False
+
         # an attribute change event value is a 2 elements tuple
         if (
             not isinstance(event.attribute_value, tuple)
@@ -125,16 +137,19 @@ class AssertLRCCompletion(TracerAssertion):
         if lrc_id != self.lrc_id:
             return False
 
-        # the result message is a JSON array
+        # the result message is JSON encoded
         try:
             result = json.loads(result_message)
         except json.JSONDecodeError:
             return False
-        if not isinstance(result, list):
-            return False
 
-        # the result first position should exist and be the result code
-        if len(result) < 1 or not isinstance(result[0], int):
+        # the result is a list, first position should exist
+        # and be the result code
+        if (
+            not isinstance(result, list)
+            or len(result) < 1
+            or not isinstance(result[0], int)
+        ):
             return False
 
         # check if the result code is the expected one

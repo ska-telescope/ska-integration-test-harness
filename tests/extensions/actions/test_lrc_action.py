@@ -1,7 +1,5 @@
 """Unit tests for the TangoLRCAction class."""
 
-from unittest.mock import MagicMock
-
 import pytest
 from assertpy import assert_that
 from ska_control_model import ResultCode
@@ -13,11 +11,9 @@ from ska_integration_test_harness.extensions.assertions.lrc_completion import (
     AssertLRCCompletion,
 )
 from tests.actions.utils.mock_device_proxy import create_device_proxy_mock
-# from tests.actions.utils.mock_event_tracer import add_event
+from tests.actions.utils.mock_event_tracer import add_event
 
-from ...core.actions.utils import (
-    create_state_change_assertion,
-)
+from ...core.actions.utils import create_state_change_assertion
 
 
 @pytest.mark.extensions
@@ -85,4 +81,67 @@ class TestTangoLRCAction:
             "The new assertion is added to the action early stop"
         ).is_not_none()
 
+    @staticmethod
+    def test_lrc_verification_succeeds_when_lrc_completion_detected():
+        """Test that the action passes when LRC completion is detected.
 
+        (Given a LRC ID is set on the last command result)
+        """
+        device = create_device_proxy_mock("test/device/1")
+        action = TangoLRCAction(device, "MoveToOn")
+        action.add_postconditions(
+            create_state_change_assertion("test/device/1"),
+        ).add_lrc_completion_to_postconditions().add_lrc_errors_to_early_stop()
+        action.last_command_result = ("Running", ["LRC_1234"])
+
+        add_event(action.tracer, "test/device/1", "state", "ON")
+        add_event(
+            action.tracer,
+            "test/device/1",
+            "longRunningCommandResult",
+            ("LRC_1234", '[0, "ok, LRC completed"]'),
+        )
+
+        action.verify_postconditions()
+
+    @staticmethod
+    def test_lrc_verification_fails_when_lrc_error_detected():
+        """Test that the action fails when LRC error is detected.
+
+        (Given a LRC ID is set on the last command result)
+        """
+        device = create_device_proxy_mock("test/device/1")
+        action = TangoLRCAction(device, "MoveToOn")
+        action.add_postconditions(
+            create_state_change_assertion("test/device/1"),
+        ).add_lrc_completion_to_postconditions().add_lrc_errors_to_early_stop()
+        action.last_command_result = ("Running", ["LRC_1234"])
+
+        add_event(action.tracer, "test/device/1", "state", "ON")
+        add_event(
+            action.tracer,
+            "test/device/1",
+            "longRunningCommandResult",
+            ("LRC_1234", '[1, "error, LRC failed"]'),
+        )
+
+        with pytest.raises(AssertionError):
+            action.verify_postconditions()
+
+    @staticmethod
+    def test_lrc_verification_fails_when_lrc_completion_not_detected():
+        """Test that the action fails when LRC completion is not detected.
+
+        (Given a LRC ID is set on the last command result)
+        """
+        device = create_device_proxy_mock("test/device/1")
+        action = TangoLRCAction(device, "MoveToOn")
+        action.add_postconditions(
+            create_state_change_assertion("test/device/1"),
+        ).add_lrc_completion_to_postconditions().add_lrc_errors_to_early_stop()
+        action.last_command_result = ("Running", ["LRC_1234"])
+
+        add_event(action.tracer, "test/device/1", "state", "ON")
+
+        with pytest.raises(AssertionError):
+            action.verify_postconditions()

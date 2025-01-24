@@ -102,6 +102,13 @@ class TangoLRCAction(TangoCommandAction):
 
             TODO: which other error codes may represent a failure?
         """
+        if error_result_codes is None:
+            error_result_codes = [
+                ResultCode.FAILED,
+                ResultCode.REJECTED,
+                ResultCode.NOT_ALLOWED,
+            ]
+
         # NOTE: we create an instance of the assertion to monitor the LRC
         # completion, but in a negative way. We will never run verify on it,
         # but:
@@ -128,16 +135,25 @@ class TangoLRCAction(TangoCommandAction):
         if len(self._early_stop_lrc_assertions) > 0:
             self._early_stop_lrc_assertions[0].setup()
 
-    def execute_procedure(self):
-        """Run the Tango command and subscribe to the LRC completion event."""
+    def verify_postconditions(self):
+        """Verify the postconditions of the action.
 
-        super().execute_procedure()
+        But before, ensure all the LRC assertions are configured with
+        the LRC ID from the last command result.
+        """
 
         last_lrc_id = self.get_last_lrc_id()
 
-        # Point out the LRC ID to monitor
+        # Point out the LRC ID to monitor in the early stop assertions
         for lrc_error_assertion in self._early_stop_lrc_assertions:
             lrc_error_assertion.monitor_lrc(last_lrc_id)
+
+        # Point out the LRC ID to monitor in the postconditions
+        for postcondition in self.postconditions:
+            if isinstance(postcondition, AssertLRCCompletion):
+                postcondition.monitor_lrc(last_lrc_id)
+
+        return super().verify_postconditions()
 
     def get_last_lrc_id(self) -> str:
         """Extract the LRC ID from the last command result.
