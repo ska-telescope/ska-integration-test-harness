@@ -65,16 +65,22 @@ class TangoLRCAction(TangoCommandAction):
     def add_lrc_completion_to_postconditions(
         self,
         expected_result_codes: (
-            ResultCode | list[ResultCode] | None
+            "ResultCode | list[ResultCode] | None"
         ) = ResultCode.OK,
         put_at_beginning: bool = False,
     ) -> "TangoLRCAction":
         """Add a postcondition to verify the completion of the LRC.
 
+        TODO: describe the fact you can monitor a sequence of long running
+        commands
+
         :param expected_result_code: the expected result code of the LRC. If
             you set it to None, any result code is accepted. You can also
             pass a list of result codes to accept multiple result codes. By
             default, it accepts only the OK result code.
+
+            TODO: describe better the possible values for this parameter
+
         :param put_at_beginning: if True, the postcondition is added at the
             beginning of the postconditions list. By default, it is added at
             the end.
@@ -89,7 +95,7 @@ class TangoLRCAction(TangoCommandAction):
 
     def add_lrc_errors_to_early_stop(
         self,
-        error_result_codes: list[ResultCode] | None = None,
+        error_result_codes: "list[ResultCode] | None" = None,
     ) -> "TangoLRCAction":
         """Add a postcondition to verify the completion of the LRC.
 
@@ -101,6 +107,8 @@ class TangoLRCAction(TangoCommandAction):
             - ``ResultCode.NOT_ALLOWED``
 
             TODO: which other error codes may represent a failure?
+
+            TODO: explain better this parameter
         """
         if error_result_codes is None:
             error_result_codes = [

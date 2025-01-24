@@ -36,7 +36,7 @@ class AssertLRCCompletion(TracerAssertion):
         self,
         device: tango.DeviceProxy,
         expected_result_codes: (
-            ResultCode | list[ResultCode] | None
+            "ResultCode | list[ResultCode] | None"
         ) = ResultCode.OK,
         **kwargs,
     ):
@@ -108,6 +108,12 @@ class AssertLRCCompletion(TracerAssertion):
         This method is a custom matcher that will be used by the assertion to
         check if an event is a LRC completion event and, if given, check also
         if the result code is the expected one.
+
+        Expected attribute value format:
+
+        .. code-block:: python
+        
+            (lrc_id, '[RESULT_CODE, "result message"]')
 
         :param event: the event to check.
         :return: True if the event is a LRC completion event with the expected

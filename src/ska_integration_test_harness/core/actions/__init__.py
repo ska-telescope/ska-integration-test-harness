@@ -13,7 +13,7 @@ generic interaction with the SUT. It can be anything that:
 - Verifies the effects of the operations on the SUT through a set of
   postconditions.
 
-**What is an action in the ITH?** In the ITH framework, we choose to
+**How are actions implemented in the ITH?** In the ITH framework, we choose to
 define actions as a classes hierarchy. The base class for all actions
 is :py:class:`~ska_integration_test_harness.core.actions.SUTAction`.
 
