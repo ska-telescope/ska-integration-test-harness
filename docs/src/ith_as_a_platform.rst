@@ -33,136 +33,124 @@ From a Monolith to a Platform
 
 At the moment (27th January 2025),
 as you may see from other sections of the documentation,
-the ITH is essentially a big monolith that provides a set of facades,
+the ITH is essentially a large monolith that provides a set of facades,
 wrappers and actions to test TMC, integrated with CSP, SDP and the Dishes
-subsystems (in a Low environment, with software only and with potential
-presence of emulators). While this is a good starting point, it is not
-what the ITH will be long term.
+subsystems (in a Low environment, using software only and potentially
+including emulators). While this is a solid starting point, it is not
+what the ITH will be in the long term.
 
-On the long term, the ITH should be seen as a platform that provides a set
+In the long term, the ITH should be seen as a platform that provides a set
 of generic tools to integration test potentially any Tango-based system,
-covering a wide range of use cases among the SKA project. To do so, we
-intend to gradually re-write the ITH to follow the *"as a Platform"* approach,
+covering a wide range of use cases within the SKA project. To achieve this,
+we plan to gradually re-write the ITH to follow the *"as a Platform"* approach,
 as described in the book `Team Topologies <https://teamtopologies.com/>`_.
 
-Essentially, the *as a Platform* means that the ITH should be seen as a
-set of shared tools, services and capabilities that all the teams can use
-to work better and faster. In this specific context, the **ITH as a Platform**
-should be seen as an **Object-Oriented Framework** that all the teams will
-use, compose and extend to create their own integration test harnesses for
-their specific System Under Test (SUT). What distinguishes the *as a Platform*
-approach from the monolith is that:
+Essentially, *as a Platform* means the ITH should be considered a
+set of shared tools, services and capabilities that all teams can use
+to work more effectively and efficiently. In this specific context, the
+**ITH as a Platform** should be considered an **Object-Oriented Framework**
+that all teams can use, compose and extend to create their own integration
+test harnesses for their specific System Under Test (SUT). What sets the
+*as a Platform* approach apart from the monolith is that:
 
-1. **the teams will be able to self-service** and setup an instance
-   of the ITH for their SUT without too much support;
-2. the ITH will provide an **abstraction to complexity**, both in terms of
-   building blocks that permit to do complex operations with few lines of
-   code, but also providing a general structure that can be extended
-   and customised;
+1. **teams will be able to self-service** and set up an instance
+   of the ITH for their SUT without requiring extensive support;
+2. the ITH will provide an **abstraction of complexity**, both in terms of
+   building blocks that enable complex operations with minimal code, and by
+   offering a general structure that can be extended and customised;
 3. through a **continuous feedback loop**, the ITH will evolve according
-   to the needs of the teams (through the satisfaction of common needs
-   with new built-in blocks, but also making making the ITH elastic enough
-   where needed);
-4. the ITH will be centred around the **Developer Experience (DX)**,
-   putting as priority the ease of use, the ease of writing new code, the ease
-   of writing new tests and the ease of debugging.
+   to the needs of the teams (by satisfying common needs with new built-in
+   blocks, while also ensuring the ITH is elastic enough where required);
+4. the ITH will focus on **Developer Experience (DX)**, prioritising ease
+   of use, writing new code, creating new tests, and debugging.
 
 The 3+1 Layers Structure
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ITH as a Platform will be structured in 3+1 layers:
 
-1. At the center, we can find a **Core** layer, which is the heart of the
+1. At the centre, there is the **Core** layer, which is the heart of the
    ITH as a Platform. The Core layer provides the basic building blocks
    to create wrappers, configurations, actions, etc. By itself,
-   the Core will be really generic and, in fact, we want to build it in such
-   a way it doesn't even assume that what is tested is a telescope or a
-   SKA subsystem, but it will be generic enough to integration test any
-   Tango-based system. The Core layer will be the most stable and the most
-   unit tested part of the ITH as a Platform. The Core layer will
-   stay in the
+   the Core will be highly generic, and it is being designed so that it
+   does not assume the SUT is a telescope or an SKA subsystem. Instead, it
+   will be versatile enough to integration test any Tango-based system.
+   The Core layer will be the most stable and thoroughly unit-tested part
+   of the ITH as a Platform. It will reside in the
    `ska-integration-test-harness <https://gitlab.com/ska-telescope/ska-integration-test-harness/>`_
-   repository and will be provided as the homonymous Python package.
-   On short-medium term, the development and the maintenance is carried out
-   by Emanuele Lena, Giorgio Brajnik and Verity Allan. On the long term,
-   it's still to be defined how the Core layer will be maintained and
-   developed.
+   repository and will be distributed as a Python package of the same name.
+   In the short to medium term, development and maintenance are handled by
+   Emanuele Lena, Giorgio Brajnik, and Verity Allan. In the long term,
+   the maintenance and development strategy is yet to be defined.
 
-2. Around the Core, we can find the **Extensions** layer, which is the
-   layer where the building blocks are composed to create the specific
-   actions, assertions, configurations, etc. needed to integration test
-   one or more specific subsystems. Contrary to the Core, the Extensions
-   will be: 1) developed and maintained by the teams (according to their
-   needs), 2) decentralised (each team will put their extensions in a suitable
-   location, which likely will simply be the one where their tests are
-   located), 3) dynamic, volatile and easy to modify (the teams should be
-   able to easily adapt their extensions to the changes in the SUT).
+2. Surrounding the Core is the **Extensions** layer, where building blocks
+   are composed to create specific actions, assertions, configurations,
+   etc., tailored to integration testing one or more specific subsystems.
+   Unlike the Core, the Extensions will: 1) be developed and maintained
+   by individual teams as needed, 2) be decentralised (each team will
+   store their extensions in appropriate locations, likely alongside
+   their tests), and 3) be dynamic, flexible and easily adaptable to
+   changes in the SUT.
 
-3. Around the Extensions, we can find the **Tests** layer, which represents
-   essentially the component, integration and system level tests the
-   teams will write to test their SUT. We specify that the Tests layer
-   is distinct from the Extensions layer because the hope that thanks to the
-   ITH Core and Extensions, the teams will be able to write readable, semantic,
-   re-usable and abstract enough tests. The Tests layer so may include all 
-   the Gherkin definitions, the pytest implementations, the test fixtures,
-   but also potentially some manual Jupyter test notebooks. Potentially,
-   many tests may re-use the same ITH Extension.
+3. Surrounding the Extensions is the **Tests** layer, representing
+   the component, integration and system-level tests teams will write
+   to test their SUT. The Tests layer is distinct from the Extensions
+   layer because it is hoped that, thanks to the ITH Core and Extensions,
+   teams will be able to write readable, semantic, reusable, and
+   abstract tests. The Tests layer may include Gherkin definitions, pytest
+   implementations, test fixtures, and possibly manual Jupyter test
+   notebooks. Many tests may reuse the same ITH Extensions.
 
-As a plus, we can also consider a **Common Extensions** layer, which is
-essentially a set of extensions that may be useful for many teams and
-that are not strictly related to a specific SUT. Common Extensions are supposed
-to be building blocks that are generic enough to be used in almost any
-SKA project, but because they assume the SUT is a piece of a telescope in
-the SKA context, they cannot be part of the Core layer. An example can be
-a command call action that is capable of handling Long Running Commands (LRC)
-according to the SKA conventions. The Common Extensions layer, at the moment,
-will be provided together with the Core in
+Additionally, there is the **Common Extensions** layer, which comprises
+extensions that may be useful for multiple teams and are not tied to a
+specific SUT. Common Extensions are intended as building blocks generic
+enough for almost any SKA project. However, as they assume the SUT is part
+of a telescope within the SKA context, they cannot be included in the
+Core layer. An example might be a command call action capable of handling
+Long Running Commands (LRC) in line with SKA conventions. Currently, the
+Common Extensions layer will be distributed alongside the Core in
 the `ska-integration-test-harness <https://gitlab.com/ska-telescope/ska-integration-test-harness/>`_.
-Contributions to this layer are welcome, provided they are generic enough
-and they follow the quality and unit-testing standards of the Core layer.
+Contributions to this layer are welcome, provided they meet the
+Core layer’s quality and unit-testing standards.
 
-Development process
+Development Process
 ^^^^^^^^^^^^^^^^^^^^
 
-The development of this new structure will be gradual and will be done
-accordingly to the needs of the teams. In particular, right now we
-are working with the CREAM team to implement Core and Common Extensions
-suitable for testing *CSP.LMC* in Low. 
+The development of this new structure will be incremental and driven by
+the needs of the teams. At present, we are collaborating with the CREAM
+team to implement a Core and Common Extensions suitable for testing
+*CSP.LMC* in Low.
 
 ITH Components and Building Blocks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ITH as a Platform is composed by a set of building blocks that should
-cover common needs of the teams. At the moment, the ITH as a Platform is still
-in development and the building blocks are not necessarily yet defined
-entirely. However, as you can see also in the `Miro board
-<https://miro.com/app/board/uXjVL7Eop40=/>`_, thanks to the experience with
-TMC and the collaboration with the CREAM team, we have already identified
-the following key building blocks:
+The ITH as a Platform consists of a set of building blocks designed to
+address common needs across teams. The ITH as a Platform is still in
+development, so its building blocks are not yet fully defined. However,
+based on our experience with TMC and our collaboration with the CREAM
+team, we have identified the following key building blocks:
 
-- **Actions and Assertions**, as the basic building blocks to define the
-  interactions with the SUT in a structured way and the consequent
-  synchronisation logic
-- **Wrappers**, as a way to group together sets of Tango devices that
-  represent a subsystem and to encapsulate the logic to interact with them
-- **Configurations**, as a way to dynamically set up a correct instance
-  of your Test Harness, accordingly to what specific SUT you are testing
+- **Actions and Assertions**: Basic building blocks to define structured
+  interactions with the SUT and the necessary synchronisation logic
+- **Wrappers**: A means to group sets of Tango devices representing a
+  subsystem and encapsulate the logic for interacting with them
+- **Configurations**: A method for dynamically setting up a correct
+  Test Harness instance according to the specific SUT being tested
 
-Further potential common concepts may be:
+Potential additional concepts may include:
 
-- **Wrapper to Emulators**, as a way to interact with emulators in a
-  structured way
-- **Inputs**, as a way to define the input data for the actions
-- **Command factories**, as a way to systematically produce actions to
-  interact with the SUT
-- **Setup and Reset Procedures**, as a systematic way to set up and reset
-  the entire SUT or parts of it
+- **Wrappers for Emulators**: Structured methods for interacting with emulators
+- **Inputs**: Defining input data for actions
+- **Command Factories**: Systematic generation of actions for interacting
+  with the SUT
+- **Setup and Reset Procedures**: Systematic methods for setting up and
+  resetting the entire SUT or its parts
 
-A further element that is not strictly a building block, but that is
-important to mention, is the **Tango Event Tracer** and its assertions,
-which are the basic mechanism from
-`SKA Tango Testing <https://developer.skao.int/projects/ska-tango-testing/en/latest/>`_
-on which the ITH as a Platform is based.
+An additional element, not strictly a building block but worth mentioning,
+is the **Tango Event Tracer** and its assertions. This is a fundamental
+mechanism provided by
+`SKA Tango Testing <https://developer.skao.int/projects/ska-tango-testing/en/latest/>`_,
+which serves as the basis for the ITH as a Platform.
 
 
 Actions, Assertions and Synchronisation
