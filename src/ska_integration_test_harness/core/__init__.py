@@ -16,14 +16,14 @@ features:
 
 The core is composed of the following main components:
 
-- :py:mod:`~ska_integration_test_harness.core.actions`: a set of classes
+- :py:mod:`ska_integration_test_harness.core.actions`: a set of classes
   that represent the actions that can be performed on your system and the
   consequent synchronisation. The concept
   of action includes both very generic procedures and more specific ones
   (e.g., like a command execution). You can use the actions as building
   blocks to represent the interactions with your system in a structured way.
 
-- :py:mod:`~ska_integration_test_harness.core.assertions`: a set of classes
+- :py:mod:`ska_integration_test_harness.core.assertions`: a set of classes
   that represent verification procedures on your system. The assertions may
   be simple checks (e.g., a set of devices are in a certain state) or more
   complex event-based checks. You can use the assertions to in actions
@@ -37,7 +37,7 @@ so you can:
 - extend the base or the intermediate classes to create your own custom
   pieces of code
 
-In :py:mod:`~ska_integration_test_harness.core` you can find some already
+In :py:mod:`ska_integration_test_harness.extensions` you can find some already
 implemented and tested extensions that may be useful for many
 SKA testing contexts.
 
