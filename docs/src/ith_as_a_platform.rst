@@ -165,36 +165,33 @@ the moment, read:
 Usage Example 1 (simple): Command + LRC & State Synchronisation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In this first simple example we will show how to use the action mechanism
-with the already provided blocks to execute a simple **Tango command call**,
-the consequent **LRC completion check** and the **state synchronisation**.
+In this first simple example, we demonstrate how to use the action mechanism
+with the provided blocks to execute a basic **Tango command call**, the
+subsequent **LRC completion check**, and the **state synchronisation**.
 
-Let's assume we have a Tango device and that we want to send it a command.
-Let's also assume that the command 1) is a Long Running Command (LRC)
-and 2) will change the state of some other devices to a particular state.
-Let's say we want to be sure
-the command is executed correctly (without errors) and that the desired states
-are reached. To do so, we proceed the following way:
+Assume we have a Tango device and want to send it a command. Also, assume
+that the command 1) is a Long Running Command (LRC) and 2) will cause the
+state of some other devices to change to a particular state. Suppose we want
+to ensure that the command executes correctly (without errors) and that the
+desired states are reached. To achieve this, we proceed as follows:
 
-1. we define the command as an instance of
-   :py:class:`ska_integration_test_harness.extensions.actions.TangoLRCAction`
-2. we define a pre condition an instance of
+1. Define the command as an instance of
+   :py:class:`ska_integration_test_harness.extensions.actions.TangoLRCAction`.
+2. Define a pre-condition using an instance of
    :py:class:`ska_integration_test_harness.core.assertions.AssertDevicesAreInState`
-   to check the initial state of the devices and be sure the action is executed
-   from a valid initial state
-3. we define the expected state transitions as post conditions using instances
-   of :py:class:`ska_integration_test_harness.core.assertions.AssertDevicesStateChanges`
-4. we add some directives to impose a timeout, to synchronise also the LRC
-   completion and to fail early if some LRC error is detected
-5. finally, given the action object enriched with all those directives,
-   we execute it
-
+   to verify the initial state of the devices and ensure the action executes
+   from a valid initial state.
+3. Define the expected state transitions as post-conditions using instances
+   of :py:class:`ska_integration_test_harness.core.assertions.AssertDevicesStateChanges`.
+4. Add directives to impose a timeout, synchronise LRC completion, and fail
+   early if an LRC error is detected.
+5. Finally, execute the enriched action object with all the directives applied.
 
 .. code-block:: python
 
     import tango
     import json
-    
+
     from ska_integration_test_harness.extensions.actions import (
         TangoLRCAction
     )
@@ -206,7 +203,7 @@ are reached. To do so, we proceed the following way:
     # The device where the command will be sent
     target_device = tango.DeviceProxy("tmc-low/centralnode/0")
 
-    # the devices that are expected to change state as result of the command
+    # The devices expected to change state as a result of the command
     subarray_devices = [
         tango.DeviceProxy("tmc-low/subarray/01"),
         tango.DeviceProxy("csp-low/subarray/01"),
@@ -214,50 +211,45 @@ are reached. To do so, we proceed the following way:
         tango.DeviceProxy("mccs/subarray/01"),
     ]
 
-
     # 1. Create an instance of an action that sends a command to a device
     action = TangoLRCAction(
         target_device=target_device,
         command_name="AssignResources",
         command_input=json.read("low/input/assign_resources.json"),
     )
-    
-    # 2. Through pre-conditions I can specify the expected initial state
-    # for the action to be run successfully. It's totally optional
-    # and in many cases you will not need them (if not to have
-    # "stronger" tests)
+
+    # 2. Use pre-conditions to specify the expected initial state
+    # for the action to execute successfully. This is optional and
+    # often unnecessary, except for ensuring "stronger" tests.
     action.add_preconditions(
-        # I expect the devices to be in the EMPTY state
+        # Expect the devices to be in the EMPTY state
         AssertDevicesAreInState(
             devices=subarray_devices,
             attribute_name="obsState",
             expected_value=ObsState.EMPTY,
         ),
     )
-    
-    # 3. Through post-conditions I can specify the expected state changes
-    # after the action is executed.
+
+    # 3. Use post-conditions to specify the expected state changes
+    # after the action executes.
     action.add_postconditions(
-        # I expect a state change in the devices to the RESOURCING state
+        # Expect a state change in the devices to the RESOURCING state
         AssertDevicesStateChanges(
             devices=subarray_devices,
             attribute_name="obsState",
             expected_value=ObsState.RESOURCING,
         ),
-        # I expect a state change in the devices to the IDLE state
+        # Expect a state change in the devices to the IDLE state
         AssertDevicesStateChanges(
             devices=subarray_devices,
             attribute_name="obsState",
             expected_value=ObsState.IDLE,
             previous_value=ObsState.RESOURCING,
-        ), 
+        ),
     )
 
-    # 4. Through some further directives I impose the fact that I want
-    # to synchronise the LRC completion and that I want to fail early
-    # if some LRC error is detected. I set also a timeout for the action
-    # to define the maximum time the action can take to complete (if no
-    # LRC error is detected)
+    # 4. Add directives to synchronise LRC completion, fail early on LRC
+    # errors, and set a timeout for the action.
     action.add_lrc_completion_to_postconditions()
     action.add_lrc_errors_to_early_stop()
     action.set_timeout(30)
@@ -267,64 +259,56 @@ are reached. To do so, we proceed the following way:
 
 Some further comments on this code:
 
-- The pre-conditions will be verified before the command is called and
-  if they fail an ``AssertionError`` is raised the command will not be
-  called.
-- The post-conditions will be verified after the command is called, they will
-  be verified in the order they are added and if one fails the others will not
-  be verified. Concretely, the verification happens using a
+- The pre-conditions are verified before the command is called. If they fail,
+  an ``AssertionError`` is raised, and the command will not be called.
+- The post-conditions are verified after the command is called. They are
+  verified in the order they are added, and if one fails, subsequent ones
+  are not checked. Verification is performed using a
   :py:class:`~ska_tango_testing.integration.TangoEventTracer` to subscribe to
-  the events and check the state changes using assertions.
-- The timeout determines the maximum wait time for
-  the post-conditions to be verified (it doesn't affect the pre-conditions
-  or the command call).
-- The LRC completion check is itself a post-condition, so it will be
-  verified after the command is called and after the other post-conditions
-  are verified, within the same shared timeout. Potentially you can specify
-  which result codes are considered as successful completions. Concretely, the
-  verification happens subscribing to the ``longRunningCommandResult`` state
-  change event and checking the result code for a the stored LRC ID.
-  The timeout is shared also with this post-condition.
-- The LRC error can be seen as a sort of "sentinel", that monitor the
-  events and stops the post-conditions verification early if a
-  LRC error is detected. Potentially you can specify which result codes
-  are considered as errors. If you use this method, during the evaluation
-  of the post-conditions, if an error is detected, an ``AssertionError`` is
-  raised and the post-conditions verification is stopped before the timeout
-  is reached.
-- The synchronisation is internally managed using a
-  :py:class:`ska_tango_testing.integration.TangoEventTracer`; all the
-  subscriptions and the events resets are done automatically, as well as
-  the memorisation of the LRC ID.
-- Potentially, given the pre-conditions are satisfied, an action can be run
-  multiple times. The post-conditions tracking and the timeout are reset
-  every time the action is executed.
+  events and check state changes through assertions.
+- The timeout specifies the maximum wait time for post-conditions to be
+  verified. It does not affect pre-conditions or the command call.
+- The LRC completion check is a post-condition. It is verified after the
+  command is called and after other post-conditions are checked, all within
+  the same timeout. You can specify which result codes count as successful
+  completions. Verification subscribes to the ``longRunningCommandResult``
+  state change event and checks the result code for the stored LRC ID.
+- The LRC error acts as a "sentinel," monitoring events and halting
+  post-condition verification early if an error is detected. You can specify
+  which result codes are treated as errors. If an error is detected, an
+  ``AssertionError`` is raised, stopping verification before the timeout.
+- Synchronisation is managed internally by the
+  :py:class:`ska_tango_testing.integration.TangoEventTracer`. All
+  subscriptions and event resets are handled automatically, including storing
+  the LRC ID.
+- Provided the pre-conditions are satisfied, an action can be executed
+  multiple times. Post-condition tracking and timeouts are reset with each
+  execution.
 
-Resuming, the possible outcomes of an action execution are the following:
+In summary, the possible outcomes of an action execution are as follows:
 
-1. the pre-conditions are satisfied and the post-conditions too (LRC successful
-   completion included) --> the action is successful;
-2. a pre-condition fails and the action procedure (in this case the command
-   call) is not executed --> an ``AssertionError`` is raised;
-3. the pre-conditions are satisfied, the action procedure is executed, but
-   some event defined by the post-conditions is not detected (LRC completion
-   included) --> The given timeout is waited and ``AssertionError`` is raised;
-4. the pre-conditions are satisfied, the action procedure is executed, but
-   a LRC error is detected --> an ``AssertionError`` is raised before the
-   timeout is reached or all the post-conditions are verified;
-5. the pre-conditions are satisfied, the action procedure is executed, but
-   some failure occurred during the action procedure (e.g. a command call
-   error) --> the error is not captured and the action execution will simply
-   fail as it would do in a normal Python code.
+1. Pre-conditions and post-conditions (including LRC completion) are satisfied:
+   The action is successful.
+2. A pre-condition fails: The action procedure (e.g., the command call) is
+   not executed, and an ``AssertionError`` is raised.
+3. Pre-conditions are satisfied, but some post-condition (including LRC
+   completion) fails: The timeout expires, and an ``AssertionError`` is raised.
+4. Pre-conditions are satisfied, but an LRC error is detected: An
+   ``AssertionError`` is raised before the timeout or all post-conditions
+   are verified.
+5. Pre-conditions are satisfied, but the action procedure encounters an error
+   (e.g., a command call error): The error is uncaptured, and the action fails
+   like normal Python code.
 
-**Do you want to try this approach?**
-Here some suggestions for further readings:
+**Would you like to try this approach?**
+Here are some suggestions for further reading:
 
 - :py:class:`~ska_integration_test_harness.extensions.actions.TangoLRCAction`
-  to learn more about the action API
+  for details on the action API
 - :py:mod:`~ska_integration_test_harness.core.assertions`
-  to learn more about the class you will use to define the pre and post
-  conditions (which are the existing ones, where to start to create new ones)
+  for information on defining pre- and post-conditions, including how to create
+  new ones
+
 
 Usage Example 2 (intermediate): Custom action
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
