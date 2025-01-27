@@ -7,6 +7,8 @@ Temporary documentation for the ITH as a Platform idea. This document
 will be used to collect ideas and show example of how the ITH as a Platform
 can be used and extended.
 
+- TODO: define the "as a Platform" approach with citation to Team Topologies
+  (GB suggestion)
 - TODO: introduce the idea of the ITH as a Platform
 - TODO: introduce the parts of the generic core
 
@@ -44,23 +46,24 @@ with the already provided blocks to execute a simple **Tango command call**,
 the consequent **LRC completion check** and the **state synchronisation**.
 
 Let's assume we have a Tango device and that we want to send it a command.
-Let's also assume
-that command 1) is a Long Running Command (LRC) and 2) will change the state
-of some other devices to a particular state. Let's say we want to be sure
+Let's also assume that the command 1) is a Long Running Command (LRC)
+and 2) will change the state of some other devices to a particular state.
+Let's say we want to be sure
 the command is executed correctly (without errors) and that the desired states
 are reached. To do so, we proceed the following way:
 
-1. we define the command as a
+1. we define the command as an instance of
    :py:class:`ska_integration_test_harness.extensions.actions.TangoLRCAction`
-2. we define a pre condition
+2. we define a pre condition an instance of
    :py:class:`ska_integration_test_harness.core.assertions.AssertDevicesAreInState`
    to check the initial state of the devices and be sure the action is executed
    from a valid initial state
-3. we define the expected state transitions as post conditions using the class
-   :py:class:`ska_integration_test_harness.core.assertions.AssertDevicesStateChanges`
+3. we define the expected state transitions as post conditions using instances
+   of :py:class:`ska_integration_test_harness.core.assertions.AssertDevicesStateChanges`
 4. we add some directives to impose a timeout, to synchronise also the LRC
    completion and to fail early if some LRC error is detected
-5. given the action object enriched with all those directives, we execute it
+5. finally, given the action object enriched with all those directives,
+   we execute it
 
 
 .. code-block:: python
@@ -89,7 +92,7 @@ are reached. To do so, we proceed the following way:
 
 
     # 1. Create an instance of an action that sends a command to a device
-    command = TangoLRCAction(
+    action = TangoLRCAction(
         target_device=target_device,
         command_name="AssignResources",
         command_input=json.read("low/input/assign_resources.json"),
@@ -99,7 +102,7 @@ are reached. To do so, we proceed the following way:
     # for the action to be run successfully. It's totally optional
     # and in many cases you will not need them (if not to have
     # "stronger" tests)
-    command.add_preconditions(
+    action.add_preconditions(
         # I expect the devices to be in the EMPTY state
         AssertDevicesAreInState(
             devices=subarray_devices,
@@ -110,7 +113,7 @@ are reached. To do so, we proceed the following way:
     
     # 3. Through post-conditions I can specify the expected state changes
     # after the action is executed.
-    command.add_postconditions(
+    action.add_postconditions(
         # I expect a state change in the devices to the RESOURCING state
         AssertDevicesStateChanges(
             devices=subarray_devices,
@@ -131,35 +134,64 @@ are reached. To do so, we proceed the following way:
     # if some LRC error is detected. I set also a timeout for the action
     # to define the maximum time the action can take to complete (if no
     # LRC error is detected)
-    command.add_lrc_completion_to_postconditions()
-    command.add_lrc_errors_to_early_stop()
-    command.set_timeout(30)
+    action.add_lrc_completion_to_postconditions()
+    action.add_lrc_errors_to_early_stop()
+    action.set_timeout(30)
 
     # 5. Execute the action
-    command.execute()
+    action.execute()
 
 Some further comments on this code:
 
 - The pre-conditions will be verified before the command is called and
-  if they fail the command will not be executed
+  if they fail an ``AssertionError`` is raised the command will not be
+  called.
 - The post-conditions will be verified after the command is called, they will
   be verified in the order they are added and if one fails the others will not
-  be verified.
+  be verified. Concretely, the verification happens using a
+  :py:class:`~ska_tango_testing.integration.TangoEventTracer` to subscribe to
+  the events and check the state changes using assertions.
 - The timeout determines the maximum wait time for
   the post-conditions to be verified (it doesn't affect the pre-conditions
-  or the command call)
+  or the command call).
 - The LRC completion check is itself a post-condition, so it will be
   verified after the command is called and after the other post-conditions
   are verified, within the same shared timeout. Potentially you can specify
-  which result codes are considered as successful completions.
+  which result codes are considered as successful completions. Concretely, the
+  verification happens subscribing to the ``longRunningCommandResult`` state
+  change event and checking the result code for a the stored LRC ID.
+  The timeout is shared also with this post-condition.
 - The LRC error can be seen as a sort of "sentinel", that monitor the
   events and stops the post-conditions verification early if a
   LRC error is detected. Potentially you can specify which result codes
-  are considered as errors.
+  are considered as errors. If you use this method, during the evaluation
+  of the post-conditions, if an error is detected, an ``AssertionError`` is
+  raised and the post-conditions verification is stopped before the timeout
+  is reached.
 - The synchronisation is internally managed using a
   :py:class:`ska_tango_testing.integration.TangoEventTracer`; all the
   subscriptions and the events resets are done automatically, as well as
   the memorisation of the LRC ID.
+- Potentially, given the pre-conditions are satisfied, an action can be run
+  multiple times. The post-conditions tracking and the timeout are reset
+  every time the action is executed.
+
+Resuming, the possible outcomes of an action execution are the following:
+
+1. the pre-conditions are satisfied and the post-conditions too (LRC successful
+   completion included) --> the action is successful;
+2. a pre-condition fails and the action procedure (in this case the command
+   call) is not executed --> an ``AssertionError`` is raised;
+3. the pre-conditions are satisfied, the action procedure is executed, but
+   some event defined by the post-conditions is not detected (LRC completion
+   included) --> The given timeout is waited and ``AssertionError`` is raised;
+4. the pre-conditions are satisfied, the action procedure is executed, but
+   a LRC error is detected --> an ``AssertionError`` is raised before the
+   timeout is reached or all the post-conditions are verified;
+5. the pre-conditions are satisfied, the action procedure is executed, but
+   some failure occurred during the action procedure (e.g. a command call
+   error) --> the error is not captured and the action execution will simply
+   fail as it would do in a normal Python code.
 
 **Do you want to try this approach?**
 Here some suggestions for further readings:
@@ -186,8 +218,8 @@ we can subscribe to the ``telescopeState`` event and that we consider the
 devices reachable when they are in one of the following states:
 ``ON``, ``OFF``, ``STAND_BY``, but the subscription must be done **after** the
 activation of the controller device (otherwise it will not work). Finally,
-let's say this is a setup procedure and for some reason it is flaky, and
-we want to retry it up to 3 times.
+let's say this is a setup procedure and because t is flaky, and
+we want to retry it up to 3 times with exponential timeouts.
 
 To do so, we proceed the following way:
 
@@ -318,6 +350,7 @@ To do so, we proceed the following way:
 
     # ---------------------------------------------------------------------
     # Step 5: create an action instance and retry it up to 3 times
+    # with exponential timeouts
     
     action = ActivateSubsystem(
         controller_device=tango.DeviceProxy("csp-low/centralnode/01"),
@@ -325,7 +358,7 @@ To do so, we proceed the following way:
             tango.DeviceProxy("csp-low/subarray/01"),
             tango.DeviceProxy("csp-low/subarray/02"),
         ],
-        timeout=15
+        timeout=16,
     )
 
     errors = []
@@ -336,6 +369,7 @@ To do so, we proceed the following way:
         except AssertionError as e:
             logger.warning(f"Attempt {i+1} failed: {e}")
             errors.append(e)
+            action.timeout *= 2 # exponential backoff
     else:
         raise AssertionError(
             "The action failed after 3 attempts. Errors:\n" + 
