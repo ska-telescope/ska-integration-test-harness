@@ -309,40 +309,38 @@ Here are some suggestions for further reading:
   for information on defining pre- and post-conditions, including how to create
   new ones
 
-
 Usage Example 2 (intermediate): Custom action
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Not all the actions are simple command calls, and also not all action
-synchronisation logic is standard. In this second example we will show how
-to create a custom action that operates on a device Tango attribute to
-configure a set of devices to be reachable (and waits for them to be).
+Not all actions are simple command calls, and not all action
+synchronisation logic is standard. In this second example, we demonstrate
+how to create a custom action that operates on a Tango device attribute to
+configure a set of devices to be reachable (and waits for them to become so).
 
-Let's assume we have a controller device that has to be activated to make
-it and some other devices reachable. Let's say that the controller device
-has an attribute ``adminMode`` that can be set to ``ONLINE`` to activate
-the devices. Let's also say that to detect the reachability of the devices
-we can subscribe to the ``telescopeState`` event and that we consider the
-devices reachable when they are in one of the following states:
-``ON``, ``OFF``, ``STAND_BY``, but the subscription must be done **after** the
-activation of the controller device (otherwise it will not work). Finally,
-let's say this is a setup procedure and because t is flaky, and
-we want to retry it up to 3 times with exponential timeouts.
+Let us assume we have a controller device that needs to be activated to make
+itself and other devices reachable. The controller device has an attribute
+``adminMode`` that can be set to ``ONLINE`` to activate the devices. Assume
+that to detect the reachability of these devices, we can subscribe to the
+``telescopeState`` event and consider the devices reachable when they are in
+any of the following states: ``ON``, ``OFF``, or ``STAND_BY``. However, the
+subscription must occur **after** the controller device is activated
+(otherwise it will not work). Finally, let us say this is a setup procedure
+that is prone to failure, so we want to retry it up to 3 times with
+exponential timeouts.
 
-To do so, we proceed the following way:
+To achieve this, we proceed as follows:
 
-1. We define a custom action subclassing the base class
+1. Define a custom action by subclassing the base class
    :py:class:`ska_integration_test_harness.core.actions.SUTAction`, which
-   if essentially an empty shell
-2. We override the ``execute_procedure`` method to implement the custom
-   activation logic (in this case, setting the ``adminMode`` attribute)
-3. We override the ``verify_postconditions`` method to implement the custom
+   is essentially an empty shell.
+2. Override the ``execute_procedure`` method to implement the custom
+   activation logic (in this case, setting the ``adminMode`` attribute).
+3. Override the ``verify_postconditions`` method to implement the custom
    synchronisation logic (in this case, subscribing to the event and waiting
-   for the devices to be reachable). We override also the ``setup`` method
-   to clean up the event tracer and permit multiple runs
-4. Provide a semantic description of the action (and use it when failing)
-5. Create an action instance and run it with a retry loop
-
+   for the devices to be reachable). Also, override the ``setup`` method to
+   clean up the event tracer and allow multiple runs.
+4. Provide a semantic description of the action (used in failure messages).
+5. Create an action instance and run it within a retry loop.
 
 .. code-block:: python
 
@@ -352,7 +350,7 @@ To do so, we proceed the following way:
     from ska_tango_testing.integration import TangoEventTracer
     from <...> import AdminMode
 
-    # Step 1: subclass the base class SUTAction to create a custom action
+    # Step 1: Subclass the base class SUTAction to create a custom action
     # from scratch.
     class ActivateSubsystem(SUTAction):
         """Activate a subsystem and ensure it is reachable."""
@@ -367,18 +365,17 @@ To do so, we proceed the following way:
         ):  
             """Initialise the action.
 
-            :param controller_device: the device that has to be activated
-            :param other_devices: the devices that have to be reachable
-            :param timeout: the maximum time to wait for the devices
-                to be reachable
-            :param kwargs: additional parameters, see the base class
+            :param controller_device: The device that must be activated.
+            :param other_devices: The devices that must be reachable.
+            :param timeout: The maximum time to wait for the devices
+                to become reachable.
+            :param kwargs: Additional parameters. See the base class
                 :py:class:`ska_integration_test_harness.core.actions.SUTAction`
-                for more details. 
+                for further details.
 
             """
-            # we always call the super method and pass the kwargs. This is a
-            # trick to allow retro-compatibility with the base class in the
-            # required parameters.
+            # Always call the super method and pass kwargs. This ensures
+            # compatibility with the base class and its required parameters.
             super().__init__(**kwargs)
 
             self.controller_device = controller_device
@@ -387,22 +384,22 @@ To do so, we proceed the following way:
             
             self.tracer = TangoEventTracer()
 
-        # (I am not interested in pre-conditions and I can simply skip them)
+        # (Pre-conditions are unnecessary here and can be skipped.)
 
         # ---------------------------------------------------------------------
-        # Step 2: implement the custom activation logic
+        # Step 2: Implement the custom activation logic
         def execute_procedure(self):
             self.controller_device.adminMode = AdminMode.ONLINE
 
         # ---------------------------------------------------------------------
-        # Step 3: implement the custom synchronisation logic (and clean up)
+        # Step 3: Implement the custom synchronisation logic (and clean up)
 
         def verify_postconditions(self):
-            # (always good to call the super method)
+            # (Always good practice to call the super method)
             super().verify_postconditions()
 
-            # Subscribe to the telescopeState event (deferred, normally
-            # I would do this in the setup method)
+            # Subscribe to the telescopeState event (deferred; usually
+            # done in the setup method)
             self.tracer.subscribe_event(self.controller_device, "telescopeState")
             for device in self.other_devices:
                 self.tracer.subscribe_event(device, "telescopeState")
@@ -410,12 +407,10 @@ To do so, we proceed the following way:
             # Wait for the devices to be reachable
             assertpy_context = assert_that(tracer).described_as(
                 self.description() + 
-                " Controller device is supposed to be reachable."
+                " The controller device must be reachable."
             ).within_timeout(self.timeout).has_change_event_occurred(
                 self.controller_device, "telescopeState",
-                # let's say that the device is reachable when it is in one
-                # of the following states (just an example to show how
-                # arbitrary complex the post-condition can be)
+                # Define reachability based on these states
                 custom_matcher=lambda event: event.attribute_value in [
                     tango.DevState.ON,
                     tango.DevState.OFF,
@@ -426,28 +421,28 @@ To do so, we proceed the following way:
             for device in self.other_devices:
                 assertpy_context.described_as(
                     self.description() + 
-                    f" Device {device.dev_name()} is supposed to be reachable."
+                    f" Device {device.dev_name()} must be reachable."
                 ).has_change_event_occurred(
                     device, "telescopeState", tango.DevState.ON
                 )
 
-            # Ensure admin mode now is online for all devices
+            # Verify all devices are now in the ONLINE admin mode
             for device in self.other_devices + [self.controller_device]:
                 assert_that(device.adminMode).described_as(
                     self.description() + 
-                    f" {device.dev_name()}.adminMode is supposed to be online."
+                    f" {device.dev_name()}.adminMode must be ONLINE."
                 ).is_equal_to(AdminMode.ONLINE)
 
         def setup(self):
-            # (always good to call the super method)
+            # (Always good practice to call the super method)
             super().setup()
 
-            # clean up the tracer
+            # Clean up the tracer
             self.tracer.unsubscribe_all()
             self.tracer.clear_events()
 
         # ---------------------------------------------------------------------
-        # Step 4: provide a semantic description of the action
+        # Step 4: Provide a semantic description of the action
 
         def description(self):
             return (
@@ -457,7 +452,7 @@ To do so, we proceed the following way:
             )
 
     # ---------------------------------------------------------------------
-    # Step 5: create an action instance and retry it up to 3 times
+    # Step 5: Create an action instance and retry it up to 3 times
     # with exponential timeouts
     
     action = ActivateSubsystem(
@@ -477,7 +472,7 @@ To do so, we proceed the following way:
         except AssertionError as e:
             logger.warning(f"Attempt {i+1} failed: {e}")
             errors.append(e)
-            action.timeout *= 2 # exponential backoff
+            action.timeout *= 2  # Exponential backoff
     else:
         raise AssertionError(
             "The action failed after 3 attempts. Errors:\n" + 
@@ -486,35 +481,33 @@ To do so, we proceed the following way:
 
 Some further comments on this code:
 
-- The action base class is an empty shell, but it provides the basic
-  structure of an action execution, which happens in the following way:
-  when the ``execute`` method is called,
+- The base class for actions is an empty shell, but it provides the fundamental
+  structure for action execution, which follows this sequence when the
+  ``execute`` method is called:
   
-  1. the action is set up (``setup`` method)
-  2. the pre-conditions are verified (``verify_preconditions`` method)
-  3. the custom procedure is executed (``execute_procedure`` method)
-  4. the post-conditions are verified (``verify_postconditions`` method)
+  1. The action is set up (via the ``setup`` method).
+  2. Pre-conditions are verified (via the ``verify_preconditions`` method).
+  3. The custom procedure is executed (via the ``execute_procedure`` method).
+  4. Post-conditions are verified (via the ``verify_postconditions`` method).
 
-- every time an action is executed, the first step is always the ``setup``
-  method, which is a good place to clean up procedure to enable multiple
-  runs of the action
-- ``execute_procedure`` is the only mandatory method to implement, it is
-  the place where the custom logic of the action is implemented
-- ``verify_preconditions`` and ``verify_postconditions`` are optional
-  methods, but they are very useful to ensure the action is executed in
-  a valid state and that the expected results are reached
-- the ``description`` method is a semantic description of the action, it
-  is used when the action fails to provide a meaningful error message
-- the retry loop is a simple way to retry the action up to 3 times
+- The ``setup`` method is always the first step in action execution, making it
+  an excellent place to clean up resources and enable multiple runs.
+- The ``execute_procedure`` method is mandatory and serves as the location
+  for implementing the custom logic of the action.
+- The ``verify_preconditions`` and ``verify_postconditions`` methods are
+  optional but are useful for ensuring that the action starts from a valid
+  state and achieves the expected results.
+- The ``description`` method provides a semantic description of the action
+  and is used to generate meaningful error messages when the action fails.
+- The retry loop is a simple way to retry the action up to three times.
 
-**Do you want to try this approach?**
-Here some suggestions for further readings:
+**Would you like to try this approach?**
+Here are some suggestions for further reading:
 
 - :py:class:`~ska_integration_test_harness.core.actions`
-  to learn more about the action idea
+  to learn more about the concept of actions.
 - :py:class:`~ska_integration_test_harness.core.actions.SUTAction`
-  to learn more about the base class you will subclass to create
-  custom actions
+  to learn more about the base class for creating custom actions.
 - `TangoEventTracer Getting Started Guide <https://developer.skao.int/projects/ska-tango-testing/en/latest/guide/integration/getting_started.html>`_
-  to learn more about the event tracer, the subscription mechanism and
-  the event assertions mechanisms
+  to learn more about the event tracer, subscription mechanisms, and
+  event assertion mechanisms.
