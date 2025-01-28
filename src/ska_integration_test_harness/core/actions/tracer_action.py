@@ -39,12 +39,117 @@ class TracerAction(SUTAction, abc.ABC):
     except for the :py:meth:`execute_procedure` method, which is left to be
     implemented by the subclasses.
 
-    At the moment, the tracer and the timeout are managed exclusively by
-    the action itself (i.e., this class takes care of creating the objects,
+    This class is very useful if combined with built-in assertions like
+    :py:class:`ska_integration_test_harness.code.assertions.AssertDevicesAreInState`
+    and :py:class:`ska_integration_test_harness.code.assertions.AssertDevicesStateChanges`.
+
+    **Usage example**:
+
+    .. code-block:: python
+
+        from ska_integration_test_harness.core.actions import TracerAction
+        from ska_integration_test_harness.core.assertions import AssertDevicesAreInState
+        from ska_integration_test_harness.core.assertions import AssertDevicesStateChanges
+
+        # To use this class, you need to create a subclass and implement the
+        # execute_procedure method.
+        class IncrementAttributeBy2(TracerAction):
+            def execute_procedure(self):
+                # your action logic here to increment the attribute by 2
+
+        # Then you can build action instances and add preconditions and
+        # postconditions to them according to your needs.
+
+        action = MyAction().add_preconditions(
+            AssertDevicesAreInState(
+                devices=[dev1, dev2],
+                attribute_name="attr1",
+                attribute_value=42
+            ),
+        ).add_postconditions(
+            AssertDevicesStateChanges(
+                devices=[dev1, dev2],
+                attribute_name="attr1",
+                attribute_value=43
+            ),
+            AssertDevicesAreInState(
+                devices=[dev1, dev2],
+                attribute_name="attr1",
+                attribute_value=44
+            ),
+        )
+
+        # define a timeout for the postconditions
+        action.set_timeout(10)
+
+        action.execute()
+
+        # ---------------------------------------------------------------
+        # alternatively, if you don't want also the pre and postconditions
+        # logic in the action class, you can just use the constructor
+
+        class IncrAttrByN(TracerAction):
+
+            def __init__(self, device, attribute_name, n):
+                super().__init__()
+                self.device = device
+                self.attribute_name = attribute_name
+                self.n = n
+
+                for incr in range(1, n+1):
+                    self.add_postconditions(
+                        AssertDevicesStateChanges(
+                            devices=[self.device],
+                            attribute_name=self.attribute_name,
+                            custom_matcher=lambda event:
+                                self.is_attr_incremented_by_N(event, incr)
+                        )
+                    )
+
+            def setup(self):
+                super().setup()
+
+                # store the initial value of the attribute
+                # (will be useful to verify the increments)
+                self.initial_value = self.device.read_attribute(self.attribute_name).value
+
+            def execute_procedure(self):
+                # the action logic that increments the attribute by n
+
+            # define a custom matcher to verify the attribute increments
+            def is_attr_incremented_by_N(self, event, incr):
+                return event.attribute_value == self.initial_value + incr
+
+
+        action = IncrAttrByN(dev1, "attr1", 3)
+
+        # (here we can set the timeout, set more pre and postconditions, etc.)
+        action.set_timeout(10)
+        action.execute()
+
+    **NOTE**: At the moment, the tracer and the timeout are managed
+    exclusively by the action itself
+    (i.e., this class takes care of creating the objects,
     resetting them and injecting them into the assertions), but in the
     future we could make them injectable from the outside (and so potentially
     shared in different actions).
-    """
+
+    **NOTE**: The action setters are chainable, so you can chain the calls to
+    add preconditions and postconditions, set the timeout, etc. Example:
+
+    .. code-block:: python
+
+        # this is valid code
+        MyTracerAction().add_preconditions(
+            # ...
+        ).add_postconditions(
+            # ...
+        ).set_timeout(10).execute()
+
+    **NOTE**: This kind of actions is particularly useful when you have to
+    factories of base actions which pre and post conditions are "enriched"
+    or "customised" according to the context in which they are used.
+    """  # pylint: disable=line-too-long # noqa: E501
 
     def __init__(
         self,
