@@ -15,30 +15,35 @@ from .sut_action import SUTAction
 class TracerAction(SUTAction, abc.ABC):
     """An event-based action which uses TangoEventTracer to synchronise.
 
-    This class represents an action where the synchronisation is based on the
-    events emitted by the
-    :class:`ska_tango_testing.integration.TangoEventTracer`.
+    This class represents an action where the preconditions and postconditions
+    have a strong dependency on the events emitted by the SUT, and so this
+    class provides a structure to manage them.
+
     Concretely, this action:
 
-    - accept a set of pre-conditions and post-conditions, expressed as
-      :py:class:`SUTAssertion` and :py:class:`TracerAssertion` instances;
-    - has a common tracer for all post-condition assertions (and also
-      for the pre-conditions, if they are event-based);
-    - has an unique shared timeout for all post-condition assertions;
-    - permits to add early stop conditions for the post-conditions.
+    - Makes you define the pre-conditions and post-conditions using
+      respectively
+      :py:class:`ska_integration_test_harness.code.assertions.SUTAssertion` and
+      :py:class:`ska_integration_test_harness.code.assertions.TracerAssertion`
+      object
+    - Manages a :class:`ska_tango_testing.integration.TangoEventTracer` to
+      trace the events emitted by the SUT and automatically makes all
+      the pre-conditions and post-conditions use the same tracer.
+    - Manages a shared timeout for the post-conditions, so all of them are
+      verified within the same time interval.
+    - Allows you to define an early stop condition for all the post-conditions,
+      so they can be stopped early if some kind of error condition is detected.
+
+    To do this, the class implements many of the lifecycle methods of the
+    :py:class:`~ska_integration_test_harness.core.actions.SUTAction` class,
+    except for the :py:meth:`execute_procedure` method, which is left to be
+    implemented by the subclasses.
 
     At the moment, the tracer and the timeout are managed exclusively by
     the action itself (i.e., this class takes care of creating the objects,
     resetting them and injecting them into the assertions), but in the
     future we could make them injectable from the outside (and so potentially
     shared in different actions).
-
-    Usage example:
-
-    TODO: add a usage example
-
-    The :py:meth:`verify` method needs to be overridden in the subclasses
-    to implement the actual action.
     """
 
     def __init__(
@@ -48,6 +53,13 @@ class TracerAction(SUTAction, abc.ABC):
         log_postconditions: bool = True,
     ) -> None:
         """Create a new TracerAction instance.
+
+        Initially,
+
+        - the action timeout is set to 0 (i.e., no timeout),
+        - the preconditions and postconditions are empty,
+        - the tracer is created and set up,
+        - no early stop condition is set.
 
         :param enable_logging: whether to enable logging
             (default is True).
