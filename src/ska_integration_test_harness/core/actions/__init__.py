@@ -4,14 +4,22 @@ This module provides base classes and implementations for defining and
 executing operations in test cases against a (Tango based)
 system under test (SUT).
 
-**What is an action?** In abstract terms, an action is supposed to be a
-generic interaction with the SUT. It can be anything that:
+**What is an action?** In abstract terms, an action is supposed any kind of
+self-contained operation that can be executed on the SUT. Whe chose to define
+an action class structure because we want to give a common interface to
+anything that holds test logic and/or domain knowledge about how you
+interact with the SUT. Concretely, an action can be something as simple as
+sending a command to a device or setting an attribute, or it can be
+something more complex like orchestrating a sequence of commands, operations
+or also other actions.
+
+In our framework, we expect an action to have the following structure:
 
 - Expects some kind of preconditions to be met to be executed
 - Performs some operations on the SUT (e.g, invoking a command, writing one
   or more attributes on devices, orchestrating a sequence of other actions)
 - Verifies the effects of the operations on the SUT through a set of
-  postconditions.
+  postconditions (and eventually synchronises with the SUT state)
 
 **How are actions implemented in the ITH?** In the ITH framework, we choose to
 define actions as a classes hierarchy. The base class for all actions

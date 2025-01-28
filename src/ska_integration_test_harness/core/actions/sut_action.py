@@ -7,24 +7,26 @@ import logging
 class SUTAction(abc.ABC):
     """A generic action on the System Under Test (SUT).
 
-    This class is the base class for a framework for defining operations
-    on the System Under Test (SUT). An action is supposed to be any kind of
-    operation that can be performed on the SUT, such as a procedure, a
-    command, or a generic interaction.
+    This class is the base class for the
+    :py:mod:`~ska_integration_test_harness.core.actions` framework and
+    it provides an empty shell for defining a generic interaction with
+    the SUT.
 
-    We provide this because we assume that a wide enough testing
-    operations have the following common features:
+    An action is a self-contained operation which is made by:
 
-    - the core part is a procedure (e.g.¸ a sequence of one or more commands
-      but also a sequence of generic interaction, mostly with Tango devices
-      but not necessarily)
-    - to be executed, they may assume some preconditions (none by default)
-    - after the procedure is executed, they may guarantee some postconditions
-      (none by default)
-    - they have a name (by default, the class name) and a brief semantic
-      description of the operation (by default, nothing)
-    - they may be run several times, given the preconditions are satisfied
-    - the user may want to log their execution
+    - A core procedure that acts on the SUT
+      (method :py:meth:`execute_procedure`, the only compulsory extension
+      point)
+    - The verification of some preconditions before the procedure is executed
+      (method :py:meth:`verify_preconditions`, optional extension point)
+    - The verification of some postconditions after the procedure is executed
+      and an eventual synchronization with the SUT state
+      (method :py:meth:`verify_postconditions`, optional extension point)
+    - A setup phase that prepares the action to be executed and resets
+      eventual internal resources (method :py:meth:`setup`, optional extension
+      point)
+    - A name and a brief description of the action (methods :py:meth:`name`
+      and :py:meth:`description`, optional extension points)
 
     **How to use an action as an end user**: An end user can use actions
     simply by creating an instance of the action and calling the
@@ -33,28 +35,50 @@ class SUTAction(abc.ABC):
     can be repeated as many times as the user wants, given the
     preconditions are satisfied. Example:
 
+    **How to extend an action**: An action can be extended by subclassing
+    it and overriding the extensions points. The only compulsory extension
+    point is the :py:meth:`execute_procedure` method. The other extension
+    points are optional and can be used to add custom preconditions,
+    postconditions, setup, name, and description. Example:
+
     .. code-block:: python
 
+        from ska_integration_test_harness.core.actions import SUTAction
+
+        # define a new action
+        class MyAction(SUTAction):
+
+            def setup(self):  # optional
+                super().setup() # always call the superclass
+
+                # e.g., reset a tracer, clear the events
+                # subscribe to the attributes, etc.
+
+            def execute_procedure(self): # compulsory
+                # (compulsory) act on the SUT
+
+                # e.g., run some kind of interaction algorithm to reach
+                # a certain state
+
+            def verify preconditions(self):  # optional
+                super().verify_preconditions() # always call the superclass
+
+                # e.g., check that the device is in the desired state
+
+        # execute the action
         action = MyAction()
         action.execute()
 
-    **How to extend an action**: An action can be extended by subclassing
-    it and overriding some of the extension points. The extension points are:
-
-    - :py:meth:`setup`: set up the action (optional)
-    - :py:meth:`verify_preconditions`: verify the preconditions (optional)
-    - :py:meth:`execute_procedure`: act on the SUT (**compulsory**)
-    - :py:meth:`verify_postconditions`: verify the postconditions (optional)
-    - :py:meth:`name`: a name to identify the action (optional)
-    - :py:meth:`description`: a brief description of the action (optional)
-
-    As you may guess, the first four extension points are the steps of
-    the action execution. The last two extension points are used to
-    identify and describe the action in the logs and in the reports. Example:
-
-    # TODO: add example
-
-    # TODO: add logging mechanism
+    **NOTE for who extends this class**: When you extend this class, always
+    think about the value and semantic meaning. An action is supposed to be
+    some meaningful procedure that acts on the SUT; it's a self-contained
+    piece of business logic, so choose a meaningful class name, write a
+    good docstring, and provide a meaningful short description.
+    Since an action implementation will likely be not unit tested code,
+    prioritise clarity and readability. Think also about reusability:
+    if you find yourself creating several actions that are very similar,
+    consider to refactor the common logic in a superclass or to implement
+    an unique (possibly unit tested) parametrised action.
     """
 
     def __init__(self, enable_logging: bool = True) -> None:
@@ -79,18 +103,25 @@ class SUTAction(abc.ABC):
         """Execute the action and verify the postconditions.
 
         This method is the entry point for the user to execute the action.
-        An execution of an action is a sequence of steps:
+        An execution of an action consists of the following steps:
 
-        1. **setup**: set up the action
-        2. **verify preconditions**: check that the system is in the state
-           expected by the action
-        3. **execute procedure**: act on the SUT
-        4. **verify postconditions**: check that the system is in the state
-           expected after the action and eventually synchronize with the
-           system
+        1. :py:meth:`setup` is called to prepare the action to be executed
+           (and reset eventual internal resources).
+        2. :py:meth:`verify_preconditions` is called to check if the
+            preconditions are satisfied. If the preconditions are not
+            satisfied, an exception is raised.
+        3. :py:meth:`execute_procedure` is called to act on the SUT.
+        4. :py:meth:`verify_postconditions` is called to check if the
+            postconditions are satisfied. If the postconditions are not
+            satisfied, an exception is raised.
 
-        An action can be executed several times, given the preconditions
-        are satisfied.
+        An action is supposed to be executable multiple times, given the
+        preconditions are satisfied.
+
+        Through the flags `verify_preconditions` and
+        `verify_postconditions`, the user can decide if the preconditions
+        and postconditions should be verified. By default, both
+        preconditions and postconditions are verified.
 
         :param verify_preconditions: True if the preconditions should be
             verified before executing the action, False otherwise. By default,
@@ -170,10 +201,8 @@ class SUTAction(abc.ABC):
           of resources such as tracers, timeouts, etc.
         - always call the superclass method
         - in the docstring of the method, specify the resources that
-          are set up (and briefly recap also what is done by superclasses)
-        - if you think the method may be extended by your own subclasses,
-          put in the docstring a reference to this method docstring
-          (e.g., TODO: add example)
+          are set up (and briefly recap also what is done by superclasses,
+          potentially referencing the superclasses method docstring)
         """
 
     def verify_preconditions(self) -> None:
@@ -198,10 +227,8 @@ class SUTAction(abc.ABC):
           the system is in the state expected by the action to be executed
           correctly
         - in the docstring of the method, specify which precondition
-          is verified (and briefly recap also what is done by superclasses)
-        - if you think the method may be extended by your own subclasses,
-          put in the docstring a reference to this method docstring
-          (e.g., TODO: add example)
+          is verified (and briefly recap also what is done by superclasses,
+          potentially referencing the superclasses method docstring)
 
         :raises: AssertionError if the preconditions are not satisfied.
         """  # noqa: DAR402
@@ -216,16 +243,20 @@ class SUTAction(abc.ABC):
         is supposed to perform on the SUT.
 
         **HOW TO EXTEND**: Override this method in a subclass to add
-        custom procedures. If you think is useful, you are encoruaged
-        to call the superclass method. You can assume
+        custom procedures. If it exists, you may consider to call the
+        superclass method but it is not compulsory. You can assume
         :py:meth:`setup` and :py:meth:`verify_preconditions` have been
-        called before this method. Some good practices if you override
-        this method are:
+        called before this method and :py:meth:`verify_postconditions`
+        will be called after.
 
-        - after this method termination, the user may be able to assume
-          the system is going to be in the state expected by the action
-          after the postconditions are verified
-        - TODO: add more
+        - unless the action purpose is to embed conditional logic,
+          assume the system is in the expected state defined by the
+          preconditions through :py:meth:`verify_preconditions`
+        - if the operation you are done is asynchronous, make this method
+          terminate quickly and put the synchronization logic in
+          :py:meth:`verify_postconditions`
+        - describe in the docstring what the action does (this method
+          docstring, but also the class docstring)
 
         :raises: AssertionError if the action fails.
         """
@@ -253,10 +284,8 @@ class SUTAction(abc.ABC):
         - after this method termination, the user may be able to assume
           the system is in the state expected by the action
         - in the docstring of the method, specify which postcondition
-          is verified (and briefly recap also what is done by superclasses)
-        - if you think the method may be extended by your own subclasses,
-          put in the docstring a reference to this method docstring
-          (e.g., TODO: add example)
+          is verified (and briefly recap also what is done by superclasses,
+          potentially referencing the superclasses method docstring)
 
         :raises: AssertionError if the postconditions are not satisfied.
         """
@@ -272,8 +301,11 @@ class SUTAction(abc.ABC):
         the class name.
 
         **HOW TO EXTEND**: Override this method in a subclass to provide
-        a your custom name. Make it be just 1 or few more words. Better
-        if it is a single camel case word (e.g., "BringTelescopeInStateX").
+        a your custom name. Make it be just 1 or few more words. We don't
+        really suggest to override this method unless you have a good reason
+        to do so (override instead the :py:meth:`description` method).
+
+        , override instead the :py:meth:`description` method.
         """
         return self.__class__.__name__
 
