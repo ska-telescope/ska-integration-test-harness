@@ -439,7 +439,7 @@ class TracerAction(SUTAction, abc.ABC):
                 )
             precondition.verify()
 
-    def verify_postconditions(self):
+    def verify_postconditions(self, timeout: float = 0):
         """Verify all the configured postconditions, within the given timeout.
 
         This method verifies all the postconditions configured for the action,
@@ -453,6 +453,8 @@ class TracerAction(SUTAction, abc.ABC):
         If specified in the initialisation, the postconditions will be logged
         (By default, they are logged).
 
+        :param timeout: the time in seconds to wait for the postconditions to
+            be verified. If not specified, it defaults to 0. TODO: use it!
         :raises AssertionError: if one of the postconditions fails.
         """
         super().verify_postconditions()

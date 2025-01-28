@@ -47,7 +47,7 @@ class MockSUTAction(SUTAction):
             raise AssertionError("Procedure failed")
         self.procedure_executed = True
 
-    def verify_postconditions(self) -> None:
+    def verify_postconditions(self, timeout: float = 0) -> None:
         if self.fail_postconditions:
             raise AssertionError("Postconditions failed")
         self.postconditions_verified = True
@@ -174,8 +174,9 @@ class TestSUTAction:
         )
         mock_logger.info.assert_any_call(
             "Action %s: procedure executed successfully. "
-            "Verifying postconditions...",
+            "Verifying postconditions (within a %s seconds timeout)...",
             "MockSUTAction",
+            0,
         )
         mock_logger.info.assert_any_call(
             "Action %s: execution completed successfully",

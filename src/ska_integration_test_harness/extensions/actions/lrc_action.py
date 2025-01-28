@@ -143,11 +143,15 @@ class TangoLRCAction(TangoCommandAction):
         if len(self._early_stop_lrc_assertions) > 0:
             self._early_stop_lrc_assertions[0].setup()
 
-    def verify_postconditions(self):
+    def verify_postconditions(self, timeout: float = 0) -> None:
         """Verify the postconditions of the action.
 
         But before, ensure all the LRC assertions are configured with
         the LRC ID from the last command result.
+
+        :param timeout: the time in seconds to wait for the postconditions to
+            be verified. If not specified, it defaults to 0. TODO: use it!
+        :raises AssertionError: if one of the postconditions fails.
         """
 
         last_lrc_id = self.get_last_lrc_id()
