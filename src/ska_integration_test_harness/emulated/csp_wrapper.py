@@ -1,5 +1,7 @@
 """A wrapper for an emulated CSP."""
 
+from ska_control_model import AdminMode
+
 from ska_integration_test_harness.emulated.utils.teardown_helper import (  # pylint: disable=line-too-long # noqa: E501
     EmulatedTeardownHelper,
 )
@@ -16,6 +18,13 @@ class EmulatedCSPWrapper(CSPWrapper):
     state directly. Moreover, the tear down implements the usual
     procedure for emulated devices.
     """
+
+    def __init__(self, csp_configuration):
+        super().__init__(csp_configuration)
+
+        # Set the admin mode for the CSP master and the CSP subarray
+        # (Now they emulate the real devices behaviour)
+        self.csp_master.adminMode = AdminMode.ONLINE
 
     # --------------------------------------------------------------
     # Subsystem properties definition
