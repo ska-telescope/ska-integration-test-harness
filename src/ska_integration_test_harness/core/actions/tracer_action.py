@@ -21,18 +21,18 @@ class TracerAction(SUTAction, abc.ABC):
 
     Concretely, this action:
 
-    - Makes you define the pre-conditions and post-conditions using
+    - Makes you define the preconditions and postconditions using
       respectively
-      :py:class:`ska_integration_test_harness.code.assertions.SUTAssertion` and
-      :py:class:`ska_integration_test_harness.code.assertions.TracerAssertion`
-      object (through the :py:meth:`add_preconditions` and
+      :py:class:`ska_integration_test_harness.core.assertions.SUTAssertion` and
+      :py:class:`ska_integration_test_harness.core.assertions.TracerAssertion`
+      objects (through the :py:meth:`add_preconditions` and
       :py:meth:`add_postconditions` methods).
     - Manages a :class:`ska_tango_testing.integration.TangoEventTracer` to
       trace the events emitted by the SUT and automatically makes all
-      the pre-conditions and post-conditions use the same tracer.
-    - Manages a shared timeout for the post-conditions, so all of them are
+      the preconditions and postconditions use the same tracer.
+    - Manages a shared timeout for the postconditions, so all of them are
       verified within the same time interval.
-    - Allows you to define early stop conditions for the post-conditions,
+    - Allows you to define early stop conditions for the postconditions,
       through the :py:meth:`add_early_stop` method (to read more about early
       stop conditions, see
       :py:func:`ska_tango_testing.integration.assertions.with_early_stop`).
@@ -43,8 +43,8 @@ class TracerAction(SUTAction, abc.ABC):
     implemented by the subclasses.
 
     This class is very useful if combined with built-in assertions like
-    :py:class:`ska_integration_test_harness.code.assertions.AssertDevicesAreInState`
-    and :py:class:`ska_integration_test_harness.code.assertions.AssertDevicesStateChanges`.
+    :py:class:`ska_integration_test_harness.core.assertions.AssertDevicesAreInState`
+    and :py:class:`ska_integration_test_harness.core.assertions.AssertDevicesStateChanges`.
 
     **Usage example**:
 
@@ -146,8 +146,8 @@ class TracerAction(SUTAction, abc.ABC):
             # ...
         ).execute(postconditions_timeout=10)
 
-    **NOTE**: This kind of actions is particularly useful when you have to
-    factories of base actions which pre and post conditions are "enriched"
+    **NOTE**: This kind of action is particularly useful when you have to
+    create factories of base actions whose pre and post conditions are "enriched"
     or "customised" according to the context in which they are used.
     """  # pylint: disable=line-too-long # noqa: E501
 

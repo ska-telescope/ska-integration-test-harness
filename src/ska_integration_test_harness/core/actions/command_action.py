@@ -11,13 +11,13 @@ class TangoCommandAction(TracerAction):
     """Send a command to a Tango device and synchronise using a tracer.
 
     This class represents an action that sends a command to a Tango device and
-    then perform a series of checks using the
+    then performs a series of checks using the
     :py:class:`ska_tango_testing.integration.TangoEventTracer`.
 
     The command:
 
     - is sent to a target :class:`tango.DeviceProxy` instance;
-    - can be any tango command;
+    - can be any Tango command;
     - can be sent with or without parameters;
     - may produce a result which is stored in this action instance's
       ``last_command_result`` attribute.
@@ -77,7 +77,7 @@ class TangoCommandAction(TracerAction):
         command_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ) -> None:
-        """Create a new TangoLRCAction instance.
+        """Create a new TangoCommandAction instance.
 
         :param target_device: the target device on which to execute
             the command.

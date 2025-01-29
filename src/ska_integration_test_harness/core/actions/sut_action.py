@@ -22,10 +22,10 @@ class SUTAction(abc.ABC):
     - The verification of some preconditions before the procedure is executed
       (method :py:meth:`verify_preconditions`, optional extension point)
     - The verification of some postconditions after the procedure is executed
-      and an eventual synchronization with the SUT state within a timeout
+      and an eventual synchronisation with the SUT state within a timeout
       (method :py:meth:`verify_postconditions`, optional extension point)
     - A setup phase that prepares the action to be executed and resets
-      eventual internal resources (method :py:meth:`setup`, optional extension
+      any internal resources (method :py:meth:`setup`, optional extension
       point)
     - A name and a brief description of the action (methods :py:meth:`name`
       and :py:meth:`description`, optional extension points)
@@ -38,9 +38,10 @@ class SUTAction(abc.ABC):
     preconditions are satisfied. Optionally, the user can also:
 
     - use a timeout for the postconditions verification by passing the
-      ``timeout`` parameter to the :py:meth:`execute` method (by default is 0s,
-      and to be working who developed the action should have implemented
-      the postconditions verification within a timeout)
+      ``timeout`` parameter to the :py:meth:`execute` method
+      (by default it is 0s, and to be working who developed the action
+      should have implemented the postconditions
+      verification within a timeout)
     - disable the verification of the preconditions or postconditions
       by passing the flags ``verify_preconditions``
       and ``verify_postconditions`` to the :py:meth:`execute` method
@@ -48,7 +49,7 @@ class SUTAction(abc.ABC):
       :py:meth:`set_logging` with the flag ``enable_logging`` set to False
 
     **How to extend an action**: An action can be extended by subclassing
-    it and overriding the extensions points. The only compulsory extension
+    it and overriding the extension points. The only compulsory extension
     point is the :py:meth:`execute_procedure` method. The other extension
     points are optional and can be used to add custom preconditions,
     postconditions, setup, name, and description.
@@ -77,7 +78,7 @@ class SUTAction(abc.ABC):
                 # ...
 
             # optional
-            def verify preconditions(self, timeout: SupportsFloat =0):
+            def verify_preconditions(self, timeout: SupportsFloat = 0):
                 # always call the superclass
                 super().verify_preconditions(timeout)
 
@@ -89,16 +90,17 @@ class SUTAction(abc.ABC):
         action = MyAction()
         action.execute(postconditions_timeout=10)
 
-    **NOTE for who extends this class**: When you extend this class, always
+    **NOTE for those who extend this class**:
+    When you extend this class, always
     think about the value and semantic meaning. An action is supposed to be
     some meaningful procedure that acts on the SUT; it's a self-contained
     piece of business logic, so choose a meaningful class name, write a
     good docstring, and provide a meaningful short description.
-    Since an action implementation will likely be not unit tested code,
+    Since an action implementation will likely not be unit tested code,
     prioritise clarity and readability. Think also about reusability:
     if you find yourself creating several actions that are very similar,
-    consider to refactor the common logic in a superclass or to implement
-    an unique (possibly unit tested) parametrised action.
+    consider refactoring the common logic into a superclass or implementing
+    a single (possibly unit tested) parameterised action.
     """
 
     def __init__(self, enable_logging: bool = True) -> None:
@@ -282,7 +284,7 @@ class SUTAction(abc.ABC):
           assume the system is in the expected state defined by the
           preconditions through :py:meth:`verify_preconditions`
         - if the operation you are done is asynchronous, make this method
-          terminate quickly and put the synchronization logic in
+          terminate quickly and put the synchronisation logic in
           :py:meth:`verify_postconditions`
         - describe in the docstring what the action does (this method
           docstring, but also the class docstring)
@@ -310,7 +312,7 @@ class SUTAction(abc.ABC):
         - make it be idempotent
         - always call the superclass method
         - the assertions you put here can be slow (e.g., with timeouts) and
-          can be intended as a way to synchronize with the system
+          can be intended as a way to synchronise with the system
           (e.g., waiting for a device to be ready)
         - after this method termination, the user may be able to assume
           the system is in the state expected by the action
