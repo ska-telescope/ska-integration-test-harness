@@ -205,4 +205,22 @@ class TangoLRCAction(TangoCommandAction):
     # (Override the building method from the superclass to specify
     # that the returned self is of the subclass type)
 
-    # TODO: maybe do this, to facilitate the chaining also
+    def add_preconditions(
+        self, *preconditions, put_them_at_beginning=False
+    ) -> "TangoLRCAction":
+        super().add_preconditions(
+            *preconditions, put_them_at_beginning=put_them_at_beginning
+        )
+        return self
+
+    def add_postconditions(
+        self, *postconditions, put_them_at_beginning=False
+    ) -> "TangoLRCAction":
+        super().add_postconditions(
+            *postconditions, put_them_at_beginning=put_them_at_beginning
+        )
+        return self
+
+    def add_early_stop(self, early_stop) -> "TangoLRCAction":
+        super().add_early_stop(early_stop)
+        return self
