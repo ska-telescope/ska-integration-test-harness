@@ -78,7 +78,7 @@ For further more complex assertions implementation, we suggest you to look at
 :py:mod:`~ska_integration_test_harness.extensions.assertions`.
 """  # pylint: disable=line-too-long # noqa: E501
 
-from .attribute import AssertDevicesAreInState
+from .dev_are_in_state import AssertDevicesAreInState
 from .dev_state_changes import AssertDevicesStateChanges
 from .sut_assertion import SUTAssertion
 from .tracer_assertion import TracerAssertion

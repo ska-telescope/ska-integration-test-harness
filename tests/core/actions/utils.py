@@ -3,7 +3,7 @@
 import time
 from unittest.mock import MagicMock
 
-from ska_integration_test_harness.core.assertions.attribute import (
+from ska_integration_test_harness.core.assertions.dev_are_in_state import (
     AssertDevicesAreInState,
 )
 from ska_integration_test_harness.core.assertions.dev_state_changes import (
