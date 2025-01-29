@@ -11,7 +11,7 @@ class SUTAssertion(abc.ABC):
     and it provides an empty shell for defining a generic assertion on the SUT.
 
     An assertion is a verification of some kind of wide condition, probably
-    made by many lower level assertions grouped together, eventually
+    made by many lower-level assertions grouped together, eventually
     event-based. An assertion:
 
     - may need a setup phase to prepare the assertion for the verification
@@ -22,12 +22,12 @@ class SUTAssertion(abc.ABC):
       (method :py:meth:`describe_assumption`, required implementation)
 
     **How to use an assertion as an end user**: An end user can use assertions
-    calling in sequence the :py:meth:`setup` method to prepare the assertion
+    by calling in sequence the :py:meth:`setup` method to prepare the assertion
     for the verification (and ensure that the assertion is in a clean state)
     and then the :py:meth:`verify` method to verify the assertion.
 
     **How to extend this class**: This class is basically just an empty
-    skeleton, so subclass it and implement compulsory
+    skeleton, so subclass it and implement the compulsory
     :py:meth:`verify` and :py:meth:`describe_assumption` methods. Optionally,
     you can also override the :py:meth:`setup` method.
 
@@ -65,7 +65,7 @@ class SUTAssertion(abc.ABC):
         """Set up the assertion (**optional extension point**).
 
         This method should be called before the verification procedure.
-        It should be used to prepare the instance to a new, clear verification
+        It should be used to prepare the instance for a new, clear verification
         procedure (e.g., subscribe to events, reset some state, etc.).
         By default, no setup is done.
 
@@ -73,8 +73,8 @@ class SUTAssertion(abc.ABC):
         the setup phase. Always call the superclass method when overriding
         this method. Some good practices if you want to override are:
 
-        - make it be idempotent
-        - inside this method, clear and setup all the subscriptions you
+        - make it idempotent
+        - inside this method, clear and set up all the subscriptions you
           need for the verification procedure
         - in the docstring of the method, specify the resources that
           are set up (and briefly recap also what is done by superclasses,
@@ -83,7 +83,7 @@ class SUTAssertion(abc.ABC):
 
     @abc.abstractmethod
     def verify(self) -> None:
-        """Verify the assertion..
+        """Verify the assertion.
 
         This method should be called to verify the assertion.
         It should be implemented to verify the assertion and raise
@@ -93,12 +93,12 @@ class SUTAssertion(abc.ABC):
         the verification procedure. Always call the superclass method when
         overriding this method. Some good practices when you implement are:
 
-        - make it be idempotent
+        - make it idempotent
         - inside this method, make all your assertions and fail if
           something is wrong
         - the verification can be a blocking operation that waits for
           some event to happen.
-          If it is consider :py:class:`SUTAssertionWTimeout`
+          If it is, consider :py:class:`SUTAssertionWTimeout`
         - if you fail, produce a meaningful error message
         - in the docstring of the method, specify the resources that
           are verified (and briefly recap also what is done by superclasses,
@@ -109,7 +109,7 @@ class SUTAssertion(abc.ABC):
 
     @abc.abstractmethod
     def describe_assumption(self) -> str:
-        """Describe assertion's assumption (**required implementation**).
+        """Describe the assertion's assumption (**required implementation**).
 
         This method should return a string that describes briefly
         what the assertion verifies. This is useful to understand
@@ -119,7 +119,7 @@ class SUTAssertion(abc.ABC):
         the description of the assumption. Return a string that describes
         briefly what you are verifying. The string may be single line, or
         multiline if needed. If you are extending from a subclass, consider
-        to call the superclass method and append your description to it
+        calling the superclass method and appending your description to it
         (if you think it is useful).
 
         :return: the description of the assumption

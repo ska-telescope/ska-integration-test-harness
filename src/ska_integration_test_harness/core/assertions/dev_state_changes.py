@@ -14,8 +14,8 @@ class AssertDevicesStateChanges(TracerAssertion):
     This assertion verifies that the given devices have recorded state changes
     for a certain attribute, within a given timeout and without early stop
     events. A state change is expected to happen in one or more ``devices``,
-    regards an ``attribute_name`` and could be defined by the following parameters
-    (all optional and combinable):
+    regarding an ``attribute_name`` and could be defined by
+    the following parameters (all optional and combinable):
 
     - by a certain value (``attribute_value``)
     - by a certain previous value (``previous_value``)
@@ -80,7 +80,7 @@ class AssertDevicesStateChanges(TracerAssertion):
         Verify that the devices have recorded state changes in the
         TangoEventTracer within the given timeout and without early stop
         events. The events should be related to the attribute specified
-        in the constructor and, accordingly to the specified parameters:
+        in the constructor and, according to the specified parameters:
 
         - have a certain value (if specified)
         - have a certain previous value (if specified)
@@ -88,7 +88,7 @@ class AssertDevicesStateChanges(TracerAssertion):
 
         :raises AssertionError: if the timeout is reached before the
             expected events are recorded or if the events are not as
-            expected or if some early fa
+            expected or if some early stop events are recorded.
         """
         super().verify()
 

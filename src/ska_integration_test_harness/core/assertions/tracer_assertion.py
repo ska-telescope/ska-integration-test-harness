@@ -38,8 +38,7 @@ class TracerAssertion(SUTAssertion, abc.ABC):
     the timeout object will be created for you and will be managed). Both
     the tracer and the timeout can be shared among multiple assertions
     (to share a timeout, check
-    :py:class:`ska_tango_testing.integration.assertions.ChainedAssertionsTimeout`
-    ).
+    :py:class:`ska_tango_testing.integration.assertions.ChainedAssertionsTimeout`).
 
     NOTE: you still have to extend this class and implement the
     :py:meth:`verify` and the :py:meth:`describe_assumption`

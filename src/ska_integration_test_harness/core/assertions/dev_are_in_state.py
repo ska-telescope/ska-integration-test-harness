@@ -12,7 +12,7 @@ class AssertDevicesAreInState(SUTAssertion):
     """Verify a set of devices are in a certain state.
 
     This assertion verifies that the given devices right now are in a certain
-    state (i.e., a their given attribute have a certain value). This assertion
+    state (i.e., their given attribute has a certain value). This assertion
     is defined by:
 
     - the ``devices`` where the attribute is expected to have a value
@@ -76,7 +76,8 @@ class AssertDevicesAreInState(SUTAssertion):
     def describe_assumption(self):
         """Describe the assertion's assumption.
 
-        This assertion verifies have a certain attribute value.
+        This assertion verifies that the devices have
+        a certain attribute value.
 
         If you extend this class, please check
         :py:meth:`SUTAssertion.describe_assumption`
@@ -84,7 +85,6 @@ class AssertDevicesAreInState(SUTAssertion):
 
         :return: the description of the assumption
         """
-
         desc = ", ".join(device.dev_name() for device in self.devices)
         desc += f" have attribute {self.attribute_name} value equal "
         desc += f"to {self.attribute_value}."
