@@ -15,22 +15,22 @@ class AssertLRCCompletion(TracerAssertion):
     This assertion is an extension of
     :py:class:`~ska_integration_test_harness.core.assertions.TracerAssertion`
     that is specifically designed to verify the completion of a
-    LongRunningCommand through the monitoring on
+    LongRunningCommand through monitoring
     ``longRunningCommandResult`` events from a Tango device.
 
     The usage is very similar to the superclass, with the only difference that
-    there is a further method called :py:meth:`monitor_lrc` which will permit
+    there is a further method called :py:meth:`monitor_lrc` which will allow
     you to set the LRC to monitor. This is necessary because probably
     when you create the assertion instance, the LRC ID is not yet available.
 
-    In creation phase, you should specify target device and the expected
+    In the creation phase, you should specify the target device and the expected
     result code(s). In the :py:meth:`setup`, the assertion will subscribe
     the tracer to the ``longRunningCommandResult`` event of the target device.
-    Then, after you called the command and you have a LRC ID is available,
+    Then, after you have called the command and the LRC ID is available,
     you can call
     :py:meth:`monitor_lrc` to set the LRC to monitor. If you don't do it,
     the assertion will monitor any LRC completion events from the target
-    device ``longRunningCommandResult`` attribute (which is probably not
+    device's ``longRunningCommandResult`` attribute (which is probably not
     what you want).
 
     **NOTE**: if for some reason your own device
