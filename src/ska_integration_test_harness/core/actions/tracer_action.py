@@ -79,10 +79,8 @@ class TracerAction(SUTAction, abc.ABC):
             ),
         )
 
-        # define a timeout for the postconditions
-        action.set_timeout(10)
-
-        action.execute()
+        # execute the action within a timeout of 5 seconds
+        action.execute(postconditions_timeout=5)
 
         # ---------------------------------------------------------------
         # alternatively, if you don't want also the pre and postconditions
@@ -123,8 +121,9 @@ class TracerAction(SUTAction, abc.ABC):
 
         action = IncrAttrByN(dev1, "attr1", 3)
 
-        # (here we can set the timeout, set more pre and postconditions, etc.)
-        action.set_timeout(10)
+        # (here we can still add more preconditions if needed)
+
+        # execute (this time without a timeout)
         action.execute()
 
     **NOTE**: At the moment, the tracer and the timeout are managed
@@ -144,7 +143,7 @@ class TracerAction(SUTAction, abc.ABC):
             # ...
         ).add_postconditions(
             # ...
-        ).set_timeout(10).execute()
+        ).execute(postconditions_timeout=10)
 
     **NOTE**: This kind of actions is particularly useful when you have to
     factories of base actions which pre and post conditions are "enriched"
@@ -161,7 +160,6 @@ class TracerAction(SUTAction, abc.ABC):
 
         Initially,
 
-        - the action timeout is set to 0 (i.e., no timeout),
         - the preconditions and postconditions are empty,
         - the tracer is created and set up,
         - no early stop condition is set.
@@ -178,7 +176,6 @@ class TracerAction(SUTAction, abc.ABC):
         self._postconditions = []
 
         self.tracer = TangoEventTracer()
-        self.set_timeout(0)
         self._early_stop = None
 
         self._log_preconditions = log_preconditions
@@ -186,33 +183,6 @@ class TracerAction(SUTAction, abc.ABC):
 
     # --------------------------------------------------------------------
     # Configure timeout, preconditions, postconditions and early stop
-
-    @property
-    def timeout(self) -> float:
-        """The timeout value for the postconditions.
-
-        NOTE: as timeout value, we intend the initial timeout value, not the
-        remaining one (which at the moment is managed exclusively internally).
-
-        :return: the timeout value for the postconditions.
-        """
-        return self._timeout.initial_timeout
-
-    def set_timeout(self, timeout: float) -> "TracerAction":
-        """Set the timeout value for the postconditions.
-
-        This method sets the timeout value for the postconditions, and also
-        resets the timeout object to the new value.
-
-        :param timeout: the new timeout value.
-        :return: the action itself, to allow chaining the calls.
-        """
-        self._timeout = ChainedAssertionsTimeout(timeout)
-
-        # set the timeout for the postconditions
-        for postcondition in self.postconditions:
-            postcondition.timeout = self._timeout
-        return self
 
     @property
     def preconditions(self) -> list[SUTAssertion]:
@@ -240,20 +210,6 @@ class TracerAction(SUTAction, abc.ABC):
 
         Try to add preconditions that terminate immediately. If a precondition
         requires a tracer, it will use the same tracer as the action.
-
-        NOTE: to favour a fluent interface, this method and
-        also :py:meth:`add_postconditions` return the action itself, so that
-        you can chain the calls.
-
-        Usage example:
-
-        .. code-block:: python
-
-            action = TracerAction().add_preconditions(
-                SUTAssertion1(), SUTAssertion2(), # ...
-            .add_postconditions(
-                TracerAssertion1(), TracerAssertion2(), # ...
-            )
 
         :param preconditions: the preconditions to add.
         :param put_them_at_beginning: whether to put the preconditions at the
@@ -307,22 +263,6 @@ class TracerAction(SUTAction, abc.ABC):
         action's tracer and timeout. The post-condition eventual early stop
         will be combined with the action's early stop.
 
-        NOTE: to favour a fluent interface, this method and
-        also :py:meth:`add_preconditions` return the action itself, so that
-        you can chain the calls.
-
-        Usage example:
-
-        .. code-block:: python
-
-            action = TracerAction(
-                postconditions_timeout=10
-            ).add_preconditions(
-                SUTAssertion1(), SUTAssertion2(), # ...
-            ).add_postconditions(
-                TracerAssertion1(), TracerAssertion2(), # ...
-            )
-
         :param postconditions: the postconditions to add.
         :param put_them_at_beginning: whether to put the postconditions at the
             beginning of the list (default is False, i.e., append them at the
@@ -334,7 +274,6 @@ class TracerAction(SUTAction, abc.ABC):
         # + combine early stop
         for postcondition in postconditions:
             postcondition.tracer = self.tracer
-            postcondition.timeout = self._timeout
             postcondition.early_stop = TracerAction._combine_early_stop(
                 postcondition.early_stop, self._early_stop
             )
@@ -395,7 +334,6 @@ class TracerAction(SUTAction, abc.ABC):
 
         - resets the tracer, unsubscribing all the events and clearing the
           event list;
-        - resets the timeout to the initial value;
         - sets up the preconditions and the postconditions (also configuring
           the timeout for the postconditions and the tracer for the
           event-based assertions).
@@ -405,9 +343,6 @@ class TracerAction(SUTAction, abc.ABC):
         # reset the tracer
         self.tracer.unsubscribe_all()
         self.tracer.clear_events()
-
-        # reset the timeout
-        self.set_timeout(self.timeout)
 
         # setup the preconditions
         for precondition in self.preconditions:
@@ -454,10 +389,13 @@ class TracerAction(SUTAction, abc.ABC):
         (By default, they are logged).
 
         :param timeout: the time in seconds to wait for the postconditions to
-            be verified. If not specified, it defaults to 0. TODO: use it!
+            be verified. If not specified, it defaults to 0.
         :raises AssertionError: if one of the postconditions fails.
         """
         super().verify_postconditions()
+
+        # define a shared timeout for all the postconditions
+        timeout = ChainedAssertionsTimeout(timeout)
 
         for postcondition in self.postconditions:
             if self._log_postconditions:
@@ -465,6 +403,10 @@ class TracerAction(SUTAction, abc.ABC):
                     "Verifying postcondition: %s",
                     postcondition.describe_assumption(),
                 )
+
+            # inject the timeout in the postcondition
+            postcondition.timeout = timeout
+
             postcondition.verify()
 
     # (the verify method needs to be overridden, as it is abstract in the
