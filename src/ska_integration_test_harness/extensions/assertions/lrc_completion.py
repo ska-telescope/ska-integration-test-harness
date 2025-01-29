@@ -23,8 +23,9 @@ class AssertLRCCompletion(TracerAssertion):
     you to set the LRC to monitor. This is necessary because probably
     when you create the assertion instance, the LRC ID is not yet available.
 
-    In the creation phase, you should specify the target device and the expected
-    result code(s). In the :py:meth:`setup`, the assertion will subscribe
+    In the creation phase, you should specify
+    the target device and the expected result code(s).
+    In the :py:meth:`setup`, the assertion will subscribe
     the tracer to the ``longRunningCommandResult`` event of the target device.
     Then, after you have called the command and the LRC ID is available,
     you can call
