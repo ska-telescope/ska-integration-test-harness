@@ -17,7 +17,7 @@ class TangoLRCAction(TangoCommandAction):
     device and then synchronises on its successful completion (and possibly
     on its errors too). This class is an extension of
     :py:class:`ska_integration_test_harness.core.actions.TangoCommandAction`,
-    which inherits the capability of sending Tango commands and to synchronise
+    which inherits the capability of sending Tango commands and synchronising
     through a set of
     :py:class:`ska_integration_test_harness.core.assertions.TracerAssertion`,
     but adds two additional features:
@@ -71,10 +71,9 @@ class TangoLRCAction(TangoCommandAction):
 
 
         # execute the action within a timeout of 5 seconds
-        # (which will stop early if the LRC fails or if it's detected
+        # (which will stop early if the LRC fails or if it detects
         # an event with an attribute value less than 42)
         action.execute(postconditions_timeout=5)
-
 
     """  # pylint: disable=line-too-long # noqa: E501
 
