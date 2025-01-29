@@ -379,9 +379,13 @@ class TestTracerAction:
         start_time = datetime.now()
         action.execute(postconditions_timeout=1)
 
-        assert_that((datetime.now() - start_time).total_seconds()).described_as(
+        assert_that(
+            (datetime.now() - start_time).total_seconds()
+        ).described_as(
             "The action succeeds only when the postconditions are verified"
-        ).is_close_to(0.5, 0.1)
+        ).is_close_to(
+            0.5, 0.1
+        )
 
     @staticmethod
     def test_action_postconditions_are_verified_within_the_timeout_and_fail():
@@ -395,6 +399,8 @@ class TestTracerAction:
         with pytest.raises(AssertionError):
             action.execute(postconditions_timeout=1)
 
-        assert_that((datetime.now() - start_time).total_seconds()).described_as(
-            "We expect the whole timout to be elapsed"
-        ).is_close_to(1, 0.1)
+        assert_that(
+            (datetime.now() - start_time).total_seconds()
+        ).described_as("We expect the whole timout to be elapsed").is_close_to(
+            1, 0.1
+        )

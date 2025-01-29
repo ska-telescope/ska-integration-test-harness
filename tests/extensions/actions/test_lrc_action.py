@@ -174,9 +174,13 @@ class TestTangoLRCAction:
         start_time = datetime.now()
         action.execute(postconditions_timeout=1)
 
-        assert_that((datetime.now() - start_time).total_seconds()).described_as(
+        assert_that(
+            (datetime.now() - start_time).total_seconds()
+        ).described_as(
             "The action succeeds only when the LRC completion is received"
-        ).is_close_to(0.5, 0.1)
+        ).is_close_to(
+            0.5, 0.1
+        )
 
     @staticmethod
     def test_lrc_fails_when_lrc_failure_is_detected():
@@ -199,6 +203,10 @@ class TestTangoLRCAction:
         with pytest.raises(AssertionError):
             action.execute(postconditions_timeout=1)
 
-        assert_that((datetime.now() - start_time).total_seconds()).described_as(
+        assert_that(
+            (datetime.now() - start_time).total_seconds()
+        ).described_as(
             "The action fails when the LRC error is received"
-        ).is_close_to(0.5, 0.1)
+        ).is_close_to(
+            0.5, 0.1
+        )
