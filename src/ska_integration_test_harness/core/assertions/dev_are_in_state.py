@@ -11,9 +11,16 @@ from .sut_assertion import SUTAssertion
 class AssertDevicesAreInState(SUTAssertion):
     """Verify a set of devices are in a certain state.
 
-    This assertion verifies that a set of devices have right now a certain
-    attribute value. The assertion is based on the current state of the
-    devices and it does not wait for any event to happen.
+    This assertion verifies that the given devices right now are in a certain
+    state (i.e., a their given attribute have a certain value). This assertion
+    is defined by:
+
+    - the ``devices`` where the attribute is expected to have a value
+    - the attribute name (``attribute_name``)
+    - the expected value (``attribute_value``)
+
+    This assertion is expected to be verified considering the current value
+    of the attribute, not the value recorded by some kind of event.
     """
 
     def __init__(
