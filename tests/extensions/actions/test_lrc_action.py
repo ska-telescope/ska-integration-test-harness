@@ -1,5 +1,9 @@
 """Unit tests for the TangoLRCAction class."""
 
+import time
+from datetime import datetime
+from unittest.mock import MagicMock
+
 import pytest
 from assertpy import assert_that
 from ska_control_model import ResultCode
@@ -11,7 +15,7 @@ from ska_integration_test_harness.extensions.assertions.lrc_completion import (
     AssertLRCCompletion,
 )
 from tests.actions.utils.mock_device_proxy import create_device_proxy_mock
-from tests.actions.utils.mock_event_tracer import add_event
+from tests.actions.utils.mock_event_tracer import add_event, delayed_add_event
 
 from ...core.actions.utils import create_state_change_assertion
 
@@ -145,3 +149,56 @@ class TestTangoLRCAction:
 
         with pytest.raises(AssertionError):
             action.verify_postconditions()
+
+    # ---------------------------------------------------------------------
+    # A few integration tests with a timeout
+
+    @staticmethod
+    def test_lrc_succeed_if_lrc_completes_within_timeout():
+        """A LRC action accepts a timeout for postconditions verification."""
+        device = create_device_proxy_mock("test/device/1")
+        device.command_inout.return_value = ("Running", ["LRC_1234"])
+        action = (
+            TangoLRCAction(device, "MoveToOn")
+            .add_lrc_completion_to_postconditions()
+            .add_lrc_errors_to_early_stop()
+        )
+        delayed_add_event(
+            action.tracer,
+            "test/device/1",
+            "longRunningCommandResult",
+            ("LRC_1234", '[0, "ok, LRC completed"]'),
+            delay=0.5,
+        )
+
+        start_time = datetime.now()
+        action.execute(postconditions_timeout=1)
+
+        assert_that((datetime.now() - start_time).total_seconds()).described_as(
+            "The action succeeds only when the LRC completion is received"
+        ).is_close_to(0.5, 0.1)
+
+    @staticmethod
+    def test_lrc_fails_when_lrc_failure_is_detected():
+        """A LRC action fails if the LRC fails within the timeout."""
+        device = create_device_proxy_mock("test/device/1")
+        device.command_inout.return_value = ("Running", ["LRC_1234"])
+        action = TangoLRCAction(device, "MoveToOn")
+        action.add_postconditions(
+            create_state_change_assertion("test/device/1"),
+        ).add_lrc_completion_to_postconditions().add_lrc_errors_to_early_stop()
+        delayed_add_event(
+            action.tracer,
+            "test/device/1",
+            "longRunningCommandResult",
+            ("LRC_1234", '[3, "error, LRC failed"]'),
+            delay=0.5,
+        )
+
+        start_time = datetime.now()
+        with pytest.raises(AssertionError):
+            action.execute(postconditions_timeout=1)
+
+        assert_that((datetime.now() - start_time).total_seconds()).described_as(
+            "The action fails when the LRC error is received"
+        ).is_close_to(0.5, 0.1)

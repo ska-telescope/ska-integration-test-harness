@@ -165,7 +165,7 @@ class TangoLRCAction(TangoCommandAction):
             if isinstance(postcondition, AssertLRCCompletion):
                 postcondition.monitor_lrc(last_lrc_id)
 
-        return super().verify_postconditions()
+        return super().verify_postconditions(timeout=timeout)
 
     def get_last_lrc_id(self) -> str:
         """Extract the LRC ID from the last command result.

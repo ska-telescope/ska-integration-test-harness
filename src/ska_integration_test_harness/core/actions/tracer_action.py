@@ -392,10 +392,11 @@ class TracerAction(SUTAction, abc.ABC):
             be verified. If not specified, it defaults to 0.
         :raises AssertionError: if one of the postconditions fails.
         """
-        super().verify_postconditions()
+        super().verify_postconditions(timeout=timeout)
 
         # define a shared timeout for all the postconditions
-        timeout = ChainedAssertionsTimeout(timeout)
+        shared_timeout = ChainedAssertionsTimeout(timeout)
+        shared_timeout.start()
 
         for postcondition in self.postconditions:
             if self._log_postconditions:
@@ -405,7 +406,7 @@ class TracerAction(SUTAction, abc.ABC):
                 )
 
             # inject the timeout in the postcondition
-            postcondition.timeout = timeout
+            postcondition.timeout = shared_timeout
 
             postcondition.verify()
 
