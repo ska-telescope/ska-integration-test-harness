@@ -51,13 +51,9 @@ class SUTAction(abc.ABC):
     it and overriding the extensions points. The only compulsory extension
     point is the :py:meth:`execute_procedure` method. The other extension
     points are optional and can be used to add custom preconditions,
-    postconditions, setup, name, and description. Example:
+    postconditions, setup, name, and description.
 
-    **How to extend an action**: An action can be extended by subclassing
-    it and overriding the extensions points. The only compulsory extension
-    point is the :py:meth:`execute_procedure` method. The other extension
-    points are optional and can be used to add custom preconditions,
-    postconditions, setup, name, and description. Example:
+    **Extension and usage example**:
 
     .. code-block:: python
 

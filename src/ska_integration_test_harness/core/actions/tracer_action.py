@@ -25,14 +25,15 @@ class TracerAction(SUTAction, abc.ABC):
       respectively
       :py:class:`ska_integration_test_harness.code.assertions.SUTAssertion` and
       :py:class:`ska_integration_test_harness.code.assertions.TracerAssertion`
-      object
+      object (through the :py:meth:`add_preconditions` and
+      :py:meth:`add_postconditions` methods).
     - Manages a :class:`ska_tango_testing.integration.TangoEventTracer` to
       trace the events emitted by the SUT and automatically makes all
       the pre-conditions and post-conditions use the same tracer.
     - Manages a shared timeout for the post-conditions, so all of them are
       verified within the same time interval.
-    - Allows you to define an early stop condition for all the post-conditions,
-      so they can be stopped early if some kind of error condition is detected.
+    - Allows you to define early stop conditions for the post-conditions,
+      through the :py:meth:`add_early_stop` method.
 
     To do this, the class implements many of the lifecycle methods of the
     :py:class:`~ska_integration_test_harness.core.actions.SUTAction` class,
@@ -173,11 +174,14 @@ class TracerAction(SUTAction, abc.ABC):
         self._preconditions = []
         self._postconditions = []
 
+        # the (managed) tracer instance to use for the pre/post conditions
         self.tracer = TangoEventTracer()
+        # a predicate to stop the postconditions verification early
         self._early_stop = None
 
-        self._log_preconditions = log_preconditions
-        self._log_postconditions = log_postconditions
+        # logging flags
+        self.log_preconditions = log_preconditions
+        self.log_postconditions = log_postconditions
 
     # --------------------------------------------------------------------
     # Configure timeout, preconditions, postconditions and early stop
@@ -238,8 +242,8 @@ class TracerAction(SUTAction, abc.ABC):
         the expected state after the action. Use :py:meth:`add_postconditions`
         to add new postconditions.
 
-        Postconditions are all verified using the same tracer and they
-        share the :py:meth:`timeout` value.
+        Postconditions are all verified using the ``timeout`` value
+        from the :py:meth:`execute` method, and they all use the same tracer.
 
         :return: the postconditions of the action.
         """
@@ -365,7 +369,7 @@ class TracerAction(SUTAction, abc.ABC):
         super().verify_preconditions()
 
         for precondition in self.preconditions:
-            if self._log_preconditions:
+            if self.log_preconditions:
                 self.logger.info(
                     "Verifying precondition: %s",
                     precondition.describe_assumption(),
@@ -404,7 +408,7 @@ class TracerAction(SUTAction, abc.ABC):
 
         # verify the postconditions within the timeout
         for postcondition in self.postconditions:
-            if self._log_postconditions:
+            if self.log_postconditions:
                 self.logger.info(
                     "Verifying postcondition: %s",
                     postcondition.describe_assumption(),
