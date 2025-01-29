@@ -14,7 +14,7 @@ class TangoLRCAction(TangoCommandAction):
     """Send a LongRunningCommand to a Tango device and synchronise.
 
     This class represents an action that sends a LongRunningCommand to a Tango
-    device and then synchronise on its successful completion (and possibly
+    device and then synchronises on its successful completion (and possibly
     on its errors too). This class is an extension of
     :py:class:`ska_integration_test_harness.core.actions.TangoCommandAction`,
     which inherits the capability of sending Tango commands and to synchronise
@@ -29,9 +29,6 @@ class TangoLRCAction(TangoCommandAction):
       through the method :py:meth:`add_lrc_errors_to_early_stop`.
 
     **Usage example**:
-
-    .. code-block:: python
-
 
     .. code-block:: python
 
