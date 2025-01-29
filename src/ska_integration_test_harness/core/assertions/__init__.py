@@ -79,7 +79,7 @@ For further more complex assertions implementation, we suggest you to look at
 """  # pylint: disable=line-too-long # noqa: E501
 
 from .attribute import AssertDevicesAreInState
-from .state_changes import AssertDevicesStateChanges
+from .dev_state_changes import AssertDevicesStateChanges
 from .sut_assertion import SUTAssertion
 from .tracer_assertion import TracerAssertion
 
