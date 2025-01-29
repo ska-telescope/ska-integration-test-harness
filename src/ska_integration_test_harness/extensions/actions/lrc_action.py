@@ -13,23 +13,73 @@ from ..assertions.lrc_completion import AssertLRCCompletion
 class TangoLRCAction(TangoCommandAction):
     """Send a LongRunningCommand to a Tango device and synchronise.
 
-    This action is an extension of
-    :py:class:`ska_integration_test_harness.core.actions.TangoCommandAction`
-    that is specifically designed to send and synchronise a
-    SKA LongRunningCommand to a Tango device.
+    This class represents an action that sends a LongRunningCommand to a Tango
+    device and then synchronise on its successful completion (and possibly
+    on its errors too). This class is an extension of
+    :py:class:`ska_integration_test_harness.core.actions.TangoCommandAction`,
+    which inherits the capability of sending Tango commands and to synchronise
+    through a set of
+    :py:class:`ska_integration_test_harness.core.assertions.TracerAssertion`,
+    but adds two additional features:
 
-    This action can be used exactly as the superclass, with the only difference
-    that (optionally) you have two additional methods
+    - the possibility to add to postconditions a check on the completion of
+      the LRC, through the method
+      :py:meth:`add_lrc_completion_to_postconditions`;
+    - the possibility to add to early stop a check on the errors of the LRC,
+      through the method :py:meth:`add_lrc_errors_to_early_stop`.
 
-    - :py:meth:`add_lrc_completion_to_postconditions`, which will verify the
-      completion of the LRC;
-    - :py:meth:`add_lrc_errors_to_early_stop`, which will monitor the
-      LRC for errors and stop the test if any are detected.
+    **Usage example**:
 
-    The preconditions and postconditions verification are performed using the
-    same mechanics as the superclass (with the only exception of the two
-    additional checks).
-    """
+    .. code-block:: python
+
+
+    .. code-block:: python
+
+        from ska_integration_test_harness.core.actions import TangoCommandAction
+        from ska_integration_test_harness.core.assertions import AssertDevicesAreInState
+        from ska_integration_test_harness.core.assertions import AssertDevicesStateChanges
+
+        # Then you can build action instances and add preconditions and
+        # postconditions to them according to your needs.
+
+        action = TangoCommandAction(
+            target_device=dev1,
+            command_name="IncreaseAttributeLRC",
+            command_param=2,
+        ).add_preconditions(
+            AssertDevicesAreInState(
+                devices=[dev1, dev2],
+                attribute_name="attr1",
+                attribute_value=42
+            ),
+        ).add_postconditions(
+            AssertDevicesStateChanges(
+                devices=[dev1, dev2],
+                attribute_name="attr1",
+                attribute_value=43
+            ),
+            AssertDevicesAreInState(
+                devices=[dev1, dev2],
+                attribute_name="attr1",
+                attribute_value=44
+            ),
+        ).add_early_stop(
+            lambda e: e.attribute_value < 42
+
+        # synchronise on LRC completion (after the state changes)
+        ).add_lrc_completion_to_postconditions(
+
+        # monitor LRC errors (if any)
+        ).add_lrc_errors_to_early_stop()
+
+
+        # execute the action within a timeout of 5 seconds
+        # (which will stop early if the LRC fails or if it's detected
+        # an event with an attribute value less than 42)
+        action.execute(postconditions_timeout=5)
+
+
+    """  # pylint: disable=line-too-long # noqa: E501
 
     def __init__(
         self,
@@ -77,20 +127,35 @@ class TangoLRCAction(TangoCommandAction):
     ) -> "TangoLRCAction":
         """Add a postcondition to verify the completion of the LRC.
 
-        TODO: describe the fact you can monitor a sequence of long running
-        commands
+        Call this method to append to postconditions a
+        an assertion to check the LRC completes with some
+        :py:class:`ska_control_model.ResultCode`. This is done through an
+        :py:class:`~ska_integration_test_harness.extensions.assertions.AssertLRCCompletion`
+        instance, which assert over events on the ``longRunningCommandResult``
+        attribute of the target device.
+        The LRC ID will be extracted from the last command execution
+        result and this class will automatically be configured in
+        all the assertions of this type you add to the action.
 
-        :param expected_result_code: the expected result code of the LRC. If
-            you set it to None, any result code is accepted. You can also
-            pass a list of result codes to accept multiple result codes. By
-            default, it accepts only the OK result code.
+        NOTE: to accept multiple result codes as successful, you can pass
+        a list of them when calling this method. If you instead want to
+        track a whole sequence of LRC events with different result codes,
+        you can call this method multiple times.
 
-            TODO: describe better the possible values for this parameter
+        :param expected_result_code: the expected result code of the LRC.
+            You can:
 
-        :param put_at_beginning: if True, the postcondition is added at the
-            beginning of the postconditions list. By default, it is added at
-            the end.
-        """
+            - leave it to the default value (``ResultCode.OK``) to accept
+              only the OK result code;
+            - set it to ``None`` to accept any result code;
+            - set it to one or more result codes to accept multiple result
+              codes (by passing a single ``ResultCode`` or a list of them).
+
+        :param put_at_beginning: if True, you will verify the LRC completion
+            before the other postconditions you configured.
+            By default, it is added at the end.
+        :return: the action itself, to allow chaining the calls.
+        """  # pylint: disable=line-too-long # noqa: E501
         return self.add_postconditions(
             AssertLRCCompletion(
                 device=self.target_device,
@@ -103,19 +168,31 @@ class TangoLRCAction(TangoCommandAction):
         self,
         error_result_codes: "list[ResultCode] | None" = None,
     ) -> "TangoLRCAction":
-        """Add a postcondition to verify the completion of the LRC.
+        """Add an early stop condition to stop early if the LRC fails.
 
-        :param error_result_codes: the error result codes of the LRC. By
-            default, the error result codes are:
+        Call this method to add an early stop condition to stop the action
+        early if some kind of LRC :py:class:`ska_control_model.ResultCode`
+        is detected among events. This method will build an early stop
+        predicate that will applied in all the existing an future
+        postconditions. The LRC ID will be extracted from the last command
+        execution result and this class will automatically be configured in
+        all the early stop assertions of this type you add to the action.
+
+        :param error_result_codes: the result codes to consider as errors.
+            By default, the following result codes are considered as errors:
+
+            .. code-block:: python
+
+                [ResultCode.FAILED, ResultCode.REJECTED, ResultCode.NOT_ALLOWED]
+
+            You can override this default by passing a result code or a list
+            of them that you want to consider as errors.
 
             - ``ResultCode.FAILED``
             - ``ResultCode.REJECTED``
             - ``ResultCode.NOT_ALLOWED``
-
-            TODO: which other error codes may represent a failure?
-
-            TODO: explain better this parameter
-        """
+        """  # pylint: disable=line-too-long # noqa: E501
+        # set the default error result codes
         if error_result_codes is None:
             error_result_codes = [
                 ResultCode.FAILED,
@@ -142,7 +219,12 @@ class TangoLRCAction(TangoCommandAction):
         )
 
     def setup(self):
-        """Subscribe to all the necessary events, including the LRC event."""
+        """Subscribe to all the necessary events, including the LRC event.
+
+        See
+        :py:meth:`ska_integration_test_harness.core.actions.TracerAction.setup`
+        for more information.
+        """
         super().setup()
 
         # NOTE: be sure to subscribe to the LRC event
@@ -155,10 +237,20 @@ class TangoLRCAction(TangoCommandAction):
         But before, ensure all the LRC assertions are configured with
         the LRC ID from the last command result.
 
+        See
+        :py:meth:`ska_integration_test_harness.core.actions.TracerAction.verify_postconditions`
+        for more information.
+
         :param timeout: the time in seconds to wait for the postconditions to
-            be verified. If not specified, it defaults to 0. TODO: use it!
+            be verified. If not specified, it defaults to 0. Potentially,
+            it can be:
+
+            - a number, specifying the timeout in seconds,
+            - a :py:class:`~ska_tango_testing.integration.assertions.ChainedAssertionsTimeout`
+              object, potentially shared among multiple actions.
+
         :raises AssertionError: if one of the postconditions fails.
-        """
+        """  # pylint: disable=line-too-long # noqa: E501
 
         last_lrc_id = self.get_last_lrc_id()
 
