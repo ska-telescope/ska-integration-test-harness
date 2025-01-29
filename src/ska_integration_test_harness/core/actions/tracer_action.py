@@ -1,7 +1,7 @@
 """An event-based action which uses TangoEventTracer to synchronise."""
 
 import abc
-from typing import Callable
+from typing import Callable, SupportsFloat
 
 from ska_tango_testing.integration import TangoEventTracer
 from ska_tango_testing.integration.assertions import ChainedAssertionsTimeout
@@ -126,12 +126,10 @@ class TracerAction(SUTAction, abc.ABC):
         # execute (this time without a timeout)
         action.execute()
 
-    **NOTE**: At the moment, the tracer and the timeout are managed
-    exclusively by the action itself
-    (i.e., this class takes care of creating the objects,
-    resetting them and injecting them into the assertions), but in the
-    future we could make them injectable from the outside (and so potentially
-    shared in different actions).
+    **NOTE**: At the moment, the tracer is managed exclusively
+    by the action itself. The timeout instead is potentially injectable
+    from the outside as an object of type
+    :py:class:`~ska_tango_testing.integration.assertions.ChainedAssertionsTimeout`.
 
     **NOTE**: The action setters are chainable, so you can chain the calls to
     add preconditions and postconditions, set the timeout, etc. Example:
@@ -374,7 +372,7 @@ class TracerAction(SUTAction, abc.ABC):
                 )
             precondition.verify()
 
-    def verify_postconditions(self, timeout: float = 0):
+    def verify_postconditions(self, timeout: SupportsFloat = 0):
         """Verify all the configured postconditions, within the given timeout.
 
         This method verifies all the postconditions configured for the action,
@@ -389,15 +387,22 @@ class TracerAction(SUTAction, abc.ABC):
         (By default, they are logged).
 
         :param timeout: the time in seconds to wait for the postconditions to
-            be verified. If not specified, it defaults to 0.
-        :raises AssertionError: if one of the postconditions fails.
-        """
-        super().verify_postconditions(timeout=timeout)
+            be verified. If not specified, it defaults to 0. Potentially,
+            it can be:
 
-        # define a shared timeout for all the postconditions
-        shared_timeout = ChainedAssertionsTimeout(timeout)
+            - a number, specifying the timeout in seconds,
+            - a :py:class:`~ska_tango_testing.integration.assertions.ChainedAssertionsTimeout`
+              object, potentially shared among multiple actions.
+
+        :raises AssertionError: if one of the postconditions fails.
+        """  # pylint: disable=line-too-long # noqa: E501
+        # ensure the timeout is an object (shared or local)
+        shared_timeout = ChainedAssertionsTimeout.get_timeout_object(timeout)
         shared_timeout.start()
 
+        super().verify_postconditions(timeout=shared_timeout)
+
+        # verify the postconditions within the timeout
         for postcondition in self.postconditions:
             if self._log_postconditions:
                 self.logger.info(

@@ -74,7 +74,8 @@ class SUTAction(abc.ABC):
                 # a certain state
                 # ...
 
-            def verify preconditions(self, timeout: float =0):  # optional
+            # optional
+            def verify preconditions(self, timeout: SupportsFloat =0):
                 # always call the superclass
                 super().verify_preconditions(timeout)
 
@@ -114,7 +115,7 @@ class SUTAction(abc.ABC):
 
     def execute(
         self,
-        postconditions_timeout: float = 0,
+        postconditions_timeout: SupportsFloat = 0,
         verify_preconditions: bool = True,
         verify_postconditions: bool = True,
     ) -> None:
@@ -180,7 +181,7 @@ class SUTAction(abc.ABC):
                 "Action %s: procedure executed successfully. "
                 "Verifying postconditions (within a %s seconds timeout)...",
                 self.name(),
-                postconditions_timeout,
+                float(postconditions_timeout),
             )
             self.verify_postconditions(timeout=postconditions_timeout)
 

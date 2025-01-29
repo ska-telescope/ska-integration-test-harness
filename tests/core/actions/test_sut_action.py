@@ -1,5 +1,6 @@
 """Unit tests for the SUTAction class."""
 
+from typing import SupportsFloat
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -51,7 +52,7 @@ class MockSUTAction(SUTAction):
             raise AssertionError("Procedure failed")
         self.procedure_executed = True
 
-    def verify_postconditions(self, timeout: float = 0) -> None:
+    def verify_postconditions(self, timeout: SupportsFloat = 0) -> None:
         self.last_timeout = timeout
         if self.fail_postconditions:
             raise AssertionError("Postconditions failed")

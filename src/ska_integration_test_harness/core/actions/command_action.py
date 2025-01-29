@@ -1,5 +1,7 @@
 """Action to invoke a Tango command on a device."""
 
+from typing import Any
+
 import tango
 
 from .tracer_action import TracerAction
@@ -29,17 +31,21 @@ class TangoCommandAction(TracerAction):
         self,
         target_device: tango.DeviceProxy,
         command_name: str,
-        command_args: list | None = None,
-        command_kwargs: dict | None = None,
+        command_param: Any | None = None,
+        command_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ) -> None:
-        """Create a new TangoCommandAction instance.
+        """Create a new TangoLRCAction instance.
 
         :param target_device: the target device on which to execute
             the command.
         :param command_name: the name of the command to execute.
-        :param command_args: the positional arguments to pass to the command.
-        :param command_kwargs: the keyword arguments to pass to the command.
+        :param command_param: the parameter to pass to the command. If not
+            specified, it defaults to no parameter.
+        :param command_kwargs: additional keyword arguments
+            to pass to the command. See
+            :py:meth:`tango.DeviceProxy.command_inout`
+            for more information on the available keyword arguments.
         :param kwargs: additional keyword arguments to pass to the superclass.
             See
             :py:class:`ska_integration_test_harness.core.actions.TracerAction`
@@ -51,7 +57,7 @@ class TangoCommandAction(TracerAction):
 
         self.target_device = target_device
         self.command_name = command_name
-        self.command_args = command_args or []
+        self.command_param = command_param
         self.command_kwargs = command_kwargs or {}
         self.last_command_result = None
 
@@ -63,7 +69,20 @@ class TangoCommandAction(TracerAction):
         ``last_command_result`` attribute.
         """
         self.last_command_result = self.target_device.command_inout(
-            self.command_name, *self.command_args, **self.command_kwargs
+            cmd_name=self.command_name,
+            cmd_param=self.command_param,
+            **self.command_kwargs,
+        )
+
+    def name(self):
+        """Return the name of the action.
+
+        :return: the name of the action.
+        """
+        return (
+            self.__class__.__name__
+            + f"(target_device={self.target_device.dev_name()}, "
+            + f"command_name={self.command_name})"
         )
 
     def description(self):
@@ -73,10 +92,10 @@ class TangoCommandAction(TracerAction):
         """
         desc = f"Execute command {self.command_name} "
         desc += f"on device {self.target_device.dev_name()} "
-        if self.command_args:
-            desc += f"with args {self.command_args} "
+        if self.command_param:
+            desc += f"with param {self.command_param} "
         if self.command_kwargs:
-            connector = "and" if self.command_args else "with"
+            connector = "and" if self.command_param else "with"
             desc += f"{connector} kwargs {self.command_kwargs} "
 
         return desc.strip() + "."
