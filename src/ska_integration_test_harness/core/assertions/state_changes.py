@@ -12,17 +12,21 @@ class AssertDevicesStateChanges(TracerAssertion):
     """Verify there are recorded state changes for the given devices.
 
     This assertion verifies that the given devices have recorded state changes
-    in the TangoEventTracer within a given timeout and without early stop
-    events.
-
-    The state change events could be defined by the following parameters
+    for a certain attribute, within a given timeout and without early stop
+    events. A state change is expected to happen in one or more ``devices``,
+    regards an ``attribute_name`` and could be defined by the following parameters
     (all optional and combinable):
 
-    - by a certain value
-    - by a certain previous value
-    - by a custom matcher
+    - by a certain value (``attribute_value``)
+    - by a certain previous value (``previous_value``)
+    - by a custom matcher (``custom_matcher``)
 
-    """
+    This assertion extends
+    :py:class:`~ska_integration_test_harness.core.assertions.TracerAssertion`
+    and uses
+    :py:func:`ska_tango_testing.integration.assertions.has_change_event_occurred`
+    assertions to detect the events.
+    """  # pylint: disable=line-too-long # noqa: E501
 
     # pylint: disable=too-many-arguments, too-many-positional-arguments
     def __init__(
@@ -49,10 +53,19 @@ class AssertDevicesStateChanges(TracerAssertion):
         """
         super().__init__(**kwargs)
         self.devices = devices
+        """The devices where the state change is expected."""
+
         self.attribute_name = attribute_name
+        """The name of the attribute that changes value."""
+
         self.attribute_value = attribute_value
+        """The expected new value (Optional)."""
+
         self.previous_value = previous_value
+        """The expected previous value than the expected event (Optional)."""
+
         self.custom_matcher = custom_matcher
+        """A custom matcher for the expected event (Optional)."""
 
     def setup(self) -> None:
         """Subscribe to the state change events of the devices."""

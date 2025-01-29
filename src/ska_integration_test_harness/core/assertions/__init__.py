@@ -5,8 +5,9 @@ for defining and executing verifications and synchronizations against a
 (Tango based) system under test (SUT).
 
 **What is an assertion?** In abstract terms, an assertion is supposed to be a
-generic verification or synchronization operation. Actually it can be anything
-that verifies some kind of property.
+generic verification of a system state or property. In an event based system
+like Tango, an assertion is often a verification that some events are emitted,
+in the past or in a certain time frame.
 
 Representing assertions as classes have not been an easy choice,
 since the risk of producing or encouraging the production of
