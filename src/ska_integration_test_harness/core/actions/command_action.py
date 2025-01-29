@@ -25,7 +25,49 @@ class TangoCommandAction(TracerAction):
     The preconditions and postconditions verification are performed using the
     same mechanics as the superclass
     :py:class:`ska_integration_test_harness.core.actions.TracerAction`.
-    """
+    Contrary to the superclass, this action does not need to be extended
+    and is ready to be used as it is.
+
+    **Usage example**:
+
+    .. code-block:: python
+
+        from ska_integration_test_harness.core.actions import TangoCommandAction
+        from ska_integration_test_harness.core.assertions import AssertDevicesAreInState
+        from ska_integration_test_harness.core.assertions import AssertDevicesStateChanges
+
+        # Then you can build action instances and add preconditions and
+        # postconditions to them according to your needs.
+
+        action = TangoCommandAction(
+            target_device=dev1,
+            command_name="IncreaseAttribute",
+            command_param=2,
+        ).add_preconditions(
+            AssertDevicesAreInState(
+                devices=[dev1, dev2],
+                attribute_name="attr1",
+                attribute_value=42
+            ),
+        ).add_postconditions(
+            AssertDevicesStateChanges(
+                devices=[dev1, dev2],
+                attribute_name="attr1",
+                attribute_value=43
+            ),
+            AssertDevicesAreInState(
+                devices=[dev1, dev2],
+                attribute_name="attr1",
+                attribute_value=44
+            ),
+        ).add_early_stop(
+            lambda e: e.attribute_value < 42
+        )
+
+        # execute the action within a timeout of 5 seconds
+        action.execute(postconditions_timeout=5)
+
+    """  # pylint: disable=line-too-long # noqa: E501
 
     def __init__(
         self,
