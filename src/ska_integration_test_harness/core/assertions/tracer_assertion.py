@@ -14,7 +14,9 @@ from .sut_assertion import SUTAssertion
 class TracerAssertion(SUTAssertion, abc.ABC):
     """An event-based assertion based on TangoEventTracer.
 
-    This class represents an assertion that is based on the events
+    This class is a
+    :py:class:`~ska_integration_test_harness.core.assertions.SUTAssertion`
+    that is based on the events
     emitted by the TangoEventTracer. The assertion is event-based,
     so it needs to be configured with:
 
@@ -33,16 +35,85 @@ class TracerAssertion(SUTAssertion, abc.ABC):
     To make the tracer unmanaged, you can pass a custom tracer instance
     to the constructor. To make the timeout unmanaged, you can pass a
     custom timeout object to the constructor (if you pass a numeric value,
-    the timeout object will be created for you and will be managed).
-
-    TODO: add a meaningful example of usage!
+    the timeout object will be created for you and will be managed). Both
+    the tracer and the timeout can be shared among multiple assertions
+    (to share a timeout, check
+    :py:class:`ska_tango_testing.integration.assertions.ChainedAssertionsTimeout`
+    ).
 
     NOTE: you still have to extend this class and implement the
-    :py:meth:`verify` method to make it work. You can use
-    :py:meth:`get_assertpy_context` to get the assertpy context you need
+    :py:meth:`verify` and the :py:meth:`describe_assumption`
+    methods to make it work. In :py:meth:`verify` implementation you can use
+    the  :py:meth:`get_assertpy_context` to get the assertpy context you need
     to verify the assertion.
 
-    """
+    **Usage Example**:
+
+    .. code-block:: python
+
+        from ska_integration_test_harness.core.assertions import (
+            TracerAssertion
+        )
+
+        class MyAssertion(TracerAssertion):
+
+            def verify(self):
+                # your verification code here
+                # - use get_assertpy_context to get the assertpy context
+                #   (already configured with the tracer, the timeout and
+                #   the early stop condition)
+                # - use the assertpy context to verify the assertion
+                #   (you can store it in a variable if you need to chain
+                #   dynamically multiple assertions - e.g., in a for loop)
+                context = get_assertpy_context()
+
+                context.has_change_event_occurred(
+                    "my/device/1", "my_attr", 42
+                ).has_change_event_occurred(
+                    "my/device/2", "my_attr", 43, previous_value=42
+                ).has_change_event_occurred(
+                    "my/device/3", "my_attr", 44, previous_value=43
+                )
+
+        assertion = MyAssertion()
+
+        # ---------------------------------------------------------------
+        # simple verification within a timeout
+        assertion.timeout = 5
+        assertion.setup()
+        assertion.verify()
+
+        # ---------------------------------------------------------------
+        # simple verification on the current events on a given
+        # tracer instance (setup will NOT clear up the given instance!)
+        assertion.tracer = my_tracer
+        assertion.setup()
+        assertion.verify()
+
+        # ---------------------------------------------------------------
+        # verification with an early stop condition
+        assertion.tracer = None # This way the tracer will be managed
+        assertion.early_stop = lambda event:
+            "ERROR" in str(event.attribute_value)
+
+        # ---------------------------------------------------------------
+        # verification of this assertion and many others within a same
+        # common timeout (setup will NOT clear up the timeout!)
+
+        from ska_tango_testing.integration.assertions import (
+            ChainedAssertionsTimeout
+        )
+        timeout = ChainedAssertionsTimeout(5)
+
+        assertions = [assertion, MyOtherAssertion(), ...]
+
+        for assertion in assertions:
+            assertion.timeout = timeout
+            # (potentially they could share also the same tracer instance)
+            assertion.setup()
+            assertion.verify()
+
+    """  # pylint: disable=line-too-long # noqa: E501
 
     def __init__(
         self,
@@ -177,6 +248,27 @@ class TracerAssertion(SUTAssertion, abc.ABC):
         includes: the tracer instance, the timeout and the early stop
         condition. Multiple calls of this method will share the same
         timeout object.
+
+        You can use the returned context to verify the assertion. Example:
+
+        .. code-block:: python
+
+            # what you will probably call in your ``verify`` method
+            # implementation
+            self.get_assertpy_context().has_change_event_occurred(
+                "my/device/1", "my_attr", 42
+            )
+
+            # or in a more sophisticated way...
+            context = self.get_assertpy_context()
+            for device, attr, value in [
+                ("my/device/1", "my_attr", 42),
+                ("my/device/2", "my_attr", 43),
+                ("my/device/3", "my_attr", 44),
+            ]:
+                context.has_change_event_occurred(device, attr, value)
+
+
 
         :return: the assertpy context to use for the assertion
         """
