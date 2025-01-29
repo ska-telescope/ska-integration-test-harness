@@ -1,6 +1,5 @@
 """Unit tests for the TracerAction class."""
 
-import time
 from datetime import datetime
 from unittest.mock import MagicMock
 
@@ -13,6 +12,7 @@ from ska_integration_test_harness.core.actions.tracer_action import (
 )
 from tests.actions.utils.mock_device_proxy import create_device_proxy_mock
 from tests.actions.utils.mock_event_tracer import add_event, delayed_add_event
+from tests.utils import assert_elapsed_time_is_closed_to
 
 from .utils import (
     create_mock_assertion,
@@ -379,13 +379,7 @@ class TestTracerAction:
         start_time = datetime.now()
         action.execute(postconditions_timeout=1)
 
-        assert_that(
-            (datetime.now() - start_time).total_seconds()
-        ).described_as(
-            "The action succeeds only when the postconditions are verified"
-        ).is_close_to(
-            0.5, 0.1
-        )
+        assert_elapsed_time_is_closed_to(start_time, 0.5, 0.1)
 
     @staticmethod
     def test_action_postconditions_are_verified_within_the_timeout_and_fail():
@@ -399,8 +393,4 @@ class TestTracerAction:
         with pytest.raises(AssertionError):
             action.execute(postconditions_timeout=1)
 
-        assert_that(
-            (datetime.now() - start_time).total_seconds()
-        ).described_as("We expect the whole timout to be elapsed").is_close_to(
-            1, 0.1
-        )
+        assert_elapsed_time_is_closed_to(start_time, 1, 0.1)

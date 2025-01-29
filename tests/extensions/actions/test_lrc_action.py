@@ -1,8 +1,6 @@
 """Unit tests for the TangoLRCAction class."""
 
-import time
 from datetime import datetime
-from unittest.mock import MagicMock
 
 import pytest
 from assertpy import assert_that
@@ -16,6 +14,7 @@ from ska_integration_test_harness.extensions.assertions.lrc_completion import (
 )
 from tests.actions.utils.mock_device_proxy import create_device_proxy_mock
 from tests.actions.utils.mock_event_tracer import add_event, delayed_add_event
+from tests.utils import assert_elapsed_time_is_closed_to
 
 from ...core.actions.utils import create_state_change_assertion
 
@@ -174,13 +173,7 @@ class TestTangoLRCAction:
         start_time = datetime.now()
         action.execute(postconditions_timeout=1)
 
-        assert_that(
-            (datetime.now() - start_time).total_seconds()
-        ).described_as(
-            "The action succeeds only when the LRC completion is received"
-        ).is_close_to(
-            0.5, 0.1
-        )
+        assert_elapsed_time_is_closed_to(start_time, 0.5, 0.1)
 
     @staticmethod
     def test_lrc_fails_when_lrc_failure_is_detected():
@@ -203,10 +196,4 @@ class TestTangoLRCAction:
         with pytest.raises(AssertionError):
             action.execute(postconditions_timeout=1)
 
-        assert_that(
-            (datetime.now() - start_time).total_seconds()
-        ).described_as(
-            "The action fails when the LRC error is received"
-        ).is_close_to(
-            0.5, 0.1
-        )
+        assert_elapsed_time_is_closed_to(start_time, 0.5, 0.1)
