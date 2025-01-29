@@ -37,8 +37,13 @@ class AssertDevicesAreInState(SUTAssertion):
         """
         super().__init__()
         self.devices = devices
+        """The list of devices to verify."""
+
         self.attribute_name = attribute_name
+        """The name of the attribute to assert."""
+
         self.attribute_value = attribute_value
+        """The value of the attribute to assert."""
 
     def verify(self) -> None:
         """Verify the devices are in the expected state.

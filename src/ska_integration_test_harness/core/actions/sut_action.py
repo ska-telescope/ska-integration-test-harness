@@ -109,6 +109,8 @@ class SUTAction(abc.ABC):
         """
         super().__init__()
         self.logger = logging.getLogger(self.__class__.__name__)
+        """The logger for the action."""
+
         self.logger.setLevel(logging.INFO)
         self.set_logging(enable_logging)
 

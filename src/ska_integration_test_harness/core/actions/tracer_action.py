@@ -33,7 +33,9 @@ class TracerAction(SUTAction, abc.ABC):
     - Manages a shared timeout for the post-conditions, so all of them are
       verified within the same time interval.
     - Allows you to define early stop conditions for the post-conditions,
-      through the :py:meth:`add_early_stop` method.
+      through the :py:meth:`add_early_stop` method (to read more about early
+      stop conditions, see
+      :py:func:`ska_tango_testing.integration.assertions.with_early_stop`).
 
     To do this, the class implements many of the lifecycle methods of the
     :py:class:`~ska_integration_test_harness.core.actions.SUTAction` class,
@@ -173,15 +175,22 @@ class TracerAction(SUTAction, abc.ABC):
         super().__init__(enable_logging=enable_logging)
         self._preconditions = []
         self._postconditions = []
-
-        # the (managed) tracer instance to use for the pre/post conditions
-        self.tracer = TangoEventTracer()
-        # a predicate to stop the postconditions verification early
         self._early_stop = None
 
-        # logging flags
+        self.tracer = TangoEventTracer()
+        """The (managed) tracer instance to use for the pre/post conditions."""
+
         self.log_preconditions = log_preconditions
+        """Whether to log the preconditions when verifying them.
+
+        Defaults to False.
+        """
+
         self.log_postconditions = log_postconditions
+        """Whether to log the postconditions when verifying them.
+
+        Defaults to True.
+        """
 
     # --------------------------------------------------------------------
     # Configure timeout, preconditions, postconditions and early stop
@@ -311,6 +320,9 @@ class TracerAction(SUTAction, abc.ABC):
 
         Add a new early stop condition for the postconditions, which will be
         combined with the existing one (if any) using a logical OR.
+
+        To read more about what is an early stop condition, see
+        :py:func:`ska_tango_testing.integration.assertions.with_early_stop`.
 
         :param early_stop: the early stop condition to add.
         :return: the action itself, to allow chaining the calls.

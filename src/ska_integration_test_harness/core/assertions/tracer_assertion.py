@@ -137,10 +137,19 @@ class TracerAssertion(SUTAssertion, abc.ABC):
         :param early_stop: whether to stop the assertion early
             in case of errors. If omitted, the assertion (if not passing)
             will wait for the timeout to expire before failing.
-        """
+            (see :py:func:`ska_tango_testing.integration.assertions.with_early_stop`
+            for more details)
+        """  # pylint: disable=line-too-long # noqa: E501
         self.tracer = tracer
         self.timeout = timeout
+
         self.early_stop = early_stop
+        """The early stop condition for the assertion.
+
+        (see
+        :py:func:`ska_tango_testing.integration.assertions.with_early_stop`
+        for more details)
+        """
 
     # --------------------------------------------------------------------
     # Tracer management

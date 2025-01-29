@@ -67,6 +67,7 @@ class AssertLRCCompletion(TracerAssertion):
         """
         super().__init__(**kwargs)
         self.device = device
+        """The target device to verify."""
 
         if expected_result_codes is None:
             # all result codes are accepted
@@ -84,6 +85,8 @@ class AssertLRCCompletion(TracerAssertion):
         We don't know it yet, so it's None by default. Until
         it's not set, the assertion will match any LRC completion event
         from the target device.
+
+        It is returned when calling the Tango command that starts the LRC.
         """
 
     def setup(self):

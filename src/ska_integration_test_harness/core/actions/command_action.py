@@ -98,10 +98,25 @@ class TangoCommandAction(TracerAction):
         super().__init__(**kwargs)
 
         self.target_device = target_device
+        """The target device on which to execute the command."""
+
         self.command_name = command_name
+        """The name of the command to execute."""
+
         self.command_param = command_param
+        """The parameter to pass to the command."""
+
         self.command_kwargs = command_kwargs or {}
+        """Additional keyword arguments.
+
+        (they will be passed to :py:meth:`tango.DeviceProxy.command_inout`)
+        """
+
         self.last_command_result = None
+        """The result of the last command execution.
+
+        It is set to None until the command is executed.
+        """
 
     def execute_procedure(self):
         """Call the command on the target device and store the result.
