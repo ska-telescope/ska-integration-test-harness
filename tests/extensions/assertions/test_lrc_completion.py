@@ -1,7 +1,6 @@
 """Unit tests for the AssertLRCCompletion class."""
 
 import pytest
-from assertpy import assert_that
 from ska_control_model import ResultCode
 
 from ska_integration_test_harness.extensions.assertions.lrc_completion import (
@@ -17,23 +16,14 @@ class TestAssertLRCCompletion:
 
     We cover the following cases:
 
-    - LRC ID is not set
     - LRC completes with expected result code
     - LRC completes with unexpected result code
     - LRC event has invalid format
+    - LRC ID is not set and any ID is accepted
+    - LRC result code is set as none and any result code is accepted
+    - LRC accepts multiple expected result codes
+    - LRC ID is set but the event has a different ID
     """
-
-    @staticmethod
-    def test_lrc_id_not_set_raises_value_error():
-        """Raises ValueError if LRC ID is not set."""
-        device = create_device_proxy_mock("test/device/1")
-        assertion = AssertLRCCompletion(device, ResultCode.OK)
-        assertion.setup()
-
-        with pytest.raises(ValueError) as exc_info:
-            assertion.verify()
-
-        assert_that(str(exc_info.value)).contains("No LRC ID to monitor")
 
     @staticmethod
     def test_lrc_completes_with_expected_result_code():
@@ -83,6 +73,75 @@ class TestAssertLRCCompletion:
             ("longRunningCommandResult", ("lrc123", '["invalid"]')),
         ]:
             add_event(assertion.tracer, "test/device/1", attr_name, value)
+
+        with pytest.raises(AssertionError):
+            assertion.verify()
+
+    @staticmethod
+    def test_lrc_id_not_set_and_any_id_accepted():
+        """Passes if LRC ID is not set and any ID is accepted."""
+        device = create_device_proxy_mock("test/device/1")
+        assertion = AssertLRCCompletion(device, ResultCode.OK)
+        assertion.setup()
+
+        add_event(
+            assertion.tracer,
+            "test/device/1",
+            "longRunningCommandResult",
+            ("lrc123", '[0, "Success"]'),
+        )
+        assertion.verify()
+
+    @staticmethod
+    def test_lrc_result_code_not_set_and_any_result_code_accepted():
+        """
+        Passes if LRC result code is not set and any result code is accepted.
+        """
+        device = create_device_proxy_mock("test/device/1")
+        assertion = AssertLRCCompletion(device, None)
+        assertion.setup()
+        assertion.monitor_lrc("lrc123")
+
+        add_event(
+            assertion.tracer,
+            "test/device/1",
+            "longRunningCommandResult",
+            ("lrc123", '[4, "UNKNOWN"]'),
+        )
+        assertion.verify()
+
+    @staticmethod
+    def test_lrc_accepts_multiple_expected_result_codes():
+        """Passes if LRC accepts multiple expected result codes."""
+        device = create_device_proxy_mock("test/device/1")
+        assertion = AssertLRCCompletion(
+            device, [ResultCode.OK, ResultCode.FAILED]
+        )
+        assertion.setup()
+        assertion.monitor_lrc("lrc123")
+
+        add_event(
+            assertion.tracer,
+            "test/device/1",
+            "longRunningCommandResult",
+            ("lrc123", '[3, "Failure"]'),
+        )
+        assertion.verify()
+
+    @staticmethod
+    def test_lrc_id_is_set_but_event_has_different_id():
+        """Fails if LRC ID is set but the event has a different ID."""
+        device = create_device_proxy_mock("test/device/1")
+        assertion = AssertLRCCompletion(device, ResultCode.OK)
+        assertion.setup()
+        assertion.monitor_lrc("lrc123")
+
+        add_event(
+            assertion.tracer,
+            "test/device/1",
+            "longRunningCommandResult",
+            ("lrc456", '[0, "Success"]'),
+        )
 
         with pytest.raises(AssertionError):
             assertion.verify()

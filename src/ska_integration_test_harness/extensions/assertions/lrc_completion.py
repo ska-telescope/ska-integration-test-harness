@@ -15,7 +15,8 @@ class AssertLRCCompletion(TracerAssertion):
     This assertion is an extension of
     :py:class:`~ska_integration_test_harness.core.assertions.TracerAssertion`
     that is specifically designed to verify the completion of a
-    LongRunningCommand.
+    LongRunningCommand through the monitoring on
+    ``longRunningCommandResult`` events from a Tango device.
 
     The usage is very similar to the superclass, with the only difference that
     there is a further method called :py:meth:`monitor_lrc` which will permit
@@ -23,13 +24,27 @@ class AssertLRCCompletion(TracerAssertion):
     when you create the assertion instance, the LRC ID is not yet available.
 
     In creation phase, you should specify target device and the expected
-    result code(s). Then, when the LRC ID is available, you can call
-    :py:meth:`monitor_lrc` to set the LRC to monitor. If you don't do that,
-    the assertion will fail because it doesn't know which LRC to monitor.
+    result code(s). In the :py:meth:`setup`, the assertion will subscribe
+    the tracer to the ``longRunningCommandResult`` event of the target device.
+    Then, after you called the command and you have a LRC ID is available,
+    you can call
+    :py:meth:`monitor_lrc` to set the LRC to monitor. If you don't do it,
+    the assertion will monitor any LRC completion events from the target
+    device ``longRunningCommandResult`` attribute (which is probably not
+    what you want).
 
-    NOTE: if for some reason your own device emits LRC in different formats,
+    **NOTE**: if for some reason your own device
+    emits LRC in different formats,
     you can extend this class and override the :py:meth:`match_lrc_completion`
     method to implement your own custom matcher.
+
+    **NOTE**: this assertion is designed to be used in the
+    :py:class:`~ska_integration_test_harness.extensions.actions.TangoLRCAction`
+    to verify the completion of a LongRunningCommand. If you use it standalone
+    (e.g., passing it directly to a
+    :py:class:`~ska_integration_test_harness.core.actions.TracerAction`),
+    you should take care of the LRC ID management (or accept that any LRC ID
+    will match).
     """
 
     def __init__(
@@ -63,8 +78,13 @@ class AssertLRCCompletion(TracerAssertion):
             # the given list of result codes is accepted
             self.expected_result_codes = expected_result_codes
 
-        # the LRC ID to monitor, we don't know it yet
         self.lrc_id: str | None = None
+        """The LRC ID to monitor.
+
+        We don't know it yet, so it's None by default. Until
+        it's not set, the assertion will match any LRC completion event
+        from the target device.
+        """
 
     def setup(self):
         """Subscribe to the LRC completion event."""
@@ -86,15 +106,17 @@ class AssertLRCCompletion(TracerAssertion):
     def verify(self):
         """Verify the LRC completes and has the expected result code.
 
-        Verify that the LRC has completed and the result code is among the
-        expected ones.
+        Verify that the device reports an event on the
+        ``longRunningCommandResult`` attribute with the expected
+        :py:class:`ska_control_model.ResultCode` value for the LRC ID
+        configured through :py:meth:`monitor_lrc`.
 
-        :raises AssertionError: if the LRC ID is not set or if the LRC
+        NOTE: before calling this method, you should call
+        :py:meth:`monitor_lrc` to set the LRC ID to monitor. If you don't
+        call it, the assertion will match any LRC completion event from the
+        target device.
         """
         super().verify()
-
-        if self.lrc_id is None:
-            raise ValueError("No LRC ID to monitor")
 
         self.get_assertpy_context().has_change_event_occurred(
             device_name=self.device,
@@ -106,26 +128,34 @@ class AssertLRCCompletion(TracerAssertion):
         """Check if an event is a LRC completion event (with expected result).
 
         This method is a custom matcher that will be used by the assertion to
-        check if an event is a LRC completion event and, if given, check also
-        if the result code is the expected one.
+        check if an event is a LRC completion event, the format is the
+        expected one and:
 
-        Expected attribute value format:
+        - if given, check the LRC ID is the expected one (``self.lrc_id``)
+        - if given, check the result code is one of the expected ones
+          (``self.expected_result_codes``)
+
+        The following is the expected format of the event value:
 
         .. code-block:: python
 
             (lrc_id, '[RESULT_CODE, "result message"]')
 
+        **NOTE**: this method can be overridden to implement custom matchers
+        for different LRC completion event formats. This method can also be
+        used as a standalone predicate to be passed as an early stop predicate
+        in :py:class:`ska_integration_test_harness.core.actions.TracerAction`
+        or
+        :py:class:`ska_integration_test_harness.core.assertions.TracerAssertion`
+        instances. When the method is used as a standalone matcher, you can
+        defer the LRC ID setting and the expected result codes setting.
+
         :param event: the event to check.
         :return: True if the event is a LRC completion event with the expected
             result code, False otherwise.
-        """
-        # (for safety if this method is used as standalone matcher)
-        # check the LRC ID is set
-        if self.lrc_id is None:
-            raise ValueError("No LRC ID to monitor")
-
-        # (for safety if this method is used as standalone matcher)
+        """  # pylint: disable=line-too-long # noqa: E501
         # check again device and attribute
+        # (for safety if this method is used as standalone matcher)
         if not event.has_device(self.device) or not event.has_attribute(
             "longRunningCommandResult"
         ):
@@ -138,9 +168,9 @@ class AssertLRCCompletion(TracerAssertion):
         ):
             return False
 
-        # check if the LRC ID is the one we are monitoring
+        # if given, check the LRC ID
         lrc_id, result_message = event.attribute_value
-        if lrc_id != self.lrc_id:
+        if self.lrc_id is not None and lrc_id != self.lrc_id:
             return False
 
         # the result message is JSON encoded
@@ -170,7 +200,7 @@ class AssertLRCCompletion(TracerAssertion):
         if self.lrc_id is not None:
             desc += f"for LRC with ID {self.lrc_id} "
         else:
-            desc += "(LRC ID not yet set) "
+            desc += "for any LRC ID "
 
         if self.expected_result_codes:
             desc += "expecting result code(s) "
