@@ -456,7 +456,6 @@ To achieve this, we proceed as follows:
             tango.DeviceProxy("csp-low/subarray/01"),
             tango.DeviceProxy("csp-low/subarray/02"),
         ],
-        timeout=16,
     )
 
     errors = []
