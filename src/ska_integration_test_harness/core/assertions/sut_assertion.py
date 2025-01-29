@@ -6,39 +6,59 @@ import abc
 class SUTAssertion(abc.ABC):
     """A base class for an assertion on the SUT.
 
-    This class represents an assertion on the SUT. A generic assertion on the
-    SUT:
+    This class is the base class for the
+    :py:mod:`ska_integration_test_harness.core.assertions` framework
+    and it provides an empty shell for defining a generic assertion on the SUT.
 
-    - is the verification of some kind of wide condition, probably made
-      by many lower level assertions grouped together;
-    - it may (optionally) need a setup phase;
-    - has a semantic description that explains what the assertion is about.
+    An assertion is a verification of some kind of wide condition, probably
+    made by many lower level assertions grouped together, eventually
+    event-based. An assertion:
 
-    We think of this class because the SUT is a complex system made
-    of multiple components, so it may be useful to have a way to
-    group together many lower level assertions into something more
-    abstract and meaningful (e.g., sometimes we want to write things as
-    "the SUT is in a X state", but the "being in a X state" may be
-    composed by many lower level assertions involving many Tango devices).
-    Moreover, in this context many assertions are event based, so defining
-    the existence of a setup phase is useful.
+    - may need a setup phase to prepare the assertion for the verification
+      (method :py:meth:`setup`, optional extension point)
+    - must have a verification phase to verify the assertion
+      (method :py:meth:`verify`, required implementation)
+    - should have a description of the assumption that the assertion verifies
+      (method :py:meth:`describe_assumption`, required implementation)
 
     **How to use an assertion as an end user**: An end user can use assertions
     calling in sequence the :py:meth:`setup` method to prepare the assertion
     for the verification (and ensure that the assertion is in a clean state)
-    and then the :py:meth:`verify` method to verify the assertion. Example:
-
-    .. code-block:: python
-
-        assertion = MyAssertion()
-        assertion.setup()
-        logging.info(f"Verifying: {assertion.describe_assumption()}")
-        assertion.verify()
+    and then the :py:meth:`verify` method to verify the assertion.
 
     **How to extend this class**: This class is basically just an empty
     skeleton, so subclass it and implement compulsory
     :py:meth:`verify` and :py:meth:`describe_assumption` methods. Optionally,
     you can also override the :py:meth:`setup` method.
+
+    .. code-block:: python
+
+        import logging
+        from ska_integration_test_harness.core.assertions import SUTAssertion
+
+        class MyAssertion(SUTAssertion):
+
+            def setup(self):
+                super().setup()
+
+                # your setup code here (e.g., subscribe to events)
+
+            def verify(self):
+                # your verification code here
+
+            def describe_assumption(self):
+                return "My assertion description"
+
+        assertion = MyAssertion()
+        assertion.setup()
+
+        logging.info(f"Verifying: {assertion.describe_assumption()}")
+        assertion.verify()
+
+        # an assertion can be reused multiple times, given that you call
+        # the setup method before each verification
+        assertion.setup()
+        assertion.verify()
     """
 
     def setup(self):
@@ -57,10 +77,8 @@ class SUTAssertion(abc.ABC):
         - inside this method, clear and setup all the subscriptions you
           need for the verification procedure
         - in the docstring of the method, specify the resources that
-          are set up (and briefly recap also what is done by superclasses)
-        - if you think the method may be extended by your own subclasses,
-          put in the docstring a reference to this method docstring
-          (e.g., TODO: add example)
+          are set up (and briefly recap also what is done by superclasses,
+          potentially referencing their method docstring)
         """
 
     @abc.abstractmethod
@@ -83,10 +101,8 @@ class SUTAssertion(abc.ABC):
           If it is consider :py:class:`SUTAssertionWTimeout`
         - if you fail, produce a meaningful error message
         - in the docstring of the method, specify the resources that
-          are verified (and briefly recap also what is done by superclasses)
-        - if you think the method may be extended by your own subclasses,
-          put in the docstring a reference to this method docstring
-          (e.g., TODO: add example)
+          are verified (and briefly recap also what is done by superclasses,
+          potentially referencing their method docstring)
 
         :raises AssertionError: if the assertion fails
         """  # noqa: DAR402
@@ -110,5 +126,4 @@ class SUTAssertion(abc.ABC):
         """
 
     def __str__(self):
-        """Describe the assumption to stringify the assertion."""
         return self.describe_assumption()
