@@ -1,5 +1,6 @@
 """Unit tests for the SUTAction class."""
 
+from typing import SupportsFloat
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -11,11 +12,13 @@ from ska_integration_test_harness.core.actions.sut_action import SUTAction
 class MockSUTAction(SUTAction):
     """Mock subclass of SUTAction for testing purposes."""
 
+    # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         fail_preconditions=False,
         fail_procedure=False,
         fail_postconditions=False,
+        **kwargs,
     ):
         """Initialise the mock action.
 
@@ -24,8 +27,9 @@ class MockSUTAction(SUTAction):
         :param fail_procedure: Flag to indicate if the procedure should fail
         :param fail_postconditions: Flag to indicate if postconditions
             should fail
+        **kwargs: Additional keyword arguments
         """
-        super().__init__()
+        super().__init__(**kwargs)
         self.fail_preconditions = fail_preconditions
         self.fail_procedure = fail_procedure
         self.fail_postconditions = fail_postconditions
@@ -33,6 +37,7 @@ class MockSUTAction(SUTAction):
         self.preconditions_verified = False
         self.procedure_executed = False
         self.postconditions_verified = False
+        self.last_timeout = None
 
     def setup(self) -> None:
         self.setup_called = True
@@ -47,7 +52,8 @@ class MockSUTAction(SUTAction):
             raise AssertionError("Procedure failed")
         self.procedure_executed = True
 
-    def verify_postconditions(self) -> None:
+    def verify_postconditions(self, timeout: SupportsFloat = 0) -> None:
+        self.last_timeout = timeout
         if self.fail_postconditions:
             raise AssertionError("Postconditions failed")
         self.postconditions_verified = True
@@ -174,8 +180,9 @@ class TestSUTAction:
         )
         mock_logger.info.assert_any_call(
             "Action %s: procedure executed successfully. "
-            "Verifying postconditions...",
+            "Verifying postconditions (within a %s seconds timeout)...",
             "MockSUTAction",
+            0,
         )
         mock_logger.info.assert_any_call(
             "Action %s: execution completed successfully",
@@ -193,3 +200,11 @@ class TestSUTAction:
         assert_that(action.logger.disabled).is_true()
         action.execute()
         assert_that(action.logger.disabled).is_true()
+
+    @staticmethod
+    def test_verify_postcond_receives_timeout_when_action_is_executed():
+        """Verify that the postconditions method receives a timeout."""
+        action = MockSUTAction()
+        action.execute(postconditions_timeout=10)
+
+        assert_that(action.last_timeout).is_equal_to(10)

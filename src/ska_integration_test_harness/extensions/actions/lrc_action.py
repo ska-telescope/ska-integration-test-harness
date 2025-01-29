@@ -1,5 +1,7 @@
 """Send a LongRunningCommand to a Tango device and synchronise."""
 
+from typing import Any, SupportsFloat
+
 import tango
 from assertpy import assert_that
 from ska_control_model import ResultCode
@@ -33,17 +35,21 @@ class TangoLRCAction(TangoCommandAction):
         self,
         target_device: tango.DeviceProxy,
         command_name: str,
-        command_args: list | None = None,
-        command_kwargs: dict | None = None,
+        command_param: Any | None = None,
+        command_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ) -> None:
-        """Create a new TangoCommandAction instance.
+        """Create a new TangoLRCAction instance.
 
         :param target_device: the target device on which to execute
             the command.
         :param command_name: the name of the command to execute.
-        :param command_args: the positional arguments to pass to the command.
-        :param command_kwargs: the keyword arguments to pass to the command.
+        :param command_param: the parameter to pass to the command. If not
+            specified, it defaults to no parameter.
+        :param command_kwargs: additional keyword arguments
+            to pass to the command. See
+            :py:meth:`tango.DeviceProxy.command_inout`
+            for more information on the available keyword arguments.
         :param kwargs: additional keyword arguments to pass to the superclass.
             See
             :py:class:`ska_integration_test_harness.core.actions.TracerAction`
@@ -54,7 +60,7 @@ class TangoLRCAction(TangoCommandAction):
         super().__init__(
             target_device=target_device,
             command_name=command_name,
-            command_args=command_args,
+            command_param=command_param,
             command_kwargs=command_kwargs,
             **kwargs,
         )
@@ -143,11 +149,15 @@ class TangoLRCAction(TangoCommandAction):
         if len(self._early_stop_lrc_assertions) > 0:
             self._early_stop_lrc_assertions[0].setup()
 
-    def verify_postconditions(self):
+    def verify_postconditions(self, timeout: SupportsFloat = 0) -> None:
         """Verify the postconditions of the action.
 
         But before, ensure all the LRC assertions are configured with
         the LRC ID from the last command result.
+
+        :param timeout: the time in seconds to wait for the postconditions to
+            be verified. If not specified, it defaults to 0. TODO: use it!
+        :raises AssertionError: if one of the postconditions fails.
         """
 
         last_lrc_id = self.get_last_lrc_id()
@@ -161,7 +171,7 @@ class TangoLRCAction(TangoCommandAction):
             if isinstance(postcondition, AssertLRCCompletion):
                 postcondition.monitor_lrc(last_lrc_id)
 
-        return super().verify_postconditions()
+        return super().verify_postconditions(timeout=timeout)
 
     def get_last_lrc_id(self) -> str:
         """Extract the LRC ID from the last command result.

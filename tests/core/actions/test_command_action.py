@@ -21,14 +21,14 @@ class TestTangoCommandAction:
         action = TangoCommandAction(
             target_device=device,
             command_name="TestCommand",
-            command_args=[1, 2],
-            command_kwargs={"param": "value"},
+            command_param="PARAM",
+            command_kwargs={"timeout": 10},
         )
 
         action.execute_procedure()
 
         device.command_inout.assert_called_once_with(
-            "TestCommand", 1, 2, param="value"
+            cmd_name="TestCommand", cmd_param="PARAM", timeout=10
         )
         assert_that(action.last_command_result).is_equal_to("result")
 
@@ -43,7 +43,9 @@ class TestTangoCommandAction:
 
         action.execute_procedure()
 
-        device.command_inout.assert_called_once_with("TestCommand")
+        device.command_inout.assert_called_once_with(
+            cmd_name="TestCommand", cmd_param=None
+        )
         assert_that(action.last_command_result).is_equal_to("result")
 
     def test_description_includes_command_and_arguments(self):
@@ -53,8 +55,8 @@ class TestTangoCommandAction:
         action = TangoCommandAction(
             target_device=device,
             command_name="TestCommand",
-            command_args=[1, 2],
-            command_kwargs={"param": "value"},
+            command_param="PARAM",
+            command_kwargs={"timeout": 10},
         )
 
         description = action.description()
@@ -62,8 +64,8 @@ class TestTangoCommandAction:
         assert_that(description).contains(
             "Execute command TestCommand",
             "on device test/device",
-            "with args [1, 2]",
-            "and kwargs {'param': 'value'}",
+            "with param PARAM",
+            "and kwargs {'timeout': 10}",
         )
 
     def test_description_without_arguments(self):

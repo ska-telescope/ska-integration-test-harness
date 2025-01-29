@@ -1,6 +1,6 @@
 """Unit tests for the TracerAction class."""
 
-import time
+from datetime import datetime
 from unittest.mock import MagicMock
 
 import pytest
@@ -11,7 +11,8 @@ from ska_integration_test_harness.core.actions.tracer_action import (
     TracerAction,
 )
 from tests.actions.utils.mock_device_proxy import create_device_proxy_mock
-from tests.actions.utils.mock_event_tracer import add_event
+from tests.actions.utils.mock_event_tracer import add_event, delayed_add_event
+from tests.utils import assert_elapsed_time_is_closed_to
 
 from .utils import (
     create_mock_assertion,
@@ -61,14 +62,12 @@ class TestTracerAction:
         In particular, we expect:
 
         - a tracer instance to be accessible;
-        - a timeout of 0;
-        - no early stop condition.
+        - no early stop condition is set;
         - pre-conditions and post-conditions to be empty
         """
         action = MockTracerAction()
 
         assert_that(action.tracer).is_instance_of(TangoEventTracer)
-        assert_that(action.timeout).is_equal_to(0)
         assert_that(action.early_stop).is_none()
         assert_that(action.preconditions).is_instance_of(list).is_length(0)
         assert_that(action.postconditions).is_instance_of(list).is_length(0)
@@ -77,26 +76,6 @@ class TestTracerAction:
     # Attributes propagation tests
     # (When I set an attribute or an early stop condition on an action,
     # it propagates to postconditions as expected)
-
-    @staticmethod
-    def test_action_timeout_when_set_propagates_to_postconditions():
-        """An action timeout when set propagate to existing postconditions."""
-        action = MockTracerAction()
-        post_cond1 = create_state_change_assertion("test/device/1")
-        post_cond2 = create_state_change_assertion("test/device/2")
-        action.add_postconditions(post_cond1, post_cond2)
-
-        action.set_timeout(10)
-
-        assert_that(action.timeout).described_as(
-            "The action can set a timeout"
-        ).is_equal_to(10)
-        assert_that(post_cond1.timeout).described_as(
-            "The same timeout is propagated to both existing postconditions"
-        ).is_same_as(post_cond2.timeout)
-        assert_that(float(post_cond1.timeout)).described_as(
-            "The timeout value is the expected one"
-        ).is_equal_to(10.0).is_equal_to(float(post_cond2.timeout))
 
     @staticmethod
     def test_action_early_stop_when_set_propagates_to_postconditions():
@@ -170,6 +149,19 @@ class TestTracerAction:
         assert_that(pre_cond.tracer).is_same_as(action.tracer)
 
     @staticmethod
+    def test_action_multiple_preconditions_can_be_added():
+        """Multiple preconditions can be added to an action."""
+        action = MockTracerAction()
+        pre_cond1 = create_simple_assertion("test/device/1")
+        pre_cond2 = create_simple_assertion("test/device/2")
+
+        action.add_preconditions(pre_cond1, pre_cond2)
+
+        assert_that(action.preconditions).is_length(2)
+        assert_that(action.preconditions[0]).is_same_as(pre_cond1)
+        assert_that(action.preconditions[1]).is_same_as(pre_cond2)
+
+    @staticmethod
     def test_action_a_postcondition_can_be_added():
         """An action can add a postcondition.
 
@@ -178,11 +170,7 @@ class TestTracerAction:
         - the early stop condition is shared with the action
         """
         action_mock_early_stop = MagicMock()
-        action = (
-            MockTracerAction()
-            .set_timeout(10)
-            .add_early_stop(action_mock_early_stop)
-        )
+        action = MockTracerAction().add_early_stop(action_mock_early_stop)
         post_cond = create_state_change_assertion("test/device/1")
         action.add_postconditions(post_cond)
 
@@ -191,17 +179,22 @@ class TestTracerAction:
         assert_that(post_cond.tracer).described_as(
             "The tracer is shared with the action"
         ).is_same_as(action.tracer)
-        assert_that(post_cond.timeout).described_as(
-            "The timeout is shared with the action"
-        ).is_same_as(
-            action._timeout  # pylint: disable=protected-access
-        )
-        assert_that(float(post_cond.timeout)).described_as(
-            "The timeout value is the expected one"
-        ).is_equal_to(10.0)
         assert_that(post_cond.early_stop).described_as(
             "The early stop condition is shared with the action"
         ).is_same_as(action_mock_early_stop)
+
+    @staticmethod
+    def test_multiple_postconditions_can_be_added():
+        """Multiple postconditions can be added to an action."""
+        action = MockTracerAction()
+        post_cond1 = create_state_change_assertion("test/device/1")
+        post_cond2 = create_state_change_assertion("test/device/2")
+
+        action.add_postconditions(post_cond1, post_cond2)
+
+        assert_that(action.postconditions).is_length(2)
+        assert_that(action.postconditions[0]).is_same_as(post_cond1)
+        assert_that(action.postconditions[1]).is_same_as(post_cond2)
 
     @staticmethod
     def test_action_a_postcondition_early_stop_is_combined_with_the_action_early_stop():  # pylint: disable=line-too-long # noqa
@@ -209,11 +202,7 @@ class TestTracerAction:
         A postcondition early stop is combined with the action early stop.
         """
         action_mock_early_stop = MagicMock(return_value=False)
-        action = (
-            MockTracerAction()
-            .set_timeout(10)
-            .add_early_stop(action_mock_early_stop)
-        )
+        action = MockTracerAction().add_early_stop(action_mock_early_stop)
         post_cond = create_state_change_assertion("test/device/1")
         post_cond_mock_early_stop = MagicMock(return_value=False)
         post_cond.early_stop = post_cond_mock_early_stop
@@ -315,28 +304,6 @@ class TestTracerAction:
             "We expect the tracer events to be cleared"
         ).is_empty()
 
-    @staticmethod
-    def test_action_setup_resets_timeout():
-        """An action setup resets the timeout."""
-        action = MockTracerAction().set_timeout(1)
-        post_cond1 = create_state_change_assertion("test/device/1")
-        post_cond2 = create_state_change_assertion("test/device/2")
-        action.add_postconditions(post_cond1, post_cond2)
-        post_cond1.timeout.start()
-        time.sleep(1)
-        assert_that(post_cond2.timeout.get_remaining_timeout()).described_as(
-            "We expect the timeout to be elapsed"
-        ).is_equal_to(0)
-
-        action.setup()
-
-        assert_that(post_cond2.timeout.get_remaining_timeout()).described_as(
-            "We expect the timeout to be resetted"
-        ).is_equal_to(1)
-        assert_that(post_cond2.timeout.is_started()).described_as(
-            "We expect the timeout to not be started"
-        ).is_false()
-
     # -----------------------------------------------------------------------
     # Logging tests
 
@@ -397,3 +364,33 @@ class TestTracerAction:
         action.verify_postconditions()
 
         action.logger.info.assert_not_called()
+
+    # -----------------------------------------------------------------------
+    # The postconditions are verified within the timeout
+
+    @staticmethod
+    def test_action_postconditions_are_verified_within_the_timeout_and_pass():
+        """The postconditions are verified within the timeout and pass."""
+        action = MockTracerAction()
+        post_cond = create_state_change_assertion("test/device/1")
+        action.add_postconditions(post_cond)
+        delayed_add_event(action.tracer, "test/device/1", "state", "ON", 0.5)
+
+        start_time = datetime.now()
+        action.execute(postconditions_timeout=1)
+
+        assert_elapsed_time_is_closed_to(start_time, 0.5, 0.1)
+
+    @staticmethod
+    def test_action_postconditions_are_verified_within_the_timeout_and_fail():
+        """The postconditions are verified within the timeout and fail."""
+        action = MockTracerAction()
+        post_cond = create_state_change_assertion("test/device/1")
+        action.add_postconditions(post_cond)
+        delayed_add_event(action.tracer, "test/device/1", "state", "OFF", 0.5)
+
+        start_time = datetime.now()
+        with pytest.raises(AssertionError):
+            action.execute(postconditions_timeout=1)
+
+        assert_elapsed_time_is_closed_to(start_time, 1, 0.1)

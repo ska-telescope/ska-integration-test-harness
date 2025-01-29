@@ -252,10 +252,9 @@ desired states are reached. To achieve this, we proceed as follows:
     # errors, and set a timeout for the action.
     action.add_lrc_completion_to_postconditions()
     action.add_lrc_errors_to_early_stop()
-    action.set_timeout(30)
 
-    # 5. Execute the action
-    action.execute()
+    # 5. Execute the action (within a timeout)
+    action.execute(postconditions_timeout=30)
 
 Some further comments on this code:
 
@@ -360,15 +359,12 @@ To achieve this, we proceed as follows:
             self, 
             controller_device: tango.DeviceProxy,
             other_devices: list[tango.DeviceProxy],
-            timeout: float = 10, 
             **kwargs
         ):  
             """Initialise the action.
 
             :param controller_device: The device that must be activated.
             :param other_devices: The devices that must be reachable.
-            :param timeout: The maximum time to wait for the devices
-                to become reachable.
             :param kwargs: Additional parameters. See the base class
                 :py:class:`ska_integration_test_harness.core.actions.SUTAction`
                 for further details.
@@ -380,7 +376,6 @@ To achieve this, we proceed as follows:
 
             self.controller_device = controller_device
             self.other_devices = other_devices
-            self.timeout = timeout
             
             self.tracer = TangoEventTracer()
 
@@ -394,7 +389,7 @@ To achieve this, we proceed as follows:
         # ---------------------------------------------------------------------
         # Step 3: Implement the custom synchronisation logic (and clean up)
 
-        def verify_postconditions(self):
+        def verify_postconditions(self, timeout=0):
             # (Always good practice to call the super method)
             super().verify_postconditions()
 
@@ -408,7 +403,7 @@ To achieve this, we proceed as follows:
             assertpy_context = assert_that(tracer).described_as(
                 self.description() + 
                 " The controller device must be reachable."
-            ).within_timeout(self.timeout).has_change_event_occurred(
+            ).within_timeout(timeout).has_change_event_occurred(
                 self.controller_device, "telescopeState",
                 # Define reachability based on these states
                 custom_matcher=lambda event: event.attribute_value in [
@@ -448,7 +443,7 @@ To achieve this, we proceed as follows:
             return (
                 f"Activate the subsystem {self.controller_device.name} and "
                 f"ensure the devices {', '.join(d.name for d in self.other_devices)} "
-                f"are reachable (within {self.timeout}s)."
+                f"are reachable."
             )
 
     # ---------------------------------------------------------------------
@@ -465,14 +460,15 @@ To achieve this, we proceed as follows:
     )
 
     errors = []
+    timeout = 10
     for i in range(3):
         try:
-            action.execute()
+            action.execute(timeout)
             break
         except AssertionError as e:
             logger.warning(f"Attempt {i+1} failed: {e}")
             errors.append(e)
-            action.timeout *= 2  # Exponential backoff
+            timeout *= 2  # Exponential backoff
     else:
         raise AssertionError(
             "The action failed after 3 attempts. Errors:\n" + 
@@ -488,7 +484,8 @@ Some further comments on this code:
   1. The action is set up (via the ``setup`` method).
   2. Pre-conditions are verified (via the ``verify_preconditions`` method).
   3. The custom procedure is executed (via the ``execute_procedure`` method).
-  4. Post-conditions are verified (via the ``verify_postconditions`` method).
+  4. Post-conditions are verified (via the ``verify_postconditions`` method)
+     within the specified timeout.
 
 - The ``setup`` method is always the first step in action execution, making it
   an excellent place to clean up resources and enable multiple runs.
