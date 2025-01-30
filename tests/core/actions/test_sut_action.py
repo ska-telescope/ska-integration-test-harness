@@ -1,68 +1,11 @@
 """Unit tests for the SUTAction class."""
 
-from typing import SupportsFloat
 from unittest.mock import MagicMock, patch
 
 import pytest
 from assertpy import assert_that
 
-from ska_integration_test_harness.core.actions.sut_action import SUTAction
-
-
-class MockSUTAction(SUTAction):
-    """Mock subclass of SUTAction for testing purposes."""
-
-    # pylint: disable=too-many-instance-attributes
-    def __init__(
-        self,
-        fail_preconditions=False,
-        fail_procedure=False,
-        fail_postconditions=False,
-        **kwargs,
-    ):
-        """Initialise the mock action.
-
-        :param fail_preconditions: Flag to indicate if preconditions
-            should fail
-        :param fail_procedure: Flag to indicate if the procedure should fail
-        :param fail_postconditions: Flag to indicate if postconditions
-            should fail
-        **kwargs: Additional keyword arguments
-        """
-        super().__init__(**kwargs)
-        self.fail_preconditions = fail_preconditions
-        self.fail_procedure = fail_procedure
-        self.fail_postconditions = fail_postconditions
-        self.setup_called = False
-        self.preconditions_verified = False
-        self.procedure_executed = False
-        self.postconditions_verified = False
-        self.last_timeout = None
-
-    def setup(self) -> None:
-        self.setup_called = True
-
-    def verify_preconditions(self) -> None:
-        if self.fail_preconditions:
-            raise AssertionError("Preconditions failed")
-        self.preconditions_verified = True
-
-    def execute_procedure(self) -> None:
-        if self.fail_procedure:
-            raise AssertionError("Procedure failed")
-        self.procedure_executed = True
-
-    def verify_postconditions(self, timeout: SupportsFloat = 0) -> None:
-        self.last_timeout = timeout
-        if self.fail_postconditions:
-            raise AssertionError("Postconditions failed")
-        self.postconditions_verified = True
-
-    def name(self) -> str:
-        return "MockSUTAction"
-
-    def description(self) -> str:
-        return "Mock a SUT action and track calls"
+from .utils import MockSUTAction, assert_action_logged_execution
 
 
 @pytest.mark.core
@@ -170,23 +113,10 @@ class TestSUTAction:
         action.execute()
 
         assert_that(mock_logger.info.call_count).is_equal_to(3)
-        mock_logger.info.assert_any_call(
-            "Executing action %s: %s "
-            "(verify_preconditions=%s, verify_postconditions=%s)",
+        assert_action_logged_execution(
+            mock_logger,
             "MockSUTAction",
             "Mock a SUT action and track calls",
-            True,
-            True,
-        )
-        mock_logger.info.assert_any_call(
-            "Action %s: procedure executed successfully. "
-            "Verifying postconditions (within a %s seconds timeout)...",
-            "MockSUTAction",
-            0,
-        )
-        mock_logger.info.assert_any_call(
-            "Action %s: execution completed successfully",
-            "MockSUTAction",
         )
 
     @staticmethod

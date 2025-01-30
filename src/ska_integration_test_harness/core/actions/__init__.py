@@ -30,7 +30,7 @@ a common interface for the action lifecycle and so it needs to be
 extended to implement concretely the preconditions, the operations, and
 the postconditions. You can directly extend it and implement the
 steps from scratch or you can start from one of the provided subclasses.
-Two important subclasses are:
+Three important subclasses are:
 
 - :py:class:`~ska_integration_test_harness.core.actions.TracerAction`: a
   subclass that essentially gives more structure to the way the preconditions
@@ -50,6 +50,10 @@ Two important subclasses are:
   is useful as a simple and quick way to send commands and verify their
   effects on the SUT.
 
+- :py:class:`~ska_integration_test_harness.core.actions.SUTActionSequence`:
+  a subclass that provides a way to group multiple actions in a sequence
+  and execute them in order within a shared timeout.
+
 Further, more complex action implementations are provided in
 :py:mod:`~ska_integration_test_harness.extensions.actions`. We suggest you
 look at that module before implementing your own actions and assertions
@@ -57,7 +61,13 @@ from scratch.
 """
 
 from .command_action import TangoCommandAction
+from .sequence import SUTActionSequence
 from .sut_action import SUTAction
 from .tracer_action import TracerAction
 
-__all__ = ["SUTAction", "TracerAction", "TangoCommandAction"]
+__all__ = [
+    "SUTAction",
+    "TracerAction",
+    "TangoCommandAction",
+    "SUTActionSequence",
+]
