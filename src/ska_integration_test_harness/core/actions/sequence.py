@@ -31,6 +31,21 @@ class SUTActionSequence(SUTAction):
       the remaining time left by the previous)
     - Optionally, you can override this class to add further global setup,
       precondition, or postcondition verification.
+
+    **Example**:
+
+    .. code-block:: python
+
+        from ska_integration_test_harness.core.actions import SUTActionSequence
+
+        # create a sequence of actions
+        sequence = SUTActionSequence()
+
+        # add actions to the sequence
+        sequence.add_actions(action1, action2, action3)
+
+        # execute the sequence (within the same shared timeout)
+        sequence.execute(timeout=10)
     """
 
     def __init__(self, enable_logging=True):
