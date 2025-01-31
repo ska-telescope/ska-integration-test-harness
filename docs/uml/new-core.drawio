@@ -912,15 +912,15 @@
         </mxGraphModel>
     </diagram>
     <diagram id="kDL7hwJ4a67UJ6_44P9I" name="OBS STATE">
-        <mxGraphModel dx="2143" dy="2060" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+        <mxGraphModel dx="2349" dy="2217" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
                 <mxCell id="FyZH2ggk8zEQRQUZSI18-1" value="We can imagine the execution of a step as it follows:&lt;br&gt;&lt;ol&gt;&lt;li style=&quot;text-align: left;&quot;&gt;the postcondition is verified, if it passes you stop&lt;/li&gt;&lt;li style=&quot;text-align: left;&quot;&gt;&amp;nbsp;(a sanity check is done to see if the ObsState is valid and consistent. If not, a failure is raised)&lt;/li&gt;&lt;li style=&quot;text-align: left;&quot;&gt;a precondition is verified, if not satisfied the chain step relies to the pointed other step to predispose the system&lt;/li&gt;&lt;li style=&quot;text-align: left;&quot;&gt;the command is executed and syncrhonised&lt;/li&gt;&lt;li style=&quot;text-align: left;&quot;&gt;the postconditions are verified again and now they should be satisfied&lt;/li&gt;&lt;/ol&gt;" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" vertex="1" parent="1">
-                    <mxGeometry x="-317.5" y="-289" width="360" height="289" as="geometry"/>
+                    <mxGeometry x="100" y="-289" width="360" height="289" as="geometry"/>
                 </mxCell>
                 <mxCell id="FyZH2ggk8zEQRQUZSI18-2" value="Each block may be seen as a step in a chain. A step that is used to reach a certain &lt;b&gt;ObsState&lt;/b&gt; (&lt;u&gt;if not already reached&lt;/u&gt;)&lt;br&gt;&lt;br&gt;Pre: is a precondition that needs to be satisfied to execute the step succesfully&lt;br&gt;&lt;br&gt;Cmd: is the command that should be called to reach that state (+ the compulsory syncrhonisation to the quiescent or transient state)&lt;br&gt;&lt;br&gt;The (implicit) post-condition for all those blocks is that the desired state is reached.&lt;br&gt;&lt;br&gt;An arrow A --&amp;gt; B represent the fact that A may rely on B&lt;br&gt;if the precondition is not satisfied (CONTRARY OF THE&lt;br&gt;SUPPOSED PROCES FLOW)&lt;br&gt;&lt;br&gt;TERMINATION: sooner or later, I will find myself in a situation where or the target goal is already reached or the precondition&lt;br&gt;is satisfied, so I don't need recursive calls." style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" vertex="1" parent="1">
-                    <mxGeometry x="100" y="-289" width="360" height="289" as="geometry"/>
+                    <mxGeometry x="525" y="-289" width="360" height="289" as="geometry"/>
                 </mxCell>
                 <mxCell id="FyZH2ggk8zEQRQUZSI18-13" value="supports restart" style="shape=folder;align=center;verticalAlign=middle;fontStyle=0;tabWidth=100;tabHeight=30;tabPosition=left;html=1;boundedLbl=1;labelInHeader=1;rounded=1;absoluteArcSize=1;arcSize=10;dashed=1;fillColor=none;" vertex="1" parent="1">
                     <mxGeometry x="-330" y="50" width="295" height="470" as="geometry"/>
@@ -998,10 +998,10 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="FyZH2ggk8zEQRQUZSI18-36" value="What is not yet defined:&lt;br&gt;&lt;br&gt;- possibility to reach FAULT&lt;br&gt;- possibility to start (or manage if I happen to be stuck in)&lt;br&gt;RESTARTING and ABORTING&lt;br&gt;(they are the only isolated nodes)&lt;br&gt;- how to determine if we are in &quot;inconsistent situations&quot; and how to manage that" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" vertex="1" parent="1">
-                    <mxGeometry x="510" y="-289" width="360" height="169" as="geometry"/>
+                    <mxGeometry x="525" y="60" width="360" height="169" as="geometry"/>
                 </mxCell>
                 <mxCell id="FyZH2ggk8zEQRQUZSI18-37" value="Assume:&lt;br&gt;- we want to move devices d1, ... , dn in a certain obs state&lt;br&gt;- we have a special device d* which is the one we use as reference for the system obs state (likely, a coordinator)&lt;br&gt;- foreach command, we have a device that is supposed to receive the command (likely the coordinator, or sometimes a controller/central node)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" vertex="1" parent="1">
-                    <mxGeometry x="-740" y="-289" width="360" height="164.5" as="geometry"/>
+                    <mxGeometry x="-330" y="-289" width="360" height="164.5" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
