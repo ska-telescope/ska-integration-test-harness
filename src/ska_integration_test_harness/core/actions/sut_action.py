@@ -116,6 +116,12 @@ class SUTAction(abc.ABC):
         self.logger.setLevel(logging.INFO)
         self.set_logging(enable_logging)
 
+        self._last_execution_params = {
+            "postconditions_timeout": 0,
+            "verify_preconditions": True,
+            "verify_postconditions": True,
+        }
+
     # ------------------------------------------------------------------
     # ENTRY POINTS FOR EXTERNAL USERS
 
@@ -163,6 +169,12 @@ class SUTAction(abc.ABC):
             not satisfied. Additional exceptions can be raised by the
             :py:meth:`execute_procedure` method if the action fails.
         """  # noqa: DAR402
+        # store locally the last execution parameters
+        self._last_execution_params = {
+            "postconditions_timeout": postconditions_timeout,
+            "verify_preconditions": verify_preconditions,
+            "verify_postconditions": verify_postconditions,
+        }
         # setup and the action and prepare it to be executed
         self.logger.info(
             "Executing action %s: %s "
