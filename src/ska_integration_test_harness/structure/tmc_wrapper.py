@@ -38,10 +38,12 @@ class TMCWrapper(SubsystemWrapper, abc.ABC):
         self.sdp_master_leaf_node = tango.DeviceProxy(
             tmc_configuration.tmc_sdp_master_leaf_node_name
         )
-
-        # TODO: they could be already initialised at the beginning...
-        self.csp_subarray_leaf_node = None
-        self.sdp_subarray_leaf_node = None
+        self.csp_subarray_leaf_node = tango.DeviceProxy(
+            tmc_configuration.tmc_csp_subarray_leaf_node_name
+        )
+        self.sdp_subarray_leaf_node = tango.DeviceProxy(
+            tmc_configuration.tmc_sdp_subarray_leaf_node_name
+        )
 
         if tmc_configuration.supports_mid():
             self.dish_leaf_node_list = [
@@ -51,7 +53,13 @@ class TMCWrapper(SubsystemWrapper, abc.ABC):
                 tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node4_name),
             ]
 
-        # TODO Low: add MCCS leaf nodes
+        if tmc_configuration.supports_low():
+            self.mccs_master_leaf_node = tango.DeviceProxy(
+                tmc_configuration.tmc_mccs_master_leaf_node_name
+            )
+            self.mccs_subarray_leaf_node = tango.DeviceProxy(
+                tmc_configuration.tmc_mccs_subarray_leaf_node_name
+            )
 
         # TODO: Use a tango dev factory instead of DeviceProxy
 
@@ -85,7 +93,9 @@ class TMCWrapper(SubsystemWrapper, abc.ABC):
             res["dish_leaf_node_063"] = self.dish_leaf_node_list[2]
             res["dish_leaf_node_100"] = self.dish_leaf_node_list[3]
 
-        # TODO Low: add TMC-Low nodes here
+        if self.supports_low():
+            res["mccs_master_leaf_node"] = self.mccs_master_leaf_node
+            res["mccs_subarray_leaf_node"] = self.mccs_subarray_leaf_node
 
         return res
 

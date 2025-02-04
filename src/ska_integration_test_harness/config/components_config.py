@@ -80,6 +80,7 @@ class TMCConfiguration(SubsystemConfiguration):
     # Controllers leaf nodes names
     tmc_csp_master_leaf_node_name: str = None
     tmc_sdp_master_leaf_node_name: str = None
+    tmc_mccs_master_leaf_node_name: str | None = None
 
     # Subarray nodes names
     subarrays_names: dict[int, str] = field(default_factory=dict)
@@ -87,6 +88,9 @@ class TMCConfiguration(SubsystemConfiguration):
         default_factory=dict
     )
     tmc_sdp_subarrays_leaf_nodes_names: dict[int, str] = field(
+        default_factory=dict
+    )
+    tmc_mccs_subarrays_leaf_nodes_names: dict[int, str] = field(
         default_factory=dict
     )
 
@@ -104,6 +108,11 @@ class TMCConfiguration(SubsystemConfiguration):
     def tmc_csp_subarray_leaf_node_name(self) -> str:
         """Get the name of the first subarray node."""
         return self.tmc_csp_subarrays_leaf_nodes_names.get(1)
+
+    @property
+    def tmc_mccs_subarray_leaf_node_name(self) -> str:
+        """Get the name of the first subarray node."""
+        return self.tmc_mccs_subarrays_leaf_nodes_names.get(1)
 
     # Dish leaf nodes
     tmc_dish_leaf_node1_name: str = None
@@ -151,11 +160,18 @@ class TMCConfiguration(SubsystemConfiguration):
                     "tmc_dish_leaf_node4_name": self.tmc_dish_leaf_node4_name,
                 }
             )
-            #
 
-        # TODO Low: add TMC-Low nodes here
-        # - MCCS subarray leaf node
-        # - MCCS master/controller leaf node
+        if self.supports_low():
+            all_devices.update(
+                {
+                    "tmc_mccs_master_leaf_node_name": (
+                        self.tmc_mccs_master_leaf_node_name
+                    ),
+                    "tmc_mccs_subarray_leaf_node_name": (
+                        self.tmc_mccs_subarray_leaf_node_name
+                    ),
+                }
+            )
 
         return all_devices
 
@@ -179,7 +195,13 @@ class TMCConfiguration(SubsystemConfiguration):
                 ]
             )
 
-        # TODO Low: add TMC-Low nodes here
+        if self.supports_low():
+            mandatory_device_names.extend(
+                [
+                    "tmc_mccs_master_leaf_node_name",
+                    "tmc_mccs_subarray_leaf_node_name",
+                ]
+            )
 
         return mandatory_device_names
 

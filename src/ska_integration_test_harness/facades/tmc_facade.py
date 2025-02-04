@@ -118,9 +118,6 @@ class TMCFacade:
     def dish_leaf_node_list(self):
         """Return Dish Leaf Node List"""
         return self._telescope.tmc.dish_leaf_node_list
-        # NOTE: in old test harness code, sometimes just the first two
-        # dishes were used. I don't know if there was a reason behind that
-        # choice. Right now, we are using 4
 
     @property
     def csp_subarray_leaf_node(self):
@@ -131,6 +128,16 @@ class TMCFacade:
     def sdp_subarray_leaf_node(self):
         """Return SDP Subarray Leaf Node Proxy"""
         return self._telescope.tmc.sdp_subarray_leaf_node
+
+    @property
+    def mccs_master_leaf_node(self):
+        """Return MCCS Master Leaf Node Proxy"""
+        return self._telescope.tmc.mccs_master_leaf_node
+
+    @property
+    def mccs_subarray_leaf_node(self):
+        """Return MCCS Subarray Leaf Node Proxy"""
+        return self._telescope.tmc.mccs_subarray_leaf_node
 
     # -----------------------------------------------------------
     # ACTIONS YOU CALL ON CENTRAL NODE
