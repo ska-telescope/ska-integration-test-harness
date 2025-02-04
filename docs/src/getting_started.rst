@@ -4,9 +4,10 @@ Overview and Getting Started
 Overview
 --------
 
-Currently (October 2024), there is a test harness for TMC in Mid integration
-tests, centred around the TMC subsystem and its interactions with CSP,
-SDP and the Dishes. In future, there will be a generic test harness for
+Currently (February 2025), there is a test harness for TMC integration tests
+in Mid and in Low, centred around the TMC subsystem and its interactions
+with CSP, SDP, Dishes and MCCS.
+In future, there will be a generic test harness for
 integration tests on an arbitrary combination of production or emulated SKA
 subsystems.
 
@@ -54,13 +55,20 @@ At the moment, the SUT consists of:
    subsystem which receives most of the commands);
 -  a production or emulated CSP;
 -  a production or emulated SDP;
--  a set of production or emulated Dishes.
+-  a set of production or emulated Dishes, or alternatively a production
+   or emulated MCCS.
 
 **NOTE:** for the purposes of this test harness, we use the term
 *production* to refer to real software that needs to be tested, and
 *emulated* to refer to software that replicates the behaviour of
 the real devices without having complex logic behind it. The term
 *production* doesn't mean we are using the real hardware.
+
+**IMPORTANT NOTE:** at the moment, the ITH is particularly calibrated
+to support the TMC tests with emulators for the CSP, SDP, Dishes and MCCS,
+since TMC teams now are mainly working with emulators. The test harness
+provides wrappers and procedures to work also with production devices,
+but it may not yet be fully tested and supported.
 
 What you cannot find (and likely will remain in separate places)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -90,7 +98,6 @@ What you cannot find (yet)
 Instead, this framework may (*and will likely*) support in the future
 (**but not at the moment**):
 
-- TMC Low integration tests;
 - integration tests where TMC is not involved (e.g.,
   stand-alone tests of a single subsystem);
 - tests with multiple subarrays.
@@ -471,3 +478,65 @@ available in the `SKA TMC Mid Integration
 repository <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/-/merge_requests/234>`__.
 To read more about the architecture and the principles behind the test
 harness, check :doc:`./architecture_overview`.
+
+Usage for Low
+~~~~~~~~~~~~~~
+
+This same test harness can be used also for the TMC-Low tests. The
+usage for Low is very similar to the one for Mid, but there are some
+differences in the configuration file and in the devices expected to be
+present in the SUT. The configuration file for Low will look like this:
+
+.. code:: yaml
+
+    # A configuration file for the test harness for Low
+
+    target: "low" # Supported "low", "mid" (case insensitive), default is "mid"
+
+    tmc:
+        is_emulated: false # Not supported otherwise, default is false
+
+        # Expected device names (Required)
+        centralnode_name: "ska_low/tm_central/central_node"
+        tmc_subarraynode1_name: "ska_low/tm_subarray_node/1"
+        tmc_csp_master_leaf_node_name: "ska_low/tm_leaf_node/csp_master"
+        tmc_csp_subarray_leaf_node_name: "ska_low/tm_leaf_node/csp_subarray01"
+        tmc_sdp_master_leaf_node_name: "ska_low/tm_leaf_node/sdp_master"
+        tmc_sdp_subarray_leaf_node_name: "ska_low/tm_leaf_node/sdp_subarray01"
+        tmc_mccs_master_leaf_node_name: "ska_low/tm_leaf_node/mccs_master"
+        tmc_mccs_subarray_leaf_node_name: "ska_low/tm_leaf_node/mccs_subarray01"
+
+    csp:
+        is_emulated: true # Supported false too, default is true
+
+        # Expected device names
+        csp_master_name: "low-csp/control/0"
+        csp_subarray1_name: "low-csp/subarray/01"
+
+    sdp:
+        is_emulated: true # Supported false too, default is true
+
+        # Expected device names (Required)
+        sdp_master_name: "low-sdp/control/0"
+        sdp_subarray1_name: "low-sdp/subarray/01"
+
+    mccs:
+        is_emulated: true # Supported false too, default is true
+
+        # Expected device names (Required)
+        mccs_controller_name: "low-mccs/control/control"
+        mccs_subarray1_name: "low-mccs/subarray/01"
+
+
+The fixtures. the facades and the test steps for Low
+will be very similar to the ones for Mid, the only differences (from outside)
+will be that:
+
+- a MCCS facade is exposed instead of a Dishes facade,
+- some devices that are exposed in Mid (like the Dishes) are not present
+  in Low and instead MCCS-related devices are present
+  (e.g., controller leaf nodes and subarray leaf nodes).
+
+
+**IMPORTANT NOTE:** at the moment, especially for the Low tests, the
+test harness is not fully tested and supported for production devices.

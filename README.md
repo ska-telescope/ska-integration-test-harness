@@ -1,8 +1,8 @@
 # SKA Integration Test Harness - Overview & Getting started
 
-Currently (October 2024), a test harness for TMC in Mid integration
+Currently (February 2025), a test harness for TMC in Mid and Low integration
 tests, centred around the TMC subsystem and its interactions with CSP,
-SDP and the Dishes. In future, a generic test harness integration
+SDP, Dishes and MCCS. In future, a generic test harness integration
 testing an arbitrary combination of production or emulated SKA
 subsystems.
 

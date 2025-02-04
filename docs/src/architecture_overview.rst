@@ -12,7 +12,7 @@ Since the test harness is still in development, both the code and the
 design may change in the future. The overall principles, however, will
 likely remain the same.
 
-This document was last updated in October 2024.
+This document was last updated in February 2025.
 
 What glues the test scripts to the SUT?
 ----------------------------------------

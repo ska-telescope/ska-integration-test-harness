@@ -24,7 +24,7 @@ class CSPFacade:
         return self._telescope.csp.csp_subarray
 
     @property
-    def pst(self) -> tango.DeviceProxy | None:
+    def pst(self) -> "tango.DeviceProxy | None":
         """A Tango proxy to the PST device.
 
         It is available only when the target is 'low'.
