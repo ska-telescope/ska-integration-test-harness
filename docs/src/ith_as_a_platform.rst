@@ -215,7 +215,7 @@ desired states are reached. To achieve this, we proceed as follows:
     action = TangoLRCAction(
         target_device=target_device,
         command_name="AssignResources",
-        command_input=json.read("low/input/assign_resources.json"),
+        command_param=json.read("low/input/assign_resources.json"),
     )
 
     # 2. Use pre-conditions to specify the expected initial state
