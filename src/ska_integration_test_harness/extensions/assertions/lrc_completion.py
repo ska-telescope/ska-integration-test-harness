@@ -70,6 +70,12 @@ class AssertLRCCompletion(TracerAssertion):
         self.device = device
         """The target device to verify."""
 
+        self.expected_result_codes = []
+        """The result codes that are accepted.
+
+        By default, it accepts only the ``OK`` result code.
+        """
+
         if expected_result_codes is None:
             # all result codes are accepted
             self.expected_result_codes = list(ResultCode)
@@ -90,11 +96,17 @@ class AssertLRCCompletion(TracerAssertion):
         It is returned when calling the Tango command that starts the LRC.
         """
 
+        self.expected_attribute_name = "longRunningCommandResult"
+        """The expected attribute name for the LRC completion event.
+
+        By default, it's ``longRunningCommandResult``.
+        """
+
     def setup(self):
         """Subscribe to the LRC completion event."""
         super().setup()
 
-        self.tracer.subscribe_event(self.device, "longRunningCommandResult")
+        self.tracer.subscribe_event(self.device, self.expected_attribute_name)
 
     def monitor_lrc(self, lrc_id: str) -> "AssertLRCCompletion":
         """Set the LRC to monitor.
@@ -124,7 +136,7 @@ class AssertLRCCompletion(TracerAssertion):
 
         self.get_assertpy_context().has_change_event_occurred(
             device_name=self.device,
-            attribute_name="longRunningCommandResult",
+            attribute_name=self.expected_attribute_name,
             custom_matcher=self.match_lrc_completion,
         )
 
@@ -161,7 +173,7 @@ class AssertLRCCompletion(TracerAssertion):
         # check again device and attribute
         # (for safety if this method is used as standalone matcher)
         if not event.has_device(self.device) or not event.has_attribute(
-            "longRunningCommandResult"
+            self.expected_attribute_name
         ):
             return False
 
@@ -199,7 +211,7 @@ class AssertLRCCompletion(TracerAssertion):
 
     def describe_assumption(self):
         desc = f"{self.device.dev_name()} has recorded a "
-        desc += "longRunningCommandResult completion event "
+        desc += f"{self.expected_attribute_name} completion event "
 
         if self.lrc_id is not None:
             desc += f"for LRC with ID {self.lrc_id} "

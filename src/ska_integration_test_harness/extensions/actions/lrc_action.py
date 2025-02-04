@@ -75,6 +75,87 @@ class TangoLRCAction(TangoCommandAction):
         # an event with an attribute value less than 42)
         action.execute(postconditions_timeout=5)
 
+    Two additional notes:
+
+    - :py:meth:`add_lrc_completion_to_postconditions` and
+      :py:meth:`add_lrc_errors_to_early_stop` can be customised passing
+      sets of result codes that you want to consider as successful or as
+      errors. See the methods documentation for more information.
+    - :py:meth:`add_lrc_completion_to_postconditions` can be called multiple
+      times with different result codes to track different stages of the LRC
+      completion.
+
+    **What if your LRC is not exactly as expected?**
+
+    If your code does not support LRC the way we expect, but it still does
+    that in a slightly different way, you can still use this class by
+    extending it and overriding it where necessary. For example, let's say:
+
+    1. The command result code is returned in a slightly different format
+    2. The event that signals the LRC completion is not emitted on
+       ``longRunningCommandResult``, but on a different attribute
+    3. The LRC events have a different format than the one supported by
+       :py:class:`~ska_integration_test_harness.extensions.assertions.AssertLRCCompletion`
+
+    To handle this:
+
+    1. You override :py:meth:`get_last_lrc_id` to extract the LRC ID from
+       your own command result format
+    2. You subclass
+       :py:class:`~ska_integration_test_harness.extensions.assertions.AssertLRCCompletion`
+       and override the method
+       :py:meth:`~ska_integration_test_harness.extensions.assertions.AssertLRCCompletion.match_lrc_completion`
+       to match your own LRC event format.
+    3. You also override the constructor of the assertion class to set your
+       own expected attribute name.
+    4. You override :py:meth:`_create_assert_lrc_completion_instance` to
+       use your own subclass instead of the default one.
+
+    Example:
+
+    .. code-block:: python
+
+        from ska_integration_test_harness.extensions.actions import TangoLRCAction
+        from ska_integration_test_harness.extensions.assertions import AssertLRCCompletion
+
+        # 2,3. Subclass AssertLRCCompletion to match your own LRC event format
+        # and set your own expected attribute name
+        class MyAssertLRCCompletion(AssertLRCCompletion):
+
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.expected_attribute_name = "myLRCEvent"
+
+            def match_lrc_completion(self, event: ReceivedEvent) -> bool:
+                # your custom implementation here
+
+        # 1,4. Subclass TangoLRCAction
+        class MyTangoLRCAction(TangoLRCAction):
+
+            def get_last_lrc_id(self) -> str:
+                # your custom implementation here to extract the LRC ID
+                return # ...
+
+            def _create_assert_lrc_completion_instance(
+                self,
+                expected_result_codes: "ResultCode | list[ResultCode] | None",
+            ) -> MyAssertLRCCompletion:
+                return MyAssertLRCCompletion(
+                    # don't forget to pass the target device
+                    device=self.target_device,
+                    expected_result_codes=expected_result_codes,
+                )
+
+            # Now you can use MyTangoLRCAction instead of TangoLRCAction
+            my_lrc_action = MyTangoLRCAction(
+                target_device=dev1,
+                command_name="IncreaseAttributeLRC",
+                command_param=2,
+            ).add_lrc_completion_to_postconditions(
+                expected_result_codes=ResultCode.OK
+            ).add_lrc_errors_to_early_stop()
+
+
     """  # pylint: disable=line-too-long # noqa: E501
 
     def __init__(
@@ -153,9 +234,8 @@ class TangoLRCAction(TangoCommandAction):
         :return: the action itself, to allow chaining the calls.
         """  # pylint: disable=line-too-long # noqa: E501
         return self.add_postconditions(
-            AssertLRCCompletion(
-                device=self.target_device,
-                expected_result_codes=expected_result_codes,
+            self._create_assert_lrc_completion_instance(
+                expected_result_codes=expected_result_codes
             ),
             put_them_at_beginning=put_at_beginning,
         )
@@ -203,11 +283,12 @@ class TangoLRCAction(TangoCommandAction):
         # - in execute_procedure we use it to say which LRC to monitor
         # - here we use it's method match_lrc_completion as a predicate
         #   for the early stop
-        lrc_error_assertion = AssertLRCCompletion(
-            device=self.target_device,
-            expected_result_codes=error_result_codes,
-            tracer=self.tracer,
+        lrc_error_assertion = self._create_assert_lrc_completion_instance(
+            expected_result_codes=error_result_codes
         )
+        # ensure the same tracer is used
+        lrc_error_assertion.tracer = self.tracer
+
         self._early_stop_lrc_assertions.append(lrc_error_assertion)
 
         return self.add_early_stop(
@@ -224,8 +305,8 @@ class TangoLRCAction(TangoCommandAction):
         super().setup()
 
         # NOTE: be sure to subscribe to the LRC event
-        if len(self._early_stop_lrc_assertions) > 0:
-            self._early_stop_lrc_assertions[0].setup()
+        for lrc_error_assertion in self._early_stop_lrc_assertions:
+            lrc_error_assertion.setup()
 
     def verify_postconditions(self, timeout: SupportsFloat = 0) -> None:
         """Verify the postconditions of the action.
@@ -270,12 +351,9 @@ class TangoLRCAction(TangoCommandAction):
         :raises AssertionError: if the last command result is not as expected.
         """
         assert_that(self.last_command_result).described_as(
-            "The last command result is expected to be a tuple"
-        ).is_instance_of(tuple).described_as(
-            "The last command result is expected to have at least two elements"
-        ).is_length(
-            2
-        )
+            "The last command result is expected to be a iterable of at least "
+            "two elements"
+        ).is_length(2)
 
         assert_that(self.last_command_result[1]).described_as(
             "The second element of the last command result is expected to be "
@@ -288,6 +366,31 @@ class TangoLRCAction(TangoCommandAction):
         ).is_instance_of(str)
 
         return self.last_command_result[1][0]
+
+    def _create_assert_lrc_completion_instance(
+        self,
+        expected_result_codes: "ResultCode | list[ResultCode] | None",
+    ) -> AssertLRCCompletion:
+        """Create an instance of AssertLRCCompletion.
+
+        This method is meant to be overridden by subclasses to create
+        a custom instance of AssertLRCCompletion, in case the default
+        implementation does not fit the needs.
+
+        :param expected_result_codes: the expected result code of the LRC.
+            You can:
+
+            - leave it to the default value (``ResultCode.OK``) to accept
+              only the OK result code;
+            - set it to ``None`` to accept any result code;
+            - set it to one or more result codes to accept multiple result
+              codes (by passing a single ``ResultCode`` or a list of them).
+        :return: an instance of AssertLRCCompletion.
+        """
+        return AssertLRCCompletion(
+            device=self.target_device,
+            expected_result_codes=expected_result_codes,
+        )
 
     # -------------------------------------------------------------------
     # (Override the building method from the superclass to specify
