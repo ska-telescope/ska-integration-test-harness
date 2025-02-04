@@ -189,6 +189,14 @@ class YAMLConfigurationReader(ConfigurationReader):
                     tmc, r"tmc_sdp_subarray(\d*)_leaf_node_name"
                 )
             ),
+            tmc_mccs_master_leaf_node_name=tmc.get(
+                "tmc_mccs_master_leaf_node_name"
+            ),
+            tmc_mccs_subarrays_leaf_nodes_names=(
+                self._extract_numbered_attributes(
+                    tmc, r"tmc_mccs_subarray(\d*)_leaf_node_name"
+                )
+            ),
         )
 
     def get_csp_configuration(self) -> CSPConfiguration | None:
