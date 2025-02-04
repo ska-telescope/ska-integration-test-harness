@@ -48,11 +48,6 @@ class TelescopeCommandAction(TelescopeAction[tuple[Any, list[str]]]):
     as you would do in a normal action.
     """
 
-    # TODO: I know that more generalisation is possible here (e.g.,
-    # adding a command name, a command input and a default _action method
-    # that calls the command on the target device), but this will be
-    # object of a future MR. For now, I don't want too impactful changes.
-
     def __init__(
         self,
         target_device: "tango.DeviceProxy | None" = None,

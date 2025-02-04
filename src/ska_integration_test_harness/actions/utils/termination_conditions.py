@@ -64,48 +64,6 @@ def all_subarrays_have_obs_state(
     return res
 
 
-# TODO: remove if not used
-# def subsystems_have_telescope_state(
-#     telescope: TelescopeWrapper, expected_state: tango.DevState
-# ) -> list[ExpectedEvent]:
-#     """Termination condition for waiting devices to have a certain state.
-
-#     Generate a termination condition for waiting all active controller and
-#     subarray devices (across CSP and SDP) to have a certain telescope
-#     state. The involved devices are:
-
-#     - CSP Master Node (State attribute, only if Mid is supported)
-#     - SDP Subarray Node (State attribute)
-#     - SDP Master Node (State attribute)
-
-#     :param telescope: The telescope wrapper.
-#     :param expected_state: The expected state.
-
-#     :return: The termination condition, as a sequence of expected events.
-#     """
-#     res = [
-#         ExpectedStateChange(
-#             telescope.tmc.central_node,
-#             "telescopeState",
-#             expected_state,
-#         ),
-#         ExpectedStateChange(
-#             telescope.sdp.sdp_subarray, "State", expected_state
-#         ),
-#         ExpectedStateChange(telescope.sdp.sdp_master,
-# "State", expected_state),
-#     ]
-
-#     # CSP is supposed to change state only if Mid is supported
-#     if telescope.tmc.supports_mid():
-#         res.append(
-#             ExpectedStateChange(
-#                 telescope.csp.csp_master, "State", expected_state
-#             ),
-#         )
-#     return res
-
-
 def dishes_have_dish_mode(
     telescope: TelescopeWrapper, expected_dish_mode: str
 ) -> list[ExpectedEvent]:
