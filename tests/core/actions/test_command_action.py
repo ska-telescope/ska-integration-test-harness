@@ -28,7 +28,7 @@ class TestTangoCommandAction:
         action.execute_procedure()
 
         device.command_inout.assert_called_once_with(
-            cmd_name="TestCommand", cmd_param="PARAM", timeout=10
+            "TestCommand", cmd_param="PARAM", timeout=10
         )
         assert_that(action.last_command_result).is_equal_to("result")
 
@@ -44,7 +44,7 @@ class TestTangoCommandAction:
         action.execute_procedure()
 
         device.command_inout.assert_called_once_with(
-            cmd_name="TestCommand", cmd_param=None
+            "TestCommand", cmd_param=None
         )
         assert_that(action.last_command_result).is_equal_to("result")
 

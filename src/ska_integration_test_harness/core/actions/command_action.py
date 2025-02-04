@@ -126,7 +126,7 @@ class TangoCommandAction(TracerAction):
         ``last_command_result`` attribute.
         """
         self.last_command_result = self.target_device.command_inout(
-            cmd_name=self.command_name,
+            self.command_name,
             cmd_param=self.command_param,
             **self.command_kwargs,
         )
