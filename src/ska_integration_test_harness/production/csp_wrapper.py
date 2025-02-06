@@ -104,19 +104,6 @@ class ProductionCSPWrapper(CSPWrapper):
             "is supposed to be ONLINE."
         ).is_equal_to(AdminMode.ONLINE)
 
-    def set_serial_number_of_cbf_processor(self):
-        """Sets serial number for cbf processor.
-
-        TODO: is this something that should be parametrised?
-        """
-        self.cbf_proc1.serialnumber = "XFL14SLO1LIF"
-        self.cbf_proc1.subscribetoallocator("low-cbf/allocator/0")
-        self.cbf_proc1.register()
-
-        self.cbf_proc2.serialnumber = "XFL1HOOQ1Y44"
-        self.cbf_proc2.subscribetoallocator("low-cbf/allocator/0")
-        self.cbf_proc2.register()
-
     # --------------------------------------------------------------
     # Subsystem properties definition
 

@@ -131,9 +131,8 @@ class TMCWrapper(SubsystemWrapper, abc.ABC):
             f"ska_{target}/tm_subarray_node/{subarray_id}"
         )
 
-        # NOTE: why zfill(2) after the first DeviceProxy creation?
+        # adapt subarray ID name to the format used in the leaf nodes
         subarray_id = str(subarray_id).zfill(2)
-
         self.csp_subarray_leaf_node = tango.DeviceProxy(
             f"ska_{target}/tm_leaf_node/csp_subarray{subarray_id}"
         )
