@@ -82,7 +82,7 @@ class TestObsStateCommandsFactory:
         factory = ObsStateCommandsFactory(obs_state_system)
 
         command = factory.create_action_with_sync(
-            "AssignResources", '{"dummy": "data"}'
+            "AssignResources", '{"dummy": "data"}', sync_transient=True
         )
 
         assert_that(command.postconditions).described_as(
@@ -130,7 +130,10 @@ class TestObsStateCommandsFactory:
         factory = ObsStateCommandsFactory(obs_state_system)
 
         command = factory.create_action_with_sync(
-            "Configure", '{"dummy": "data"}', sync_quiescent=False
+            "Configure",
+            '{"dummy": "data"}',
+            sync_quiescent=False,
+            sync_transient=True,
         )
 
         assert_that(command.postconditions).described_as(
@@ -218,7 +221,7 @@ class TestObsStateCommandsFactory:
         factory = ObsStateCommandsFactory(obs_state_system)
 
         with pytest.raises(ValueError) as exc_info:
-            factory.create_action_with_sync("End")
+            factory.create_action_with_sync("End", sync_transient=True)
 
         assert_that(str(exc_info.value)).described_as(
             "The exception message contains the command name."

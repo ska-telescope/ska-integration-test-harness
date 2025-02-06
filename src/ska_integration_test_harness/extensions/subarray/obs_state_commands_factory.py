@@ -15,6 +15,10 @@ COMMANDS_STATES_MAP: dict[str, dict[str, ObsState | None]] = {
         "transient": ObsState.RESOURCING,
         "quiescent": ObsState.IDLE,
     },
+    "ReleaseResources": {
+        "transient": ObsState.RESOURCING,
+        "quiescent": ObsState.EMPTY,
+    },
     "ReleaseAllResources": {
         "transient": ObsState.RESOURCING,
         "quiescent": ObsState.EMPTY,
@@ -158,7 +162,7 @@ class ObsStateCommandsFactory:
         command_name: str,
         command_input: str | None = None,
         subarray_id: int = DEFAULT_SUBARRAY_ID,
-        sync_transient: bool = True,
+        sync_transient: bool = False,
         sync_quiescent: bool = True,
     ) -> TangoLRCAction:
         """Create a new action to execute a subarray command with sync.
@@ -173,7 +177,7 @@ class ObsStateCommandsFactory:
             of a JSON string (default: None)
         :param subarray_id: the subarray ID (default: DEFAULT_SUBARRAY_ID)
         :param sync_transient: whether to synchronise on the next transient
-            ObsState (default: True)
+            ObsState (default: False)
         :param sync_quiescent: whether to synchronise on the next quiescent
             ObsState (default: True)
 
@@ -224,7 +228,6 @@ class ObsStateCommandsFactory:
 
         :return: the action to execute the command
 
-        :raise ObsStateIDDoesNotExist: if the passed subarray ID does not exist
         :raise ObsStateIDDoesNotExist: if the passed subarray ID does not exist
         :raise ObsStateCommandDoesNotExist: if the command does not exist
         """
@@ -303,6 +306,14 @@ class ObsStateCommandsFactory:
         return command_name in COMMANDS_STATES_MAP and isinstance(
             COMMANDS_STATES_MAP[command_name], dict
         )
+
+    def _command_requires_input(self, command_name: str) -> bool:
+        """Check if a command requires input.
+
+        :param command_name: the name of the command
+        :return: whether the command requires input
+        """
+        return COMMANDS_STATES_MAP[command_name].get("requires_input", False)
 
     def _get_obs_state_transition(
         self, command_name: str, transition_type: str
@@ -387,7 +398,38 @@ class ObsStateCommandsFactory:
             sync_quiescent,
         )
 
-    def release_all_resources_action(
+    def create_release_resources_action(
+        self,
+        command_input: str,
+        subarray_id: int = DEFAULT_SUBARRAY_ID,
+        sync_transient: bool = True,
+        sync_quiescent: bool = True,
+    ):
+        """Create a new action to execute the ReleaseResources command.
+
+        IMPORTANT NOTE: the quiescent ObsState we are synchronising on is
+        ``ObsState.EMPTY``. Set ``sync_quiescent`` to ``False`` if you want
+        to not do this and add your own postcondition.
+
+        :param command_input: the input for the command, in a form
+            of a JSON string
+        :param subarray_id: the subarray ID (default: DEFAULT_SUBARRAY_ID)
+        :param sync_transient: whether to synchronise on the next transient
+            ObsState (default: True)
+        :param sync_quiescent: whether to synchronise on the next quiescent
+            ObsState (default: True)
+        :return: the action to execute the command
+        :raise ObsStateIDDoesNotExist: if the passed subarray ID does not exist
+        """
+        return self.create_action_with_sync(
+            "ReleaseResources",
+            command_input,
+            subarray_id,
+            sync_transient,
+            sync_quiescent,
+        )
+
+    def create_release_all_resources_action(
         self,
         subarray_id: int = DEFAULT_SUBARRAY_ID,
         sync_transient: bool = True,
