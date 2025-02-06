@@ -110,7 +110,8 @@ class ObsStateCommandsFactory:
 
     The main method of this class is :py:meth:`create_action_with_sync`,
     which creates a new action to execute a given command on a subarray
-    and synchronise on the next transient and/or quiescent ObsState.
+    and - `according to your settings` - synchronise on the
+    next transient and/or quiescent ObsState.
     It relies on the :py:data:`COMMANDS_STATES_MAP` to know which
     ObsState transitions are triggered by each command and
     to
@@ -163,7 +164,7 @@ class ObsStateCommandsFactory:
         command_input: str | None = None,
         subarray_id: int = DEFAULT_SUBARRAY_ID,
         sync_transient: bool = False,
-        sync_quiescent: bool = True,
+        sync_quiescent: bool = False,
     ) -> TangoLRCAction:
         """Create a new action to execute a subarray command with sync.
 
@@ -176,10 +177,10 @@ class ObsStateCommandsFactory:
         :param command_input: the input for the command, in a form
             of a JSON string (default: None)
         :param subarray_id: the subarray ID (default: DEFAULT_SUBARRAY_ID)
-        :param sync_transient: whether to synchronise on the next transient
-            ObsState (default: False)
-        :param sync_quiescent: whether to synchronise on the next quiescent
-            ObsState (default: True)
+        :param sync_transient: set to ``True`` to synchronise
+            on the next transient ObsState (default: False)
+        :param sync_quiescent: set to ``True`` to synchronise
+            on the next quiescent ObsState (default: False)
 
         :return: the action to execute the command
 

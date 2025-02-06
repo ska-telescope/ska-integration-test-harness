@@ -69,6 +69,9 @@ class TestObsStateCommandsFactory:
         assert_that(command.command_param).described_as(
             "The command param is the expected JSON data."
         ).is_equal_to('{"dummy": "data"}')
+        assert_that(command.postconditions).described_as(
+            "The postconditions are not set on the action."
+        ).is_empty()
 
     @staticmethod
     def test_create_assign_resources_has_expected_postconditions(
@@ -82,7 +85,10 @@ class TestObsStateCommandsFactory:
         factory = ObsStateCommandsFactory(obs_state_system)
 
         command = factory.create_action_with_sync(
-            "AssignResources", '{"dummy": "data"}', sync_transient=True
+            "AssignResources",
+            '{"dummy": "data"}',
+            sync_transient=True,
+            sync_quiescent=True,
         )
 
         assert_that(command.postconditions).described_as(
@@ -165,7 +171,7 @@ class TestObsStateCommandsFactory:
         factory = ObsStateCommandsFactory(obs_state_system)
 
         command = factory.create_action_with_sync(
-            "Abort", sync_transient=False
+            "Abort", sync_transient=False, sync_quiescent=True
         )
 
         assert_that(command.postconditions).described_as(
