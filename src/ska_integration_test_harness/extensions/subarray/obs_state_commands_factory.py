@@ -76,7 +76,7 @@ class ObsStateCommandDoesNotExist(ValueError):
         :param command_name: the name of the command
         """
         super().__init__(
-            f"Command '{command_name}' does not exist or is not supported"
+            f"Command '{command_name}' does not exist or is not supported."
         )
 
 
@@ -91,7 +91,8 @@ class ObsStateCommandHasNoTransition(ValueError):
             (e.g. "transient" or "quiescent")
         """
         super().__init__(
-            f"Command '{command_name}' hasn't a {transition_type} transition"
+            f"Command '{command_name}' hasn't a {transition_type} "
+            "obsState transition."
         )
 
 
@@ -189,11 +190,18 @@ class ObsStateCommandsFactory:
         # passed flags
         if sync_transient:
             self.add_transient_sync_to_postconditions(
-                action, command_name, subarray_id
+                action, command_name, subarray_id, None
             )
         if sync_quiescent:
             self.add_quiescent_sync_to_postconditions(
-                action, command_name, subarray_id
+                action,
+                command_name,
+                subarray_id,
+                (
+                    self._get_obs_state_transition(command_name, "transient")
+                    if sync_transient
+                    else None
+                ),
             )
 
         return action
