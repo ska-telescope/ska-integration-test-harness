@@ -62,7 +62,9 @@ If your system for some reason behaves differently but you still
 want to re-use
 :py:class:`~ska_integration_test_harness.extensions.subarray.ObsStateCommandsFactory`
 , you can override this map in your own factory instance.
-""" # pylint: disable=line-too-long # noqa: E501
+
+TODO: choose if it's better I inject this map in the constructor
+"""  # pylint: disable=line-too-long # noqa: E501
 
 
 class ObsStateCommandDoesNotExist(ValueError):
