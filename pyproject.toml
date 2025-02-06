@@ -28,6 +28,7 @@ ska-control-model=">=1.0.0,<2.0.0"
 ska-tango-testing = {git="https://gitlab.com/ska-telescope/ska-tango-testing.git", branch="sst-1022-refactor-tracer-and-add-stop-condition"}
 ska-ser-logging = "^0.4.1"
 msgpack-numpy = "^0.4.8"
+pydantic = "^2.10.6"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -67,7 +67,22 @@ want to re-use
 :py:class:`~ska_integration_test_harness.extensions.subarray.ObsStateCommandsFactory`
 , you can override this map in your own factory instance.
 
-TODO: choose if it's better I inject this map in the constructor
+TODO: Re-engineer in the following way (idea):
+
+- use pydantic to represent commands synchronisation policies
+- make each policy contain:
+  - boolean flags for transient and quiescent state sync
+  - the expected ObsState for each state
+  - boolean flags for LRC sync
+  - the expected LRC state
+  - boolean flag to fail early if LRC fails
+  - list of bad LRC states
+- this variable becomes a list of default policies
+- the factory holds a list of policies inside (which is a copy of the default)
+- every time the user creates a command, a policy is accepted as an argument
+  and the specified fields override the default policy
+
+I have to think about this
 """  # pylint: disable=line-too-long # noqa: E501
 
 

@@ -3,6 +3,7 @@
 import abc
 
 from assertpy import assert_that
+from pydantic import BaseModel
 from ska_control_model import ObsState
 
 from ...core.actions.sut_action import SUTAction
@@ -27,21 +28,34 @@ NOT_REACHABLE_STATES = [
 You can override this if your subclasses somehow support these states.
 """
 
-SUPPORTS_ABORT_STATES = [
-    ObsState.RESOURCING,
-    ObsState.IDLE,
-    ObsState.CONFIGURING,
-    ObsState.READY,
-    ObsState.SCANNING,
-    ObsState.RESETTING,
-]
-"""List of observation states that support the Abort command."""
 
-SUPPORTS_RESET_STATES = [
-    ObsState.ABORTED,
-    ObsState.FAULT,
-]
-"""List of observation states that support the Reset command."""
+class ObsStateCommandsInput(BaseModel):
+    """Input for the observation state commands.
+
+    This class represents the input for the observation state commands
+    to be used during the observation state set procedure.
+    """
+
+    AssignResources: str | None = None
+    Configure: str | None = None
+    Scan: str | None = None
+
+    @staticmethod
+    def get_object(
+        cmd_inputs: "ObsStateCommandsInput | dict",
+    ) -> "ObsStateCommandsInput":
+        """Get the object from a dictionary or an object.
+
+        :param cmd_inputs: the dictionary or object to convert
+        :return: the object
+        """
+        if cmd_inputs is None:
+            return ObsStateCommandsInput()
+
+        if isinstance(cmd_inputs, dict):
+            return ObsStateCommandsInput(**cmd_inputs)
+        return cmd_inputs
+
 
 # -------------------------------------------------------------------
 # Base class for observation state setters
@@ -61,6 +75,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
         system: ObsStateSystem,
         target_obs_state: ObsState,
         subarray_id: int = DEFAULT_SUBARRAY_ID,
+        commands_input: ObsStateCommandsInput | dict | None = None,
         enable_logging=True,
     ) -> "ObsStateSetter":
         """Get the appropriate setter action from the current system state.
@@ -72,6 +87,11 @@ class ObsStateSetter(SUTAction, abc.ABC):
         :param system: the system to put in the desired observation state
         :param target_obs_state: the desired observation state
         :param subarray_id: the subarray ID
+        :param commands_input: the input for the commands. Specify them
+            as a dictionary or as an :py:class:`ObsStateCommandsInput`
+            instance (default: no input for any command, you can leave
+            like that if you think you don't need to execute
+            any ``AssignResources``, ``Configure`` or ``Scan`` command)
         :param enable_logging: whether to enable logging (default: True)
 
         :return: the appropriate setter action
@@ -99,14 +119,20 @@ class ObsStateSetter(SUTAction, abc.ABC):
             )
 
         return STATE_CLASS_MAP[current_obs_state](
-            system, target_obs_state, subarray_id, enable_logging
+            system,
+            target_obs_state,
+            subarray_id,
+            commands_input,
+            enable_logging,
         )
 
+    # pylint: disable=too-many-arguments, too-many-positional-arguments
     def __init__(
         self,
         system: ObsStateSystem,
         target_obs_state: ObsState,
         subarray_id: int = DEFAULT_SUBARRAY_ID,
+        commands_input: ObsStateCommandsInput | dict | None = None,
         enable_logging=True,
     ):
         """Initialize the ObsStateSetter.
@@ -114,6 +140,11 @@ class ObsStateSetter(SUTAction, abc.ABC):
         :param system: the system to put in the desired observation state
         :param target_obs_state: the desired observation state
         :param subarray_id: the subarray ID
+        :param commands_input: the input for the commands. Specify them
+            as a dictionary or as an :py:class:`ObsStateCommandsInput`
+            instance (default: no input for any command, you can leave
+            like that if you think you don't need to execute
+            any ``AssignResources``, ``Configure`` or ``Scan`` command)
         :param enable_logging: whether to enable logging (default: True)
         """
         super().__init__(enable_logging)
@@ -123,6 +154,8 @@ class ObsStateSetter(SUTAction, abc.ABC):
         self.subarray_id = subarray_id
 
         self.command_factory = ObsStateCommandsFactory(self.system)
+
+        self.commands_input = ObsStateCommandsInput.get_object(commands_input)
 
     def description(self) -> str:
         return (
@@ -176,12 +209,20 @@ class ObsStateSetter(SUTAction, abc.ABC):
                 "is not reachable by current decision rules."
             )
 
-        # execute the next command
-        self.next_command().execute(**self._last_execution_params)
+        # compute the next command that should be run
+        command = self.next_command()
+        command.set_logging(not self.logger.disabled)
+
+        # run it
+        command.execute(**self._last_execution_params)
 
         # determine the next setter to use and execute it
         self.get_setter_action(
-            self.system, self.target_obs_state, self.subarray_id
+            self.system,
+            self.target_obs_state,
+            self.subarray_id,
+            self.commands_input,
+            not self.logger.disabled,
         ).execute(**self._last_execution_params)
 
     def next_command(self) -> SUTAction:
@@ -252,6 +293,23 @@ class ObsStateSetter(SUTAction, abc.ABC):
                 f"device {device.dev_name()} is not."
             ).is_in(self._accepted_obs_states_for_devices())
 
+    def _get_command_input_or_fail(self, command_name: str) -> str:
+        """Get the command input or raise an exception if it is missing.
+
+        :param command_name: the name of the command
+        :return: the command input
+        :raise ValueError: if the command input is missing
+        """
+        command_input = getattr(self.commands_input, command_name)
+        if command_input is None:
+            raise ValueError(
+                f"Failure in {self.name()} action ({self.description()}): "
+                f"The {command_name} command input is missing. "
+                "Set it using the ``commands_input`` parameter in "
+                "the constructor."
+            )
+        return command_input
+
 
 # -------------------------------------------------------------------
 # Specific classes for observation state setters
@@ -269,21 +327,37 @@ class ObsStateSetterEmpty(ObsStateSetter):
     begin the normal operational flow.
 
     Routing rules:
-    - if the target state is ``RESOURCING``, send ``AssignResources``
+    - if the target state is ``RESOURCING`` (or something that will
+      require immediate abort), send ``AssignResources``
       synchronising on the transient state
     - any other state is supposed to be reached passing through ``IDLE``,
-      so send ``AssignResources`` synchronising on the quiescent state
+      so I send ``AssignResources`` synchronising on the quiescent state
+      (+ verifying LRC completion and errors)
+
+    LRC errors will always be used as early stop conditions.
     """
 
     def next_command(self):
-        if self.target_obs_state == ObsState.RESOURCING:
-            return self.command_factory.create_assign_resources_action(
-                self.subarray_id, sync_transient=True, sync_quiescent=False
-            )
+        command_input = self._get_command_input_or_fail("AssignResources")
 
-        return self.command_factory.create_assign_resources_action(
-            self.subarray_id, sync_transient=False, sync_quiescent=True
-        )
+        # I don't need to synchronise on the transient state if 1)
+        # the target state is RESOURCING or 2) the target state is
+        # something I will reach passing through an Abort command
+        sync_quiescent = self.target_obs_state not in [
+            ObsState.RESOURCING,
+            ObsState.ABORTING,
+            ObsState.ABORTED,
+            ObsState.RESTARTING,
+        ]
+
+        action = self.command_factory.create_assign_resources_action(
+            command_input, self.subarray_id, True, sync_quiescent
+        ).add_lrc_errors_to_early_stop()
+
+        if sync_quiescent:
+            action.add_lrc_completion_to_postconditions()
+
+        return action
 
 
 # *** STATES THAT SUPPORT ABORT ***
@@ -303,18 +377,22 @@ class ObsStateSetterSupportsAbort(ObsStateSetter, abc.ABC):
     - if the target state is ``ABORTING``, send ``Abort`` synchronising
       on the transient state
     - for any other state, send ``Abort`` synchronising on the quiescent
-      state
+      state (+ verifying LRC completion and errors)
+
+    LRC errors will always be used as early stop conditions.
     """
 
     def next_command(self):
-        if self.target_obs_state == ObsState.ABORTING:
-            return self.command_factory.create_abort_action(
-                self.subarray_id, sync_transient=True, sync_quiescent=False
-            )
+        sync_quiescent = self.target_obs_state != ObsState.ABORTING
 
-        return self.command_factory.create_abort_action(
-            self.subarray_id, sync_transient=False, sync_quiescent=True
-        )
+        action = self.command_factory.create_abort_action(
+            self.subarray_id, True, sync_quiescent
+        ).add_lrc_errors_to_early_stop()
+
+        if sync_quiescent:
+            action.add_lrc_completion_to_postconditions()
+
+        return action
 
 
 class ObsStateSetterResourcing(ObsStateSetterSupportsAbort):
@@ -335,25 +413,37 @@ class ObsStateSetterIdle(ObsStateSetterSupportsAbort):
     Routing rules:
 
     - for ``READY`` and ``SCANNING``, I have to ``Configure`` synchronising
-      on the quiescent state
+      on the quiescent state (and verifying LRC completion)
     - for ``CONFIGURING``, I have to ``Configure`` synchronising on the
       transient state
     - for any other state, I have to ``Abort`` first
       (see :py:class:`ObsStateSetterSupportsAbort`)
+
+    LRC errors will always be used as early stop conditions.
     """
 
     def next_command(self):
-        if self.target_obs_state in [ObsState.READY, ObsState.SCANNING]:
-            return self.command_factory.create_configure_action(
-                self.subarray_id, sync_transient=False, sync_quiescent=True
-            )
+        # if the target state is not one of the consecutive states
+        # I Abort first
+        if self.target_obs_state not in [
+            ObsState.CONFIGURING,
+            ObsState.READY,
+            ObsState.SCANNING,
+        ]:
+            return super().next_command()
 
-        if self.target_obs_state == ObsState.CONFIGURING:
-            return self.command_factory.create_configure_action(
-                self.subarray_id, sync_transient=True, sync_quiescent=False
-            )
+        command_input = self._get_command_input_or_fail("Configure")
 
-        return super().next_command()
+        sync_quiescent = self.target_obs_state != ObsState.CONFIGURING
+
+        action = self.command_factory.create_configure_action(
+            command_input, self.subarray_id, True, sync_quiescent
+        ).add_lrc_errors_to_early_stop()
+
+        if sync_quiescent:
+            action.add_lrc_completion_to_postconditions()
+
+        return action
 
 
 class ObsStateSetterConfiguring(ObsStateSetterSupportsAbort):
@@ -376,15 +466,20 @@ class ObsStateSetterReady(ObsStateSetterSupportsAbort):
     - for ``SCANNING``, I have to ``Scan`` synchronising on the transient state
     - for any other state, I have to ``Abort`` first
       (see :py:class:`ObsStateSetterSupportsAbort`)
+
+    LRC errors will always be used as early stop conditions.
     """
 
     def next_command(self):
-        if self.target_obs_state == ObsState.SCANNING:
-            return self.command_factory.create_scan_action(
-                self.subarray_id, sync_transient=True, sync_quiescent=False
-            )
+        # if the target state is not SCANNING, I Abort first
+        if self.target_obs_state != ObsState.SCANNING:
+            return super().next_command()
 
-        return super().next_command()
+        command_input = self._get_command_input_or_fail("Scan")
+
+        return self.command_factory.create_scan_action(
+            command_input, self.subarray_id, True, False
+        ).add_lrc_errors_to_early_stop()
 
 
 class ObsStateSetterScanning(ObsStateSetterSupportsAbort):
@@ -429,18 +524,22 @@ class ObsStateSetterSupportsRestart(ObsStateSetter, abc.ABC):
     - if the target state is ``RESTARTING``, send ``Restart`` synchronising
       on the transient state
     - for any other state, send ``Restart`` synchronising on the quiescent
-      state
+      state (+ verifying LRC completion and errors)
+
+    LRC errors will always be used as early stop conditions.
     """
 
     def next_command(self):
-        if self.target_obs_state == ObsState.RESTARTING:
-            return self.command_factory.create_restart_action(
-                self.subarray_id, sync_transient=True, sync_quiescent=False
-            )
+        sync_quiescent = self.target_obs_state != ObsState.RESTARTING
 
-        return self.command_factory.create_restart_action(
-            self.subarray_id, sync_transient=False, sync_quiescent=True
-        )
+        action = self.command_factory.create_restart_action(
+            self.subarray_id, True, sync_quiescent
+        ).add_lrc_errors_to_early_stop()
+
+        if sync_quiescent:
+            action.add_lrc_completion_to_postconditions()
+
+        return action
 
 
 class ObsStateSetterFault(ObsStateSetterSupportsRestart):
