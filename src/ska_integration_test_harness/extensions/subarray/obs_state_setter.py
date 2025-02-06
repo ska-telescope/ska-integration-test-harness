@@ -127,13 +127,15 @@ class ObsStateSetter(SUTAction, abc.ABC):
     def description(self) -> str:
         return (
             f"Move subarray {self.subarray_id} "
-            f"from {self.class_obs_state()} to {self.target_obs_state}."
+            f"from {self.class_starting_obs_state()} "
+            f"to {self.target_obs_state}."
         )
 
-    def class_obs_state(self):
+    def class_starting_obs_state(self):
         """Return the observation state that is expected by the class.
 
-        :return: the observation state expected by the class
+        :return: the observation state expected by the class as a
+            starting point for the observation state set procedure
         """
         return STATE_CLASS_MAP[self.__class__]
 
@@ -145,8 +147,8 @@ class ObsStateSetter(SUTAction, abc.ABC):
         - the system is in a consistent observation state
         - the consistent observation state is the one expected by the class
         """
-        self._verify_class_obs_state()
-        self._verify_obs_state_consistency()
+        self._system_is_in_class_starting_obs_state()
+        self._system_obs_state_is_consistent()
 
     def execute_procedure(self):
         """Move towards the target observation state (if not already there).
@@ -163,10 +165,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
           given the new observation state
         """
         # verify if the system is already in the target observation state
-        if (
-            self.system.get_main_obs_state_device(self.subarray_id).obsState
-            == self.target_obs_state
-        ):
+        if self._system_obs_state() == self.target_obs_state:
             return
 
         # ensure target state is reachable
@@ -205,23 +204,28 @@ class ObsStateSetter(SUTAction, abc.ABC):
             f"Failure in {self.name()} action ({self.description()}): "
             "The system cannot move towards the target observation state "
             f"({self.target_obs_state}) from the current state "
-            f"({self.class_obs_state()})."
+            f"({self.class_starting_obs_state()})."
         )
 
     # -------------------------------------------------------------------
     # Internal utilities for the class
 
-    def _verify_class_obs_state(self):
-        """Verify the system is in the class observation state."""
-        assert_that(
-            self.system.get_main_obs_state_device(self.subarray_id).obsState
-        ).described_as(
-            self.description()
-            + "FAILED ASSUMPTION: "
-            + " The system is expected to be in the class observation state "
-        ).is_equal_to(
-            self.class_obs_state()
-        )
+    def _system_obs_state(self) -> ObsState:
+        """Return the current observation state of the system.
+
+        :return: the current observation state of the system, read from the
+            coordinator device (which observation state should be
+            representative for the whole system).
+        """
+        return self.system.get_main_obs_state_device(self.subarray_id).obsState
+
+    def _system_is_in_class_starting_obs_state(self):
+        """Verify the system is in the expected class observation state."""
+        assert_that(self._system_obs_state()).described_as(
+            f"{self.description()} FAILED ASSUMPTION: "
+            "The system is expected to be in the class observation state "
+            "As a starting point for the observation state set procedure."
+        ).is_equal_to(self.class_starting_obs_state())
 
     def _accepted_obs_states_for_devices(self) -> list[ObsState]:
         """Define the accepted observation states for the devices.
@@ -235,9 +239,9 @@ class ObsStateSetter(SUTAction, abc.ABC):
 
         :return: the list of accepted observation states
         """
-        return [self.class_obs_state()]
+        return [self.class_starting_obs_state()]
 
-    def _verify_obs_state_consistency(self):
+    def _system_obs_state_is_consistent(self):
         """Verify the system is in a consistent observation state."""
         for device in self.system.get_obs_state_devices(self.subarray_id):
             assert_that(device.obsState).described_as(
