@@ -36,12 +36,3 @@ class ProductionMCCSWrapper(MCCSWrapper):
 
     def is_emulated(self) -> bool:
         return False
-
-    # --------------------------------------------------------------
-    # Specific MCCS methods and properties
-
-    def tear_down(self) -> None:
-        """Nothing specific to be done for production MCCS."""
-
-    def clear_command_call(self) -> None:
-        """Nothing specific to be done for production MCCS."""

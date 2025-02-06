@@ -44,23 +44,9 @@ class CSPWrapper(SubsystemWrapper, abc.ABC):
     # --------------------------------------------------------------
     # Specific CSP methods and properties
 
-    def before_move_to_on(self) -> None:
-        """Hook for an action to be called before the TelescopeOn command.
-
-        This is a no-op by default.
-        """
-
-    def after_move_to_on(self) -> None:
-        """Hook for an action to be called after the TelescopeOn command.
-
-        This is a no-op by default.
-        """
-
-    @abc.abstractmethod
     def tear_down(self) -> None:
         """Tear down the CSP (if needed)."""
 
-    @abc.abstractmethod
     def clear_command_call(self) -> None:
         """Clear the command call on the CSP (if needed)."""
 

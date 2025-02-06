@@ -31,10 +31,7 @@ class EmulatedSDPWrapper(SDPWrapper):
     # Specific SDP methods and properties
 
     def configure_receive_address(self):
-        """Configure the receive address for the SDP subarray.
-
-        TODO: why is this method needed?
-        """
+        """Configure the receive address for the SDP subarray."""
         receive_address = DictJSONInput(
             {
                 "science_A": {

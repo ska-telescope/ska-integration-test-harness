@@ -55,10 +55,8 @@ class SDPWrapper(SubsystemWrapper, abc.ABC):
             f"{target}-sdp/subarray/{subarray_id}"
         )
 
-    @abc.abstractmethod
     def tear_down(self) -> None:
         """Tear down the SDP (if needed)."""
 
-    @abc.abstractmethod
     def clear_command_call(self) -> None:
         """Clear the command call on the SDP (if needed)."""

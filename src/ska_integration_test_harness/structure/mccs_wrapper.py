@@ -52,10 +52,8 @@ class MCCSWrapper(SubsystemWrapper, abc.ABC):
             f"low-mccs/subarray/{subarray_id}"
         )
 
-    @abc.abstractmethod
     def tear_down(self) -> None:
         """Tear down the dishes (if needed)."""
 
-    @abc.abstractmethod
     def clear_command_call(self) -> None:
         """Clear the command call on the Dishes (if needed)."""

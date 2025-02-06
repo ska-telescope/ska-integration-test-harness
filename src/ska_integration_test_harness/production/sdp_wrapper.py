@@ -11,12 +11,3 @@ class ProductionSDPWrapper(SDPWrapper):
 
     def is_emulated(self) -> bool:
         return False
-
-    # --------------------------------------------------------------
-    # Specific SDP methods and properties
-
-    def tear_down(self) -> None:
-        """Tear down the CSP (not needed)."""
-
-    def clear_command_call(self) -> None:
-        """Clear the command call on the SDP (not needed)."""

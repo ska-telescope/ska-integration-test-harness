@@ -56,7 +56,6 @@ class DishesWrapper(SubsystemWrapper, abc.ABC):
     # --------------------------------------------------------------
     # Specific Dishes methods and properties
 
-    @abc.abstractmethod
     def _pre_init_dish_names(
         self, dishes_configuration: DishesConfiguration
     ) -> None:
@@ -73,10 +72,8 @@ class DishesWrapper(SubsystemWrapper, abc.ABC):
             for key in sorted(self.dish_master_dict.keys())
         ]
 
-    @abc.abstractmethod
     def tear_down(self) -> None:
         """Tear down the dishes (if needed)."""
 
-    @abc.abstractmethod
     def clear_command_call(self) -> None:
         """Clear the command call on the Dishes (if needed)."""
