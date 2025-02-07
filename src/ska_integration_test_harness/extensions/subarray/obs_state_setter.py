@@ -487,7 +487,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
                 + " The system devices are expected to be in a "
                 "consistent observation state, but "
                 f"device {device.dev_name()} is not."
-            ).is_in(self._accepted_obs_states_for_devices())
+            ).is_in(*self._accepted_obs_states_for_devices())
 
     def _get_command_input_or_fail(self, command_name: str) -> str:
         """Get the command input or raise an exception if it is missing.
