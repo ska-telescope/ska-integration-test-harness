@@ -64,11 +64,179 @@ class ObsStateCommandsInput(BaseModel):
 class ObsStateSetter(SUTAction, abc.ABC):
     """Tool to put the system in a desired observation state.
 
-    TODO: describe the class
+    This class is a tool to put an observation state-based system
+    (:py:class:`~ska_integration_test_harness.extensions.subarray.ObsStateSystem`)
+    in a desired target :py:class:`~ska_control_model.ObsState` starting
+    from (almost) any observation state. The general idea is to pilot
+    the system towards the target observation state by sending
+    the appropriate commands and synchronising on the right states. The
+    commands are created by a
+    :py:class:`~ska_integration_test_harness.extensions.subarray.ObsStateCommandsFactory`
+    and the input is given by an :py:class:`~ObsStateCommandsInput` instance.
 
-    TODO: how may I embed the conditional LRC synchronization and early
-    stop in an elegant way?
-    """
+    The class is abstract, because it is meant to be the base class for
+    a set of subclasses, implemented in a way that each subclass represents
+    a specific (`starting`) observation state and implements the routing rules
+    to move towards the `target` observation state. This idea is not new,
+    but it is an application of the
+    `State Design Pattern <https://refactoring.guru/design-patterns/state>`_.
+
+    **Usage as an end user**: to use this class, you can just call the
+    :py:meth:`get_setter_action` (static) method to get the appropriate
+    initial setter action, which can be executed simply by calling the
+    :py:meth:`execute` method (passing an appropriate timeout, which will
+    be shared by all the commands). The method will automatically
+    return the appropriate setter action according to the system's
+    current observation state. Example:
+
+    .. code-block:: python
+
+        from ska_integration_test_harness.extensions.subarray import (
+            ObsStateSetter
+        )
+
+        # (please see the ObsStateSystem protocol)
+        system = YourOwnObsStateSystem()
+
+        # get the appropriate setter action
+        setter = ObsStateSetter.get_setter_action(
+            system,
+            ObsState.SCANNING, # your target observation state
+            subarray_id=1, # your subarray ID
+
+            # the input for the commands
+            commands_input={
+                "AssignResources": <...>,
+                "Configure": <...>,
+                "Scan": <...>,
+            },
+        )
+
+        # execute the setter action within a shared timeout (e.g. 100 seconds)
+        setter.execute(100)
+
+
+    **Implemented algorithm**: the implemented algorithm is quite simple.
+    Intuitively:
+
+    - let's divide our states in three categories:
+      - the regular operational flow states
+        (``EMPTY, RESOURCING, IDLE, CONFIGURING, READY, SCANNING``)
+      - the states for the abort & restart procedure
+        (``ABORTING, ABORTED, RESTARTING``)
+      - the remaining states
+        - ``FAULT``, which in a certain sense can be seen as part
+          of the abort & restart procedure, since it
+          supports the ``Restart`` command
+        - ``RESETTING``, which - in theory - can be aborted and be
+          reduced to the abort & restart procedure
+    - if in any point of the procedure the system **current state**
+      is equal to the **target state**, I just return
+    - if the **target state** is in the operational flow and the
+      **starting state** "comes before", I just follow the regular
+      operational flow. If instead the **target state** "comes after",
+      at the moment I abort first and then I follow the regular
+      operational flow. At the moment, I abort also if the **initial state**
+      is a transient state (``RESOURCING, CONFIGURING, SCANNING``)
+    - if the **target state** is in the abort & restart procedure and
+      the **starting state** "comes before" or is part of the regular
+      operational flow, I just follow the abort & restart procedure.
+      If instead the **target state** "comes after", I first terminate
+      the abort procedure, then I enter in the regular operational flow
+      (``RESOURCING``) to just abort again and then follow the abort &
+      restart procedure till I reach the **target state**
+
+    A few exceptional cases (that may be improved in the future):
+
+    - :py:data:`NOT_REACHABLE_STATES` are states that are not reachable
+      by the system. If the target state is one of these states, the
+      procedure will always raise an exception
+    - if the starting state is a transient state in the regular
+      operational flow, to reach any state an ``Abort`` command will be called
+      first
+    - if the starting state is a transient state in the abort & restart
+      procedure, at the moment I have no rules to deal with it and the
+      procedure will always raise an exception. A slight improvement
+      could be to at least try to wait for the transient state to end
+    - the regular operational flow is followed just through the
+      "main direction"
+      (``EMPTY -> RESOURCING -> IDLE -> CONFIGURING -> READY -> SCANNING``),
+      not really considering the other possible paths. This is a simplification
+      to avoid too complex routing rules
+
+    A further notes about obs-state consistency and preconditions:
+
+    - before sending any command, the system is verified to be in the expected
+      current state (the one expected by the class) and also it is verified
+      to be in a consistent state (all the devices are in an accepted state,
+      or at least in a state that can be accepted by the class). All this
+      logic is encoded in the :py:meth:`verify_preconditions` method
+    - since this class is a
+      :py:class:`~ska_integration_test_harness.core.actions.SUTAction`,
+      the preconditions are verified before executing the action and a failure
+      will be raised if they are not satisfied. Conceptually, this means this
+      classes structure is meant to deal **only with cases where the system
+      is in a consistent state**. If it detects an inconsistency, it will
+      fail.
+
+    **Extending the class**: this class structure is designed to be
+    easily extensible and overrideable. You can extend the class by
+    creating new subclasses that represent new (or existing) observation
+    states, implement the routing rules in the :py:meth:`next_command`
+    method and then add the new class to the :py:data:`STATE_CLASS_MAP` data
+    structure (which maps the observation states to the classes that
+    support them as starting states). You can also override the
+    :py:meth:`_accepted_obs_states_for_devices` method to define which
+    observation states for the devices are handled by the class. Potentially,
+    you can override any other method to implement more complex behaviours.
+    Here an example on how you can override the routing rules for the
+    ``IDLE`` state to reach ``EMPTY`` or ``RESOURCING`` by the
+    ``ReleaseAllResources`` command:
+
+    .. code-block:: python
+
+        from ska_control_model import ObsState
+        from ska_integration_test_harness.extensions.subarray import (
+            ObsStateSetterFromIdle,
+        )
+
+        class CustomObsStateSetterFromIdle(ObsStateSetterFromIdle):
+
+            def next_command(self):
+                # the particular target states I want to deal are
+                # EMPTY and RESOURCING. If the target state is not
+                # one of these, I can just call the superclass method
+                # and use the default routing rules
+                if not self.target_obs_state in [
+                    ObsState.EMPTY, ObsState.RESOURCING
+                ]:
+                    return super().next_command()
+
+                # To reach EMPTY or RESOURCING from IDLE, I just
+                # need to release all resources.
+                # To do so, I just have to be careful to synchronise
+                # on the transient state only (if the target state is
+                # RESOURCING) or on the quiescent state + LRC completion
+                # (if the target state is EMPTY)
+
+                sync_quiescent = self.target_obs_state != ObsState.RESOURCING
+
+                action = self.command_factory.create_release_all_resources_action(
+                    self.subarray_id, True, sync_quiescent
+                ).add_lrc_errors_to_early_stop()
+
+                if sync_quiescent:
+                    action.add_lrc_completion_to_postconditions()
+
+                return action
+
+        # add the new class to the STATE_CLASS_MAP, overriding the IDLE state
+        STATE_CLASS_MAP[ObsState.IDLE] = CustomObsStateSetterFromIdle
+
+        # (now if I call get_setter_action my custom class will be used
+        # if I happen to pass through the IDLE state)
+
+    """  # pylint: disable=line-too-long # noqa: E501
 
     @staticmethod
     def get_setter_action(
@@ -319,7 +487,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
 # Rules: simple, just begin the normal operational flow
 
 
-class ObsStateSetterEmpty(ObsStateSetter):
+class ObsStateSetterFromEmpty(ObsStateSetter):
     """Set Observation State starting from an empty state.
 
     From an empty state, whatever the target state is (except
@@ -395,7 +563,7 @@ class ObsStateSetterSupportsAbort(ObsStateSetter, abc.ABC):
         return action
 
 
-class ObsStateSetterResourcing(ObsStateSetterSupportsAbort):
+class ObsStateSetterFromResourcing(ObsStateSetterSupportsAbort):
     """Set Observation State starting from a RESOURCING state.
 
     Being a transient state, some devices may already be in ``IDLE`` state.
@@ -407,7 +575,7 @@ class ObsStateSetterResourcing(ObsStateSetterSupportsAbort):
         return [ObsState.RESOURCING, ObsState.IDLE]
 
 
-class ObsStateSetterIdle(ObsStateSetterSupportsAbort):
+class ObsStateSetterFromIdle(ObsStateSetterSupportsAbort):
     """Set Observation State starting from an IDLE state.
 
     Routing rules:
@@ -446,7 +614,7 @@ class ObsStateSetterIdle(ObsStateSetterSupportsAbort):
         return action
 
 
-class ObsStateSetterConfiguring(ObsStateSetterSupportsAbort):
+class ObsStateSetterFromConfiguring(ObsStateSetterSupportsAbort):
     """Set Observation State starting from a CONFIGURING state.
 
     Being a transient state, some devices may already be in ``READY`` state.
@@ -458,7 +626,7 @@ class ObsStateSetterConfiguring(ObsStateSetterSupportsAbort):
         return [ObsState.CONFIGURING, ObsState.READY]
 
 
-class ObsStateSetterReady(ObsStateSetterSupportsAbort):
+class ObsStateSetterFromReady(ObsStateSetterSupportsAbort):
     """Set Observation State starting from a READY state.
 
     Routing rules:
@@ -482,7 +650,7 @@ class ObsStateSetterReady(ObsStateSetterSupportsAbort):
         ).add_lrc_errors_to_early_stop()
 
 
-class ObsStateSetterScanning(ObsStateSetterSupportsAbort):
+class ObsStateSetterFromScanning(ObsStateSetterSupportsAbort):
     """Set Observation State starting from a SCANNING state.
 
     Being a transient state, some devices may already be in ``READY`` state.
@@ -494,7 +662,7 @@ class ObsStateSetterScanning(ObsStateSetterSupportsAbort):
         return [ObsState.SCANNING, ObsState.READY]
 
 
-class ObsStateSetterResetting(ObsStateSetterSupportsAbort):
+class ObsStateSetterFromResetting(ObsStateSetterSupportsAbort):
     """Set Observation State starting from an RESETTING state.
 
     Being a transient state, some devices may already be in ``IDLE`` state.
@@ -542,7 +710,7 @@ class ObsStateSetterSupportsRestart(ObsStateSetter, abc.ABC):
         return action
 
 
-class ObsStateSetterFault(ObsStateSetterSupportsRestart):
+class ObsStateSetterFromFault(ObsStateSetterSupportsRestart):
     """Set Observation State starting from a FAULT state.
 
     Fault is particular. I am not sure, but I think that if the system
@@ -555,7 +723,7 @@ class ObsStateSetterFault(ObsStateSetterSupportsRestart):
         return list(ObsState)
 
 
-class ObsStateSetterAborted(ObsStateSetterSupportsRestart):
+class ObsStateSetterFromAborted(ObsStateSetterSupportsRestart):
     """Set Observation State starting from an ABORTED state.
 
     Routing rules are the ones from :py:class:`ObsStateSetterSupportsRestart`.
@@ -571,7 +739,7 @@ class ObsStateSetterAborted(ObsStateSetterSupportsRestart):
 # to be satisfied (e.g. the system is in the target state)
 
 
-class ObsStateSetterAborting(ObsStateSetter):
+class ObsStateSetterFromAborting(ObsStateSetter):
     """Set Observation State starting from an ABORTING state.
 
     ABORTING is a transient state, so some devices may already be in
@@ -585,7 +753,7 @@ class ObsStateSetterAborting(ObsStateSetter):
         return [ObsState.ABORTING, ObsState.ABORTED]
 
 
-class ObsStateSetterRestarting(ObsStateSetter):
+class ObsStateSetterFromRestarting(ObsStateSetter):
     """Set Observation State starting from a RESTARTING state.
 
     RESTARTING is a transient state, so some devices may already be in
@@ -602,14 +770,14 @@ class ObsStateSetterRestarting(ObsStateSetter):
 # -------------------------------------------------------------------
 # Fill the state-class map
 
-STATE_CLASS_MAP[ObsState.EMPTY] = ObsStateSetterEmpty
-STATE_CLASS_MAP[ObsState.RESOURCING] = ObsStateSetterResourcing
-STATE_CLASS_MAP[ObsState.IDLE] = ObsStateSetterIdle
-STATE_CLASS_MAP[ObsState.CONFIGURING] = ObsStateSetterConfiguring
-STATE_CLASS_MAP[ObsState.READY] = ObsStateSetterReady
-STATE_CLASS_MAP[ObsState.SCANNING] = ObsStateSetterScanning
-STATE_CLASS_MAP[ObsState.RESETTING] = ObsStateSetterResetting
-STATE_CLASS_MAP[ObsState.FAULT] = ObsStateSetterFault
-STATE_CLASS_MAP[ObsState.ABORTED] = ObsStateSetterAborted
-STATE_CLASS_MAP[ObsState.ABORTING] = ObsStateSetterAborting
-STATE_CLASS_MAP[ObsState.RESTARTING] = ObsStateSetterRestarting
+STATE_CLASS_MAP[ObsState.EMPTY] = ObsStateSetterFromEmpty
+STATE_CLASS_MAP[ObsState.RESOURCING] = ObsStateSetterFromResourcing
+STATE_CLASS_MAP[ObsState.IDLE] = ObsStateSetterFromIdle
+STATE_CLASS_MAP[ObsState.CONFIGURING] = ObsStateSetterFromConfiguring
+STATE_CLASS_MAP[ObsState.READY] = ObsStateSetterFromReady
+STATE_CLASS_MAP[ObsState.SCANNING] = ObsStateSetterFromScanning
+STATE_CLASS_MAP[ObsState.RESETTING] = ObsStateSetterFromResetting
+STATE_CLASS_MAP[ObsState.FAULT] = ObsStateSetterFromFault
+STATE_CLASS_MAP[ObsState.ABORTED] = ObsStateSetterFromAborted
+STATE_CLASS_MAP[ObsState.ABORTING] = ObsStateSetterFromAborting
+STATE_CLASS_MAP[ObsState.RESTARTING] = ObsStateSetterFromRestarting
