@@ -1,3 +1,5 @@
+# pylint: disable=invalid-name
+
 """Utilities for testing the subarray extension."""
 
 from ska_control_model import ObsState
@@ -41,3 +43,30 @@ class MockSubarraySystem(ObsStateSystem):
 
     def get_obs_state_devices(self, subarray_id: int = 1):
         return self.obs_state_devices
+
+    # -------------------------------------------------------------------------
+    # Mock methods
+
+    def set_controller_obs_state(self, obs_state):
+        """Set the subarray controller obsState.
+
+        :param obs_state: The new obsState for the subarray controller.
+        """
+        self.subarray_controller.obsState = obs_state
+
+    def set_obs_state_other_devices(self, obs_state):
+        """Set the obsState of all other devices.
+
+        :param obs_state: The new obsState for the devices.
+        """
+        for device in self.obs_state_devices:
+            device.obsState = obs_state
+
+    def set_partial_obs_state(self, obs_state, device_index=0):
+        """Set the obsState of a single device, ignoring the others.
+
+        :param obs_state: The new obsState for the device.
+        :param device_index: The index of the device to update.
+            It defaults to 0 but it can be also 1 or 2.
+        """
+        self.obs_state_devices[device_index].obsState = obs_state

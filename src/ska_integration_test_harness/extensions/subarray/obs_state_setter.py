@@ -196,8 +196,8 @@ class ObsStateSetter(SUTAction, abc.ABC):
     .. code-block:: python
 
         from ska_control_model import ObsState
-        from ska_integration_test_harness.extensions.subarray import (
-            ObsStateSetterFromIdle,
+        from ska_integration_test_harness.extensions.subarray.obs_state_setter import (
+            ObsStateSetterFromIdle, STATE_CLASS_MAP
         )
 
         class CustomObsStateSetterFromIdle(ObsStateSetterFromIdle):
@@ -328,8 +328,8 @@ class ObsStateSetter(SUTAction, abc.ABC):
     def description(self) -> str:
         return (
             f"Move subarray {self.subarray_id} "
-            f"from {self.class_starting_obs_state()} "
-            f"to {self.target_obs_state}."
+            f"from {str(self.class_starting_obs_state())} "
+            f"to {str(self.target_obs_state)}."
         )
 
     def class_starting_obs_state(self):
@@ -338,7 +338,18 @@ class ObsStateSetter(SUTAction, abc.ABC):
         :return: the observation state expected by the class as a
             starting point for the observation state set procedure
         """
-        return STATE_CLASS_MAP[self.__class__]
+        # find the key in STATE_CLASS_MAP that points to the class
+        # that is the current class
+        for key, value in STATE_CLASS_MAP.items():
+            if value == self.__class__:
+                return key
+
+        raise RuntimeError(
+            f"The given class {self.__class__} is not correctly "
+            "inserted in the STATE_CLASS_MAP. "
+            "This is a bug in the class structure. Please read carefully "
+            "the documentation and the examples."
+        )
 
     def verify_preconditions(self):
         """Verify the system is the class obs. state and it's consistent.
@@ -347,7 +358,24 @@ class ObsStateSetter(SUTAction, abc.ABC):
 
         - the system is in a consistent observation state
         - the consistent observation state is the one expected by the class
+
+        **NOTE**: there is a tricky weakness to fix. Transient states will not
+        last forever, so the system may be in a transient state during
+        the preconditions verification but then it may change
+        to a (valid) quiescent state during the execution of the procedure.
+        How do I deal with this? Is it even possible to deal with this?
+
+        **POTENTIAL SOLUTION**: design well the generated errors and
+        apply a retry mechanism in the action execution. I could also
+        implement a way such that it detects that if I am in a consistent
+        state but not in the expected one, I can still proceed calling
+        another setter action. (TODO: think about it, this validation
+        should be designed better)
+
+        **URGENT TODO**: The consistency verification is poorly designed.
         """
+        super().verify_preconditions()
+
         self._system_is_in_class_starting_obs_state()
         self._system_obs_state_is_consistent()
 
