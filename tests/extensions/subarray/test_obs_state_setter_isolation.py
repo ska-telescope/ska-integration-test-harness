@@ -20,6 +20,7 @@ from ska_integration_test_harness.extensions.subarray.obs_state_setter import (
     ObsStateSetterFromScanning,
     ObsStateSetterSupportsAbort,
     ObsStateSetterSupportsRestart,
+    ObsStateSystemNotConsistent,
 )
 
 from .utils import MockSubarraySystem
@@ -39,7 +40,10 @@ class TestObsStateSetterInIsolation:
 
     This class focuses on the first category and it includes:
 
-    - TODO: list of test cases
+    - Tests on the factory method to create the expected setter instances
+      according to the current ObsState of the system
+    - Tests on the
+
     """
 
     @pytest.fixture
@@ -170,25 +174,25 @@ class TestObsStateSetterInIsolation:
     # Test the setter action methods
 
     @staticmethod
-    def test_class_starting_obs_state_is_correctly_defined(
+    def test_class_assumed_obs_state_is_correctly_defined(
         system: MockSubarraySystem,
     ):
-        """The starting_obs_state method returns the expected class state.
+        """The class assumed obs state is correctly defined.
 
-        (The class state is supposed also to be the one of the system,
-        unless the system changes state)
+        (If everything is correct, the class assumed obs
+        state should be the same as the target obs state.)
 
         :param system: The observation state system.
         """
         system.set_controller_obs_state(ObsState.RESOURCING)
         setter = ObsStateSetter.get_setter_action(system, ObsState.ABORTED)
 
-        assert_that(setter.class_starting_obs_state()).described_as(
+        assert_that(setter.assumed_current_obs_state()).described_as(
             "The class starting state is the expected one."
         ).is_equal_to(ObsState.RESOURCING)
 
         system.set_controller_obs_state(ObsState.IDLE)
-        assert_that(setter.class_starting_obs_state()).described_as(
+        assert_that(setter.assumed_current_obs_state()).described_as(
             "The class starting state is still the initial one."
         ).is_equal_to(ObsState.RESOURCING)
 
@@ -248,7 +252,8 @@ class TestObsStateSetterInIsolation:
         may be in the next quiescent state. This test verifies an example
         of this situation.
 
-        NOTE: it's not exhaustive, but it's a good example.
+        NOTE: it's not exhaustive, but it's a good example. There are much
+        more situations to consider!
 
         :param system: The observation state system.
         """
@@ -261,13 +266,16 @@ class TestObsStateSetterInIsolation:
         setter.verify_preconditions()
 
     @staticmethod
-    def test_verify_preconditions_fails_if_obs_state_is_not_consistent(
+    def test_verify_preconditions_fail_if_obs_state_is_not_consistent(
         system: MockSubarraySystem,
     ):
         """Verify preconditions fail if the obsState is not consistent.
 
         If the system is not in the expected state, the preconditions
         are not met and therefore their verification should fail.
+
+        NOTE: it's not exhaustive, but it's a good example. There are much
+        more situations to consider!
 
         :param system: The observation state system.
         """
@@ -278,5 +286,27 @@ class TestObsStateSetterInIsolation:
 
         setter = ObsStateSetter.get_setter_action(system, ObsState.SCANNING)
 
-        with pytest.raises(AssertionError):
+        with pytest.raises(ObsStateSystemNotConsistent) as exc_info:
             setter.verify_preconditions()
+
+        assert_that(str(exc_info.value)).described_as(
+            "The error message that what occurred is a failed assumption"
+        ).contains("FAILED ASSUMPTION").described_as(
+            "The action name and description should be included"
+        ).contains(
+            "ObsStateSetterFromResourcing"
+        ).contains(
+            "Move subarray 1 from ObsState.RESOURCING to ObsState.SCANNING"
+        ).described_as(
+            "The expected consistent state should be included"
+        ).contains(
+            "consistent observation state ObsState.RESOURCING"
+        ).described_as(
+            "The actual devices states should be included"
+        ).contains(
+            "subarray/dev_a/1=ObsState.RESOURCING"
+        ).contains(
+            "subarray/dev_b/1=ObsState.RESOURCING"
+        ).contains(
+            "subarray/dev_c/1=ObsState.ABORTED"
+        )

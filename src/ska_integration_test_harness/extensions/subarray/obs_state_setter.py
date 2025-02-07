@@ -2,7 +2,7 @@
 
 import abc
 
-from assertpy import assert_that
+import tango
 from pydantic import BaseModel
 from ska_control_model import ObsState
 
@@ -55,6 +55,52 @@ class ObsStateCommandsInput(BaseModel):
         if isinstance(cmd_inputs, dict):
             return ObsStateCommandsInput(**cmd_inputs)
         return cmd_inputs
+
+
+# -------------------------------------------------------------------
+# Error classes to be raised when preconditions are not satisfied
+
+
+class ObsStateSystemNotInExpectedState(AssertionError):
+    """Raised when the system is not in the expected observation state."""
+
+    def __init__(
+        self,
+        expected_state: ObsState,
+        current_state: ObsState,
+        action: SUTAction,
+    ):
+        super().__init__(
+            f"FAILED ASSUMPTION for action {action.name()} "
+            f"({action.description()}): "
+            f"The system is expected to be in the observation state "
+            f"{str(expected_state)}, but it is observed to be in the state "
+            f"{str(current_state)}."
+        )
+
+
+class ObsStateSystemNotConsistent(AssertionError):
+    """Raised when the system is not in a consistent observation state."""
+
+    def __init__(
+        self,
+        expected_state: ObsState,
+        system: ObsStateSystem,
+        action: SUTAction,
+    ):
+
+        msg = (
+            f"FAILED ASSUMPTION for action {action.name()} "
+            f"({action.description()}): "
+            f"The system is expected to be in a consistent observation state "
+            f"{str(expected_state)}, but it is observed to be in an "
+            "inconsistent state: "
+        )
+
+        for device in system.get_obs_state_devices():
+            msg += f"{device.dev_name()}={str(device.obsState)}, "
+
+        super().__init__(msg)
 
 
 # -------------------------------------------------------------------
@@ -236,6 +282,32 @@ class ObsStateSetter(SUTAction, abc.ABC):
         # (now if I call get_setter_action my custom class will be used
         # if I happen to pass through the IDLE state)
 
+    **Final notes on the status of this class structure**: this class and
+    the whole structure is a first implementation of a tool to manage the
+    the observation state transitions. However, it still have weaknesses
+    and limitations. For example:
+
+    - The routing rules are quite simple and sometimes you make useless
+      aborts and restarts (sometimes this may be necessary, but sometimes
+      it is just a waste of time; I opted for the simplicity and for
+      the solution that is more likely to work in most cases).
+      **CURRENT WORKAROUND**: you can override the routing rules
+      (the :py:meth:`next_command` method) to implement more complex
+      routing rules
+    - The consistency checks are quite simple and sometimes you may want
+      something more strict and also the fact that the consistency is verified
+      as precondition does not exclude the possibility of inconsistencies
+      at the time a command is sent. Also, it may happen sometime that
+      you are in a transient state and when you send a command you are
+      already in the quiescent state. **CURRENT WORKAROUND**:
+      To some extent, those
+      limitations cannot really be solved because they are inherent
+      to the distributed nature of the system. However, you can
+      override the :py:meth:`verify_preconditions` method to
+      implement some stricter or weaker checks, or can you just run
+      this action using a retry mechanism to deal with errors coming
+      from commands sended from the wrong state.
+
     """  # pylint: disable=line-too-long # noqa: E501
 
     @staticmethod
@@ -267,18 +339,18 @@ class ObsStateSetter(SUTAction, abc.ABC):
             supported by the decision rules or if the target observation state
             is not reachable by the current decision rules
         """
+        current_obs_state = ObsStateSetter._read_obs_state(
+            system.get_main_obs_state_device(subarray_id)
+        )
 
-        current_obs_state = system.get_main_obs_state_device(
-            subarray_id
-        ).obsState
-
+        # fail if the current observation state is not supported
+        # or if the target observation state is not reachable
         if current_obs_state not in STATE_CLASS_MAP:
             raise NotImplementedError(
                 f"Failure in get_setter_action: "
                 f"From the current observation state ({current_obs_state}) "
                 "the current decision rules do not support any setter action."
             )
-
         if target_obs_state in NOT_REACHABLE_STATES:
             raise NotImplementedError(
                 f"Failure in get_setter_action: "
@@ -286,6 +358,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
                 "is not reachable by current decision rules."
             )
 
+        # create the appropriate setter action according to the mapping
         return STATE_CLASS_MAP[current_obs_state](
             system,
             target_obs_state,
@@ -328,15 +401,24 @@ class ObsStateSetter(SUTAction, abc.ABC):
     def description(self) -> str:
         return (
             f"Move subarray {self.subarray_id} "
-            f"from {str(self.class_starting_obs_state())} "
+            f"from {str(self.assumed_current_obs_state())} "
             f"to {str(self.target_obs_state)}."
         )
 
-    def class_starting_obs_state(self):
+    def assumed_current_obs_state(self):
         """Return the observation state that is expected by the class.
+
+        To perform the observation state set procedure, the class assumes
+        the system is in a certain observation state. This method returns
+        the observation state that is expected by the class. By default,
+        we can just read it from the
+        :py:data:`STATE_CLASS_MAP` data structure.
 
         :return: the observation state expected by the class as a
             starting point for the observation state set procedure
+
+        :raise RuntimeError: if the class is not correctly inserted in the
+            STATE_CLASS_MAP (this is a bug in the class structure)
         """
         # find the key in STATE_CLASS_MAP that points to the class
         # that is the current class
@@ -352,32 +434,26 @@ class ObsStateSetter(SUTAction, abc.ABC):
         )
 
     def verify_preconditions(self):
-        """Verify the system is the class obs. state and it's consistent.
+        """Verify the system is in a consistent observation state.
 
-        The preconditions for a successful observation state change are:
+        The system is in a consistent observation state if all the devices
+        are in an accepted observation state (as defined by the class
+        through the
+        :py:meth:`accepted_obs_states_for_devices` method).
 
-        - the system is in a consistent observation state
-        - the consistent observation state is the one expected by the class
-
-        **NOTE**: there is a tricky weakness to fix. Transient states will not
-        last forever, so the system may be in a transient state during
-        the preconditions verification but then it may change
-        to a (valid) quiescent state during the execution of the procedure.
-        How do I deal with this? Is it even possible to deal with this?
-
-        **POTENTIAL SOLUTION**: design well the generated errors and
-        apply a retry mechanism in the action execution. I could also
-        implement a way such that it detects that if I am in a consistent
-        state but not in the expected one, I can still proceed calling
-        another setter action. (TODO: think about it, this validation
-        should be designed better)
-
-        **URGENT TODO**: The consistency verification is poorly designed.
+        :raise ObsStateSystemNotConsistent: if the system is not in a
+            consistent observation state
         """
         super().verify_preconditions()
 
-        self._system_is_in_class_starting_obs_state()
-        self._system_obs_state_is_consistent()
+        for device in self.system.get_obs_state_devices(self.subarray_id):
+            device_obs_state = self._read_obs_state(device)
+
+            # each system device should be in an accepted observation state
+            if device_obs_state not in self.accepted_obs_states_for_devices():
+                raise ObsStateSystemNotConsistent(
+                    self.assumed_current_obs_state(), self.system, self
+                )
 
     def execute_procedure(self):
         """Move towards the target observation state (if not already there).
@@ -393,7 +469,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
         - after executing the command, I determine the next setter to use
           given the new observation state
         """
-        # verify if the system is already in the target observation state
+        # if the system is already in the target observation state, terminate
         if self._system_obs_state() == self.target_obs_state:
             return
 
@@ -405,12 +481,15 @@ class ObsStateSetter(SUTAction, abc.ABC):
                 "is not reachable by current decision rules."
             )
 
-        # compute the next command that should be run
-        command = self.next_command()
-        command.set_logging(not self.logger.disabled)
+        # if this class is the expected starting point, execute (a step of)
+        # the procedure. Otherwise skip and delegate to the next setter
+        if self._system_obs_state() == self.assumed_current_obs_state():
+            # compute the command that should be run
+            command = self.next_command()
+            command.set_logging(not self.logger.disabled)
 
-        # run it
-        command.execute(**self._last_execution_params)
+            # run it
+            command.execute(**self._last_execution_params)
 
         # determine the next setter to use and execute it
         self.get_setter_action(
@@ -441,7 +520,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
             f"Failure in {self.name()} action ({self.description()}): "
             "The system cannot move towards the target observation state "
             f"({self.target_obs_state}) from the current state "
-            f"({self.class_starting_obs_state()})."
+            f"({self.assumed_current_obs_state()})."
         )
 
     # -------------------------------------------------------------------
@@ -454,17 +533,20 @@ class ObsStateSetter(SUTAction, abc.ABC):
             coordinator device (which observation state should be
             representative for the whole system).
         """
-        return self.system.get_main_obs_state_device(self.subarray_id).obsState
+        return self._read_obs_state(
+            self.system.get_main_obs_state_device(self.subarray_id)
+        )
 
-    def _system_is_in_class_starting_obs_state(self):
-        """Verify the system is in the expected class observation state."""
-        assert_that(self._system_obs_state()).described_as(
-            f"{self.description()} FAILED ASSUMPTION: "
-            "The system is expected to be in the class observation state "
-            "As a starting point for the observation state set procedure."
-        ).is_equal_to(self.class_starting_obs_state())
+    @staticmethod
+    def _read_obs_state(device: tango.DeviceProxy) -> ObsState:
+        """Read the observation state from a device.
 
-    def _accepted_obs_states_for_devices(self) -> list[ObsState]:
+        :param device: the device to read the observation state from
+        :return: the observation state
+        """
+        return ObsState(device.obsState)
+
+    def accepted_obs_states_for_devices(self) -> list[ObsState]:
         """Define the accepted observation states for the devices.
 
         This method defines which observation states for the devices are
@@ -472,22 +554,12 @@ class ObsStateSetter(SUTAction, abc.ABC):
         states that are accepted by the class.
 
         By default, the only accepted observation state is the one defined
-        in the state-class mapping.
+        in the state-class mapping. Subclasses can override this method
+        to define more accepted observation states.
 
         :return: the list of accepted observation states
         """
-        return [self.class_starting_obs_state()]
-
-    def _system_obs_state_is_consistent(self):
-        """Verify the system is in a consistent observation state."""
-        for device in self.system.get_obs_state_devices(self.subarray_id):
-            assert_that(device.obsState).described_as(
-                self.description()
-                + "FAILED ASSUMPTION: "
-                + " The system devices are expected to be in a "
-                "consistent observation state, but "
-                f"device {device.dev_name()} is not."
-            ).is_in(*self._accepted_obs_states_for_devices())
+        return [self.assumed_current_obs_state()]
 
     def _get_command_input_or_fail(self, command_name: str) -> str:
         """Get the command input or raise an exception if it is missing.
@@ -594,13 +666,15 @@ class ObsStateSetterSupportsAbort(ObsStateSetter, abc.ABC):
 class ObsStateSetterFromResourcing(ObsStateSetterSupportsAbort):
     """Set Observation State starting from a RESOURCING state.
 
-    Being a transient state, some devices may already be in ``IDLE`` state.
+    Being a transient state, not all devices may be in ``RESOURCING`` state.
+    Some devices may still be in ``EMPTY`` state,
+    while others may already be in ``IDLE`` state.
 
     Routing rules are the ones from :py:class:`ObsStateSetterSupportsAbort`.
     """
 
-    def _accepted_obs_states_for_devices(self):
-        return [ObsState.RESOURCING, ObsState.IDLE]
+    def accepted_obs_states_for_devices(self):
+        return [ObsState.EMPTY, ObsState.RESOURCING, ObsState.IDLE]
 
 
 class ObsStateSetterFromIdle(ObsStateSetterSupportsAbort):
@@ -645,13 +719,15 @@ class ObsStateSetterFromIdle(ObsStateSetterSupportsAbort):
 class ObsStateSetterFromConfiguring(ObsStateSetterSupportsAbort):
     """Set Observation State starting from a CONFIGURING state.
 
-    Being a transient state, some devices may already be in ``READY`` state.
+    Being a transient state, not all devices may be in ``CONFIGURING`` state.
+    Some devices may still be in ``IDLE`` state, while others may already
+    be in ``READY`` state.
 
     Routing rules are the ones from :py:class:`ObsStateSetterSupportsAbort`.
     """
 
-    def _accepted_obs_states_for_devices(self):
-        return [ObsState.CONFIGURING, ObsState.READY]
+    def accepted_obs_states_for_devices(self):
+        return [ObsState.IDLE, ObsState.CONFIGURING, ObsState.READY]
 
 
 class ObsStateSetterFromReady(ObsStateSetterSupportsAbort):
@@ -681,25 +757,29 @@ class ObsStateSetterFromReady(ObsStateSetterSupportsAbort):
 class ObsStateSetterFromScanning(ObsStateSetterSupportsAbort):
     """Set Observation State starting from a SCANNING state.
 
-    Being a transient state, some devices may already be in ``READY`` state.
+    Being a transient state, not all devices may be in ``SCANNING`` state.
+    Some devices may already be in ``READY`` state (because they already
+    completed the scan or because they are not yet started).
 
     Routing rules are the ones from :py:class:`ObsStateSetterSupportsAbort`.
     """
 
-    def _accepted_obs_states_for_devices(self):
+    def accepted_obs_states_for_devices(self):
         return [ObsState.SCANNING, ObsState.READY]
 
 
 class ObsStateSetterFromResetting(ObsStateSetterSupportsAbort):
     """Set Observation State starting from an RESETTING state.
 
-    Being a transient state, some devices may already be in ``IDLE`` state.
+    Resetting is not really a supported state. In this case we assume
+    consistency every time we enter in this state. Override with
+    your own rules if you need to.
 
     Routing rules are the ones from :py:class:`ObsStateSetterSupportsAbort`.
     """
 
-    def _accepted_obs_states_for_devices(self):
-        return [ObsState.RESETTING, ObsState.IDLE]
+    def accepted_obs_states_for_devices(self):
+        return list(ObsState)
 
 
 # *** STATES THAT SUPPORT RESTART ***
@@ -741,13 +821,14 @@ class ObsStateSetterSupportsRestart(ObsStateSetter, abc.ABC):
 class ObsStateSetterFromFault(ObsStateSetterSupportsRestart):
     """Set Observation State starting from a FAULT state.
 
-    Fault is particular. I am not sure, but I think that if the system
-    is in FAULT, some devices may be in any state.
+    Fault is a particular state. I am not sure, but I think that if the system
+    is in FAULT, devices may potentially be in any state. At the moment,
+    we will assume it's like that. Override with your own rules if you need to.
 
     Routing rules are the ones from :py:class:`ObsStateSetterSupportsRestart`.
     """
 
-    def _accepted_obs_states_for_devices(self):
+    def accepted_obs_states_for_devices(self):
         return list(ObsState)
 
 
@@ -770,29 +851,54 @@ class ObsStateSetterFromAborted(ObsStateSetterSupportsRestart):
 class ObsStateSetterFromAborting(ObsStateSetter):
     """Set Observation State starting from an ABORTING state.
 
-    ABORTING is a transient state, so some devices may already be in
-    ``ABORTED`` state.
+    ``ABORTING`` is a transient state, so some devices may already be in
+    ``ABORTED`` state. Some devices may also still be in the previous
+    state (any state that supports the ``Abort`` command,
+    so ``RESOURCING, IDLE, CONFIGURING, READY, SCANNING, RESETTING``,
+    but also ``EMPTY``, since an ``AssignResources`` or a ``ReleaseResources``
+    command may have been sent).
+
 
     Routing rules: I cannot send any command to move from ABORTING to
     another state, so next command will always fail.
     """
 
-    def _accepted_obs_states_for_devices(self):
-        return [ObsState.ABORTING, ObsState.ABORTED]
+    def accepted_obs_states_for_devices(self):
+        return [
+            ObsState.ABORTING,
+            ObsState.ABORTED,
+            # states that support abort
+            ObsState.RESOURCING,
+            ObsState.IDLE,
+            ObsState.CONFIGURING,
+            ObsState.READY,
+            ObsState.SCANNING,
+            ObsState.RESETTING,
+            # states that may still be in the previous state of transient
+            # states that support the Abort command
+            ObsState.EMPTY,
+        ]
 
 
 class ObsStateSetterFromRestarting(ObsStateSetter):
     """Set Observation State starting from a RESTARTING state.
 
-    RESTARTING is a transient state, so some devices may already be in
-    ``EMPTY`` state.
+    ``RESTARTING`` is a transient state, so some devices may already be in
+    ``EMPTY`` state. Some devices may also still be in the previous
+    state (any state that supports the ``Restart`` command,
+    so ``FAULT, RESETTING``).
 
     Routing rules: I cannot send any command to move from RESTARTING to
     another state, so next command will always fail.
     """
 
-    def _accepted_obs_states_for_devices(self):
-        return [ObsState.RESTARTING, ObsState.EMPTY]
+    def accepted_obs_states_for_devices(self):
+        return [
+            ObsState.RESTARTING,
+            ObsState.EMPTY,
+            ObsState.FAULT,
+            ObsState.RESETTING,
+        ]
 
 
 # -------------------------------------------------------------------
