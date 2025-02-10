@@ -219,30 +219,17 @@ class CSPConfiguration(SubsystemConfiguration):
 
     # At the moment the following are required just for low
     pst_name: str | None = None
-    # cbf_proc1_name: str | None = None
-    # cbf_proc2_name: str | None = None
-    # cbf_controller_name: str | None = None
-    # cbf_subarrays_names: dict[int, str] = field(default_factory=dict)
 
     @property
     def csp_subarray1_name(self) -> str:
         """Get the name of the first subarray."""
         return self.csp_subarrays_names.get(1)
 
-    # @property
-    # def cbf_subarray1_name(self) -> str:
-    #     """Get the name of the first subarray."""
-    #     return self.cbf_subarrays_names.get(1)
-
     def get_device_names(self) -> dict[str, str]:
         dev_names = {
             "csp_master_name": self.csp_master_name,
             "csp_subarray1_name": self.csp_subarray1_name,
         }
-
-        # PST is required when in Low and CSP is not emulated
-        # if self.pst_name:
-        #     dev_names["pst_name"] = self.pst_name
 
         # NOTE: maybe PST is available only after the Online mode thing
         # removed that check for now, since it fails.
@@ -255,14 +242,9 @@ class CSPConfiguration(SubsystemConfiguration):
             "csp_subarray1_name",
         ]
 
-        # PST, CBF processors and controllers are required when in Low
-        # and CSP is not emulated
+        # TODO: check if it's really necessary and if it isn't, remove it
         if not self.is_emulated and self.supports_low():
             attrs.append("pst_name")
-            # attrs.append("cbf_proc1_name")
-            # attrs.append("cbf_proc2_name")
-            # attrs.append("cbf_controller_name")
-            # attrs.append("cbf_subarray1_name")
 
         return attrs
 

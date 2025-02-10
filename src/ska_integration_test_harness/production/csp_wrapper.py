@@ -70,6 +70,10 @@ class ProductionCSPWrapper(CSPWrapper):
             tracer.subscribe_event(self.csp_master, "healthState")
             tracer.subscribe_event(self.csp_subarray, "state")
             tracer.subscribe_event(self.csp_subarray, "healthState")
+
+            # TODO: check if it's really necessary to wait for the PST?
+            # It may be good to remove this (probably outdated) patches
+            # Maybe also remove fully the PST references
             tracer.subscribe_event(self.pst, "state")
             tracer.subscribe_event(self.pst, "healthState")
 
