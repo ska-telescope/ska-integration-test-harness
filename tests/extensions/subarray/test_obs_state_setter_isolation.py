@@ -12,6 +12,7 @@ from ska_integration_test_harness.extensions.subarray.obs_state_commands_factory
 )
 from ska_integration_test_harness.extensions.subarray.obs_state_setter import (
     STATE_CLASS_MAP,
+    ObsStateCommandsInput,
     ObsStateSetter,
     ObsStateSetterFromAborted,
     ObsStateSetterFromAborting,
@@ -322,7 +323,7 @@ class TestObsStateSetterInIsolation:
     # Test Execute process
 
     @staticmethod
-    def test_verify_execute_terminates_if_system_state_is_target(
+    def test_execute_terminates_if_system_state_is_target(
         system: MockSubarraySystem,
     ):
         """The execute procedure terminates if the system state is the target.
@@ -342,7 +343,7 @@ class TestObsStateSetterInIsolation:
         setter.next_command.assert_not_called()
 
     @staticmethod
-    def test_verify_execute_fails_if_target_is_not_reachable(
+    def test_execute_fails_if_target_is_not_reachable(
         system: MockSubarraySystem,
     ):
         """The execute procedure fails if the target is not reachable.
@@ -366,7 +367,7 @@ class TestObsStateSetterInIsolation:
         )
 
     @staticmethod
-    def test_verify_execute_calls_expected_tango_command(
+    def test_execute_calls_expected_tango_command(
         system: MockSubarraySystem,
     ):
         """The execute procedure calls the expected Tango command.
@@ -407,3 +408,58 @@ class TestObsStateSetterInIsolation:
         # check if the LRC action was called with the timeout and
         # preconditions flag (not postconditions flag)
         mock_execute.assert_called_with(timeout, False)
+
+    @staticmethod
+    def test_execute_determines_correctly_the_next_step(
+        system: MockSubarraySystem,
+    ):
+        """The execute procedure determines correctly the next step.
+
+        The execute procedure should determine correctly the next step
+        to move the system to the target state.
+
+        :param system: The observation state system.
+        """
+        system.set_controller_obs_state(ObsState.EMPTY)
+        system.set_obs_state_other_devices(ObsState.EMPTY)
+        cmd_inputs = ObsStateCommandsInput(AssignResources="DUMMY INPUT")
+        setter = ObsStateSetter.get_setter_action(
+            system,
+            ObsState.READY,
+            commands_input=cmd_inputs,
+        )
+
+        # create a timeout object to track when it's passed
+        timeout = ChainedAssertionsTimeout(10)
+
+        # define a side effect to change the system state to RESOURCING
+        # pylint: disable=unused-argument
+        def move_system_to_idle(*args, **kwargs):
+            system.set_controller_obs_state(ObsState.IDLE)
+            system.set_obs_state_other_devices(ObsState.IDLE)
+
+        with patch.object(
+            TangoLRCAction, "execute", side_effect=move_system_to_idle
+        ):
+            mock_next_action = MagicMock()
+            with patch.object(
+                ObsStateSetter,
+                "get_setter_action",
+                side_effect=MagicMock(return_value=mock_next_action),
+            ) as mock_get_setter_action:
+                setter.execute(timeout, False, False)
+
+        # check if the next action is determined as expected and then executed
+        mock_get_setter_action.assert_called_once()
+        # check if the next action receives all the expected parameters
+        mock_get_setter_action.assert_called_with(
+            system, ObsState.READY, 1, cmd_inputs, True
+        )
+
+        # the next action is called with the timeout and the preconditions flag
+        mock_next_action.execute.assert_called_once()
+        mock_next_action.execute.assert_called_with(
+            postconditions_timeout=timeout,
+            verify_preconditions=False,
+            verify_postconditions=False,
+        )
