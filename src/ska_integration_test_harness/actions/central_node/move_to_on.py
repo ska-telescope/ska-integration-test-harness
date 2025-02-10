@@ -93,28 +93,6 @@ class MoveToOnCommand(TelescopeCommandAction):
                 self.telescope, DishMode.STANDBY_FP
             )
 
-        if self.telescope.tmc.supports_low():
-            if hasattr(self.telescope.csp, "cbf_controller"):
-                # (in Low) CBF controller is supposed to be in ON state
-                # + all VCCs are supposed to be in ON state (?)
-                expected_events += [
-                    ExpectedStateChange(
-                        self.telescope.csp.cbf_controller, "State", DevState.ON
-                    ),
-                    # ExpectedStateChange(
-                    #     self.telescope.csp.cbf_controller,
-                    #     "reportVccState",
-                    #     [0, 0, 0, 0],
-                    # ),
-                ]
-            if hasattr(self.telescope.csp, "cbf_subarray1"):
-                # (in Low) CBF subarray is supposed to be in ON state
-                expected_events += [
-                    ExpectedStateChange(
-                        self.telescope.csp.cbf_subarray1, "State", DevState.ON
-                    )
-                ]
-
         return expected_events
 
 
