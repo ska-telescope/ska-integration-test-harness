@@ -85,22 +85,23 @@ class ObsStateSystemNotConsistent(AssertionError):
     def __init__(
         self,
         expected_state: ObsState,
-        system: ObsStateSystem,
+        observed_states: dict[tango.DeviceProxy, ObsState],
         action: SUTAction,
     ):
 
-        msg = (
+        super().__init__(
             f"FAILED ASSUMPTION for action {action.name()} "
             f"({action.description()}): "
             f"The system is expected to be in a consistent observation state "
             f"{str(expected_state)}, but it is observed to be in an "
             "inconsistent state: "
+            ", ".join(
+                [
+                    f"{device.dev_name()}={str(obs_state)}"
+                    for device, obs_state in observed_states.items()
+                ]
+            )
         )
-
-        for device in system.get_obs_state_devices():
-            msg += f"{device.dev_name()}={str(device.obsState)}, "
-
-        super().__init__(msg)
 
 
 # -------------------------------------------------------------------
@@ -401,11 +402,11 @@ class ObsStateSetter(SUTAction, abc.ABC):
     def description(self) -> str:
         return (
             f"Move subarray {self.subarray_id} "
-            f"from {str(self.assumed_current_obs_state())} "
+            f"from {str(self.assumed_class_obs_state())} "
             f"to {str(self.target_obs_state)}."
         )
 
-    def assumed_current_obs_state(self):
+    def assumed_class_obs_state(self):
         """Return the observation state that is expected by the class.
 
         To perform the observation state set procedure, the class assumes
@@ -446,13 +447,12 @@ class ObsStateSetter(SUTAction, abc.ABC):
         """
         super().verify_preconditions()
 
-        for device in self.system.get_obs_state_devices(self.subarray_id):
-            device_obs_state = self._read_obs_state(device)
+        device_obs_states = self._devices_obs_state()
 
-            # each system device should be in an accepted observation state
-            if device_obs_state not in self.accepted_obs_states_for_devices():
+        for _, obs_state in device_obs_states.items():
+            if obs_state not in self.accepted_obs_states_for_devices():
                 raise ObsStateSystemNotConsistent(
-                    self.assumed_current_obs_state(), self.system, self
+                    self.assumed_class_obs_state(), device_obs_states, self
                 )
 
     def execute_procedure(self):
@@ -477,19 +477,23 @@ class ObsStateSetter(SUTAction, abc.ABC):
         if self.target_obs_state in NOT_REACHABLE_STATES:
             raise NotImplementedError(
                 f"Failure in {self.name()} action ({self.description()}): "
-                f"The target observation state ({self.target_obs_state}) "
+                f"The target observation state {str(self.target_obs_state)} "
                 "is not reachable by current decision rules."
             )
 
         # if this class is the expected starting point, execute (a step of)
         # the procedure. Otherwise skip and delegate to the next setter
-        if self._system_obs_state() == self.assumed_current_obs_state():
+        if self._system_obs_state() == self.assumed_class_obs_state():
+
             # compute the command that should be run
             command = self.next_command()
             command.set_logging(not self.logger.disabled)
 
-            # run it
-            command.execute(**self._last_execution_params)
+            # run the command
+            command.execute(
+                self._last_execution_params["postconditions_timeout"],
+                self._last_execution_params["verify_preconditions"],
+            )
 
         # determine the next setter to use and execute it
         self.get_setter_action(
@@ -520,7 +524,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
             f"Failure in {self.name()} action ({self.description()}): "
             "The system cannot move towards the target observation state "
             f"({self.target_obs_state}) from the current state "
-            f"({self.assumed_current_obs_state()})."
+            f"({self.assumed_class_obs_state()})."
         )
 
     # -------------------------------------------------------------------
@@ -536,6 +540,16 @@ class ObsStateSetter(SUTAction, abc.ABC):
         return self._read_obs_state(
             self.system.get_main_obs_state_device(self.subarray_id)
         )
+
+    def _devices_obs_state(self) -> dict[tango.DeviceProxy, ObsState]:
+        """Return the observation state of all the devices.
+
+        :return: a dictionary with the devices and their observation states
+        """
+        return {
+            device: self._read_obs_state(device)
+            for device in self.system.get_obs_state_devices(self.subarray_id)
+        }
 
     @staticmethod
     def _read_obs_state(device: tango.DeviceProxy) -> ObsState:
@@ -559,7 +573,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
 
         :return: the list of accepted observation states
         """
-        return [self.assumed_current_obs_state()]
+        return [self.assumed_class_obs_state()]
 
     def _get_command_input_or_fail(self, command_name: str) -> str:
         """Get the command input or raise an exception if it is missing.

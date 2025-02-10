@@ -156,7 +156,7 @@ class ObsStateCommandsFactory:
     postconditions. The produced instances will have:
 
     - **no preconditions**
-    - **the syncrhonisation to the next transient and/or quiescent
+    - **the synchronisation to the next transient and/or quiescent
       ObsState as postconditions** (according to the passed flags)
     """
 

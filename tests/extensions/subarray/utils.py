@@ -2,8 +2,13 @@
 
 """Utilities for testing the subarray extension."""
 
+from unittest.mock import MagicMock
+
 from ska_control_model import ObsState
 
+from ska_integration_test_harness.extensions.actions.lrc_action import (
+    TangoLRCAction,
+)
 from ska_integration_test_harness.extensions.subarray.obs_state_system import (
     ObsStateSystem,
 )
@@ -70,3 +75,28 @@ class MockSubarraySystem(ObsStateSystem):
             It defaults to 0 but it can be also 1 or 2.
         """
         self.obs_state_devices[device_index].obsState = obs_state
+
+
+class MockTangoLRCAction(TangoLRCAction):
+    """A mock for the TangoLRCAction class."""
+
+    def __init__(
+        self,
+        target_device,
+        command_name,
+        command_param=None,
+        command_kwargs=None,
+        **kwargs
+    ):
+        super().__init__(
+            target_device,
+            command_name,
+            command_param,
+            command_kwargs,
+            **kwargs
+        )
+
+        self.execute = MagicMock()
+        """
+        Execute is a mock that will be called instead of the real method.
+        """
