@@ -6,6 +6,7 @@ complexities of the interaction with and between the devices.
 
 from .csp_facade import CSPFacade
 from .dishes_facade import DishesFacade
+from .mccs_facade import MCCSFacade
 from .sdp_facade import SDPFacade
 from .tmc_central_node_facade import TMCCentralNodeFacade
 from .tmc_facade import TMCFacade
@@ -18,4 +19,5 @@ __all__ = [
     "CSPFacade",
     "DishesFacade",
     "SDPFacade",
+    "MCCSFacade",
 ]
