@@ -10,7 +10,7 @@ from ...core.assertions import AssertDevicesStateChanges
 from ..actions.lrc_action import TangoLRCAction
 from .obs_state_system import DEFAULT_SUBARRAY_ID, ObsStateSystem
 
-COMMANDS_STATES_MAP: dict[str, dict[str, ObsState | None]] = {
+COMMANDS_STATES_MAP: "dict[str, dict[str, ObsState | None]]" = {
     "AssignResources": {
         "transient": ObsState.RESOURCING,
         "quiescent": ObsState.IDLE,
@@ -263,7 +263,7 @@ class ObsStateCommandsFactory:
         action: TracerAction,
         command_name: str,
         subarray_id: int = DEFAULT_SUBARRAY_ID,
-        previous_obs_state: ObsState | None = None,
+        previous_obs_state: "ObsState | None" = None,
     ) -> None:
         """Append synchronisation on the next transient ObsState to an action.
 
@@ -289,7 +289,7 @@ class ObsStateCommandsFactory:
         action: TracerAction,
         command_name: str,
         subarray_id: int = DEFAULT_SUBARRAY_ID,
-        previous_obs_state: ObsState | None = None,
+        previous_obs_state: "ObsState | None" = None,
     ) -> None:
         """Append synchronisation on the next quiescent ObsState to an action.
 
@@ -333,7 +333,7 @@ class ObsStateCommandsFactory:
 
     def _get_obs_state_transition(
         self, command_name: str, transition_type: str
-    ) -> ObsState | None:
+    ) -> "ObsState | None":
         """Get the ObsState transition for a command.
 
         :param command_name: the name of the command
@@ -351,7 +351,7 @@ class ObsStateCommandsFactory:
         command_name: str,
         subarray_id: int,
         transition_type: str,
-        previous_obs_state: ObsState | None = None,
+        previous_obs_state: "ObsState | None" = None,
     ) -> AssertDevicesStateChanges:
         """Get the sync condition from the map.
 

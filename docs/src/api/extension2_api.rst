@@ -1,6 +1,6 @@
 
-Common Extensions API Reference
---------------------------------
+(New) Common Extensions API Reference
+-------------------------------------
 
 
 .. automodule:: ska_integration_test_harness.extensions
@@ -21,3 +21,11 @@ Assertions module
 .. automodule:: ska_integration_test_harness.extensions.assertions
     :members:
     :undoc-members:
+
+Subarray module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: ska_integration_test_harness.extensions.subarray
+    :members:
+    :undoc-members:
+

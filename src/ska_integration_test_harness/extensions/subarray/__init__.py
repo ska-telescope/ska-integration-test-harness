@@ -17,9 +17,37 @@ involved in the subarray lifecycle (which devices changes
 :py:class:`~ska_control_model.ObsState` and which devices should be
 the targets of which commands).
 
-TODO: classes overview
+The main classes in this module are the following three:
 
-"""
+1. :py:class:`~ska_integration_test_harness.extensions.subarray.ObsStateSystem`
+   , which is an interface to a system based on the Subarray Observation
+   State Machine. It required to be implemented by the user and is essentially
+   needed to inform the framework about which Tango devices are involved in the
+   subarray lifecycle (who receives the commands and who emits events on the
+   ``obsState`` attribute).
+2. :py:class:`~ska_integration_test_harness.extensions.subarray.ObsStateCommandsFactory`
+   , which is a factory class that build actions to run subarray commands
+   and synchronise after on the transient and quiescent states.
+3. :py:class:`~ska_integration_test_harness.extensions.subarray.ObsStateSetter`
+   , which is an orchestrator class that has the responsibility to move
+   the system to a desired :py:class:`~ska_control_model.ObsState`, starting
+   by almost any initial state. This class (and its subclasses) embeds the
+   knowledge about how to "pilot" the system in the Observation State Machine
+   and uses the factory to generate the command actions.
+
+Further classes are used to define input, exceptions, etc.
+
+Some global constants like
+:py:data:`~ska_integration_test_harness.extensions.subarray.DEFAULT_SUBARRAY_ID`,
+:py:data:`~ska_integration_test_harness.extensions.subarray.COMMANDS_STATES_MAP`
+and :py:data:`~ska_integration_test_harness.extensions.subarray.STATE_CLASS_MAP`
+are also defined in this module and can be used to customise the behaviour
+of the framework.
+
+TODO: link ObsStateSetter subclasses in a separate section
+of the documentation.
+
+""" # pylint: disable=line-too-long # noqa: E501
 
 from .obs_state_commands_factory import (
     COMMANDS_STATES_MAP,
@@ -27,7 +55,7 @@ from .obs_state_commands_factory import (
     ObsStateCommandHasNoTransition,
     ObsStateCommandsFactory,
 )
-from .obs_state_setter import ObsStateCommandsInput, ObsStateSetter
+from .obs_state_setter import ObsStateCommandsInput, ObsStateSetter, STATE_CLASS_MAP
 from .obs_state_system import (
     DEFAULT_SUBARRAY_ID,
     ObsStateSubarrayDoesNotExist,
@@ -44,4 +72,5 @@ __all__ = [
     "COMMANDS_STATES_MAP",
     "ObsStateSetter",
     "ObsStateCommandsInput",
+    "STATE_CLASS_MAP",
 ]

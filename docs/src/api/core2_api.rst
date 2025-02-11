@@ -1,5 +1,5 @@
 
-Core API Reference
+(New) Core API Reference
 --------------------------------
 
 .. automodule:: ska_integration_test_harness.core

@@ -507,3 +507,9 @@ Here are some suggestions for further reading:
 - `TangoEventTracer Getting Started Guide <https://developer.skao.int/projects/ska-tango-testing/en/latest/guide/integration/getting_started.html>`_
   to learn more about the event tracer, subscription mechanisms, and
   event assertion mechanisms.
+
+
+Subarray Orchestration Common Extensions
+------------------------------------------
+
+TODO: introduce the subarray common extension
