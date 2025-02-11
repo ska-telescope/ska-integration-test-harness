@@ -47,7 +47,7 @@ of the framework.
 TODO: link ObsStateSetter subclasses in a separate section
 of the documentation.
 
-""" # pylint: disable=line-too-long # noqa: E501
+"""  # pylint: disable=line-too-long # noqa: E501
 
 from .obs_state_commands_factory import (
     COMMANDS_STATES_MAP,
@@ -55,7 +55,11 @@ from .obs_state_commands_factory import (
     ObsStateCommandHasNoTransition,
     ObsStateCommandsFactory,
 )
-from .obs_state_setter import ObsStateCommandsInput, ObsStateSetter, STATE_CLASS_MAP
+from .obs_state_setter import (
+    STATE_CLASS_MAP,
+    ObsStateCommandsInput,
+    ObsStateSetter,
+)
 from .obs_state_system import (
     DEFAULT_SUBARRAY_ID,
     ObsStateSubarrayDoesNotExist,

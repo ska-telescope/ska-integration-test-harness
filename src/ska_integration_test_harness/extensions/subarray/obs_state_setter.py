@@ -162,21 +162,24 @@ class ObsStateSetter(SUTAction, abc.ABC):
         # execute the setter action within a shared timeout (e.g. 100 seconds)
         setter.execute(100)
 
-
     **Implemented algorithm**: the implemented algorithm is quite simple.
     Intuitively:
 
     - let's divide our states in three categories:
+
       - the regular operational flow states
         (``EMPTY, RESOURCING, IDLE, CONFIGURING, READY, SCANNING``)
       - the states for the abort & restart procedure
         (``ABORTING, ABORTED, RESTARTING``)
       - the remaining states
+
         - ``FAULT``, which in a certain sense can be seen as part
           of the abort & restart procedure, since it
           supports the ``Restart`` command
         - ``RESETTING``, which - in theory - can be aborted and be
           reduced to the abort & restart procedure
+
+
     - if in any point of the procedure the system **current state**
       is equal to the **target state**, I just return
     - if the **target state** is in the operational flow and the
