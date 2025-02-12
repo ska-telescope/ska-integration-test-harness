@@ -65,10 +65,14 @@ the real devices without having complex logic behind it. The term
 *production* doesn't mean we are using the real hardware.
 
 **IMPORTANT NOTE:** at the moment, the ITH is particularly calibrated
-to support the TMC tests with emulators for the CSP, SDP, Dishes and MCCS,
-since TMC teams now are mainly working with emulators. The test harness
-provides wrappers and procedures to work also with production devices,
-but it may not yet be fully tested and supported.
+to support the following testing scenarios:
+
+- TMC with Mid, with all the combination of production and emulated
+  CSP, SDP and Dishes;
+- TMC with Low, but using emulators.
+
+The support for Low with production devices is not fully tested, since
+TMC teams now prioritise testing TMC with emulators.
 
 What you cannot find (and likely will remain in separate places)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
