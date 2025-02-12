@@ -35,22 +35,23 @@ from .utils import MockSubarraySystem
 
 @pytest.mark.extensions
 class TestObsStateSetterInIsolation:
-    """Unit tests for the ObsStateSetter class.
+    """Unit tests for the ObsStateSetter class methods and isolated behaviour.
 
-    This set of unit tests has the objective to validate the ObsStateSetter
-    class behaviour. We can divide the test cases into two categories:
+    This set of unit tests has the responsibility to validate the
+    ObsStateSetter class behaviour in isolation. The ObsStateSetter
+    is a complex mechanism based on a base class with much common logic,
+    some child classes with specific logic for each observation state and
+    a data structure to map the observation states to the setter classes.
+    The mechanism is recursive and the setter classes are created on-demand
+    according to an observed current state.
 
-    1. Tests on individual Setter instances (to validate the class behaviour
-       in isolation and unit test the individual methods)
-    2. Tests that simulate a complete ObsState setting scenario (to validate
-       the capability of the class to follow the expected path of commands)
-
-    This class focuses on the first category and it includes:
-
-    - Tests on the factory method to create the expected setter instances
-      according to the current ObsState of the system
-    - Tests on the
-
+    This first set of tests if focused on the behaviour in isolation of
+    ObsStateSetter instances. Essentially, we create ObsStateSetter instances
+    and we check that their methods work as expected. We don't yet instead
+    verify (here) the "collaboration" between the ObsStateSetter instances,
+    the recursive mechanism and the capability of navigating correctly
+    the state transitions. For that there is another test class
+    (``TestObsStateSetterCommandsSequences``).
     """
 
     @pytest.fixture
