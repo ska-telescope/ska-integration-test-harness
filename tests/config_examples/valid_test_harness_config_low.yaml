@@ -1,0 +1,36 @@
+# Example of a valid test harness configuration file (for Low)
+
+target: "low"
+
+tmc:
+  is_emulated: false # Not supported otherwise, default is false
+
+  # Expected device names (Required)
+  centralnode_name: "ska_low/tm_central/central_node"
+  tmc_subarraynode1_name: "ska_low/tm_subarray_node/1"
+  tmc_csp_master_leaf_node_name: "ska_low/tm_leaf_node/csp_master"
+  tmc_csp_subarray_leaf_node_name: "ska_low/tm_leaf_node/csp_subarray01"
+  tmc_sdp_master_leaf_node_name: "ska_low/tm_leaf_node/sdp_master"
+  tmc_sdp_subarray_leaf_node_name: "ska_low/tm_leaf_node/sdp_subarray01"
+  tmc_mccs_master_leaf_node_name: "ska_low/tm_leaf_node/mccs_master"
+  tmc_mccs_subarray_leaf_node_name: "ska_low/tm_leaf_node/mccs_subarray01"
+
+csp:
+  is_emulated: true # Supported false too, default is true
+
+  # Expected device names
+  csp_master_name: "low-csp/control/0"
+  csp_subarray1_name: "low-csp/subarray/01"
+
+sdp:
+  is_emulated: true # Supported false too, default is true
+
+  # Expected device names (Required)
+  sdp_master_name: "low-sdp/control/0"
+  sdp_subarray1_name: "low-sdp/subarray/01"
+
+mccs:
+  is_emulated: true # Supported false too, default is true
+
+  mccs_controller_name: "low-mccs/control/0"
+  mccs_subarray_name: "low-mccs/subarray/01"
