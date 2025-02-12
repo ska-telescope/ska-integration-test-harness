@@ -3,11 +3,11 @@
 import abc
 
 import tango
-from pydantic import BaseModel
 from ska_control_model import ObsState
 
 from ...core.actions.sut_action import SUTAction
 from .obs_state_commands_factory import ObsStateCommandsFactory
+from .obs_state_setter_step import ObsStateCommandsInput
 from .obs_state_system import DEFAULT_SUBARRAY_ID, ObsStateSystem
 
 STATE_CLASS_MAP: dict[ObsState, type] = {}
@@ -27,34 +27,6 @@ NOT_REACHABLE_STATES = [
 
 You can override this if your subclasses somehow support these states.
 """
-
-
-class ObsStateCommandsInput(BaseModel):
-    """Input for the observation state commands.
-
-    This class represents the input for the observation state commands
-    to be used during the observation state set procedure.
-    """
-
-    AssignResources: str | None = None
-    Configure: str | None = None
-    Scan: str | None = None
-
-    @staticmethod
-    def get_object(
-        cmd_inputs: "ObsStateCommandsInput | dict",
-    ) -> "ObsStateCommandsInput":
-        """Get the object from a dictionary or an object.
-
-        :param cmd_inputs: the dictionary or object to convert
-        :return: the object
-        """
-        if cmd_inputs is None:
-            return ObsStateCommandsInput()
-
-        if isinstance(cmd_inputs, dict):
-            return ObsStateCommandsInput(**cmd_inputs)
-        return cmd_inputs
 
 
 # -------------------------------------------------------------------
@@ -885,6 +857,7 @@ class ObsStateSetterFromAborting(ObsStateSetter):
             ObsState.ABORTING,
             ObsState.ABORTED,
             # states that support abort
+            # pylint: disable=duplicate-code
             ObsState.RESOURCING,
             ObsState.IDLE,
             ObsState.CONFIGURING,
