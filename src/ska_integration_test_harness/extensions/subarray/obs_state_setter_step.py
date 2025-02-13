@@ -277,9 +277,9 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
 
     def description(self) -> str:
         return (
-            f"Move subarray {self.subarray_id} "
+            f"Executing a transition step to move subarray {self.subarray_id} "
             f"from {str(self.get_assumed_obs_state())} "
-            f"to {str(self.target_state)}."
+            f"towards {str(self.target_state)}"
         )
 
     # --------------------------------------------------------------------

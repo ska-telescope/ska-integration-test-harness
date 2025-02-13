@@ -58,14 +58,18 @@ class TestObsStateSetterStep:
 
         assert_that(setter.description()).described_as(
             "The setter description reference the subarray ID."
-        ).contains("Move subarray 1").described_as(
+        ).contains("subarray 1").described_as(
+            "The setter description mention this is just one step"
+        ).contains(
+            "Executing a transition step to move"
+        ).described_as(
             "The setter description reference the current obsState."
         ).contains(
             "from ObsState.READY"
         ).described_as(
             "The setter description reference the target obsState."
         ).contains(
-            "to ObsState.SCANNING"
+            "towards ObsState.SCANNING"
         )
 
     # -------------------------------------------------------------------------
