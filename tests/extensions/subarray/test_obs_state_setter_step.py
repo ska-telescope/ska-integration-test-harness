@@ -5,6 +5,7 @@ from assertpy import assert_that
 from ska_control_model import ObsState
 
 from ska_integration_test_harness.extensions.subarray.obs_state_setter_step import (  # pylint: disable=line-too-long # noqa: E501
+    ObsStateCommandsInput,
     ObsStateSetterStep,
     ObsStateSystemNotConsistent,
 )
@@ -37,6 +38,73 @@ class TestObsStateSetterStep:
     def system() -> MockSubarraySystem:
         """Create an observation state system for testing purposes."""
         return MockSubarraySystem()
+
+    # -------------------------------------------------------------------------
+    # Test initialization & input reception
+
+    @staticmethod
+    def test_init_without_input_creates_empty_default_commands_input(
+        system: MockSubarraySystem,
+    ):
+        """The initialization without input creates an empty default.
+
+        If the initialization is called without input, the commands_input
+        attribute should be an empty dictionary.
+
+        :param system: The observation state system.
+        """
+        setter = ObsStateSetterStepFromEmpty(system, ObsState.IDLE)
+
+        assert_that(setter.commands_input).is_instance_of(
+            ObsStateCommandsInput
+        )
+        assert_that(setter.commands_input.AssignResources).is_none()
+        assert_that(setter.commands_input.Configure).is_none()
+        assert_that(setter.commands_input.Scan).is_none()
+
+    @staticmethod
+    def test_init_accepts_input_as_a_dict(system: MockSubarraySystem):
+        """The initialization accepts input as a dictionary.
+
+        The initialization should accept the input as a dictionary and
+        store it in the commands_input attribute.
+
+        :param system: The observation state system.
+        """
+        commands_input = {
+            "AssignResources": '{"dummy": "input"}',
+            "Configure": '{"another_dummy": "input"}',
+        }
+        setter = ObsStateSetterStepFromEmpty(
+            system, ObsState.IDLE, commands_input=commands_input
+        )
+
+        assert_that(setter.commands_input).is_instance_of(
+            ObsStateCommandsInput
+        )
+        assert_that(setter.commands_input.AssignResources).is_equal_to(
+            '{"dummy": "input"}'
+        )
+        assert_that(setter.commands_input.Configure).is_equal_to(
+            '{"another_dummy": "input"}'
+        )
+        assert_that(setter.commands_input.Scan).is_none()
+
+    @staticmethod
+    def test_init_accepts_input_as_an_object(system: MockSubarraySystem):
+        """The initialization accepts input as an object.
+
+        The initialization should accept the input as an object and
+        store it in the commands_input attribute.
+
+        :param system: The observation state system.
+        """
+        commands_input = ObsStateCommandsInput(Scan='{"dummy": "input"}')
+        setter = ObsStateSetterStepFromEmpty(
+            system, ObsState.IDLE, commands_input=commands_input
+        )
+
+        assert_that(setter.commands_input).is_equal_to(commands_input)
 
     # -------------------------------------------------------------------------
     # Test action name and description

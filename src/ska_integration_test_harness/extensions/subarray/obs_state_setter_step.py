@@ -153,7 +153,7 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
         system: ObsStateSystem,
         target_state: ObsState,
         subarray_id: int = DEFAULT_SUBARRAY_ID,
-        commands_inputs: ObsStateCommandsInput | dict | None = None,
+        commands_input: ObsStateCommandsInput | dict | None = None,
     ):
         """Initializes the step.
 
@@ -161,7 +161,7 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
         :param target_state: The target state the system should move to.
         :param subarray_id: The subarray id the step will act on. It defaults
             to the value of :py:const:`DEFAULT_SUBARRAY_ID`.
-        :param commands_inputs: The inputs to use for commands such as
+        :param commands_input: The inputs to use for commands such as
             ``AssignResources``, ``Configure`` and ``Scan``. It defaults to
             no inputs (None).
         """
@@ -172,8 +172,8 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
         """The target state the system should move to."""
         self.subarray_id = subarray_id
         """The subarray id the step will act on."""
-        self.commands_inputs = (
-            ObsStateCommandsInput.get_object(commands_inputs)
+        self.commands_input = (
+            ObsStateCommandsInput.get_object(commands_input)
             or ObsStateCommandsInput()
         )
         """

@@ -56,7 +56,7 @@ class ObsStateSetterStepFromEmpty(ObsStateSetterStep):
         self.run_subarray_command(
             self.subarray_id,
             "AssignResources",
-            self.commands_inputs.AssignResources,
+            self.commands_input.AssignResources,
             # I synchronise on the the transient state if my target
             # is RESOURCING or if I already know I will have to
             # abort immediately
@@ -122,7 +122,7 @@ class ObsStateSetterStepFromIdle(ObsStateSetterStepSupportsAbort):
         self.run_subarray_command(
             self.subarray_id,
             "Configure",
-            self.commands_inputs.Configure,
+            self.commands_input.Configure,
             sync_transient=(self.target_state == ObsState.CONFIGURING),
         )
 
@@ -148,7 +148,7 @@ class ObsStateSetterStepFromReady(ObsStateSetterStepSupportsAbort):
         self.run_subarray_command(
             self.subarray_id,
             "Scan",
-            self.commands_inputs.Scan,
+            self.commands_input.Scan,
             sync_transient=True,
         )
 
