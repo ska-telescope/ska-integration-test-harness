@@ -53,10 +53,8 @@ class ObsStateSetterStepFromEmpty(ObsStateSetterStep):
         return ObsState.EMPTY
 
     def execute_procedure(self) -> None:
-        self.run_subarray_command(
-            self.subarray_id,
+        self.send_subarray_command_and_synchronise(
             "AssignResources",
-            self.commands_input.AssignResources,
             # I synchronise on the the transient state if my target
             # is RESOURCING or if I already know I will have to
             # abort immediately
@@ -88,8 +86,7 @@ class ObsStateSetterStepSupportsAbort(ObsStateSetterStep, abc.ABC):
     """
 
     def execute_procedure(self) -> None:
-        self.run_subarray_command(
-            self.subarray_id,
+        self.send_subarray_command_and_synchronise(
             "Abort",
             sync_transient=(self.target_state == ObsState.ABORTING),
         )
@@ -119,10 +116,8 @@ class ObsStateSetterStepFromIdle(ObsStateSetterStepSupportsAbort):
             super().execute_procedure()
             return
 
-        self.run_subarray_command(
-            self.subarray_id,
+        self.send_subarray_command_and_synchronise(
             "Configure",
-            self.commands_input.Configure,
             sync_transient=(self.target_state == ObsState.CONFIGURING),
         )
 
@@ -145,10 +140,8 @@ class ObsStateSetterStepFromReady(ObsStateSetterStepSupportsAbort):
             super().execute_procedure()
             return
 
-        self.run_subarray_command(
-            self.subarray_id,
+        self.send_subarray_command_and_synchronise(
             "Scan",
-            self.commands_input.Scan,
             sync_transient=True,
         )
 
@@ -217,8 +210,7 @@ class ObsStateSetterStepSupportsRestart(ObsStateSetterStep, abc.ABC):
     """
 
     def execute_procedure(self) -> None:
-        self.run_subarray_command(
-            self.subarray_id,
+        self.send_subarray_command_and_synchronise(
             "Restart",
             sync_transient=(self.target_state == ObsState.RESTARTING),
         )

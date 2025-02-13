@@ -47,6 +47,32 @@ class ObsStateCommandsInput(BaseModel):
         return cmd_inputs
 
 
+class ObsStateMissingCommandInput(ValueError):
+    """Raised when a command input is missing.
+
+    TODO: would it be better to move this exception in the factory?
+    """
+
+    def __init__(
+        self,
+        command_name: str,
+        inputs: ObsStateCommandsInput,
+        action: SUTAction,
+    ):
+        """Initializes the exception.
+
+        :param command_name: The name of the command that is missing an input.
+        :param inputs: The input object that is missing the input.
+        :param action: The action that is missing the input.
+        """
+        super().__init__(
+            f"FAILED ASSUMPTION for action {action.name()} "
+            f"({action.description()}): "
+            f"Missing input for command {command_name} "
+            f"in obs state inputs: {inputs.model_dump()}"
+        )
+
+
 class ObsStateSystemNotConsistent(AssertionError):
     """Raised when the system is not in a consistent observation state."""
 
@@ -285,14 +311,12 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
     # --------------------------------------------------------------------
     # Utilities
 
-    def run_subarray_command(
+    def send_subarray_command_and_synchronise(
         self,
-        subarray_id: int,
         command_name: str,
-        command_input: str | None = None,
         sync_transient: bool = False,
     ) -> None:
-        """Run a command on the subarray and synchronise on the right state.
+        """Send a command on the subarray and synchronise on the right state.
 
         This method is a utility to quickly send a command to the subarray
         and synchronise on the right transient or quiescent state, dealing
@@ -302,31 +326,48 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
         command action, then it executes it propagating the timeout
         and the parameters of the execution from this
         :py:class:`ska_integration_test_harness.core.actions.SUTAction`.
+
+        :param command_name: The name of the command to execute.
+        :param sync_transient: Whether to synchronise on the transient state
+            or on the quiescent state. Default is False
+
+        :raise ObsStateMissingCommandInput: if the input for the command
+            is required but missing
         """
-        self.create_subarray_command(
-            subarray_id, command_name, command_input, sync_transient
-        ).execute(
+        command_action = self.create_subarray_command(
+            command_name, sync_transient
+        )
+        command_action.set_logging(not self.logger.disabled)
+        command_action.execute(
             self._last_execution_params["postconditions_timeout"],
             self._last_execution_params["verify_preconditions"],
             # (postconditions are always verified by the command action,
             # independently of the value of the parameter)
+            True,
         )
 
     def create_subarray_command(
         self,
-        subarray_id: int,
         command_name: str,
-        command_input: str | None = None,
         sync_transient: bool = False,
     ) -> TangoLRCAction:
         """Creates a command action to be sent to the subarray.
 
         This method is a utility to quickly create a
         :py:class:`ska_integration_test_harness.extensions.actions.TangoLRCAction`
-        already configured to synchronise alternatively:
+        already configured:
+
+        - with the correct target device (done by the factory)
+        - pointed to the correct subarray ID
+        - using the set input (automatically set according to the command
+          name)
+        - synchronising on the right transient or quiescent state
+
+        For the synchronisation, through the parameter ``sync_transient``,
+        you can choose to synchronise:
 
         - on the next quiescent/stable state + LRC completion
-        - on the next transient state (with no LRC completion)
+        - or on the next transient state (with no LRC completion)
 
         Moreover, the LRC action is already configured to stop early if any
         LRC error is detected.
@@ -337,25 +378,42 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
         instead of just ``quiescent -> LRC completion``. Actually I don't
         know if it's desirable or not (just an idea).
 
-        :param subarray_id: The subarray id the command is for.
         :param command_name: The name of the command to execute.
-        :param command_input: The input for the command. Default is None
-            (since not all commands require an input).
         :param sync_transient: Whether to synchronise on the transient state
             or on the quiescent state. Default is False.
+
         :return: The command action to be executed.
+
+        :raise ObsStateMissingCommandInput: if the input for the command
+            is required but missing
         """  # pylint: disable=line-too-long # noqa: E501
+        # get the input from the command name from the input object
+        # and raise an exception if the input is missing
+        if hasattr(self.commands_input, command_name):
+            if getattr(self.commands_input, command_name) is None:
+                raise ObsStateMissingCommandInput(
+                    command_name, self.commands_input, self
+                )
+            command_input = getattr(self.commands_input, command_name)
+        else:
+            command_input = None
+
+        # create the action synchronising alternatively on the transient
+        # or quiescent state
         command_action = self.commands_factory.create_action_with_sync(
-            subarray_id,
             command_name,
             command_input,
-            sync_transient,
-            not sync_transient,
+            subarray_id=self.subarray_id,
+            sync_transient=sync_transient,
+            sync_quiescent=not sync_transient,
         )
 
+        # if we synchronise on the transient state, we want also
+        # to add the LRC completion to the postconditions
         if not sync_transient:
             command_action.add_lrc_completion_to_postconditions()
 
+        # in any case, we want to monitor the LRC errors
         command_action.add_lrc_errors_to_early_stop()
 
         return command_action

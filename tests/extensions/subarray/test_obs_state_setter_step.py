@@ -1,11 +1,23 @@
 """Unit tests for the ObsStateSetterStep class."""
 
+from unittest.mock import MagicMock
+
 import pytest
 from assertpy import assert_that
 from ska_control_model import ObsState
 
+from ska_integration_test_harness.core.assertions.dev_state_changes import (
+    AssertDevicesStateChanges,
+)
+from ska_integration_test_harness.extensions.actions.lrc_action import (
+    TangoLRCAction,
+)
+from ska_integration_test_harness.extensions.assertions.lrc_completion import (
+    AssertLRCCompletion,
+)
 from ska_integration_test_harness.extensions.subarray.obs_state_setter_step import (  # pylint: disable=line-too-long # noqa: E501
     ObsStateCommandsInput,
+    ObsStateMissingCommandInput,
     ObsStateSetterStep,
     ObsStateSystemNotConsistent,
 )
@@ -23,7 +35,7 @@ from ska_integration_test_harness.extensions.subarray.setter_steps import (
     ObsStateSetterStepFromScanning,
 )
 
-from .utils import MockSubarraySystem
+from .utils import MockSubarraySystem, MockTangoLRCActionPatcher
 
 
 @pytest.mark.extensions
@@ -474,149 +486,292 @@ class TestObsStateSetterStep:
         )
 
     # -------------------------------------------------------------------------
-    # Test Commands utilities
+    # Test Commands utilities (creation and execution)
 
-    # @staticmethod
-    # def test_execute_terminates_if_system_state_is_target(
-    #     system: MockSubarraySystem,
-    # ):
-    #     """The execute procedure terminates if the system
-    # state is the target.
+    @staticmethod
+    def test_create_command_that_synchronise_on_transient(
+        system: MockSubarraySystem,
+    ):
+        """Create a command that synchronises on transient state.
 
-    #     If the system is already in the target state, the execute procedure
-    #     should terminate without any action.
+        We expect the command to be pointed to the correct target device,
+        to have the expected timeout and parameters and
 
-    #     :param system: The observation state system.
-    #     """
-    #     system.set_controller_obs_state(ObsState.ABORTING)
-    #     system.set_obs_state_other_devices(ObsState.ABORTING)
-    #     setter = ObsStateSetter.get_setter_action(system, ObsState.ABORTING)
+        :param system: The observation state system.
+        """
+        system.set_controller_obs_state(ObsState.READY)
+        system.set_obs_state_other_devices(ObsState.READY)
+        setter = ObsStateSetterStepFromReady(system, ObsState.ABORTING)
 
-    #     setter.next_command = MagicMock()
-    #     setter.execute()
+        command = setter.create_subarray_command("Abort", sync_transient=True)
 
-    #     setter.next_command.assert_not_called()
+        assert_that(command).is_instance_of(TangoLRCAction)
+        assert_that(command.target_device).is_equal_to(
+            system.subarray_controller
+        )
+        assert_that(command.command_name).is_equal_to("Abort")
+        assert_that(command.preconditions).described_as(
+            "The command is supposed to have no preconditions"
+        ).is_length(0)
+        assert_that(command.early_stop).described_as(
+            "The early stop is supposed to be set"
+        ).is_not_none()
+        assert_that(command.postconditions).described_as(
+            "The command is supposed to have 1 postcondition "
+            "to check the transient state"
+        ).is_length(1)
 
-    # @staticmethod
-    # def test_execute_fails_if_target_is_not_reachable(
-    #     system: MockSubarraySystem,
-    # ):
-    #     """The execute procedure fails if the target is not reachable.
+        postcondition = command.postconditions[0]
+        assert_that(postcondition).is_instance_of(AssertDevicesStateChanges)
+        assert_that(postcondition.devices).described_as(
+            "The postcondition is supposed to check the system devices"
+        ).is_equal_to(
+            [
+                system.obs_state_devices[0],
+                system.obs_state_devices[1],
+                system.obs_state_devices[2],
+            ]
+        )
+        assert_that(postcondition.attribute_name).described_as(
+            "The postcondition is supposed to check the obsState attribute"
+        ).is_equal_to("obsState")
+        assert_that(postcondition.attribute_value).described_as(
+            "The postcondition is supposed to check the transient state"
+        ).is_equal_to(ObsState.ABORTING)
 
-    #     If the target is not reachable, the execute procedure should fail.
+    @staticmethod
+    def test_create_command_that_synchronise_on_quiescent_and_lrc_completion(
+        system: MockSubarraySystem,
+    ):
+        """Create a command that synchronises on quiescent state.
 
-    #     :param system: The observation state system.
-    #     """
-    #     system.set_controller_obs_state(ObsState.ABORTED)
-    #     system.set_obs_state_other_devices(ObsState.ABORTED)
-    #     setter = ObsStateSetterFromAborted(system, ObsState.FAULT)
+        We expect the command to be pointed to the correct target device,
+        to have the expected timeout and parameters and
 
-    #     with pytest.raises(NotImplementedError) as exc_info:
-    #         setter.execute()
+        :param system: The observation state system.
+        """
+        system.set_controller_obs_state(ObsState.ABORTED)
+        system.set_obs_state_other_devices(ObsState.ABORTED)
+        setter = ObsStateSetterStepFromAborted(system, ObsState.EMPTY)
 
-    #     assert_that(str(exc_info.value)).described_as(
-    #         "The error message references the unsupported target obs state"
-    #     ).contains(
-    #         "target observation state ObsState.FAULT "
-    #         "is not reachable by current decision rules"
-    #     )
+        command = setter.create_subarray_command(
+            "Restart", sync_transient=False
+        )
 
-    # @staticmethod
-    # def test_execute_calls_expected_tango_command(
-    #     system: MockSubarraySystem,
-    # ):
-    #     """The execute procedure calls the expected Tango command.
+        assert_that(command).is_instance_of(TangoLRCAction)
+        assert_that(command.target_device).is_equal_to(
+            system.subarray_controller
+        )
+        assert_that(command.command_name).is_equal_to("Restart")
+        assert_that(command.preconditions).described_as(
+            "The command is supposed to have no preconditions"
+        ).is_length(0)
+        assert_that(command.early_stop).described_as(
+            "The early stop is supposed to be set"
+        ).is_not_none()
+        assert_that(command.postconditions).described_as(
+            "The command is supposed to have 2 postcondition "
+            "to check the quiescent state and the LRC completion"
+        ).is_length(2)
 
-    #     The execute procedure should call the expected Tango command
-    #     to move the system to the target state.
+        # check first postcondition
+        postcondition = command.postconditions[0]
+        assert_that(postcondition).is_instance_of(AssertDevicesStateChanges)
+        assert_that(postcondition.devices).described_as(
+            "The postcondition is supposed to check the system devices"
+        ).is_equal_to(
+            [
+                system.obs_state_devices[0],
+                system.obs_state_devices[1],
+                system.obs_state_devices[2],
+            ]
+        )
+        assert_that(postcondition.attribute_name).described_as(
+            "The postcondition is supposed to check the obsState attribute"
+        ).is_equal_to("obsState")
+        assert_that(postcondition.attribute_value).described_as(
+            "The postcondition is supposed to check the quiescent state"
+        ).is_equal_to(ObsState.EMPTY)
 
-    #     :param system: The observation state system.
-    #     """
-    #     system.set_controller_obs_state(ObsState.IDLE)
-    #     system.set_obs_state_other_devices(ObsState.IDLE)
-    #     setter = ObsStateSetter.get_setter_action(
-    #         system,
-    #         ObsState.RESOURCING,
-    #         commands_input={
-    #             "AssignResources": "DUMMY INPUT",
-    #         },
-    #     )
+        # check second postcondition
+        postcondition = command.postconditions[1]
+        assert_that(postcondition).is_instance_of(AssertLRCCompletion)
+        assert_that(postcondition.device).described_as(
+            "The postcondition is supposed to check the LRC completion "
+            "on the subarray device that receives the command"
+        ).is_equal_to(system.subarray_controller)
 
-    #     # create a timeout object to track when it's passed
-    #     timeout = ChainedAssertionsTimeout(10)
+    @staticmethod
+    @pytest.mark.parametrize(
+        ("command_name", "expected_command_input"),
+        [
+            ("AssignResources", '{"dummy": "input"}'),
+            ("Configure", '{"another_dummy": "input"}'),
+            ("Scan", '{"another_dummy": "input"}'),
+        ],
+    )
+    def test_create_command_uses_appropriate_input(
+        system: MockSubarraySystem,
+        command_name: str,
+        expected_command_input: str,
+    ):
+        """Create command uses the appropriate input for each command.
 
-    #     # define a side effect to change the system state to RESOURCING
-    #     # pylint: disable=unused-argument
-    #     def move_system_to_resourcing(*args, **kwargs):
-    #         system.set_controller_obs_state(ObsState.RESOURCING)
-    #         system.set_obs_state_other_devices(ObsState.RESOURCING)
+        We expect the method to be able to use the correct inputs for each
+        command.
 
-    #     # tell to use MockTangoLRCAction
-    #     with patch.object(
-    #         TangoLRCAction, "execute", side_effect=move_system_to_resourcing
-    #     ) as mock_execute:
-    #         setter.execute(timeout, False, False)
+        :param system: The observation state system.
+        :param command_name: The command name.
+        :param expected_command_input: The expected command input.
+        """
+        system.set_controller_obs_state(ObsState.IDLE)
+        system.set_obs_state_other_devices(ObsState.IDLE)
+        setter = ObsStateSetterStepFromIdle(
+            system,
+            ObsState.READY,
+            commands_input={
+                "AssignResources": '{"dummy": "input"}',
+                "Configure": '{"another_dummy": "input"}',
+                "Scan": '{"another_dummy": "input"}',
+            },
+        )
 
-    #     # check if the LRC action was called
-    #     mock_execute.assert_called_once()
+        command = setter.create_subarray_command(command_name)
 
-    #     # check if the LRC action was called with the timeout and
-    #     # preconditions flag (not postconditions flag)
-    #     mock_execute.assert_called_with(timeout, False)
+        assert_that(command).is_instance_of(TangoLRCAction)
+        assert_that(command.command_name).is_equal_to(command_name)
+        assert_that(command.command_param).described_as(
+            "The command is supposed to have the expected input"
+        ).is_equal_to(expected_command_input)
 
-    # @staticmethod
-    # def test_execute_determines_correctly_the_next_step(
-    #     system: MockSubarraySystem,
-    # ):
-    #     """The execute procedure determines correctly the next step.
+    @staticmethod
+    @pytest.mark.parametrize(
+        "command_name", ["AssignResources", "Configure", "Scan"]
+    )
+    def test_create_command_fails_if_an_input_is_missing(
+        system: MockSubarraySystem, command_name: str
+    ):
+        """Create command fails if an input is missing.
 
-    #     The execute procedure should determine correctly the next step
-    #     to move the system to the target state.
+        We expect the method to raise an error if the input for the command
+        is missing.
 
-    #     :param system: The observation state system.
-    #     """
-    #     system.set_controller_obs_state(ObsState.EMPTY)
-    #     system.set_obs_state_other_devices(ObsState.EMPTY)
-    #     cmd_inputs = ObsStateCommandsInput(AssignResources="DUMMY INPUT")
-    #     setter = ObsStateSetter.get_setter_action(
-    #         system,
-    #         ObsState.READY,
-    #         commands_input=cmd_inputs,
-    #     )
+        :param system: The observation state system.
+        :param command_name: The command name.
+        """
+        system.set_controller_obs_state(ObsState.IDLE)
+        system.set_obs_state_other_devices(ObsState.IDLE)
 
-    #     # create a timeout object to track when it's passed
-    #     timeout = ChainedAssertionsTimeout(10)
+        # define inputs, but remove the one for the command
+        command_inputs = {
+            "AssignResources": '{"dummy": "input"}',
+            "Configure": '{"another_dummy": "input"}',
+            "Scan": '{"another_dummy": "input"}',
+        }
+        command_inputs[command_name] = None
+        setter = ObsStateSetterStepFromIdle(
+            system, ObsState.READY, commands_input=command_inputs
+        )
 
-    #     # define a side effect to change the system state to RESOURCING
-    #     # pylint: disable=unused-argument
-    #     def move_system_to_idle(*args, **kwargs):
-    #         system.set_controller_obs_state(ObsState.IDLE)
-    #         system.set_obs_state_other_devices(ObsState.IDLE)
+        with pytest.raises(ObsStateMissingCommandInput) as exc_info:
+            setter.create_subarray_command(command_name)
 
-    #     with patch.object(
-    #         TangoLRCAction, "execute", side_effect=move_system_to_idle
-    #     ):
-    #         mock_next_action = MagicMock()
-    #         with patch.object(
-    #             ObsStateSetter,
-    #             "get_setter_action",
-    #             side_effect=MagicMock(return_value=mock_next_action),
-    #         ) as mock_get_setter_action:
-    #             setter.execute(timeout, False, False)
+        assert_that(str(exc_info.value)).described_as(
+            "The error message includes the missing command input name"
+        ).contains(f"Missing input for command {command_name}").described_as(
+            "The error message is expected to include the passed inputs"
+        ).contains(
+            str(command_inputs)
+        ).described_as(
+            "The error message is expected to include the action name"
+            " and description"
+        ).contains(
+            setter.name()
+        ).contains(
+            setter.description()
+        )
 
-    #     # check if the next action is determined as expected and
-    # then executed
-    #     mock_get_setter_action.assert_called_once()
-    #     # check if the next action receives all the expected parameters
-    #     mock_get_setter_action.assert_called_with(
-    #         system, ObsState.READY, 1, cmd_inputs, True
-    #     )
+    @staticmethod
+    def test_send_command_enable_or_disable_log_according_to_action_setting(
+        system: MockSubarraySystem,
+    ):
+        """Send command enables or disables log according to action setting.
 
-    #     # the next action is called with the timeout and the preconditions
-    # flag
-    #     mock_next_action.execute.assert_called_once()
-    #     mock_next_action.execute.assert_called_with(
-    #         postconditions_timeout=timeout,
-    #         verify_preconditions=False,
-    #         verify_postconditions=False,
-    #     )
+        We expect the method to "propagate" the log setting to the command
+        being sent.
+        """
+        system.set_controller_obs_state(ObsState.IDLE)
+        system.set_obs_state_other_devices(ObsState.IDLE)
+        setter = ObsStateSetterStepFromIdle(system, ObsState.ABORTED)
+        # setter.set_logging(True) (default)
+
+        patcher = MockTangoLRCActionPatcher()
+        with patcher.patch():
+            setter.send_subarray_command_and_synchronise("Abort")
+
+            assert_that(patcher.instances).is_length(1)
+            instance = patcher.instances[0]
+            assert_that(instance.target_device).is_equal_to(
+                system.subarray_controller
+            )
+            assert_that(instance.command_name).is_equal_to("Abort")
+            assert_that(instance.is_logging_enabled()).is_true()
+
+        # try to set to False and repeat the test
+        patcher.reset()
+        setter.set_logging(False)
+        with patcher.patch():
+            setter.send_subarray_command_and_synchronise("Abort")
+
+            assert_that(patcher.instances).is_length(1)
+            instance = patcher.instances[0]
+            assert_that(instance.target_device).is_equal_to(
+                system.subarray_controller
+            )
+            assert_that(instance.command_name).is_equal_to("Abort")
+            assert_that(instance.is_logging_enabled()).is_false()
+
+    @staticmethod
+    def test_send_command_executes_the_command_with_timeout_and_other_settings(
+        system: MockSubarraySystem,
+    ):
+        """Send command executes the command with timeout and other settings.
+
+        We expect the method to execute the command with the expected
+        action timeout and other settings.
+        """
+        system.set_controller_obs_state(ObsState.READY)
+        system.set_obs_state_other_devices(ObsState.READY)
+        setter = ObsStateSetterStepFromIdle(
+            system,
+            ObsState.CONFIGURING,
+            commands_input={
+                "Scan": '{"dummy": "input"}',
+            },
+        )
+        # simulate being in an execution context
+        mock_timeout = MagicMock()
+        # pylint: disable=protected-access
+        setter._last_execution_params = {
+            "postconditions_timeout": mock_timeout,
+            "verify_preconditions": False,
+            "verify_postconditions": False,
+        }
+
+        patcher = MockTangoLRCActionPatcher()
+        with patcher.patch():
+            setter.send_subarray_command_and_synchronise("Scan")
+
+            assert_that(patcher.instances).is_length(1)
+            instance = patcher.instances[0]
+            assert_that(instance.target_device).is_equal_to(
+                system.subarray_controller
+            )
+            assert_that(instance.command_name).is_equal_to("Scan")
+            assert_that(instance.command_param).is_equal_to(
+                '{"dummy": "input"}'
+            )
+
+            # verify the execute call arguments
+            instance.execute.assert_called_once()
+            instance.execute.assert_called_once_with(mock_timeout, False, True)

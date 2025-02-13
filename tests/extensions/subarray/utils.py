@@ -2,7 +2,7 @@
 
 """Utilities for testing the subarray extension."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from ska_control_model import ObsState
 
@@ -100,3 +100,81 @@ class MockTangoLRCAction(TangoLRCAction):
         """
         Execute is a mock that will be called instead of the real method.
         """
+
+    def is_logging_enabled(self) -> bool:
+        """Check if the logger is enabled.
+
+        :return: True if the logger is enabled, False otherwise.
+        """
+        return not self.logger.disabled
+
+
+DEFAULT_PATCH_PATH = (
+    "ska_integration_test_harness.extensions.subarray"
+    ".obs_state_commands_factory.TangoLRCAction"
+)
+"""
+The default path to the class to patch (from the subarray commands factory).
+"""
+
+
+class MockTangoLRCActionPatcher:
+    """A class to patch TangoLRCAction and track the instances created.
+
+    Usage example:
+
+    .. code-block:: python
+
+        patcher = MockTangoLRCActionPatcher()
+        with patcher.patch():
+            # here the code that generates TangoLRCAction instances
+
+            assert len(patcher.instances) == 1
+            action = patcher.instances[0]
+            # etc.
+    """
+
+    def __init__(self, patch_path: str = DEFAULT_PATCH_PATH):
+        """Create a new patcher.
+
+        :param patch_path: The path to the class to patch. It defaults to
+            the TangoLRCAction class from the subarray commands factory.
+        """
+        self.patch_path: str = patch_path
+        self.instances: list[MockTangoLRCAction] = []
+
+    def reset(self):
+        """Reset the list of instances created."""
+        self.instances = []
+
+    def create_instance(self, *args, **kwargs) -> MockTangoLRCAction:
+        """Create a new instance of the patched class.
+
+        And track its creation as a side effect.
+
+        :param args: Positional arguments to pass to the constructor.
+        :param kwargs: Keyword arguments to pass to the constructor.
+        :return: The new instance.
+        """
+        instance = MockTangoLRCAction(*args, **kwargs)
+        self.instances.append(instance)
+        return instance
+
+    def patch(self):
+        """Patch the TangoLRCAction class.
+
+        Usage example:
+
+        .. code-block:: python
+
+            patcher = MockTangoLRCActionPatcher()
+            with patcher.patch():
+                # here the code that generates TangoLRCAction instances
+
+                assert len(patcher.instances) == 1
+                action = patcher.instances[0]
+                # etc.
+
+        :return: Whatever ``unittest.mock.patch`` returns.
+        """
+        return patch(self.patch_path, side_effect=self.create_instance)
