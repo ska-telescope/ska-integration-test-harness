@@ -6,15 +6,10 @@ from .utils import MockSubarraySystem
 
 
 @pytest.mark.extensions
-class TestObsStateSetterCommandsSequences:
-    """Unit tests for the ObsStateSetter class from a broader perspective.
+class TestObsStateSetter:
+    """Unit tests for the ObsStateSetter class.
 
-    This set of unit tests is complementer to ``TestObsStateSetterInIsolation``
-    and verifies the ObsStateSetter class from a broader perspective. It
-    verifies the ObsStateSetter class capabilities to call a correct sequence
-    of commands to move the system to the desired target state (and
-    so consequently also to self-orchestrate correctly the sequence of
-    ObsStateSetter instances that are needed to reach the target state).
+    TODO: change this description to reflect the actual class being tested.
     """
 
     @pytest.fixture

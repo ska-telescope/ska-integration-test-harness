@@ -1,4 +1,4 @@
-"""Unit tests for the ObsStateSetter class."""
+"""Unit tests for the ObsStateSetterStep class."""
 
 import pytest
 from assertpy import assert_that
@@ -26,7 +26,7 @@ from .utils import MockSubarraySystem
 
 
 @pytest.mark.extensions
-class TestObsStateSetterInIsolation:
+class TestObsStateSetterStep:
     """Unit tests for the ObsStateSetterStep class.
 
     TODO: describe the purpose of the class.
