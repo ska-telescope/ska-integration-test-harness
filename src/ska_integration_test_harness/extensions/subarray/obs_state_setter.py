@@ -7,7 +7,10 @@ from ska_control_model import ObsState
 
 from ...core.actions.sut_action import SUTAction
 from .obs_state_commands_factory import ObsStateCommandsFactory
-from .obs_state_setter_step import ObsStateCommandsInput
+from .obs_state_setter_step import (
+    ObsStateCommandsInput,
+    ObsStateSystemNotConsistent,
+)
 from .obs_state_system import DEFAULT_SUBARRAY_ID, ObsStateSystem
 
 STATE_CLASS_MAP: dict[ObsState, type] = {}
@@ -48,31 +51,6 @@ class ObsStateSystemNotInExpectedState(AssertionError):
             f"The system is expected to be in the observation state "
             f"{str(expected_state)}, but it is observed to be in the state "
             f"{str(current_state)}."
-        )
-
-
-class ObsStateSystemNotConsistent(AssertionError):
-    """Raised when the system is not in a consistent observation state."""
-
-    def __init__(
-        self,
-        expected_state: ObsState,
-        observed_states: dict[tango.DeviceProxy, ObsState],
-        action: SUTAction,
-    ):
-
-        super().__init__(
-            f"FAILED ASSUMPTION for action {action.name()} "
-            f"({action.description()}): "
-            f"The system is expected to be in a consistent observation state "
-            f"{str(expected_state)}, but it is observed to be in an "
-            "inconsistent state: "
-            ", ".join(
-                [
-                    f"{device.dev_name()}={str(obs_state)}"
-                    for device, obs_state in observed_states.items()
-                ]
-            )
         )
 
 

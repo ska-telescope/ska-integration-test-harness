@@ -23,7 +23,6 @@ import abc
 
 from ska_control_model import ObsState
 
-from ...core.actions.sut_action import SUTAction
 from .obs_state_setter_step import ObsStateSetterStep
 
 # -------------------------------------------------------------------
@@ -49,26 +48,24 @@ class ObsStateSetterStepFromEmpty(ObsStateSetterStep):
     LRC errors will always be used as early stop conditions.
     """
 
-    def get_step_obs_state(self) -> ObsState:
+    def get_assumed_obs_state(self) -> ObsState:
         return ObsState.EMPTY
 
-    def get_next_action(self, target_state: ObsState) -> SUTAction:
-        return self.get_subarray_command_action(
+    def execute_procedure(self) -> None:
+        self.run_subarray_command(
             self.subarray_id,
             "AssignResources",
             self.commands_inputs.AssignResources,
             # I synchronise on the the transient state if my target
             # is RESOURCING or if I already know I will have to
             # abort immediately
-            sync_transient=(
-                target_state
-                in [
-                    ObsState.RESOURCING,
-                    ObsState.ABORTING,
-                    ObsState.ABORTED,
-                    ObsState.RESTARTING,
-                ]
-            ),
+            sync_transient=self.target_state
+            in [
+                ObsState.RESOURCING,
+                ObsState.ABORTING,
+                ObsState.ABORTED,
+                ObsState.RESTARTING,
+            ],
         )
 
 
@@ -88,11 +85,11 @@ class ObsStateSetterStepSupportsAbort(ObsStateSetterStep, abc.ABC):
     LRC errors will always be used as early stop conditions.
     """
 
-    def get_next_action(self, target_state: ObsState) -> SUTAction:
-        return self.get_subarray_command_action(
+    def execute_procedure(self) -> None:
+        self.run_subarray_command(
             self.subarray_id,
             "Abort",
-            sync_transient=(target_state == ObsState.ABORTING),
+            sync_transient=(self.target_state == ObsState.ABORTING),
         )
 
 
@@ -107,22 +104,23 @@ class ObsStateSetterStepFromIdle(ObsStateSetterStepSupportsAbort):
     - For any other state, I have to ``Abort`` first.
     """
 
-    def get_step_obs_state(self) -> ObsState:
+    def get_assumed_obs_state(self) -> ObsState:
         return ObsState.IDLE
 
-    def get_next_action(self, target_state: ObsState) -> SUTAction:
-        if target_state not in [
+    def execute_procedure(self) -> None:
+        if self.target_state not in [
             ObsState.CONFIGURING,
             ObsState.READY,
             ObsState.SCANNING,
         ]:
-            return super().get_next_action(target_state)
+            super().execute_procedure()
+            return
 
-        return self.get_subarray_command_action(
+        self.run_subarray_command(
             self.subarray_id,
             "Configure",
             self.commands_inputs.Configure,
-            sync_transient=(target_state == ObsState.CONFIGURING),
+            sync_transient=(self.target_state == ObsState.CONFIGURING),
         )
 
 
@@ -135,14 +133,15 @@ class ObsStateSetterStepFromReady(ObsStateSetterStepSupportsAbort):
     - For any other state, I have to ``Abort`` first.
     """
 
-    def get_step_obs_state(self) -> ObsState:
+    def get_assumed_obs_state(self) -> ObsState:
         return ObsState.READY
 
-    def get_next_action(self, target_state: ObsState) -> SUTAction:
-        if target_state != ObsState.SCANNING:
-            return super().get_next_action(target_state)
+    def execute_procedure(self) -> None:
+        if self.target_state != ObsState.SCANNING:
+            super().execute_procedure()
+            return
 
-        return self.get_subarray_command_action(
+        self.run_subarray_command(
             self.subarray_id,
             "Scan",
             self.commands_inputs.Scan,
@@ -162,7 +161,7 @@ class ObsStateSetterStepFromResourcing(ObsStateSetterStepSupportsAbort):
     while others may already be in ``IDLE`` state.
     """
 
-    def get_step_obs_state(self) -> ObsState:
+    def get_assumed_obs_state(self) -> ObsState:
         return ObsState.RESOURCING
 
     def get_accepted_obs_states(self) -> list[ObsState]:
@@ -177,7 +176,7 @@ class ObsStateSetterStepFromConfiguring(ObsStateSetterStepSupportsAbort):
     be in ``READY`` state.
     """
 
-    def get_step_obs_state(self) -> ObsState:
+    def get_assumed_obs_state(self) -> ObsState:
         return ObsState.CONFIGURING
 
     def get_accepted_obs_states(self) -> list[ObsState]:
@@ -192,7 +191,7 @@ class ObsStateSetterStepFromScanning(ObsStateSetterStepSupportsAbort):
     completed the scan or because they are not yet started).
     """
 
-    def get_step_obs_state(self) -> ObsState:
+    def get_assumed_obs_state(self) -> ObsState:
         return ObsState.SCANNING
 
     def get_accepted_obs_states(self) -> list[ObsState]:
@@ -213,11 +212,11 @@ class ObsStateSetterStepSupportsRestart(ObsStateSetterStep, abc.ABC):
       state (+ verifying LRC completion and errors).
     """
 
-    def get_next_action(self, target_state: ObsState) -> SUTAction:
-        return self.get_subarray_command_action(
+    def execute_procedure(self) -> None:
+        self.run_subarray_command(
             self.subarray_id,
             "Restart",
-            sync_transient=(target_state == ObsState.RESTARTING),
+            sync_transient=(self.target_state == ObsState.RESTARTING),
         )
 
 
@@ -228,7 +227,7 @@ class ObsStateSetterStepFromFault(ObsStateSetterStepSupportsRestart):
     This implementation assumes all states are acceptable.
     """
 
-    def get_step_obs_state(self) -> ObsState:
+    def get_assumed_obs_state(self) -> ObsState:
         return ObsState.FAULT
 
     def get_accepted_obs_states(self) -> list[ObsState]:
@@ -238,12 +237,12 @@ class ObsStateSetterStepFromFault(ObsStateSetterStepSupportsRestart):
 class ObsStateSetterStepFromAborted(ObsStateSetterStepSupportsRestart):
     """Step to handle transitions from an ABORTED state."""
 
-    def get_step_obs_state(self) -> ObsState:
+    def get_assumed_obs_state(self) -> ObsState:
         return ObsState.ABORTED
 
 
 # -------------------------------------------------------------------
-# *** OTHER STATES ***
+# *** REMAINING TRICKY TRANSITIONS ***
 
 
 class ObsStateSetterStepFromAborting(ObsStateSetterStep):
@@ -259,22 +258,29 @@ class ObsStateSetterStepFromAborting(ObsStateSetterStep):
     In future we may attempt a wait operation.
     """
 
-    def get_step_obs_state(self) -> ObsState:
+    def get_assumed_obs_state(self) -> ObsState:
         return ObsState.ABORTING
 
     def get_accepted_obs_states(self) -> list[ObsState]:
         return [
+            # states that support Abort
             ObsState.RESOURCING,
             ObsState.IDLE,
             ObsState.CONFIGURING,
             ObsState.READY,
             ObsState.SCANNING,
             ObsState.RESETTING,
+            # the aborting transient state
             ObsState.ABORTING,
+            # the final state
             ObsState.ABORTED,
         ]
 
-    def get_next_action(self, target_state: ObsState) -> SUTAction:
+    def execute_procedure(self) -> None:
+        """No defined action for ABORTING state.
+
+        Future improvements may introduce a waiting mechanism.
+        """
         raise NotImplementedError(
             "No procedure yet defined to exit from ABORTING state."
         )
@@ -291,13 +297,17 @@ class ObsStateSetterStepFromRestarting(ObsStateSetterStep):
     In future we may attempt a wait operation.
     """
 
-    def get_step_obs_state(self) -> ObsState:
+    def get_assumed_obs_state(self) -> ObsState:
         return ObsState.RESTARTING
 
     def get_accepted_obs_states(self) -> list[ObsState]:
         return [ObsState.EMPTY, ObsState.ABORTED, ObsState.FAULT]
 
-    def get_next_action(self, target_state: ObsState) -> SUTAction:
+    def execute_procedure(self) -> None:
+        """No defined action for RESTARTING state.
+
+        Future improvements may introduce a waiting mechanism.
+        """
         raise NotImplementedError(
             "No procedure yet defined to exit from RESTARTING state."
         )
