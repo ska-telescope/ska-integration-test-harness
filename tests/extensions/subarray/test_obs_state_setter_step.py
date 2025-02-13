@@ -42,7 +42,22 @@ from .utils import MockSubarraySystem, MockTangoLRCActionPatcher
 class TestObsStateSetterStep:
     """Unit tests for the ObsStateSetterStep class.
 
-    TODO: describe the purpose of the class.
+    The following tests are focused on the ObsStateSetterStep class as
+    a standalone class. The following tests are done:
+
+    - Initialization and input reception: the class should be able to
+      receive the commands input in different formats.
+    - Action name and description: the class should be able to provide
+      a meaningful name and description.
+    - Get assumed and accepted obsState: the subclasses implementation
+      provide coherent and sensed assumed and accepted obsState.
+    - Preconditions verification: the class should be able to verify
+      the preconditions for the action; various subclasses are tested
+      checking both more or less strict valid and un-valid preconditions.
+    - Commands utilities: the class should be able to create the
+      appropriate commands for the action, considering the input and
+      the context; the class should also be able to execute those
+      commands with the expected settings.
     """
 
     @pytest.fixture
