@@ -73,7 +73,7 @@ class TestObsStateSetterStep:
         )
 
     # -------------------------------------------------------------------------
-    # Test get expected obsState & preconditions verification
+    # Test get assumed and accepted obsState
 
     @staticmethod
     @pytest.mark.parametrize(
@@ -94,7 +94,7 @@ class TestObsStateSetterStep:
     )
     def test_get_assumed_obs_state_returns_assumed_obs_state(
         system: MockSubarraySystem,
-        step_class: ObsStateSetterStep,
+        step_class: type[ObsStateSetterStep],
         assumed_obs_state: ObsState,
     ):
         """The get_assumed_obs_state method returns the expected obsState.
@@ -127,7 +127,7 @@ class TestObsStateSetterStep:
     )
     def test_get_accepted_obs_states_default_to_the_assumed_one_for_quiescent(
         system: MockSubarraySystem,
-        step_class: ObsStateSetterStep,
+        step_class: type[ObsStateSetterStep],
         assumed_obs_state: ObsState,
     ):
         """The get_accepted_obs_states method returns the assumed obsState.
@@ -146,6 +146,9 @@ class TestObsStateSetterStep:
         assert_that(setter.get_accepted_obs_states()).is_equal_to(
             [assumed_obs_state]
         )
+
+    # -------------------------------------------------------------------------
+    # Test preconditions verification
 
     @staticmethod
     @pytest.mark.parametrize(
@@ -166,7 +169,7 @@ class TestObsStateSetterStep:
     )
     def test_preconditions_pass_if_all_devices_are_in_assumed_state(
         system: MockSubarraySystem,
-        step_class: ObsStateSetterStep,
+        step_class: type[ObsStateSetterStep],
         assumed_obs_state: ObsState,
     ):
         """Preconditions pass if all devices are in the assumed state.
@@ -180,6 +183,74 @@ class TestObsStateSetterStep:
         """
         system.set_controller_obs_state(assumed_obs_state)
         system.set_obs_state_other_devices(assumed_obs_state)
+        setter = step_class(system, ObsState.EMPTY)
+
+        setter.verify_preconditions()
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        ("step_class", "dev_a_state", "dev_b_state", "dev_c_state"),
+        [
+            (
+                ObsStateSetterStepFromResourcing,
+                ObsState.EMPTY,
+                ObsState.RESOURCING,
+                ObsState.IDLE,
+            ),
+            (
+                ObsStateSetterStepFromConfiguring,
+                ObsState.IDLE,
+                ObsState.CONFIGURING,
+                ObsState.READY,
+            ),
+            (
+                ObsStateSetterStepFromScanning,
+                ObsState.READY,
+                ObsState.SCANNING,
+                ObsState.READY,
+            ),
+            (
+                ObsStateSetterStepFromResetting,
+                ObsState.FAULT,
+                ObsState.RESETTING,
+                ObsState.IDLE,
+            ),
+            (
+                ObsStateSetterStepFromAborting,
+                ObsState.IDLE,
+                ObsState.ABORTING,
+                ObsState.ABORTED,
+            ),
+            (
+                ObsStateSetterStepFromRestarting,
+                ObsState.ABORTED,
+                ObsState.RESTARTING,
+                ObsState.EMPTY,
+            ),
+        ],
+    )
+    def test_transient_precond_accepts_devices_in_close_states(
+        system: MockSubarraySystem,
+        step_class: type[ObsStateSetterStep],
+        dev_a_state: ObsState,
+        dev_b_state: ObsState,
+        dev_c_state: ObsState,
+    ):
+        """Transient preconditions accept devices in close states.
+
+        If devices are in close states, the preconditions are met and therefore
+        their verification should pass.
+
+        :param system: The observation state system.
+        :param step_class: The ObsStateSetterStep class.
+        :param dev_a_state: The first device state.
+        :param dev_b_state: The second device state.
+        :param dev_c_state: The third device state.
+        """
+        system.set_controller_obs_state(dev_b_state)
+        system.set_partial_obs_state(dev_a_state, device_index=0)
+        system.set_partial_obs_state(dev_b_state, device_index=1)
+        system.set_partial_obs_state(dev_c_state, device_index=2)
         setter = step_class(system, ObsState.EMPTY)
 
         setter.verify_preconditions()
@@ -204,7 +275,7 @@ class TestObsStateSetterStep:
     )
     def test_quiescent_precond_fail_if_a_device_is_not_in_assumed_obs_state(
         system: MockSubarraySystem,
-        step_class: ObsStateSetterStep,
+        step_class: type[ObsStateSetterStep],
         assumed_obs_state: ObsState,
         divergent_device_obs_state: ObsState,
     ):
@@ -244,6 +315,94 @@ class TestObsStateSetterStep:
             f"subarray/dev_b/1={str(assumed_obs_state)}"
         ).contains(
             f"subarray/dev_c/1={str(assumed_obs_state)}"
+        )
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        ("step_class", "dev_a_state", "dev_b_state", "dev_c_state"),
+        [
+            (
+                ObsStateSetterStepFromResourcing,
+                ObsState.FAULT,
+                ObsState.RESOURCING,
+                ObsState.ABORTING,
+            ),
+            (
+                ObsStateSetterStepFromConfiguring,
+                ObsState.IDLE,
+                ObsState.CONFIGURING,
+                ObsState.FAULT,
+            ),
+            (
+                ObsStateSetterStepFromScanning,
+                ObsState.READY,
+                ObsState.SCANNING,
+                ObsState.FAULT,
+            ),
+            (
+                ObsStateSetterStepFromResetting,
+                ObsState.EMPTY,
+                ObsState.RESETTING,
+                ObsState.IDLE,
+            ),
+            (
+                ObsStateSetterStepFromAborting,
+                ObsState.IDLE,
+                ObsState.ABORTING,
+                ObsState.FAULT,
+            ),
+            (
+                ObsStateSetterStepFromRestarting,
+                ObsState.ABORTED,
+                ObsState.RESTARTING,
+                ObsState.ABORTING,
+            ),
+        ],
+    )
+    def test_transient_precond_fail_if_a_device_is_not_in_accepted_state(
+        system: MockSubarraySystem,
+        step_class: type[ObsStateSetterStep],
+        dev_a_state: ObsState,
+        dev_b_state: ObsState,
+        dev_c_state: ObsState,
+    ):
+        """Transient preconditions fail if a device is not in accepted state.
+
+        If a device has not an accepted obsState, the preconditions
+        are not met and therefore their verification should fail.
+
+        :param system: The observation state system.
+        :param step_class: The ObsStateSetterStep class.
+        :param dev_a_state: The first device state.
+        :param dev_b_state: The second device state (in this case it will
+            always be the assumed obsState).
+        :param dev_c_state: The third device state.
+        """
+        system.set_controller_obs_state(dev_b_state)
+        system.set_partial_obs_state(dev_a_state, device_index=0)
+        system.set_partial_obs_state(dev_b_state, device_index=1)
+        system.set_partial_obs_state(dev_c_state, device_index=2)
+        setter = step_class(system, ObsState.EMPTY)
+
+        with pytest.raises(ObsStateSystemNotConsistent) as exc_info:
+            setter.verify_preconditions()
+
+        assert_that(str(exc_info.value)).described_as(
+            "The error message includes action name and description"
+        ).contains(step_class.__name__).contains(
+            setter.description()
+        ).described_as(
+            "The error message includes the expected consistent state"
+        ).contains(
+            f"consistent observation state {str(dev_b_state)}"
+        ).described_as(
+            "The error message includes the actual devices states"
+        ).contains(
+            f"subarray/dev_a/1={str(dev_a_state)}"
+        ).contains(
+            f"subarray/dev_b/1={str(dev_b_state)}"
+        ).contains(
+            f"subarray/dev_c/1={str(dev_c_state)}"
         )
 
     # -------------------------------------------------------------------------
