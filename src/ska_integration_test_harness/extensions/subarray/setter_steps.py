@@ -38,6 +38,7 @@ class ObsStateSetterStepFromEmpty(ObsStateSetterStep):
     begin the normal operational flow.
 
     Routing rules:
+
     - If the target state is ``RESOURCING`` (or something that will
       require immediate abort), send ``AssignResources``
       synchronizing on the transient state.
@@ -77,6 +78,7 @@ class ObsStateSetterStepSupportsAbort(ObsStateSetterStep, abc.ABC):
     """Step to handle transitions from states that support Abort.
 
     Routing rules:
+
     - If the target state is ``ABORTING``, send ``Abort`` synchronizing
       on the transient state.
     - For any other state, send ``Abort`` synchronizing on the quiescent
@@ -97,6 +99,7 @@ class ObsStateSetterStepFromIdle(ObsStateSetterStepSupportsAbort):
     """Step to handle transitions from an IDLE state.
 
     Routing rules:
+
     - For ``READY`` and ``SCANNING``, I have to ``Configure`` synchronizing
       on the quiescent state (and verifying LRC completion).
     - For ``CONFIGURING``, I have to ``Configure`` synchronizing on the
@@ -128,6 +131,7 @@ class ObsStateSetterStepFromReady(ObsStateSetterStepSupportsAbort):
     """Step to handle transitions from a READY state.
 
     Routing rules:
+
     - If the target state is ``SCANNING``, I have to ``Scan`` synchronizing
       on the transient state.
     - For any other state, I have to ``Abort`` first.
@@ -301,7 +305,15 @@ class ObsStateSetterStepFromRestarting(ObsStateSetterStep):
         return ObsState.RESTARTING
 
     def get_accepted_obs_states(self) -> list[ObsState]:
-        return [ObsState.EMPTY, ObsState.ABORTED, ObsState.FAULT]
+        return [
+            # the initial states from which I can restarts
+            ObsState.ABORTED,
+            ObsState.FAULT,
+            # the transient state
+            ObsState.RESTARTING,
+            # the final state
+            ObsState.EMPTY,
+        ]
 
     def execute_procedure(self) -> None:
         """No defined action for RESTARTING state.
@@ -311,3 +323,29 @@ class ObsStateSetterStepFromRestarting(ObsStateSetterStep):
         raise NotImplementedError(
             "No procedure yet defined to exit from RESTARTING state."
         )
+
+
+class ObsStateSetterStepFromResetting(ObsStateSetterStepSupportsAbort):
+    """Step to handle transitions from a RESETTING state.
+
+    Being a transient state, not all devices may be in ``RESETTING`` state.
+    Some devices may be in:
+    ``FAULT, ABORTED, ABORTING, IDLE`` states.
+
+    Routing rules:
+
+    - Whatever the target state is, I have to ``Abort`` first (I just
+      inherited the procedure from the ``ObsStateSetterStepSupportsAbort``).
+    """
+
+    def get_assumed_obs_state(self) -> ObsState:
+        return ObsState.RESETTING
+
+    def get_accepted_obs_states(self) -> list[ObsState]:
+        return [
+            ObsState.RESETTING,
+            ObsState.FAULT,
+            ObsState.ABORTED,
+            ObsState.ABORTING,
+            ObsState.IDLE,
+        ]

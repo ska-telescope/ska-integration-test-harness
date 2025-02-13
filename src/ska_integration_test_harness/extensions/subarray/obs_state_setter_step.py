@@ -12,7 +12,7 @@ from ska_integration_test_harness.extensions.actions.lrc_action import (
 
 from ...core.actions.sut_action import SUTAction
 from .obs_state_commands_factory import ObsStateCommandsFactory
-from .obs_state_system import ObsStateSystem
+from .obs_state_system import DEFAULT_SUBARRAY_ID, ObsStateSystem
 from .utils import read_obs_state
 
 # --------------------------------------------------------------------
@@ -56,20 +56,21 @@ class ObsStateSystemNotConsistent(AssertionError):
         observed_states: dict[tango.DeviceProxy, ObsState],
         action: SUTAction,
     ):
-
-        super().__init__(
+        msg = (
             f"FAILED ASSUMPTION for action {action.name()} "
             f"({action.description()}): "
             f"The system is expected to be in a consistent observation state "
             f"{str(expected_state)}, but it is observed to be in an "
             "inconsistent state: "
-            ", ".join(
-                [
-                    f"{device.dev_name()}={str(obs_state)}"
-                    for device, obs_state in observed_states.items()
-                ]
-            )
         )
+
+        msg += ", ".join(
+            [
+                f"{device.dev_name()}={str(obs_state)}"
+                for device, obs_state in observed_states.items()
+            ]
+        )
+        super().__init__(msg)
 
 
 # --------------------------------------------------------------------
@@ -151,16 +152,18 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
         self,
         system: ObsStateSystem,
         target_state: ObsState,
-        subarray_id: int,
-        commands_inputs: ObsStateCommandsInput,
+        subarray_id: int = DEFAULT_SUBARRAY_ID,
+        commands_inputs: ObsStateCommandsInput | dict | None = None,
     ):
         """Initializes the step.
 
         :param system: The system that the step will act on.
-
-        :param subarray_id: The subarray id the step will act on.
+        :param target_state: The target state the system should move to.
+        :param subarray_id: The subarray id the step will act on. It defaults
+            to the value of :py:const:`DEFAULT_SUBARRAY_ID`.
         :param commands_inputs: The inputs to use for commands such as
-            ``AssignResources``, ``Configure`` and ``Scan``.
+            ``AssignResources``, ``Configure`` and ``Scan``. It defaults to
+            no inputs (None).
         """
         super().__init__()
         self.system = system
@@ -169,7 +172,10 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
         """The target state the system should move to."""
         self.subarray_id = subarray_id
         """The subarray id the step will act on."""
-        self.commands_inputs = commands_inputs
+        self.commands_inputs = (
+            ObsStateCommandsInput.get_object(commands_inputs)
+            or ObsStateCommandsInput()
+        )
         """
         The inputs to use for commands such as ``AssignResources``,
         ``Configure`` and ``Scan.
@@ -268,6 +274,13 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
                 raise ObsStateSystemNotConsistent(
                     self.get_assumed_obs_state(), device_obs_states, self
                 )
+
+    def description(self) -> str:
+        return (
+            f"Move subarray {self.subarray_id} "
+            f"from {str(self.get_assumed_obs_state())} "
+            f"to {str(self.target_state)}."
+        )
 
     # --------------------------------------------------------------------
     # Utilities
