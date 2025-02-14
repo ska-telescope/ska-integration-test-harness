@@ -4,12 +4,25 @@ import abc
 
 from ska_control_model import ObsState
 
+from ska_integration_test_harness.extensions.subarray.setter_steps import (
+    ObsStateSetterStepFromAborted,
+    ObsStateSetterStepFromAborting,
+    ObsStateSetterStepFromConfiguring,
+    ObsStateSetterStepFromEmpty,
+    ObsStateSetterStepFromFault,
+    ObsStateSetterStepFromIdle,
+    ObsStateSetterStepFromReady,
+    ObsStateSetterStepFromResetting,
+    ObsStateSetterStepFromResourcing,
+    ObsStateSetterStepFromRestarting,
+    ObsStateSetterStepFromScanning,
+)
 from ska_integration_test_harness.extensions.subarray.utils import (
     read_obs_state,
 )
 
 from ...core.actions.sut_action import SUTAction
-from .obs_state_setter_step import ObsStateCommandsInput
+from .obs_state_setter_step import ObsStateCommandsInput, ObsStateSetterStep
 from .obs_state_system import DEFAULT_SUBARRAY_ID, ObsStateSystem
 
 STATE_CLASS_MAP: dict[ObsState, type] = {}
@@ -61,7 +74,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
       :py:exc:ska_integration_test_harness.extensions.subarray.ObsStateMissingCommandInput`
       exception if a command should be sent and the input is missing)
 
-    When you execute the action, the timeout you specify here will be shared
+    When you execute the action, the timeout you specify will be shared
     by all the steps and so by all the commands and synchronisations that
     will done to move the system towards the target observation state.
 
@@ -111,14 +124,18 @@ class ObsStateSetter(SUTAction, abc.ABC):
     module.
 
     The step mechanism is designed to be easily extensible and overrideable.
-
-    TODO: describe how to override the steps
+    This class holds internally a map of observation states to the steps
+    that will deal with them. You can override the steps with the
+    :py:meth:`override_step` method, that allows you to replace the
+    default step with a new one, automatically filled with all the necessary
+    information. By default, after the construction, the map is filled
+    with the default steps defined in :py:meth:`configure_default_steps`.
 
     The mechanism is inspired by the
     `State design pattern <https://refactoring.guru/design-patterns/state>`_
     (because we have a state machine and we want to encapsulate the logic
     of each state in a separate class)
-    and partially also by the
+    and also by the
     `Strategy design pattern <https://refactoring.guru/design-patterns/strategy>`_
     (because we imagine that that the logic to decide what to do can be
     encapsulated in a separate class, and potentially replaced by another
@@ -167,11 +184,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
         commands_input: ObsStateCommandsInput | dict | None = None,
         enable_logging: bool = True,
     ):
-        """Initialize the ObsStateSetter.
-
-        :param system: The system that the step will act on.
-        :param target_state: The target state the system should move to.
-        :param subarray_id: The subarray id the step will act on. It defaults
+        """Initialize the ObsStateSetter.thelts
             to the value of :py:const:`DEFAULT_SUBARRAY_ID`.
         :param commands_input: The inputs to use for commands such as
             ``AssignResources``, ``Configure`` and ``Scan``. It defaults to
@@ -199,13 +212,17 @@ class ObsStateSetter(SUTAction, abc.ABC):
         ``Configure`` and ``Scan.
         """
 
+        # initialise the map of observation states to steps
+        self._obs_states_steps_map = {}
+        self.configure_default_steps()
+
     # -------------------------------------------------------------------
     # Class lifecycle and description methods
 
     def description(self) -> str:
         return (
             f"Move subarray {self.subarray_id} "
-            f"from {str(self._system_overall_obs_state())} "
+            f"from {str(self._system_obs_state())} "
             f"to {str(self.target_state)}."
         )
 
@@ -226,9 +243,83 @@ class ObsStateSetter(SUTAction, abc.ABC):
     # could be useful for this.
 
     # -------------------------------------------------------------------
-    # Internal utilities for the class
+    # Other Utilities
 
-    def _system_overall_obs_state(self) -> ObsState:
+    @property
+    def obs_states_steps_map(self) -> dict[ObsState, ObsStateSetterStep]:
+        """Get the map of observation states to steps.
+
+        :return: The map of observation states to steps.
+        """
+        return self._obs_states_steps_map
+
+    def override_step(
+        self, obs_state: ObsState, new_step_class: type[ObsStateSetterStep]
+    ):
+        """Override a step with a new class.
+
+        This method allows you to override a step with a
+        (automatically created) instance of a new
+        :py:class:`~ska_integration_test_harness.extensions.subarray.ObsStateSetterStep`
+        subclass that will be used to move the system from the
+        given observation state to the next one towards the target state.
+
+        :param obs_state: The observation state to override the step for.
+        :param new_step_class: The new class to use for the step.
+
+        :raises ValueError: If the new step is not compatible with the
+            requested observation state.
+        """
+        # Create an instance of the new step class
+        new_step = new_step_class(
+            self.system,
+            self.target_state,
+            self.subarray_id,
+            self.commands_input,
+        )
+
+        # verify that the new step is compatible with the requested state
+        if not new_step.get_assumed_obs_state() == obs_state:
+            raise ValueError(
+                f"Step class {new_step_class.__name__} is not compatible with "
+                f"the observation state {str(obs_state)}, because it "
+                "assumes the observation state "
+                f"{str(new_step.get_assumed_obs_state())}. Please check how "
+                "is implemented the method ``get_assumed_obs_state`` "
+                "in the new step class."
+            )
+
+        # Replace the old step with the new one
+        self.obs_states_steps_map[obs_state] = new_step
+
+    def configure_default_steps(self):
+        """Configure the default steps for the observation states.
+
+        This method configures the default steps for the observation states.
+        It is called by the constructor to set up the default steps.
+
+        If you modify some class setting (e.g., subarray_id, commands_input,
+        etc.), please call this method again to reconfigure the steps.
+        """
+        self.override_step(ObsState.EMPTY, ObsStateSetterStepFromEmpty)
+        self.override_step(
+            ObsState.RESOURCING, ObsStateSetterStepFromResourcing
+        )
+        self.override_step(ObsState.IDLE, ObsStateSetterStepFromIdle)
+        self.override_step(
+            ObsState.CONFIGURING, ObsStateSetterStepFromConfiguring
+        )
+        self.override_step(ObsState.READY, ObsStateSetterStepFromReady)
+        self.override_step(ObsState.SCANNING, ObsStateSetterStepFromScanning)
+        self.override_step(ObsState.RESETTING, ObsStateSetterStepFromResetting)
+        self.override_step(ObsState.ABORTING, ObsStateSetterStepFromAborting)
+        self.override_step(ObsState.ABORTED, ObsStateSetterStepFromAborted)
+        self.override_step(ObsState.FAULT, ObsStateSetterStepFromFault)
+        self.override_step(
+            ObsState.RESTARTING, ObsStateSetterStepFromRestarting
+        )
+
+    def _system_obs_state(self) -> ObsState:
         """Get the overall observation state of the system.
 
         :return: The overall observation state of the system.
