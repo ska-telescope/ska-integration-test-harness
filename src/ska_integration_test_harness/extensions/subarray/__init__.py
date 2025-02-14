@@ -55,7 +55,7 @@ from .commands_factory import (
     ObsStateCommandHasNoTransition,
     ObsStateCommandsFactory,
 )
-from .setter import STATE_CLASS_MAP, ObsStateCommandsInput, ObsStateSetter
+from .setter import ObsStateCommandsInput, ObsStateSetter
 from .system import (
     DEFAULT_SUBARRAY_ID,
     ObsStateSubarrayDoesNotExist,
@@ -72,5 +72,4 @@ __all__ = [
     "COMMANDS_STATES_MAP",
     "ObsStateSetter",
     "ObsStateCommandsInput",
-    "STATE_CLASS_MAP",
 ]

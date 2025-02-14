@@ -69,7 +69,7 @@ class TestObsStateSetter:
         )
 
     # -------------------------------------------------------------------
-    # Tests on ObsState - Steps map
+    # Tests on ObsState Steps map
 
     @staticmethod
     def test_obs_state_steps_map_contains_all_and_only_obs_states(
@@ -187,3 +187,6 @@ class TestObsStateSetter:
         assert_that(str(exc_info.value)).described_as(
             "The error message is expected to contain the given class name"
         ).contains("MockObsStateSetterStep")
+
+    # -------------------------------------------------------------------
+    # Tests on postconditions

@@ -3,6 +3,7 @@
 import abc
 from typing import SupportsFloat
 
+from assertpy import assert_that
 from ska_control_model import ObsState
 
 from ska_integration_test_harness.extensions.subarray.setter_steps_imp import (
@@ -31,24 +32,6 @@ from .system import (
     read_devices_obs_state,
     read_sys_obs_state,
 )
-
-STATE_CLASS_MAP: dict[ObsState, type] = {}
-"""Map ``ObsState`` to the classes that support them as starting states.
-
-This class maps the observation states to the classes that support them
-as starting states to move towards another observation state. The map
-is filled after all the classes are defined, but you can
-extend/override it if you need to.
-"""
-
-NOT_REACHABLE_STATES = [
-    ObsState.FAULT,
-    ObsState.RESETTING,
-]
-"""List of observation states that are not reachable by the system.
-
-You can override this if your subclasses somehow support these states.
-"""
 
 
 class ObsStateDidNotReachTargetState(AssertionError):
@@ -97,6 +80,7 @@ class ObsStateDidNotReachTargetState(AssertionError):
 # Base class for observation state setters
 
 
+# pylint: disable=too-many-instance-attributes
 class ObsStateSetter(SUTAction, abc.ABC):
     """Tool to put the system in a desired observation state.
 
@@ -262,6 +246,9 @@ class ObsStateSetter(SUTAction, abc.ABC):
         ``Configure`` and ``Scan.
         """
 
+        # *****************************************************
+        # ObsState map to steps
+
         # initialise the map of observation states to steps
         self.obs_state_steps_map: dict[ObsState, ObsStateSetterStep] = {}
         """The map that associates observation states to steps.
@@ -272,13 +259,41 @@ class ObsStateSetter(SUTAction, abc.ABC):
         """
         self.configure_default_steps()
 
-        # set a maximum number of steps to avoid infinite loops if
-        # something goes really wrong
-        self.max_steps: int = 15
-        """The maximum number of steps that can be executed."""
+        # *****************************************************
+        # Other settings
+
+        self.max_steps: int = 5
+        """The maximum number of steps that can be executed.
+
+        This is a safety measure to avoid infinite loops if for whatever
+        reason the steps are not able to move the system to the target
+        observation state and they keep looping. At the moment, the longest
+        paths is 5 steps long, so this is a reasonable default.
+        """
 
         self._last_run_steps_execution_count: int = 0
         """The number of steps executed so far in the last run."""
+
+        self.unreachable_states = [ObsState.FAULT, ObsState.RESETTING]
+        """A list of unreachable states for the system.
+
+        You can use this list for specifying observation states that
+        you are sure the system cannot reach with the current steps.
+        If the system is in one of these states, the preconditions
+        will fail and the action will not be executed.
+
+        By default, all states are supported, except
+        ``FAULT`` and ``RESETTING``.
+        """
+
+        # TODO: create a separate step runner that runs the steps
+        # and takes care of tracking which step are executed and
+        # the states of the system
+        # e.g., I could potentially generate in case of errors messages like:
+        # followed path:
+        # - EMPTY -> RESOURCING (ObsStateSetterStepFromEmpty)
+        # - RESOURCING -> ABORTED (ObsStateSetterStepFromResourcing)
+        # - ABORTED -> RESTARTING (ObsStateSetterStepFromAborted)
 
     # -------------------------------------------------------------------
     # Class lifecycle and description methods
@@ -290,9 +305,20 @@ class ObsStateSetter(SUTAction, abc.ABC):
             f"to {str(self.target_state)}."
         )
 
-    # TODO: what to do with preconditions? Could I verify I am in a
-    # supported state? Actually long term all the states will be supported
-    # so it is not a big deal.
+    def verify_preconditions(self):
+        """Verify the target state is reachable.
+
+        The target state should not be in the unreachable states list.
+
+        :raises AssertionError: If the target state is in the
+            unreachable states.
+        """
+        super().verify_preconditions()
+
+        assert_that(self.unreachable_states).described_as(
+            "The target state should not be in the unreachable states "
+            f"({str(self.unreachable_states)})"
+        ).does_not_contain(self.target_state)
 
     def execute_procedure(self):
         """Move towards the target observation state (if not already there).
@@ -321,14 +347,13 @@ class ObsStateSetter(SUTAction, abc.ABC):
         # loop until the target state is reached or the maximum number
         # of steps is reached
         while self._last_run_steps_execution_count < self.max_steps:
-            self._last_run_steps_execution_count += 1
-
-            # get the current observation state
-            curr_obs_state = self._curr_obs_state()
 
             # if the system is already in the target state, we are done
+            curr_obs_state = self._curr_obs_state()
             if curr_obs_state == self.target_state:
                 break
+
+            self._last_run_steps_execution_count += 1
 
             # get the step to move from the current observation state
             # to the next one
@@ -353,6 +378,8 @@ class ObsStateSetter(SUTAction, abc.ABC):
             ignored, because when we verify those postconditions we
             are expecting the system to already be in the desired state).
         """
+        super().verify_postconditions(timeout)
+
         # verify that the system is in the target observation state
         if self._curr_obs_state() != self.target_state:
             raise ObsStateDidNotReachTargetState(
