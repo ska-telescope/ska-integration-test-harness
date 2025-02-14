@@ -3,6 +3,7 @@
 from typing import Protocol
 
 import tango
+from ska_control_model import ObsState
 
 DEFAULT_SUBARRAY_ID = 1
 
@@ -95,3 +96,42 @@ class ObsStateSystem(Protocol):
             the order you expect the devices to change state.
         :raise ObsStateIDDoesNotExist: if the passed subarray ID does not exist
         """
+
+
+# ----------------------------------------------------------------------------
+# A few utility methods to interact with a system
+
+
+def read_obs_state(device: tango.DeviceProxy) -> ObsState:
+    """Read the obsState attribute from a given device.
+
+    :param device: The device proxy to read the obsState attribute from.
+    :return: The ObsState value read from the device.
+    """
+    return ObsState(device.obsState)
+
+
+def read_sys_obs_state(
+    system: ObsStateSystem, subarray_id: int = DEFAULT_SUBARRAY_ID
+) -> ObsState:
+    """Read the system observation state through the main device.
+
+    :param system: The system to read the observation state from.
+    :param subarray_id: The subarray ID to read the observation state from.
+    :return: The ObsState value read from the system.
+    """
+    main_device = system.get_main_obs_state_device(subarray_id)
+    return read_obs_state(main_device)
+
+
+def read_devices_obs_state(
+    system: ObsStateSystem, subarray_id: int = DEFAULT_SUBARRAY_ID
+) -> dict[tango.DeviceProxy, ObsState]:
+    """Read the observation state of all devices in the system.
+
+    :param system: The system to read the observation state from.
+    :param subarray_id: The subarray ID to read the observation state from.
+    :return: A list of ObsState values read from the devices.
+    """
+    devices = system.get_obs_state_devices(subarray_id)
+    return {device: read_obs_state(device) for device in devices}

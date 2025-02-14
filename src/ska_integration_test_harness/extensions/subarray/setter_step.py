@@ -12,8 +12,7 @@ from ska_integration_test_harness.extensions.actions.lrc_action import (
 
 from ...core.actions.sut_action import SUTAction
 from .commands_factory import ObsStateCommandsFactory
-from .system import DEFAULT_SUBARRAY_ID, ObsStateSystem
-from .utils import read_obs_state
+from .system import DEFAULT_SUBARRAY_ID, ObsStateSystem, read_obs_state
 
 # --------------------------------------------------------------------
 # Inputs and exceptions

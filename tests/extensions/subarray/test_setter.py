@@ -79,17 +79,17 @@ class TestObsStateSetter:
         setter = ObsStateSetter(system, ObsState.EMPTY)
 
         for obs_state in ObsState:
-            assert_that(setter.obs_states_steps_map.keys()).described_as(
+            assert_that(setter.obs_state_steps_map.keys()).described_as(
                 f"The map keys contains the observation state {str(obs_state)}"
             ).contains(obs_state)
             assert_that(
-                setter.obs_states_steps_map[obs_state].get_assumed_obs_state()
+                setter.obs_state_steps_map[obs_state].get_assumed_obs_state()
             ).described_as(
                 f"The step associated to {obs_state} assumes the correct "
                 "observation state"
             )
 
-        assert_that(setter.obs_states_steps_map.keys()).described_as(
+        assert_that(setter.obs_state_steps_map.keys()).described_as(
             "The map contains all and only the expected observation states"
         ).is_length(len(list(ObsState)))
 
@@ -111,21 +111,21 @@ class TestObsStateSetter:
 
         for obs_state in ObsState:
             assert_that(
-                setter.obs_states_steps_map[obs_state].system
+                setter.obs_state_steps_map[obs_state].system
             ).described_as(
                 f"The step associated to {obs_state} has the correct system"
             ).is_equal_to(
                 system
             )
             assert_that(
-                setter.obs_states_steps_map[obs_state].target_state
+                setter.obs_state_steps_map[obs_state].target_state
             ).described_as(
                 f"The step associated to {obs_state} has the correct target"
             ).is_equal_to(
                 ObsState.READY
             )
             assert_that(
-                setter.obs_states_steps_map[obs_state].subarray_id
+                setter.obs_state_steps_map[obs_state].subarray_id
             ).described_as(
                 f"The step associated to {obs_state} has the "
                 "correct subarray ID"
@@ -133,7 +133,7 @@ class TestObsStateSetter:
                 5
             )
             assert_that(
-                setter.obs_states_steps_map[obs_state].commands_input
+                setter.obs_state_steps_map[obs_state].commands_input
             ).described_as(
                 f"The step associated to {obs_state} has the correct input"
             ).is_equal_to(
@@ -150,11 +150,11 @@ class TestObsStateSetter:
 
         setter.override_step(ObsState.IDLE, MockObsStateSetterStep)
 
-        assert_that(setter.obs_states_steps_map[ObsState.IDLE]).described_as(
+        assert_that(setter.obs_state_steps_map[ObsState.IDLE]).described_as(
             "The map is expected to be successfully overridden with an "
             "instance of the new class"
         ).is_instance_of(MockObsStateSetterStep)
-        new_instance = setter.obs_states_steps_map[ObsState.IDLE]
+        new_instance = setter.obs_state_steps_map[ObsState.IDLE]
         assert_that(new_instance.system).described_as(
             "The new instance has the correct system"
         ).is_equal_to(system)

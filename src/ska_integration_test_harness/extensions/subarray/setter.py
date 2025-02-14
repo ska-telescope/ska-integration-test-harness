@@ -1,6 +1,7 @@
 """Tools to put the system in a desired observation state."""
 
 import abc
+from typing import SupportsFloat
 
 from ska_control_model import ObsState
 
@@ -17,13 +18,10 @@ from ska_integration_test_harness.extensions.subarray.setter_steps_imp import (
     ObsStateSetterStepFromRestarting,
     ObsStateSetterStepFromScanning,
 )
-from ska_integration_test_harness.extensions.subarray.utils import (
-    read_obs_state,
-)
 
 from ...core.actions.sut_action import SUTAction
 from .setter_step import ObsStateCommandsInput, ObsStateSetterStep
-from .system import DEFAULT_SUBARRAY_ID, ObsStateSystem
+from .system import DEFAULT_SUBARRAY_ID, ObsStateSystem, read_obs_state
 
 STATE_CLASS_MAP: dict[ObsState, type] = {}
 """Map ``ObsState`` to the classes that support them as starting states.
@@ -42,6 +40,48 @@ NOT_REACHABLE_STATES = [
 
 You can override this if your subclasses somehow support these states.
 """
+
+
+class ObsStateDidNotReachTargetState(AssertionError):
+    """Exception for when the system did not reach the target state.
+
+    Exception to raise when the system did not reach the target state
+    after a
+    :py:class:`ska_integration_test_harness.extensions.subarray.ObsStateSetter`
+    action is executed. It specifically is raised when a system main device
+    ``obsState`` attribute value is not equal to the expected target state.
+    """
+
+    def __init__(
+        self,
+        expected_state: ObsState,
+        actual_state: ObsState,
+        system: ObsStateSystem,
+        action: SUTAction,
+    ):
+        # self.expected_state = expected_state
+        # self.actual_state = actual_state
+        # self.devices_states =
+        # self.action = action
+
+        # msg = (
+        #     f"Failed postcondition in "
+        #     f"{action.name()} - {action.description()}:\n"
+        #     "The system (represented by "
+        #     f"{system.get_main_obs_state_device().dev_name()}) "
+        #     "after the action completion is supposed to be in the "
+        #     f"target observation state {str(expected_state)}, "
+        #     f"but it is in the observation state {str(actual_state)}.\n"
+        #     "Devices state: "
+        # )
+
+        # msg += "\n".join(
+        #     f"{dev.dev_name()}: {str(state)}"
+        #     for dev, state in devices_states.items()
+        # )
+
+        # super().__init__(msg)
+        pass
 
 
 # -------------------------------------------------------------------
@@ -125,7 +165,8 @@ class ObsStateSetter(SUTAction, abc.ABC):
 
     The step mechanism is designed to be easily extensible and overrideable.
     This class holds internally a map of observation states to the steps
-    that will deal with them. You can override the steps with the
+    that will deal with them (the :py:attr:`obs_states_steps_map` attribute).
+    You can override the steps with the
     :py:meth:`override_step` method, that allows you to replace the
     default step with a new one, automatically filled with all the necessary
     information. By default, after the construction, the map is filled
@@ -213,7 +254,13 @@ class ObsStateSetter(SUTAction, abc.ABC):
         """
 
         # initialise the map of observation states to steps
-        self._obs_states_steps_map = {}
+        self.obs_state_steps_map: dict[ObsState, ObsStateSetterStep] = {}
+        """The map that associates observation states to steps.
+
+        By default, the map is filled with the default steps defined in
+        :py:meth:`configure_default_steps`. You can override the steps
+        with the :py:meth:`override_step` method.
+        """
         self.configure_default_steps()
 
     # -------------------------------------------------------------------
@@ -238,20 +285,11 @@ class ObsStateSetter(SUTAction, abc.ABC):
         # TODO: describe the procedure
         """
 
-    # TODO: as postcondition, check that the system is in the target state
-    # and that it's consistent. The Step object verify_postconditions
-    # could be useful for this.
+    def verify_postconditions(self, timeout: SupportsFloat = 0):
+        """The system reached the observation state consistently."""
 
     # -------------------------------------------------------------------
     # Other Utilities
-
-    @property
-    def obs_states_steps_map(self) -> dict[ObsState, ObsStateSetterStep]:
-        """Get the map of observation states to steps.
-
-        :return: The map of observation states to steps.
-        """
-        return self._obs_states_steps_map
 
     def override_step(
         self, obs_state: ObsState, new_step_class: type[ObsStateSetterStep]
@@ -290,7 +328,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
             )
 
         # Replace the old step with the new one
-        self.obs_states_steps_map[obs_state] = new_step
+        self.obs_state_steps_map[obs_state] = new_step
 
     def configure_default_steps(self):
         """Configure the default steps for the observation states.
