@@ -12,7 +12,7 @@ from ska_integration_test_harness.extensions.actions.lrc_action import (
 
 from ...core.actions.sut_action import SUTAction
 from .commands_factory import ObsStateCommandsFactory
-from .system import DEFAULT_SUBARRAY_ID, ObsStateSystem, read_obs_state
+from .system import DEFAULT_SUBARRAY_ID, ObsStateSystem, read_devices_obs_state
 
 # --------------------------------------------------------------------
 # Inputs and exceptions
@@ -292,7 +292,9 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
         """
         super().verify_preconditions()
 
-        device_obs_states = self._devices_obs_state()
+        device_obs_states = read_devices_obs_state(
+            self.system, self.subarray_id
+        )
 
         for _, obs_state in device_obs_states.items():
             if obs_state not in self.get_accepted_obs_states():
@@ -422,7 +424,4 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
 
         :return: a dictionary with the devices and their observation states
         """
-        return {
-            device: read_obs_state(device)
-            for device in self.system.get_obs_state_devices(self.subarray_id)
-        }
+        return read_devices_obs_state(self.system, self.subarray_id)
