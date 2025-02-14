@@ -29,6 +29,9 @@ ska-tango-testing = {git="https://gitlab.com/ska-telescope/ska-tango-testing.git
 ska-ser-logging = "^0.4.1"
 msgpack-numpy = "^0.4.8"
 pydantic = "^2.10.6"
+networkx = "^3.4.2"
+pandas = "^2.2.3"
+matplotlib = "^3.10.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -40,6 +43,7 @@ pylint-junit = "^0.3.4"
 pytest = "^8.3.2"
 pytest-cov = "^5.0.0"
 build = "^1.2.1"
+ipykernel = "^6.29.5"
 
 
 [tool.poetry.group.docs.dependencies]
