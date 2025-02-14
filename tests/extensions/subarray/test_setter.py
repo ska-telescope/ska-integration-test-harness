@@ -5,11 +5,13 @@ from assertpy import assert_that
 from ska_control_model import ObsState
 
 from ska_integration_test_harness.extensions.subarray.setter import (
+    ObsStateDidNotReachTargetState,
     ObsStateSetter,
 )
 from ska_integration_test_harness.extensions.subarray.setter_step import (  # pylint: disable=line-too-long # noqa
     ObsStateCommandsInput,
     ObsStateSetterStep,
+    ObsStateSystemNotConsistent,
 )
 
 from .utils import MockSubarraySystem
@@ -189,4 +191,142 @@ class TestObsStateSetter:
         ).contains("MockObsStateSetterStep")
 
     # -------------------------------------------------------------------
+    # Tests on preconditions
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "target_state",
+        [
+            ObsState.EMPTY,
+            ObsState.IDLE,
+            ObsState.RESOURCING,
+            ObsState.READY,
+            ObsState.CONFIGURING,
+            ObsState.SCANNING,
+            ObsState.ABORTED,
+            ObsState.ABORTING,
+            ObsState.RESTARTING,
+        ],
+    )
+    def test_preconditions_pass_when_target_state_is_reachable(
+        system: MockSubarraySystem, target_state: ObsState
+    ):
+        """The preconditions pass when the target state is reachable."""
+        setter = ObsStateSetter(system, target_state)
+
+        setter.verify_preconditions()
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "target_state", [ObsState.FAULT, ObsState.RESETTING]
+    )
+    def test_preconditions_fail_when_target_state_is_not_reachable(
+        system: MockSubarraySystem, target_state: ObsState
+    ):
+        """The preconditions fail when the target state is not reachable."""
+        setter = ObsStateSetter(system, target_state)
+
+        with pytest.raises(AssertionError) as exc_info:
+            setter.verify_preconditions()
+
+        assert_that(str(exc_info.value)).described_as(
+            "The error message is expected to contain the target state"
+        ).contains(str(target_state))
+
+    # -------------------------------------------------------------------
     # Tests on postconditions
+
+    @staticmethod
+    @pytest.mark.parametrize("target_state", list(ObsState))
+    def test_postconditions_pass_when_target_state_is_reached_consistently(
+        system: MockSubarraySystem, target_state: ObsState
+    ):
+        """The postconditions pass when the system in target state.
+
+        (consistently)
+        """
+        setter = ObsStateSetter(system, target_state)
+        system.set_controller_obs_state(target_state)
+        system.set_obs_state_other_devices(target_state)
+
+        setter.verify_postconditions()
+
+    @staticmethod
+    def test_postconditions_fail_when_system_is_not_in_target_state(
+        system: MockSubarraySystem,
+    ):
+        """The postconditions fail when the system is not in target state."""
+        setter = ObsStateSetter(system, ObsState.READY, subarray_id=8)
+        system.set_controller_obs_state(ObsState.CONFIGURING)
+        system.set_obs_state_other_devices(ObsState.IDLE)
+
+        with pytest.raises(ObsStateDidNotReachTargetState) as exc_info:
+            setter.verify_postconditions()
+
+        assert_that(str(exc_info.value)).described_as(
+            "The error message is expected to contain the target state"
+        ).contains(
+            "is expected to be in the target observation state ObsState.READY"
+        ).described_as(
+            "The error message is expected to contain the actual state"
+        ).contains(
+            "but is in ObsState.CONFIGURING"
+        ).described_as(
+            "The error message is expected to mention the the subarray ID"
+        ).contains(
+            "subarray 8"
+        ).described_as(
+            "The error message is expected to mention the actual state of "
+            "the devices"
+        ).contains(
+            "subarray/dev_a/1=ObsState.IDLE"
+        ).contains(
+            "subarray/dev_b/1=ObsState.IDLE",
+        ).contains(
+            "subarray/dev_c/1=ObsState.IDLE"
+        ).described_as(
+            "The action name and description are expected to be mentioned"
+        ).contains(
+            setter.name()
+        ).contains(
+            setter.description()
+        )
+
+    @staticmethod
+    def test_postconditions_fail_when_system_state_is_not_consistent(
+        system: MockSubarraySystem,
+    ):
+        """The postconditions fail when the system state is not consistent."""
+        setter = ObsStateSetter(system, ObsState.ABORTED, subarray_id=3)
+        system.set_controller_obs_state(ObsState.ABORTED)
+        system.set_obs_state_other_devices(ObsState.ABORTED)
+        system.set_partial_obs_state(ObsState.ABORTING, 1)
+
+        with pytest.raises(ObsStateSystemNotConsistent) as exc_info:
+            setter.verify_postconditions()
+
+        assert_that(str(exc_info.value)).described_as(
+            "The error message is expected to contain the target state"
+        ).contains(
+            "is expected to be in a consistent observation state "
+            "ObsState.ABORTED"
+        ).described_as(
+            "The error message is expected to mention the actual state of "
+            "the devices"
+        ).contains(
+            "subarray/dev_a/1=ObsState.ABORTED"
+        ).contains(
+            "subarray/dev_b/1=ObsState.ABORTING",
+        ).contains(
+            "subarray/dev_c/1=ObsState.ABORTED"
+        ).described_as(
+            "The action name and description are expected to be mentioned"
+        ).contains(
+            setter.name()
+        ).contains(
+            setter.description()
+        ).described_as(
+            "The error message is expected to mention the the subarray ID"
+        ).contains(
+            "subarray 3"
+        )

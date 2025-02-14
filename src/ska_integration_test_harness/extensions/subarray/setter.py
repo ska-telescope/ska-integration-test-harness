@@ -60,16 +60,16 @@ class ObsStateDidNotReachTargetState(AssertionError):
         msg = (
             f"Failed postcondition in action "
             f"{action.name()} - {action.description()}:\n"
-            "The system (represented by "
+            f"The subarray {self.subarray_id} (represented by "
             f"{system.get_main_obs_state_device().dev_name()}) "
-            "after the action completion is supposed to be in the "
+            "after the action completion is expected to be in the "
             f"target observation state {str(expected_state)}, "
-            f"but it is in the observation state {str(self.actual_state)}.\n"
+            f"but is in {str(self.actual_state)}.\n"
             "Devices state: "
         )
 
         msg += "\n".join(
-            f"{dev.dev_name()}: {str(state)}"
+            f"{dev.dev_name()}={str(state)}"
             for dev, state in self.devices_states.items()
         )
 
