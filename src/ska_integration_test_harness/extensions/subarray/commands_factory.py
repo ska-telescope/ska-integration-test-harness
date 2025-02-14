@@ -8,7 +8,7 @@ from ska_integration_test_harness.core.actions.tracer_action import (
 
 from ...core.assertions import AssertDevicesStateChanges
 from ..actions.lrc_action import TangoLRCAction
-from .obs_state_system import DEFAULT_SUBARRAY_ID, ObsStateSystem
+from .system import DEFAULT_SUBARRAY_ID, ObsStateSystem
 
 COMMANDS_STATES_MAP: "dict[str, dict[str, ObsState | None]]" = {
     "AssignResources": {

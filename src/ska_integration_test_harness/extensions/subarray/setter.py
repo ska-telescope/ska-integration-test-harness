@@ -4,7 +4,7 @@ import abc
 
 from ska_control_model import ObsState
 
-from ska_integration_test_harness.extensions.subarray.setter_steps import (
+from ska_integration_test_harness.extensions.subarray.setter_steps_imp import (
     ObsStateSetterStepFromAborted,
     ObsStateSetterStepFromAborting,
     ObsStateSetterStepFromConfiguring,
@@ -22,8 +22,8 @@ from ska_integration_test_harness.extensions.subarray.utils import (
 )
 
 from ...core.actions.sut_action import SUTAction
-from .obs_state_setter_step import ObsStateCommandsInput, ObsStateSetterStep
-from .obs_state_system import DEFAULT_SUBARRAY_ID, ObsStateSystem
+from .setter_step import ObsStateCommandsInput, ObsStateSetterStep
+from .system import DEFAULT_SUBARRAY_ID, ObsStateSystem
 
 STATE_CLASS_MAP: dict[ObsState, type] = {}
 """Map ``ObsState`` to the classes that support them as starting states.
@@ -120,7 +120,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
     the target observation state is) and then synchronise on the
     appropriate quiescent or transient state the command should reach.
     You can find a documentation of the existing steps in the
-    :py:mod:`ska_integration_test_harness.extensions.subarray.setter_steps`
+    :py:mod:`ska_integration_test_harness.extensions.subarray.setter_steps_impl`
     module.
 
     The step mechanism is designed to be easily extensible and overrideable.

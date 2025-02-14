@@ -9,7 +9,7 @@ from ska_control_model import ObsState
 from ska_integration_test_harness.extensions.actions.lrc_action import (
     TangoLRCAction,
 )
-from ska_integration_test_harness.extensions.subarray.obs_state_system import (
+from ska_integration_test_harness.extensions.subarray.system import (
     ObsStateSystem,
 )
 
@@ -111,7 +111,7 @@ class MockTangoLRCAction(TangoLRCAction):
 
 DEFAULT_PATCH_PATH = (
     "ska_integration_test_harness.extensions.subarray"
-    ".obs_state_commands_factory.TangoLRCAction"
+    ".commands_factory.TangoLRCAction"
 )
 """
 The default path to the class to patch (from the subarray commands factory).

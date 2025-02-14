@@ -49,18 +49,14 @@ of the documentation.
 
 """  # pylint: disable=line-too-long # noqa: E501
 
-from .obs_state_commands_factory import (
+from .commands_factory import (
     COMMANDS_STATES_MAP,
     ObsStateCommandDoesNotExist,
     ObsStateCommandHasNoTransition,
     ObsStateCommandsFactory,
 )
-from .obs_state_setter import (
-    STATE_CLASS_MAP,
-    ObsStateCommandsInput,
-    ObsStateSetter,
-)
-from .obs_state_system import (
+from .setter import STATE_CLASS_MAP, ObsStateCommandsInput, ObsStateSetter
+from .system import (
     DEFAULT_SUBARRAY_ID,
     ObsStateSubarrayDoesNotExist,
     ObsStateSystem,

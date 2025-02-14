@@ -2,7 +2,7 @@
 
 import pytest
 
-from ska_integration_test_harness.extensions.subarray.obs_state_setter import (
+from ska_integration_test_harness.extensions.subarray.setter import (
     ObsStateSetter,
 )
 

@@ -12,7 +12,7 @@ from ska_integration_test_harness.core.assertions.dev_state_changes import (
 from ska_integration_test_harness.extensions.actions.lrc_action import (
     TangoLRCAction,
 )
-from ska_integration_test_harness.extensions.subarray.obs_state_commands_factory import (  # pylint: disable=line-too-long # noqa: E501
+from ska_integration_test_harness.extensions.subarray.commands_factory import (  # pylint: disable=line-too-long # noqa: E501
     ObsStateCommandDoesNotExist,
     ObsStateCommandsFactory,
 )

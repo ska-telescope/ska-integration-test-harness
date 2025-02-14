@@ -4,10 +4,10 @@ import pytest
 from assertpy import assert_that
 from ska_control_model import ObsState
 
-from ska_integration_test_harness.extensions.subarray.obs_state_setter import (
+from ska_integration_test_harness.extensions.subarray.setter import (
     ObsStateSetter,
 )
-from ska_integration_test_harness.extensions.subarray.obs_state_setter_step import (  # pylint: disable=line-too-long # noqa
+from ska_integration_test_harness.extensions.subarray.setter_step import (  # pylint: disable=line-too-long # noqa
     ObsStateCommandsInput,
     ObsStateSetterStep,
 )

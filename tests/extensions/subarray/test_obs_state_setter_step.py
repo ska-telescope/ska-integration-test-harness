@@ -15,13 +15,13 @@ from ska_integration_test_harness.extensions.actions.lrc_action import (
 from ska_integration_test_harness.extensions.assertions.lrc_completion import (
     AssertLRCCompletion,
 )
-from ska_integration_test_harness.extensions.subarray.obs_state_setter_step import (  # pylint: disable=line-too-long # noqa: E501
+from ska_integration_test_harness.extensions.subarray.setter_step import (
     ObsStateCommandsInput,
     ObsStateMissingCommandInput,
     ObsStateSetterStep,
     ObsStateSystemNotConsistent,
 )
-from ska_integration_test_harness.extensions.subarray.setter_steps import (
+from ska_integration_test_harness.extensions.subarray.setter_steps_imp import (
     ObsStateSetterStepFromAborted,
     ObsStateSetterStepFromAborting,
     ObsStateSetterStepFromConfiguring,

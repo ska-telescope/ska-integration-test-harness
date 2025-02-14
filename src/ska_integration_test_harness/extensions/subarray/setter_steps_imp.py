@@ -4,15 +4,15 @@ This module contains concrete implementations for the steps that set the
 observation state of a subarray system. Each class is meant to handle the
 procedure from a specific starting state. E.g.,
 
-:py:class:`~ska_integration_test_harness.extensions.subarray.setter_steps.ObsStateSetterStepFromEmpty`
+:py:class:`~ska_integration_test_harness.extensions.subarray.setter_steps_impl.ObsStateSetterStepFromEmpty`
 assumes the system is in the EMPTY state, etc.
 
 Some of those classed directly inherit from
 :py:class:`~ska_integration_test_harness.extensions.subarray.ObsStateSetterStep`,
 while other are grouped under more specific abstract classes, like
-:py:class:`~ska_integration_test_harness.extensions.subarray.setter_steps.ObsStateSetterStepSupportsAbort`
+:py:class:`~ska_integration_test_harness.extensions.subarray.setter_steps_impl.ObsStateSetterStepSupportsAbort`
 or
-:py:class:`~ska_integration_test_harness.extensions.subarray.setter_steps.ObsStateSetterStepSupportsRestart`
+:py:class:`~ska_integration_test_harness.extensions.subarray.setter_steps_impl.ObsStateSetterStepSupportsRestart`
 (useful to group states that support the ``Abort`` or ``Restart`` commands).
 
 See :py:class:`~ska_integration_test_harness.extensions.subarray.ObsStateSetterStep`
@@ -23,7 +23,7 @@ import abc
 
 from ska_control_model import ObsState
 
-from .obs_state_setter_step import ObsStateSetterStep
+from .setter_step import ObsStateSetterStep
 
 # -------------------------------------------------------------------
 # *** EMPTY ***
