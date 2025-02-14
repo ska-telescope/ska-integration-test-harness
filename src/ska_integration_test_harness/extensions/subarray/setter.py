@@ -140,7 +140,38 @@ class ObsStateSetter(SUTAction, abc.ABC):
 
     **Default Algorithm**
 
-    TODO: describe intuitively the default algorithm
+    The implemented algorithm is a simplification of he observation state
+    machine. Essentially:
+
+    - We view the observation state machine as a directed graph, where the
+      nodes are the observation states and the edges are the operations that
+      can be done for move the system from one observation state to another
+    - The graph is very similar to the observation state machine, but it is
+      simplified in two ways:
+      - the regular operational flow (EMPTY -> RESOURCING -> IDLE -> ...)
+        is viewed as unidirectional (so, for example, you can go from
+        EMPTY to IDLE but not from IDLE to EMPTY, without aborting and
+        restarting first)
+      - the edges are not just commands but commands + synchronisations
+        policies (so for example, from EMPTY to IDLE there is a single
+        "logical" edge that is the "AssignResources" command + the
+        synchronisation on the quiescent/stable "IDLE" state,
+        while instead from EMPTY to
+        RESOURCING there is another logical edge that is the "AssignResources"
+        command + the synchronisation on the "RESOURCING" state)
+    - The algorithm associate to each state a step and each step is supposed
+      to contain the logic to move the system from the current observation
+      state to the next one (towards the direction of the target observation
+      state)
+    - Concretely, what comes out is a sort of cyclic graph we navigate, where:
+      - there is EMPTY as the starting point
+      - there is the unidirectional operational flow (EMPTY -> IDLE -> ...)
+        with their transient and quiescent/stable states
+      - ABORTED and ABORTING are accessible calling the "Abort" command
+        from any state of the regular operational flow
+      - RESTARTING and EMPTY are accessible calling the "Restart" command
+        from ABORTED or FAULT
+      - (and so on)
 
     **Internal Structure**
 
@@ -177,33 +208,35 @@ class ObsStateSetter(SUTAction, abc.ABC):
 
     **Current Limitations and Workarounds**
 
-    TODO: describe the current limitations and the workarounds better
-
-    This class and
-    the whole structure is a first implementation of a tool to manage the
-    the observation state transitions. However, it still have weaknesses
-    and limitations. For example:
-
-    - The routing rules are quite simple and sometimes you make useless
-      aborts and restarts (sometimes this may be necessary, but sometimes
-      it is just a waste of time; I opted for the simplicity and for
-      the solution that is more likely to work in most cases).
-      **CURRENT WORKAROUND**: you can override the routing rules
-      (the :py:meth:`next_command` method) to implement more complex
-      routing rules
-    - The consistency checks are quite simple and sometimes you may want
-      something more strict and also the fact that the consistency is verified
-      as precondition does not exclude the possibility of inconsistencies
-      at the time a command is sent. Also, it may happen sometime that
-      you are in a transient state and when you send a command you are
-      already in the quiescent state. **CURRENT WORKAROUND**:
-      To some extent, those
-      limitations cannot really be solved because they are inherent
-      to the distributed nature of the system. However, you can
-      override the :py:meth:`verify_preconditions` method to
-      implement some stricter or weaker checks, or can you just run
-      this action using a retry mechanism to deal with errors coming
-      from commands sended from the wrong state.
+    - **consistency definition, verification and handling**:
+      the consistency definition may be somewhat loose, we don't yet deal
+      situations where a group of devices is not aligned in the same
+      assumed state or in compatible states. **WORKAROUND**: you can
+      call this action in a try-except block, catch errors and then
+      choose to deal with the situation as you prefer (i.e., use this as
+      a first-level reset and eventually use a "harder" reset if needed)
+    - **procedure reliability**: we know we are in a distributed system and
+      we know that not all our systems are always perfectly reliable
+      (because of network issues, but also because we are testing them
+      so we don't expect them to be perfect); the procedure is designed to
+      be robust and to try to detect failures and unexpected behaviours
+      (failing LRC, devices not in the expected states, etc.), so in some cases
+      it may be a bit flaky or too strict for your needs. **WORKAROUND**:
+      you can put the action in a try-except block, catch the exceptions
+      and retry it a few times (if you think the issue is due to some
+      flaky behaviour); you can override the steps and loose some specific
+      constraints (e.g., in some cases if you know the LRC is failing
+      but you are sure the system is in a consistent state, you can
+      override the step to skip the LRC check).
+    - **unreachable states**: some states are not reachable (RESETTING, FAULT). **WORKAROUND**:
+      if you really need to reach them you can 1) override the steps to add
+      the needed logic or 2) use the setter to reach a state where you
+      know you can reach them and then reach them by yourself
+    - **unsupported starting states**: the setting procedure starting
+      from the transient states ABORTING and RESTARTING
+      is not yet implemented. **SOON TO BE IMPLEMENTED**. **WORKAROUND**:
+      if you need it right now, you can override the steps by extending
+      them and adding the logit to exit from those states
 
     """  # pylint: disable=line-too-long # noqa: E501
 
