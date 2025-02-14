@@ -85,20 +85,17 @@ class MockTangoLRCAction(TangoLRCAction):
         target_device,
         command_name,
         command_param=None,
-        command_kwargs=None,
+        side_effect=None,
         **kwargs
     ):
-        super().__init__(
-            target_device,
-            command_name,
-            command_param,
-            command_kwargs,
-            **kwargs
-        )
+        super().__init__(target_device, command_name, command_param, **kwargs)
 
-        self.execute = MagicMock()
+        self.execute = MagicMock(side_effect=side_effect)
         """
         Execute is a mock that will be called instead of the real method.
+
+        If given, it will also have a side effect that can be used to
+        simulate the behaviour of the real method.
         """
 
     def is_logging_enabled(self) -> bool:
@@ -134,14 +131,16 @@ class MockTangoLRCActionPatcher:
             # etc.
     """
 
-    def __init__(self, patch_path: str = DEFAULT_PATCH_PATH):
+    def __init__(self, patch_path: str = DEFAULT_PATCH_PATH, side_effect=None):
         """Create a new patcher.
 
         :param patch_path: The path to the class to patch. It defaults to
             the TangoLRCAction class from the subarray commands factory.
+        :param side_effect: The side effect to inject in the mock instances.
         """
         self.patch_path: str = patch_path
         self.instances: list[MockTangoLRCAction] = []
+        self.side_effect = side_effect
 
     def reset(self):
         """Reset the list of instances created."""
@@ -156,7 +155,9 @@ class MockTangoLRCActionPatcher:
         :param kwargs: Keyword arguments to pass to the constructor.
         :return: The new instance.
         """
-        instance = MockTangoLRCAction(*args, **kwargs)
+        instance = MockTangoLRCAction(
+            *args, **kwargs, side_effect=self.side_effect
+        )
         self.instances.append(instance)
         return instance
 

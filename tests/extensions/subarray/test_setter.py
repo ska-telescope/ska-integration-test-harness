@@ -31,7 +31,14 @@ class MockObsStateSetterStep(ObsStateSetterStep):
 class TestObsStateSetter:
     """Unit tests for the ObsStateSetter class.
 
-    TODO: change this description to reflect the actual class being tested.
+    The tests cover:
+
+    - the action description
+    - the ObsState Steps map construction and manipulation
+    - the preconditions and postconditions verification
+
+    The execution of the action is not tested here, but in the complementary
+    ``TestObsStateSetterSequences`` class.
     """
 
     @pytest.fixture
