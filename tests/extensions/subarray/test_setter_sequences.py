@@ -67,21 +67,62 @@ class MoveMockSystemThroughStates:
 
 
 def assert_command_has_postcondition_for_state(
-    command: MockTangoLRCAction, target_state: ObsState
+    command: MockTangoLRCAction, expected_state: ObsState
 ):
-    """Assert that the command has a postcondition for the target state."""
+    """Assert that the command has a postcondition for the target state.
+
+    :param command: The command to verify.
+    :param expected_state: The expected state for the postcondition.
+    """
     for postcondition in command.postconditions:
         if (
             isinstance(postcondition, AssertDevicesStateChanges)
             and postcondition.attribute_name == "obsState"
-            and postcondition.attribute_value == target_state
+            and postcondition.attribute_value == expected_state
         ):
             return
 
     raise AssertionError(
         f"The command {command} has no postcondition "
-        f"for the target state {target_state}."
+        f"for the expected state {expected_state}."
     )
+
+
+def get_position_from_index(index) -> str:
+    """Get a semantic position from an index.
+
+    :param index: The index to convert to a position (starting from 0).
+    :return: The position as a string
+        (0 -> 1st, 1 -> 2nd, 2 -> 3rd, 3 -> 4th, ...)
+    """
+    position = index + 1
+    if position == 1:
+        return "1st"
+    if position == 2:
+        return "2nd"
+    if position == 3:
+        return "3rd"
+    return f"{position}th"
+
+
+def assert_command_and_postcondition(
+    commands: list[MockTangoLRCAction],
+    index: int,
+    expected_command_name: str,
+    expected_state: ObsState,
+):
+    """Assert that the index-th command is as expected.
+
+    :param commands: The list of commands to verify.
+    :param index: The index of the command to verify.
+    :param expected_command_name: The expected name of the command.
+    :param expected_state: The expected state for the postcondition.
+    """
+    position = get_position_from_index(index)
+    assert_that(commands[index].command_name).described_as(
+        f"The {position} command is expected to be {expected_command_name}"
+    ).is_equal_to(expected_command_name)
+    assert_command_has_postcondition_for_state(commands[index], expected_state)
 
 
 @pytest.mark.extensions
@@ -112,6 +153,20 @@ class TestObsStateSetterSequences:
     the tests respect the observation state machine).
 
     This set of tests is complementary to the tests in ``TestObsStateSetter``.
+
+    The following cases are covered:
+
+    - ensure the action succeeds immediately if already in the target state
+      from all possible starting states (disabling the preconditions check
+      so also the not supported target states are tested)
+    - move the system from EMPTY to CONFIGURING (normal operational sequence)
+    - move the system from IDLE to SCANNING (normal operational sequence)
+    - move the system from READY to IDLE (abort-restart sequence)
+    - move the system from CONFIGURING to READY (abort sequence)
+    - move the system from ABORTED to ABORTING (restart-assign-abort sequence)
+    - move the system from FAULT to RESOURCING (restart-assign sequence)
+    - move the system from RESETTING to RESTARTING (abort-restart sequence)
+    - move the system from SCANNING to ABORTED (abort sequence)
     """
 
     @pytest.fixture
@@ -210,11 +265,11 @@ class TestObsStateSetterSequences:
     def test_execute_from_idle_to_scanning(system: MockSubarraySystem):
         """The action is able to move the system from IDLE to SCANNING.
 
-        - states sequence: IDLE -> CONFIGURING -> SCANNING
+        - states sequence: IDLE -> READY -> SCANNING
         - commands sequence: Configure -> Scan
         """
         commands_input = ObsStateCommandsInput(
-            Configure='{"dummy": 0}', Scan='{"dummy": 1}'
+            Configure='{"dummy": 1}', Scan='{"dummy": 2}'
         )
         setter = ObsStateSetter(
             system, ObsState.SCANNING, commands_input=commands_input
@@ -232,17 +287,216 @@ class TestObsStateSetterSequences:
         assert_that(patcher.instances).described_as(
             "Two commands are expected"
         ).is_length(2)
-
-        assert_that(patcher.instances[0].command_name).described_as(
-            "The first command is expected to be Configure"
-        ).is_equal_to("Configure")
-        assert_command_has_postcondition_for_state(
-            patcher.instances[0], ObsState.READY
+        assert_command_and_postcondition(
+            patcher.instances, 0, "Configure", ObsState.READY
+        )
+        assert_command_and_postcondition(
+            patcher.instances, 1, "Scan", ObsState.SCANNING
         )
 
-        assert_that(patcher.instances[1].command_name).described_as(
-            "The second command is expected to be Scan"
-        ).is_equal_to("Scan")
-        assert_command_has_postcondition_for_state(
-            patcher.instances[1], ObsState.SCANNING
+    @staticmethod
+    def test_execute_from_ready_to_idle(system: MockSubarraySystem):
+        """The action is able to move the system from READY to IDLE.
+
+        - states sequence: READY -> ABORTED -> EMPTY -> IDLE
+        - commands sequence: Abort -> Restart -> AssignResources
+        """
+        commands_input = ObsStateCommandsInput(
+            AssignResources='{"dummy": 3}',
+        )
+        setter = ObsStateSetter(
+            system, ObsState.IDLE, commands_input=commands_input
+        )
+
+        # patch the commands and execute a side effect that
+        # moves the system through a sequence of states
+        side_effect = MoveMockSystemThroughStates(
+            system,
+            [ObsState.READY, ObsState.ABORTED, ObsState.EMPTY, ObsState.IDLE],
+        )
+        patcher = MockTangoLRCActionPatcher(side_effect=side_effect)
+        with patcher.patch():
+            setter.execute()
+
+        assert_that(patcher.instances).described_as(
+            "Three commands are expected to be executed"
+        ).is_length(3)
+        assert_command_and_postcondition(
+            patcher.instances, 0, "Abort", ObsState.ABORTED
+        )
+        assert_command_and_postcondition(
+            patcher.instances, 1, "Restart", ObsState.EMPTY
+        )
+        assert_command_and_postcondition(
+            patcher.instances, 2, "AssignResources", ObsState.IDLE
+        )
+
+    @staticmethod
+    def test_execute_from_configuring_to_ready(system: MockSubarraySystem):
+        """The action is able to move the system from CONFIGURING to READY.
+
+        - states sequence: CONFIGURING -> ABORTED -> EMPTY -> IDLE -> READY
+        - commands sequence: Abort -> Restart -> AssignResources -> Configure
+        """
+        commands_input = ObsStateCommandsInput(
+            AssignResources='{"dummy": 3}', Configure='{"dummy": 4}'
+        )
+        setter = ObsStateSetter(
+            system, ObsState.READY, commands_input=commands_input
+        )
+
+        # patch the commands and execute a side effect that
+        # moves the system through a sequence of states
+        side_effect = MoveMockSystemThroughStates(
+            system,
+            [
+                ObsState.CONFIGURING,
+                ObsState.ABORTED,
+                ObsState.EMPTY,
+                ObsState.IDLE,
+                ObsState.READY,
+            ],
+        )
+        patcher = MockTangoLRCActionPatcher(side_effect=side_effect)
+        with patcher.patch():
+            setter.execute()
+
+        assert_that(patcher.instances).described_as(
+            "Four commands are expected"
+        ).is_length(4)
+        assert_command_and_postcondition(
+            patcher.instances, 0, "Abort", ObsState.ABORTED
+        )
+        assert_command_and_postcondition(
+            patcher.instances, 1, "Restart", ObsState.EMPTY
+        )
+        assert_command_and_postcondition(
+            patcher.instances, 2, "AssignResources", ObsState.IDLE
+        )
+        assert_command_and_postcondition(
+            patcher.instances, 3, "Configure", ObsState.READY
+        )
+
+    @staticmethod
+    def test_execute_from_aborted_to_aborting(system: MockSubarraySystem):
+        """The action is able to move the system from ABORTED to ABORTING.
+
+        - states sequence: ABORTED -> EMPTY -> RESOURCING -> ABORTING
+        - commands sequence: Restart -> AssignResources -> Abort
+        """
+        commands_input = ObsStateCommandsInput(AssignResources='{"dummy": 2}')
+        setter = ObsStateSetter(
+            system, ObsState.ABORTING, commands_input=commands_input
+        )
+
+        # patch the commands and execute a side effect that
+        # moves the system through a sequence of states
+        side_effect = MoveMockSystemThroughStates(
+            system,
+            [
+                ObsState.ABORTED,
+                ObsState.EMPTY,
+                ObsState.RESOURCING,
+                ObsState.ABORTING,
+            ],
+        )
+        patcher = MockTangoLRCActionPatcher(side_effect=side_effect)
+        with patcher.patch():
+            setter.execute()
+
+        assert_that(patcher.instances).described_as(
+            "Three commands are expected"
+        ).is_length(3)
+        assert_command_and_postcondition(
+            patcher.instances, 0, "Restart", ObsState.EMPTY
+        )
+        assert_command_and_postcondition(
+            patcher.instances, 1, "AssignResources", ObsState.RESOURCING
+        )
+        assert_command_and_postcondition(
+            patcher.instances, 2, "Abort", ObsState.ABORTING
+        )
+
+    @staticmethod
+    def test_execute_from_fault_to_resourcing(system: MockSubarraySystem):
+        """The action is able to move the system from FAULT to RESOURCING.
+
+        - states sequence: FAULT -> EMPTY -> RESOURCING
+        - commands sequence: Restart -> AssignResources
+        """
+        commands_input = ObsStateCommandsInput(AssignResources='{"dummy": 2}')
+        setter = ObsStateSetter(
+            system, ObsState.RESOURCING, commands_input=commands_input
+        )
+
+        # patch the commands and execute a side effect that
+        # moves the system through a sequence of states
+        side_effect = MoveMockSystemThroughStates(
+            system, [ObsState.FAULT, ObsState.EMPTY, ObsState.RESOURCING]
+        )
+        patcher = MockTangoLRCActionPatcher(side_effect=side_effect)
+        with patcher.patch():
+            setter.execute()
+
+        assert_that(patcher.instances).described_as(
+            "Two commands are expected"
+        ).is_length(2)
+        assert_command_and_postcondition(
+            patcher.instances, 0, "Restart", ObsState.EMPTY
+        )
+        assert_command_and_postcondition(
+            patcher.instances, 1, "AssignResources", ObsState.RESOURCING
+        )
+
+    @staticmethod
+    def test_execute_from_resetting_to_restarting(system: MockSubarraySystem):
+        """The action is able to move the system from RESETTING to RESTARTING.
+
+        - states sequence: RESETTING -> ABORTED -> RESTARTING
+        - commands sequence: Abort -> Restart
+        """
+        setter = ObsStateSetter(system, ObsState.RESTARTING)
+
+        # patch the commands and execute a side effect that
+        # moves the system through a sequence of states
+        side_effect = MoveMockSystemThroughStates(
+            system, [ObsState.RESETTING, ObsState.ABORTED, ObsState.RESTARTING]
+        )
+        patcher = MockTangoLRCActionPatcher(side_effect=side_effect)
+        with patcher.patch():
+            setter.execute()
+
+        assert_that(patcher.instances).described_as(
+            "Two commands are expected"
+        ).is_length(2)
+        assert_command_and_postcondition(
+            patcher.instances, 0, "Abort", ObsState.ABORTED
+        )
+        assert_command_and_postcondition(
+            patcher.instances, 1, "Restart", ObsState.RESTARTING
+        )
+
+    @staticmethod
+    def test_execute_from_scanning_to_aborted(system: MockSubarraySystem):
+        """The action is able to move the system from SCANNING to ABORTED.
+
+        - states sequence: SCANNING -> ABORTED
+        - commands sequence: Abort
+        """
+        setter = ObsStateSetter(system, ObsState.ABORTED)
+
+        # patch the commands and execute a side effect that
+        # moves the system through a sequence of states
+        side_effect = MoveMockSystemThroughStates(
+            system, [ObsState.SCANNING, ObsState.ABORTED]
+        )
+        patcher = MockTangoLRCActionPatcher(side_effect=side_effect)
+        with patcher.patch():
+            setter.execute()
+
+        assert_that(patcher.instances).described_as(
+            "One command is expected"
+        ).is_length(1)
+        assert_command_and_postcondition(
+            patcher.instances, 0, "Abort", ObsState.ABORTED
         )
