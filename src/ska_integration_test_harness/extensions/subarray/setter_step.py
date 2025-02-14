@@ -80,10 +80,20 @@ class ObsStateSystemNotConsistent(AssertionError):
         expected_state: ObsState,
         observed_states: dict[tango.DeviceProxy, ObsState],
         action: SUTAction,
+        failure_kind: str = "FAILED ASSUMPTION for action ",
     ):
+        """Initializes the exception.
+
+        :param expected_state: The expected observation state.
+        :param observed_states: The observed observation states.
+        :param action: The action that failed the assumption.
+        :param failure_kind: The kind of failure. It is used as a preamble
+            to the error message. Default is "FAILED ASSUMPTION for action ".
+
+        """
         msg = (
-            f"FAILED ASSUMPTION for action {action.name()} "
-            f"({action.description()}): "
+            f"{failure_kind}{action.name()} - "
+            f"({action.description()}):\n"
             f"The system is expected to be in a consistent observation state "
             f"{str(expected_state)}, but it is observed to be in an "
             "inconsistent state: "

@@ -20,8 +20,17 @@ from ska_integration_test_harness.extensions.subarray.setter_steps_imp import (
 )
 
 from ...core.actions.sut_action import SUTAction
-from .setter_step import ObsStateCommandsInput, ObsStateSetterStep
-from .system import DEFAULT_SUBARRAY_ID, ObsStateSystem, read_obs_state
+from .setter_step import (
+    ObsStateCommandsInput,
+    ObsStateSetterStep,
+    ObsStateSystemNotConsistent,
+)
+from .system import (
+    DEFAULT_SUBARRAY_ID,
+    ObsStateSystem,
+    read_devices_obs_state,
+    read_sys_obs_state,
+)
 
 STATE_CLASS_MAP: dict[ObsState, type] = {}
 """Map ``ObsState`` to the classes that support them as starting states.
@@ -55,33 +64,33 @@ class ObsStateDidNotReachTargetState(AssertionError):
     def __init__(
         self,
         expected_state: ObsState,
-        actual_state: ObsState,
+        subarray_id: int,
         system: ObsStateSystem,
         action: SUTAction,
     ):
-        # self.expected_state = expected_state
-        # self.actual_state = actual_state
-        # self.devices_states =
-        # self.action = action
+        self.expected_state = expected_state
+        self.subarray_id = subarray_id
+        self.actual_state = read_sys_obs_state(system, subarray_id)
+        self.devices_states = read_devices_obs_state(system, subarray_id)
+        self.action = action
 
-        # msg = (
-        #     f"Failed postcondition in "
-        #     f"{action.name()} - {action.description()}:\n"
-        #     "The system (represented by "
-        #     f"{system.get_main_obs_state_device().dev_name()}) "
-        #     "after the action completion is supposed to be in the "
-        #     f"target observation state {str(expected_state)}, "
-        #     f"but it is in the observation state {str(actual_state)}.\n"
-        #     "Devices state: "
-        # )
+        msg = (
+            f"Failed postcondition in action "
+            f"{action.name()} - {action.description()}:\n"
+            "The system (represented by "
+            f"{system.get_main_obs_state_device().dev_name()}) "
+            "after the action completion is supposed to be in the "
+            f"target observation state {str(expected_state)}, "
+            f"but it is in the observation state {str(self.actual_state)}.\n"
+            "Devices state: "
+        )
 
-        # msg += "\n".join(
-        #     f"{dev.dev_name()}: {str(state)}"
-        #     for dev, state in devices_states.items()
-        # )
+        msg += "\n".join(
+            f"{dev.dev_name()}: {str(state)}"
+            for dev, state in self.devices_states.items()
+        )
 
-        # super().__init__(msg)
-        pass
+        super().__init__(msg)
 
 
 # -------------------------------------------------------------------
@@ -263,13 +272,21 @@ class ObsStateSetter(SUTAction, abc.ABC):
         """
         self.configure_default_steps()
 
+        # set a maximum number of steps to avoid infinite loops if
+        # something goes really wrong
+        self.max_steps: int = 15
+        """The maximum number of steps that can be executed."""
+
+        self._last_run_steps_execution_count: int = 0
+        """The number of steps executed so far in the last run."""
+
     # -------------------------------------------------------------------
     # Class lifecycle and description methods
 
     def description(self) -> str:
         return (
             f"Move subarray {self.subarray_id} "
-            f"from {str(self._system_obs_state())} "
+            f"from {str(self._curr_obs_state())} "
             f"to {str(self.target_state)}."
         )
 
@@ -280,16 +297,88 @@ class ObsStateSetter(SUTAction, abc.ABC):
     def execute_procedure(self):
         """Move towards the target observation state (if not already there).
 
-        The procedure:
+        The procedure internally loops through the steps to move the system
+        from the current observation state to the target observation state.
+        At each loop iteration:
 
-        # TODO: describe the procedure
+        - The system is checked to see if it is already in the target
+          observation state
+        - If it is, the loop is broken and the action is considered completed
+          (the postconditions will verify consistency)
+        - If it is not, it's executed the step associated with the current
+          observation state to move the system to the next one
+
+        The loop is repeated until the target observation state is reached
+        or until the maximum number of steps is reached
+        (see :py:attr:`max_steps`).
+
+        Each step shares the same logging and execution settings of this
+        action (timeout included).
         """
+        # reset the execution counter
+        self._last_run_steps_execution_count = 0
+
+        # loop until the target state is reached or the maximum number
+        # of steps is reached
+        while self._last_run_steps_execution_count < self.max_steps:
+            self._last_run_steps_execution_count += 1
+
+            # get the current observation state
+            curr_obs_state = self._curr_obs_state()
+
+            # if the system is already in the target state, we are done
+            if curr_obs_state == self.target_state:
+                break
+
+            # get the step to move from the current observation state
+            # to the next one
+            step = self.obs_state_steps_map[curr_obs_state]
+
+            # execute the step (propagating this class log policy
+            # and other settings - timeout included)
+            step.set_logging(not self.logger.disabled)
+            step.execute(**self._last_execution_params)
 
     def verify_postconditions(self, timeout: SupportsFloat = 0):
-        """The system reached the observation state consistently."""
+        """Verify the system reached the observation state consistently.
+
+        The postcondition is verified when:
+
+        - the system is in the target observation state
+        - all the devices are in a consistent state (see
+          :py:meth:`~ska_integration_test_harness.extensions.subarray.ObsStateSetterStep.verify_preconditions`
+          for more details)
+
+        :param timeout: The timeout to use for the verification (It is
+            ignored, because when we verify those postconditions we
+            are expecting the system to already be in the desired state).
+        """
+        # verify that the system is in the target observation state
+        if self._curr_obs_state() != self.target_state:
+            raise ObsStateDidNotReachTargetState(
+                self.target_state, self.subarray_id, self.system, self
+            )
+
+        # verify that all the devices are in a consistent state
+        # (use the target step precondition to do so)
+        step = self.obs_state_steps_map[self.target_state]
+
+        try:
+            step.verify_preconditions()
+        except ObsStateSystemNotConsistent as exc:
+            raise ObsStateSystemNotConsistent(
+                self.target_state,
+                read_devices_obs_state(self.system, self.subarray_id),
+                self,
+                failure_kind="Failed postcondition in action ",
+            ) from exc
 
     # -------------------------------------------------------------------
     # Other Utilities
+
+    def _curr_obs_state(self) -> ObsState:
+        """Shortcut to get the current observation state of the system."""
+        return read_sys_obs_state(self.system, self.subarray_id)
 
     def override_step(
         self, obs_state: ObsState, new_step_class: type[ObsStateSetterStep]
@@ -355,13 +444,4 @@ class ObsStateSetter(SUTAction, abc.ABC):
         self.override_step(ObsState.FAULT, ObsStateSetterStepFromFault)
         self.override_step(
             ObsState.RESTARTING, ObsStateSetterStepFromRestarting
-        )
-
-    def _system_obs_state(self) -> ObsState:
-        """Get the overall observation state of the system.
-
-        :return: The overall observation state of the system.
-        """
-        return read_obs_state(
-            self.system.get_main_obs_state_device(self.subarray_id)
         )
