@@ -148,6 +148,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
       can be done for move the system from one observation state to another
     - The graph is very similar to the observation state machine, but it is
       simplified in two ways:
+
       - the regular operational flow (EMPTY -> RESOURCING -> IDLE -> ...)
         is viewed as unidirectional (so, for example, you can go from
         EMPTY to IDLE but not from IDLE to EMPTY, without aborting and
@@ -159,11 +160,14 @@ class ObsStateSetter(SUTAction, abc.ABC):
         while instead from EMPTY to
         RESOURCING there is another logical edge that is the "AssignResources"
         command + the synchronisation on the "RESOURCING" state)
+
     - The algorithm associate to each state a step and each step is supposed
       to contain the logic to move the system from the current observation
       state to the next one (towards the direction of the target observation
       state)
+
     - Concretely, what comes out is a sort of cyclic graph we navigate, where:
+
       - there is EMPTY as the starting point
       - there is the unidirectional operational flow (EMPTY -> IDLE -> ...)
         with their transient and quiescent/stable states

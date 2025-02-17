@@ -212,7 +212,7 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
             or ObsStateCommandsInput()
         )
         """
-        The inputs to use for commands such as ``AssignResources``,
+        The inputs to use for commands, such as ``AssignResources``,
         ``Configure`` and ``Scan.
         """
 
