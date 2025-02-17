@@ -47,6 +47,7 @@ autodoc_mock_imports = [
     "tango",
     "ska_control_model",
     "ska_tango_testing",
+    "pydantic",
 ]
 
 
@@ -82,4 +83,9 @@ intersphinx_mapping = {
         "https://developer.skao.int/projects/ska-tango-testing/en/latest/",
         None,
     ),
+    "ska_control_model": (
+        "https://developer.skao.int/projects/ska-control-model/en/latest/",
+        None,
+    ),
+    "pydantic": ("https://docs.pydantic.dev/latest/", None),
 }
