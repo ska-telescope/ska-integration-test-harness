@@ -11,8 +11,7 @@ TODO: improve troubleshooting guidelines.
 import tango
 from ska_control_model import ObsState
 
-from ska_integration_test_harness.core.actions.sut_action import SUTAction
-
+from ...core.actions.sut_action import SUTAction
 from .inputs import ObsStateCommandsInput
 from .system import ObsStateSystem, read_devices_obs_state, read_sys_obs_state
 

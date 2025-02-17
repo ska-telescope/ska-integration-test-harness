@@ -115,8 +115,9 @@ class TangoLRCAction(TangoCommandAction):
 
     .. code-block:: python
 
-        from ska_integration_test_harness.extensions.lrc import TangoLRCAction
-        from ska_integration_test_harness.extensions.lrc import AssertLRCCompletion
+        from ska_integration_test_harness.extensions.lrc import (
+            AssertLRCCompletion, TangoLRCAction
+        )
 
         # 2,3. Subclass AssertLRCCompletion to match your own LRC event format
         # and set your own expected attribute name

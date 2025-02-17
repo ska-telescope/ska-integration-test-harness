@@ -2,10 +2,7 @@
 
 from ska_control_model import ObsState
 
-from ska_integration_test_harness.core.actions.tracer_action import (
-    TracerAction,
-)
-
+from ...core.actions.tracer_action import TracerAction
 from ...core.assertions import AssertDevicesStateChanges
 from ..lrc.tango_lrc_action import TangoLRCAction
 from .exceptions import (

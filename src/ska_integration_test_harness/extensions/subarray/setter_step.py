@@ -5,14 +5,9 @@ import abc
 import tango
 from ska_control_model import ObsState
 
-from ska_integration_test_harness.extensions.lrc.tango_lrc_action import (
-    TangoLRCAction,
-)
-from ska_integration_test_harness.extensions.subarray.inputs import (
-    ObsStateCommandsInput,
-)
-
 from ...core.actions.sut_action import SUTAction
+from ..lrc.tango_lrc_action import TangoLRCAction
+from ..subarray.inputs import ObsStateCommandsInput
 from .commands_factory import ObsStateCommandsFactory
 from .exceptions import (
     ObsStateMissingCommandInput,
