@@ -3,155 +3,22 @@
 import abc
 
 import tango
-from pydantic import BaseModel
 from ska_control_model import ObsState
 
 from ska_integration_test_harness.extensions.actions.lrc_action import (
     TangoLRCAction,
 )
+from ska_integration_test_harness.extensions.subarray.inputs import (
+    ObsStateCommandsInput,
+)
 
 from ...core.actions.sut_action import SUTAction
 from .commands_factory import ObsStateCommandsFactory
+from .exceptions import (
+    ObsStateMissingCommandInput,
+    ObsStateSystemNotConsistent,
+)
 from .system import DEFAULT_SUBARRAY_ID, ObsStateSystem, read_devices_obs_state
-
-# --------------------------------------------------------------------
-# Inputs and exceptions
-
-
-class ObsStateCommandsInput(BaseModel):
-    """Input for the observation state commands.
-
-    This class represents the input for the observation state commands
-    to be used during the observation state set procedure. At the moment, it
-    includes the inputs for the commands:
-
-    - ``AssignResources``
-    - ``Configure``
-    - ``Scan``
-
-    All of them are optionally settable, so you can set only the ones you
-    think you need.
-
-    This class is a :py:mod:`pydantic.BaseModel`. Usually, where we ask
-    for an input of this type, you can pass a dictionary with the same
-    keys as the attributes of this class and classes will convert it
-    to the right object automatically.
-    """
-
-    AssignResources: str | None = None
-    """Input for the ``AssignResources`` command."""
-
-    Configure: str | None = None
-    """Input for the ``Configure`` command."""
-
-    Scan: str | None = None
-    """Input for the ``Scan`` command."""
-
-    @staticmethod
-    def get_object(
-        cmd_inputs: "ObsStateCommandsInput | dict",
-    ) -> "ObsStateCommandsInput":
-        """Get the object from a dictionary or an object.
-
-        :param cmd_inputs: the dictionary or object to convert
-        :return: the object
-        """
-        if cmd_inputs is None:
-            return ObsStateCommandsInput()
-
-        if isinstance(cmd_inputs, dict):
-            return ObsStateCommandsInput(**cmd_inputs)
-        return cmd_inputs
-
-
-class ObsStateMissingCommandInput(ValueError):
-    """Raised when a command input is missing.
-
-    If you see this raised while using some class, probably you forgot to
-    set the input for a command. Check the input object you are using
-    in your setter constructor or in the setter method. If you are not
-    sure on which input to use, check the documentation of the input
-    class :py:class:`~ObsStateCommandsInput` for the correct structure.
-    """
-
-    def __init__(
-        self,
-        command_name: str,
-        inputs: ObsStateCommandsInput,
-        action: SUTAction,
-    ):
-        """Initializes the exception.
-
-        :param command_name: The name of the command that is missing an input.
-        :param inputs: The input object that is missing the input.
-        :param action: The action that is missing the input.
-        """
-        super().__init__(
-            f"FAILED ASSUMPTION for action {action.name()} "
-            f"({action.description()}): "
-            f"Missing input for command {command_name} "
-            f"in obs state inputs: {inputs.model_dump()}"
-        )
-
-
-class ObsStateSystemNotConsistent(AssertionError):
-    """Raised when the system is not in a consistent observation state.
-
-    If you see this raised while using some class it means that the system
-    has been found in an inconsistent observation state. Conceptually, an
-    inconsistent observation state is when one or more of your subarray
-    devices are in a state that is not compatible with the state you
-    assume to be in.
-
-    For quiescent/stable states, it means that one or more devices are
-    not in the expected state (e.g., if the expected state is ``IDLE``,
-    but one device is still stuck in ``CONFIGURING`` or is in some unexpected
-    state like ``FAULT`` or ``ABORTING``).
-
-    For transient states, the pool of accepted states is usually wider,
-    since we configured the classes to accept also eventual previous and
-    next states. So if it fails it means that one or more devices are
-    not in the set of accepted states.
-
-    To conclude, if you see this error please analyse carefully the log
-    and the state of the devices to understand what is going wrong.
-    """
-
-    def __init__(
-        self,
-        expected_state: ObsState,
-        observed_states: dict[tango.DeviceProxy, ObsState],
-        action: SUTAction,
-        failure_kind: str = "FAILED ASSUMPTION for action ",
-    ):
-        """Initializes the exception.
-
-        :param expected_state: The expected observation state.
-        :param observed_states: The observed observation states.
-        :param action: The action that failed the assumption.
-        :param failure_kind: The kind of failure. It is used as a preamble
-            to the error message. Default is "FAILED ASSUMPTION for action ".
-
-        """
-        msg = (
-            f"{failure_kind}{action.name()} - "
-            f"({action.description()}):\n"
-            f"The system is expected to be in a consistent observation state "
-            f"{str(expected_state)}, but it is observed to be in an "
-            "inconsistent state: "
-        )
-
-        msg += ", ".join(
-            [
-                f"{device.dev_name()}={str(obs_state)}"
-                for device, obs_state in observed_states.items()
-            ]
-        )
-        super().__init__(msg)
-
-
-# --------------------------------------------------------------------
-# The step action-class implementation
 
 
 class ObsStateSetterStep(SUTAction, abc.ABC):
@@ -252,10 +119,7 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
         """The target state the system should move to."""
         self.subarray_id = subarray_id
         """The subarray id the step will act on."""
-        self.commands_input = (
-            ObsStateCommandsInput.get_object(commands_input)
-            or ObsStateCommandsInput()
-        )
+        self.commands_input = ObsStateCommandsInput.get_object(commands_input)
         """
         The inputs to use for commands, such as ``AssignResources``,
         ``Configure`` and ``Scan``.

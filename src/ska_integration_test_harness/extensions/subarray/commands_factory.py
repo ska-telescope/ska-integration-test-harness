@@ -8,6 +8,10 @@ from ska_integration_test_harness.core.actions.tracer_action import (
 
 from ...core.assertions import AssertDevicesStateChanges
 from ..actions.lrc_action import TangoLRCAction
+from .exceptions import (
+    ObsStateCommandDoesNotExist,
+    ObsStateCommandHasNoTransition,
+)
 from .system import DEFAULT_SUBARRAY_ID, ObsStateSystem
 
 COMMANDS_STATES_MAP: "dict[str, dict[str, ObsState | None]]" = {
@@ -84,35 +88,6 @@ TODO: Re-engineer in the following way (idea):
 
 I have to think about this
 """  # pylint: disable=line-too-long # noqa: E501
-
-
-class ObsStateCommandDoesNotExist(ValueError):
-    """Exception raised when a command is not found in the map."""
-
-    def __init__(self, command_name: str):
-        """Create a new exception instance.
-
-        :param command_name: the name of the command
-        """
-        super().__init__(
-            f"Command '{command_name}' does not exist or is not supported."
-        )
-
-
-class ObsStateCommandHasNoTransition(ValueError):
-    """Exception raised when a command has no transition in the map."""
-
-    def __init__(self, command_name: str, transition_type: str):
-        """Create a new exception instance.
-
-        :param command_name: the name of the command
-        :param transition_type: the type of the transition
-            (e.g. "transient" or "quiescent")
-        """
-        super().__init__(
-            f"Command '{command_name}' hasn't a {transition_type} "
-            "obsState transition."
-        )
 
 
 class ObsStateCommandsFactory:

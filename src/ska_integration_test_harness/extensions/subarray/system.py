@@ -8,19 +8,6 @@ from ska_control_model import ObsState
 DEFAULT_SUBARRAY_ID = 1
 
 
-class ObsStateSubarrayDoesNotExist(ValueError):
-    """Exception to raise when an given subarray ID does not exist.
-
-    You can raise this in :"""
-
-    def __init__(self, obs_state_id: int, further_info: str = ""):
-        self.obs_state_id = obs_state_id
-        msg = f"Subarray ID {obs_state_id} does not exist. "
-        if further_info:
-            msg += f"Further info: {further_info}"
-        super().__init__(msg)
-
-
 class ObsStateSystem(Protocol):
     """Interface for a system that supports observation state operations.
 

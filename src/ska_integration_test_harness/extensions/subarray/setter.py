@@ -6,7 +6,17 @@ from typing import SupportsFloat
 from assertpy import assert_that
 from ska_control_model import ObsState
 
-from ska_integration_test_harness.extensions.subarray.steps import (
+from ska_integration_test_harness.extensions.subarray.inputs import (
+    ObsStateCommandsInput,
+)
+
+from ...core.actions.sut_action import SUTAction
+from .exceptions import (
+    ObsStateDidNotReachTargetState,
+    ObsStateSystemNotConsistent,
+)
+from .setter_step import ObsStateSetterStep
+from .steps import (
     ObsStateSetterStepFromAborted,
     ObsStateSetterStepFromAborting,
     ObsStateSetterStepFromConfiguring,
@@ -19,62 +29,12 @@ from ska_integration_test_harness.extensions.subarray.steps import (
     ObsStateSetterStepFromRestarting,
     ObsStateSetterStepFromScanning,
 )
-
-from ...core.actions.sut_action import SUTAction
-from .setter_step import (
-    ObsStateCommandsInput,
-    ObsStateSetterStep,
-    ObsStateSystemNotConsistent,
-)
 from .system import (
     DEFAULT_SUBARRAY_ID,
     ObsStateSystem,
     read_devices_obs_state,
     read_sys_obs_state,
 )
-
-
-class ObsStateDidNotReachTargetState(AssertionError):
-    """Exception for when the system did not reach the target state.
-
-    Exception to raise when the system did not reach the target state
-    after a
-    :py:class:`ska_integration_test_harness.extensions.subarray.ObsStateSetter`
-    action is executed. It specifically is raised when a system main device
-    ``obsState`` attribute value is not equal to the expected target state.
-    """
-
-    def __init__(
-        self,
-        expected_state: ObsState,
-        subarray_id: int,
-        system: ObsStateSystem,
-        action: SUTAction,
-    ):
-        self.expected_state = expected_state
-        self.subarray_id = subarray_id
-        self.actual_state = read_sys_obs_state(system, subarray_id)
-        self.devices_states = read_devices_obs_state(system, subarray_id)
-        self.action = action
-
-        msg = (
-            f"Failed postcondition in action "
-            f"{action.name()} - {action.description()}:\n"
-            f"The subarray {self.subarray_id} (represented by "
-            f"{system.get_main_obs_state_device().dev_name()}) "
-            "after the action completion is expected to be in the "
-            f"target observation state {str(expected_state)}, "
-            f"but is in {str(self.actual_state)}.\n"
-            "Devices state: "
-        )
-
-        msg += "\n".join(
-            f"{dev.dev_name()}={str(state)}"
-            for dev, state in self.devices_states.items()
-        )
-
-        super().__init__(msg)
-
 
 # -------------------------------------------------------------------
 # Base class for observation state setters
@@ -273,10 +233,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
         """The target state the system should move to."""
         self.subarray_id = subarray_id
         """The subarray id the step will act on."""
-        self.commands_input = (
-            ObsStateCommandsInput.get_object(commands_input)
-            or ObsStateCommandsInput()
-        )
+        self.commands_input = ObsStateCommandsInput.get_object(commands_input)
         """
         The inputs to use for commands such as ``AssignResources``,
         ``Configure`` and ``Scan``.
@@ -429,6 +386,8 @@ class ObsStateSetter(SUTAction, abc.ABC):
         try:
             step.verify_preconditions()
         except ObsStateSystemNotConsistent as exc:
+            # TODO: maybe replace with prev. exception, for consistency
+            # and clearness in documentation
             raise ObsStateSystemNotConsistent(
                 self.target_state,
                 read_devices_obs_state(self.system, self.subarray_id),
