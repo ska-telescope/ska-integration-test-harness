@@ -95,16 +95,16 @@ class TangoLRCAction(TangoCommandAction):
     2. The event that signals the LRC completion is not emitted on
        ``longRunningCommandResult``, but on a different attribute
     3. The LRC events have a different format than the one supported by
-       :py:class:`~ska_integration_test_harness.extensions.assertions.AssertLRCCompletion`
+       :py:class:`~ska_integration_test_harness.extensions.lrc.AssertLRCCompletion`
 
     To handle this:
 
     1. You override :py:meth:`get_last_lrc_id` to extract the LRC ID from
        your own command result format
     2. You subclass
-       :py:class:`~ska_integration_test_harness.extensions.assertions.AssertLRCCompletion`
+       :py:class:`~ska_integration_test_harness.extensions.lrc.AssertLRCCompletion`
        and override the method
-       :py:meth:`~ska_integration_test_harness.extensions.assertions.AssertLRCCompletion.match_lrc_completion`
+       :py:meth:`~ska_integration_test_harness.extensions.lrc.AssertLRCCompletion.match_lrc_completion`
        to match your own LRC event format.
     3. You also override the constructor of the assertion class to set your
        own expected attribute name.
@@ -116,7 +116,7 @@ class TangoLRCAction(TangoCommandAction):
     .. code-block:: python
 
         from ska_integration_test_harness.extensions.lrc import TangoLRCAction
-        from ska_integration_test_harness.extensions.assertions import AssertLRCCompletion
+        from ska_integration_test_harness.extensions.lrc import AssertLRCCompletion
 
         # 2,3. Subclass AssertLRCCompletion to match your own LRC event format
         # and set your own expected attribute name
@@ -207,7 +207,7 @@ class TangoLRCAction(TangoCommandAction):
         Call this method to append to postconditions a
         an assertion to check the LRC completes with some
         :py:class:`ska_control_model.ResultCode`. This is done through an
-        :py:class:`~ska_integration_test_harness.extensions.assertions.AssertLRCCompletion`
+        :py:class:`~ska_integration_test_harness.extensions.lrc.AssertLRCCompletion`
         instance, which assert over events on the ``longRunningCommandResult``
         attribute of the target device.
         The LRC ID will be extracted from the last command execution

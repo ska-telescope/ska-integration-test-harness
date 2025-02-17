@@ -74,8 +74,12 @@ Some concrete and ready-to-use assertions are:
   an assertion that checks if a set of devices' attributes change their value
   in a specific way. Useful for defining simple event-based checks.
 
-For further more complex assertion implementations, we suggest you look at
-:py:mod:`~ska_integration_test_harness.extensions.assertions`.
+Further actions and assertions (e.g, for dealing with long-running commands
+and subarray commands) can be found in the
+:py:mod:`ska_integration_test_harness.extensions`
+module. We suggest you look at that module before implementing
+your own actions and assertions
+from scratch.
 """  # pylint: disable=line-too-long # noqa: E501
 
 from .dev_are_in_state import AssertDevicesAreInState

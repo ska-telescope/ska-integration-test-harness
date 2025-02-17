@@ -23,7 +23,7 @@ of handwork you can extend the classes and override the methods to adapt
 them to your needs.
 """
 
-from .tango_lrc_action import TangoLRCAction
 from .assert_lrc_completion import AssertLRCCompletion
+from .tango_lrc_action import TangoLRCAction
 
 __all__ = ["TangoLRCAction", "AssertLRCCompletion"]

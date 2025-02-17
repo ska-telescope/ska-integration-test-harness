@@ -40,7 +40,7 @@ class AssertLRCCompletion(TracerAssertion):
     method to implement your own custom matcher.
 
     **NOTE**: this assertion is designed to be used in the
-    :py:class:`~ska_integration_test_harness.extensions.actions.TangoLRCAction`
+    :py:class:`~ska_integration_test_harness.extensions.lrc.TangoLRCAction`
     to verify the completion of a LongRunningCommand. If you use it standalone
     (e.g., passing it directly to a
     :py:class:`~ska_integration_test_harness.core.actions.TracerAction`),

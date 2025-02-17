@@ -6,11 +6,11 @@ import pytest
 from assertpy import assert_that
 from ska_control_model import ResultCode
 
-from ska_integration_test_harness.extensions.lrc.tango_lrc_action import (
-    TangoLRCAction,
-)
 from ska_integration_test_harness.extensions.lrc.assert_lrc_completion import (
     AssertLRCCompletion,
+)
+from ska_integration_test_harness.extensions.lrc.tango_lrc_action import (
+    TangoLRCAction,
 )
 from tests.actions.utils.mock_device_proxy import create_device_proxy_mock
 from tests.actions.utils.mock_event_tracer import add_event, delayed_add_event

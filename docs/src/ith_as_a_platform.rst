@@ -176,7 +176,7 @@ to ensure that the command executes correctly (without errors) and that the
 desired states are reached. To achieve this, we proceed as follows:
 
 1. Define the command as an instance of
-   :py:class:`ska_integration_test_harness.extensions.actions.TangoLRCAction`.
+   :py:class:`ska_integration_test_harness.extensions.lrc.TangoLRCAction`.
 2. Define a pre-condition using an instance of
    :py:class:`ska_integration_test_harness.core.assertions.AssertDevicesAreInState`
    to verify the initial state of the devices and ensure the action executes
@@ -302,7 +302,7 @@ In summary, the possible outcomes of an action execution are as follows:
 **Would you like to try this approach?**
 Here are some suggestions for further reading:
 
-- :py:class:`~ska_integration_test_harness.extensions.actions.TangoLRCAction`
+- :py:class:`~ska_integration_test_harness.extensions.lrc.TangoLRCAction`
   for details on the action API
 - :py:mod:`~ska_integration_test_harness.core.assertions`
   for information on defining pre- and post-conditions, including how to create

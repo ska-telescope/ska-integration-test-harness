@@ -274,7 +274,7 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
         """Creates a command action to be sent to the subarray.
 
         This method is a utility to quickly create a
-        :py:class:`ska_integration_test_harness.extensions.actions.TangoLRCAction`
+        :py:class:`ska_integration_test_harness.extensions.lrc.TangoLRCAction`
         already configured:
 
         - with the correct target device (done by the factory)

@@ -54,9 +54,11 @@ Three important subclasses are:
   a subclass that provides a way to group multiple actions in a sequence
   and execute them in order within a shared timeout.
 
-Further, more complex action implementations are provided in
-:py:mod:`~ska_integration_test_harness.extensions.actions`. We suggest you
-look at that module before implementing your own actions and assertions
+Further actions and assertions (e.g, for dealing with long-running commands
+and subarray commands) can be found in the
+:py:mod:`ska_integration_test_harness.extensions`
+module. We suggest you look at that module before implementing
+your own actions and assertions
 from scratch.
 """
 

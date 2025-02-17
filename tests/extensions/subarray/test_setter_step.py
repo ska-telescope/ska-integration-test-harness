@@ -9,11 +9,11 @@ from ska_control_model import ObsState
 from ska_integration_test_harness.core.assertions.dev_state_changes import (
     AssertDevicesStateChanges,
 )
-from ska_integration_test_harness.extensions.lrc.tango_lrc_action import (
-    TangoLRCAction,
-)
 from ska_integration_test_harness.extensions.lrc.assert_lrc_completion import (
     AssertLRCCompletion,
+)
+from ska_integration_test_harness.extensions.lrc.tango_lrc_action import (
+    TangoLRCAction,
 )
 from ska_integration_test_harness.extensions.subarray.setter_step import (
     ObsStateCommandsInput,

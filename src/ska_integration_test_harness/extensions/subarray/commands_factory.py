@@ -124,7 +124,7 @@ class ObsStateCommandsFactory:
       specific subarray commands (TODO: choose to keep or remove them)
 
     The produced items are instances of
-    :py:class:`~ska_integration_test_harness.extensions.actions.TangoLRCAction`
+    :py:class:`~ska_integration_test_harness.extensions.lrc.TangoLRCAction`
     , so you can execute them using the
     :py:meth:`~ska_integration_test_harness.core.actions.SUTAction.execute`
     method, or you can further enrich their preconditions and
