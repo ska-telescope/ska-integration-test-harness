@@ -7,18 +7,10 @@
     :members:
     :undoc-members:
 
-Actions module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Long Running Command (LRC) module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: ska_integration_test_harness.extensions.actions
-    :members:
-    :undoc-members:
-
-
-Assertions module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: ska_integration_test_harness.extensions.assertions
+.. automodule:: ska_integration_test_harness.extensions.lrc
     :members:
     :undoc-members:
 

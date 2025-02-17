@@ -192,7 +192,7 @@ desired states are reached. To achieve this, we proceed as follows:
     import tango
     import json
 
-    from ska_integration_test_harness.extensions.actions import (
+    from ska_integration_test_harness.extensions.lrc import (
         TangoLRCAction
     )
     from ska_integration_test_harness.core.assertions import (

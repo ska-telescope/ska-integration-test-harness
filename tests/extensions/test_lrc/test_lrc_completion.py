@@ -3,7 +3,7 @@
 import pytest
 from ska_control_model import ResultCode
 
-from ska_integration_test_harness.extensions.assertions.lrc_completion import (
+from ska_integration_test_harness.extensions.lrc.assert_lrc_completion import (
     AssertLRCCompletion,
 )
 from tests.actions.utils.mock_device_proxy import create_device_proxy_mock

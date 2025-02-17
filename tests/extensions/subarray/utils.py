@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 from ska_control_model import ObsState
 
-from ska_integration_test_harness.extensions.actions.lrc_action import (
+from ska_integration_test_harness.extensions.lrc.tango_lrc_action import (
     TangoLRCAction,
 )
 from ska_integration_test_harness.extensions.subarray.system import (

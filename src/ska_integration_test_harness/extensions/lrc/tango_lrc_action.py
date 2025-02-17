@@ -7,7 +7,7 @@ from assertpy import assert_that
 from ska_control_model import ResultCode
 
 from ...core.actions.command_action import TangoCommandAction
-from ..assertions.lrc_completion import AssertLRCCompletion
+from .assert_lrc_completion import AssertLRCCompletion
 
 
 class TangoLRCAction(TangoCommandAction):
@@ -115,7 +115,7 @@ class TangoLRCAction(TangoCommandAction):
 
     .. code-block:: python
 
-        from ska_integration_test_harness.extensions.actions import TangoLRCAction
+        from ska_integration_test_harness.extensions.lrc import TangoLRCAction
         from ska_integration_test_harness.extensions.assertions import AssertLRCCompletion
 
         # 2,3. Subclass AssertLRCCompletion to match your own LRC event format

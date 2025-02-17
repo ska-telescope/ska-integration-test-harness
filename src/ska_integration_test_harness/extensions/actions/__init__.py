@@ -1,5 +1,9 @@
 """Common actions for the SKA ITH Core.
 
+**DEPRECATED**: This module is deprecated and will be removed in the future.
+Please use the new module :mod:`ska_integration_test_harness.extensions.lrc`
+instead.
+
 This module is supposed to contain common actions that can be
 re-used across different test contexts and on multiple SKA SUTs.
 
@@ -11,6 +15,15 @@ Optionally, it also permits you to fail early if some
 LRC error code is detected among events.
 """
 
-from .lrc_action import TangoLRCAction
+
+from ..lrc.tango_lrc_action import TangoLRCAction
+
+import logging
+logging.warning(
+    "The 'ska_integration_test_harness.extensions.actions' "
+    "module is deprecated "
+    "and will be removed in the future. Please use the new "
+    "'ska_integration_test_harness.extensions.lrc' module instead."
+)
 
 __all__ = ["TangoLRCAction"]

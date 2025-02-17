@@ -7,7 +7,7 @@ from ska_integration_test_harness.core.actions.tracer_action import (
 )
 
 from ...core.assertions import AssertDevicesStateChanges
-from ..actions.lrc_action import TangoLRCAction
+from ..lrc.tango_lrc_action import TangoLRCAction
 from .exceptions import (
     ObsStateCommandDoesNotExist,
     ObsStateCommandHasNoTransition,
