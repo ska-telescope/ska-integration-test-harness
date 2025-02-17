@@ -98,13 +98,6 @@ class MockTangoLRCAction(TangoLRCAction):
         simulate the behaviour of the real method.
         """
 
-    def is_logging_enabled(self) -> bool:
-        """Check if the logger is enabled.
-
-        :return: True if the logger is enabled, False otherwise.
-        """
-        return not self.logger.disabled
-
 
 DEFAULT_PATCH_PATH = (
     "ska_integration_test_harness.extensions.subarray"

@@ -203,27 +203,28 @@ class ObsStateSetter(SUTAction, abc.ABC):
 
     """  # pylint: disable=line-too-long # noqa: E501
 
-    # (I think it's worth to keep the enable_logging parameter here)
-    # (maybe this is a signal that it should be removed everywhere)
-    # pylint: disable=too-many-arguments, too-many-positional-arguments
     def __init__(
         self,
         system: ObsStateSystem,
         target_state: ObsState,
         subarray_id: int = DEFAULT_SUBARRAY_ID,
         commands_input: ObsStateCommandsInput | dict | None = None,
-        enable_logging: bool = True,
     ):
-        """Initialize the ObsStateSetter.thelts
-            to the value of :py:const:`DEFAULT_SUBARRAY_ID`.
+        """Initialize the ObsStateSetter instance.
+
+        :param system: The system that the step will act on.
+        :param target_state: The target state the system should move to.
+        :param subarray_id: The subarray id the step will act on. It defaults
+            to the ``DEFAULT_SUBARRAY_ID`` global constant.
         :param commands_input: The inputs to use for commands such as
             ``AssignResources``, ``Configure`` and ``Scan``. It defaults to
-            no inputs (None).
-        :param enable_logging: If True, the logger will be enabled. It defaults
-            to True. The same policy will be applied to all the steps
-            and commands executed.
-        """
-        super().__init__(enable_logging=enable_logging)
+            no inputs (None). You can specify the inputs as a
+            :py:class:`~ska_integration_test_harness.extensions.subarray.ObsStateCommandsInput`
+            object, as a dictionary or as a dictionary-like object. The
+            important thing is that the keys are the command names and the
+            values are the inputs for the commands as JSON strings.
+        """  # pylint: disable=line-too-long # noqa: E501
+        super().__init__()
 
         # (the parameters are duplicated in the steps, but it's fine)
         # pylint: disable=duplicate-code
@@ -354,7 +355,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
 
             # execute the step (propagating this class log policy
             # and other settings - timeout included)
-            step.set_logging(not self.logger.disabled)
+            step.set_logging(self.is_logging_enabled())
             step.execute(**self._last_execution_params)
 
     def verify_postconditions(self, timeout: SupportsFloat = 0):

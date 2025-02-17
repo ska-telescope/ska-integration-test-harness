@@ -100,27 +100,32 @@ class SUTAction(abc.ABC):
     prioritise clarity and readability. Think also about reusability:
     if you find yourself creating several actions that are very similar,
     consider refactoring the common logic into a superclass or implementing
-    a single (possibly unit tested) parameterised action.
+    a single (possibly unit tested) parametrised action.
     """
 
-    def __init__(self, enable_logging: bool = True) -> None:
+    def __init__(self) -> None:
         """Initialize the action.
 
-        :param enable_logging: True if the action should log the execution,
-            False otherwise. By default, logging is enabled.
+        By default, the action logs the execution messages.
         """
         super().__init__()
+
         self.logger = logging.getLogger(self.__class__.__name__)
         """The logger for the action."""
 
+        # enable logging
         self.logger.setLevel(logging.INFO)
-        self.set_logging(enable_logging)
+        self.set_logging(True)
 
         self._last_execution_params = {
             "postconditions_timeout": 0,
             "verify_preconditions": True,
             "verify_postconditions": True,
         }
+        """Parameters passed the last time :py:meth:`execute` was called.
+
+        TODO: refactor into a dataclass/pydantic model.
+        """
 
     # ------------------------------------------------------------------
     # ENTRY POINTS FOR EXTERNAL USERS
@@ -215,10 +220,20 @@ class SUTAction(abc.ABC):
         Enable or disable the logging messages the action generates during
         its execution. By default, logging is enabled.
 
+        TODO: should this be a runtime configuration or a class-level
+        configuration?
+
         :param enable_logging: True if the action should log the execution,
             False otherwise.
         """
         self.logger.disabled = not enable_logging
+
+    def is_logging_enabled(self) -> bool:
+        """Check if the logging is enabled for the action.
+
+        :return: True if the action logs the execution, False otherwise.
+        """
+        return not self.logger.disabled
 
     # ------------------------------------------------------------------
     # EXTENSION HOOKS - ACTION EXECUTION STEPS

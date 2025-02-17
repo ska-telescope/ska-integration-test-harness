@@ -48,7 +48,7 @@ class SUTActionSequence(SUTAction):
         sequence.execute(timeout=10)
     """
 
-    def __init__(self, enable_logging=True):
+    def __init__(self):
         # the list of actions in the sequence
         self._actions: list[SUTAction] = []
 
@@ -57,7 +57,7 @@ class SUTActionSequence(SUTAction):
         self._verify_preconditions = True
         self._verify_postconditions = True
 
-        super().__init__(enable_logging)
+        super().__init__()
 
     @property
     def actions(self) -> list[SUTAction]:

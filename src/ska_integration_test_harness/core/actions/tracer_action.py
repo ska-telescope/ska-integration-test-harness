@@ -151,12 +151,7 @@ class TracerAction(SUTAction, abc.ABC):
     or "customised" according to the context in which they are used.
     """  # pylint: disable=line-too-long # noqa: E501
 
-    def __init__(
-        self,
-        enable_logging: bool = True,
-        log_preconditions: bool = False,
-        log_postconditions: bool = True,
-    ) -> None:
+    def __init__(self) -> None:
         """Create a new TracerAction instance.
 
         Initially,
@@ -165,14 +160,12 @@ class TracerAction(SUTAction, abc.ABC):
         - the tracer is created and set up,
         - no early stop condition is set.
 
-        :param enable_logging: whether to enable logging
-            (default is True).
-        :param log_preconditions: whether to log the preconditions when
-            verifying them (default is False).
-        :param log_postconditions: whether to log the postconditions
-            when verifying them (default is True).
+        Preconditions execution by default is not logged, while postconditions
+        instead are logged. You can change this behaviour by setting the
+        :py:attr:`log_preconditions` and :py:attr:`log_postconditions`
+        boolean attributes.
         """
-        super().__init__(enable_logging=enable_logging)
+        super().__init__()
         self._preconditions = []
         self._postconditions = []
         self._early_stop = None
@@ -180,13 +173,13 @@ class TracerAction(SUTAction, abc.ABC):
         self.tracer = TangoEventTracer()
         """The (managed) tracer instance to use for the pre/post conditions."""
 
-        self.log_preconditions = log_preconditions
+        self.log_preconditions = False
         """Whether to log the preconditions when verifying them.
 
         Defaults to False.
         """
 
-        self.log_postconditions = log_postconditions
+        self.log_postconditions = True
         """Whether to log the postconditions when verifying them.
 
         Defaults to True.

@@ -339,7 +339,8 @@ class TestTracerAction:
     @staticmethod
     def test_action_executions_can_enable_precondition_logging():
         """An action execution can enable logging."""
-        action = MockTracerAction(log_preconditions=True)
+        action = MockTracerAction()
+        action.log_preconditions = True
         action.logger = MagicMock()
         pre_cond = create_state_change_assertion("test/device/1")
         pre_cond.verify = MagicMock()
@@ -355,7 +356,8 @@ class TestTracerAction:
     @staticmethod
     def test_action_executions_can_disable_postcondition_logging():
         """An action execution can disable logging."""
-        action = MockTracerAction(log_postconditions=False)
+        action = MockTracerAction()
+        action.log_postconditions = False
         action.logger = MagicMock()
         post_cond = create_state_change_assertion("test/device/1")
         post_cond.verify = MagicMock()

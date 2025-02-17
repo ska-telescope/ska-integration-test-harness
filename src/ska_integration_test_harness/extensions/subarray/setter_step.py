@@ -252,7 +252,7 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
         command_action = self.create_subarray_command(
             command_name, sync_transient
         )
-        command_action.set_logging(not self.logger.disabled)
+        command_action.set_logging(self.is_logging_enabled())
         command_action.execute(
             self._last_execution_params["postconditions_timeout"],
             self._last_execution_params["verify_preconditions"],

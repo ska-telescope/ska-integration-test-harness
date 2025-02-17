@@ -165,7 +165,6 @@ class TangoLRCAction(TangoCommandAction):
         command_name: str,
         command_param: Any | None = None,
         command_kwargs: dict[str, Any] | None = None,
-        **kwargs,
     ) -> None:
         """Create a new TangoLRCAction instance.
 
@@ -178,19 +177,12 @@ class TangoLRCAction(TangoCommandAction):
             to pass to the command. See
             :py:meth:`tango.DeviceProxy.command_inout`
             for more information on the available keyword arguments.
-        :param kwargs: additional keyword arguments to pass to the superclass.
-            See
-            :py:class:`ska_integration_test_harness.core.actions.TracerAction`
-            and
-            :py:class:`ska_integration_test_harness.core.actions.SUTAction`
-            for more information on the available keyword arguments.
         """
         super().__init__(
             target_device=target_device,
             command_name=command_name,
             command_param=command_param,
             command_kwargs=command_kwargs,
-            **kwargs,
         )
         # we use this special list to monitor which LRC errors are monitored
         # See add_lrc_errors_to_early_stop for more details
