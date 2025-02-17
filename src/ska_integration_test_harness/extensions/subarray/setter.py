@@ -280,7 +280,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
         )
         """
         The inputs to use for commands such as ``AssignResources``,
-        ``Configure`` and ``Scan.
+        ``Configure`` and ``Scan``.
         """
 
         # *****************************************************
