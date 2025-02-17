@@ -6,7 +6,7 @@ from typing import SupportsFloat
 from assertpy import assert_that
 from ska_control_model import ObsState
 
-from ska_integration_test_harness.extensions.subarray.setter_steps_imp import (
+from ska_integration_test_harness.extensions.subarray.steps import (
     ObsStateSetterStepFromAborted,
     ObsStateSetterStepFromAborting,
     ObsStateSetterStepFromConfiguring,
@@ -187,9 +187,8 @@ class ObsStateSetter(SUTAction, abc.ABC):
     send a command to the system (according to the direction where
     the target observation state is) and then synchronise on the
     appropriate quiescent or transient state the command should reach.
-    You can find a documentation of the existing steps in the
-    :py:mod:`ska_integration_test_harness.extensions.subarray.setter_steps_impl`
-    module.
+    You can find a documentation of the existing steps implementations in the
+    :py:mod:`ska_integration_test_harness.extensions.subarray.steps` module.
 
     The step mechanism is designed to be easily extensible and overrideable.
     This class holds internally a map of observation states to the steps

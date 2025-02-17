@@ -9,7 +9,9 @@ DEFAULT_SUBARRAY_ID = 1
 
 
 class ObsStateSubarrayDoesNotExist(ValueError):
-    """Exception to raise when an given subarray ID does not exist."""
+    """Exception to raise when an given subarray ID does not exist.
+
+    You can raise this in :"""
 
     def __init__(self, obs_state_id: int, further_info: str = ""):
         self.obs_state_id = obs_state_id
@@ -32,16 +34,16 @@ class ObsStateSystem(Protocol):
     needs to operate on the subarray lifecycle. Clients should implement:
 
     - :py:meth:`get_target_device`, to tell which is the target device for
-        a given command on a given subarray ID
+      a given command on a given subarray ID
     - :py:meth:`get_main_obs_state_device`, to tell which is the main device
-        that changes the observation state on a given subarray ID
+      that changes the observation state on a given subarray ID
     - :py:meth:`get_obs_state_devices`, to tell which are the devices that
-        are involved in the observation state machine on a given subarray ID
+       are involved in the observation state machine on a given subarray ID
 
     The methods are meant to support multiple subarrays, so they should
     accept a ``subarray_id`` parameter to specify the subarray ID they
     are referring to. If the passed subarray ID does not exist, the methods
-    should raise :py:exc:`ObsStateIDDoesNotExist`.
+    can raise a ``ValueError``.
     """
 
     def get_target_device(
@@ -56,7 +58,7 @@ class ObsStateSystem(Protocol):
         :param command_name: the name of the command
         :param subarray_id: the subarray ID (default: DEFAULT_SUBARRAY_ID)
         :return: the device proxy of the target device
-        :raise ObsStateIDDoesNotExist: if the passed subarray ID does not exist
+        :raise ValueError: if the passed subarray ID does not exist
         """
 
     def get_main_obs_state_device(
@@ -72,7 +74,7 @@ class ObsStateSystem(Protocol):
 
         :param subarray_id: the subarray ID (default: DEFAULT_SUBARRAY_ID)
         :return: the device proxy of the main device
-        :raise ObsStateIDDoesNotExist: if the passed subarray ID does not exist
+        :raise ValueError: if the passed subarray ID does not exist
         """
 
     def get_obs_state_devices(
@@ -94,7 +96,7 @@ class ObsStateSystem(Protocol):
             Consider the order you give here will be the order of the
             state change assertions, so make it more or less similar to
             the order you expect the devices to change state.
-        :raise ObsStateIDDoesNotExist: if the passed subarray ID does not exist
+        :raise ValueError: if the passed subarray ID does not exist
         """
 
 

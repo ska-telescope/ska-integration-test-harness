@@ -31,21 +31,18 @@ The main classes in this module are the following three:
 3. :py:class:`~ska_integration_test_harness.extensions.subarray.ObsStateSetter`
    , which is an orchestrator class that has the responsibility to move
    the system to a desired :py:class:`~ska_control_model.ObsState`, starting
-   by almost any initial state. This class (and its subclasses) embeds the
-   knowledge about how to "pilot" the system in the Observation State Machine
-   and uses the factory to generate the command actions.
+   by almost any initial state. The class relies on
+   :py:class:`~ska_integration_test_harness.extensions.subarray.ObsStateSetterStep`
+   subclasses to define what to do when the system is in each state to reach
+   the desired state. The individual steps are defined and documented
+   in :py:mod:`ska_integration_test_harness.extensions.subarray.steps` and
+   you can override them and inject in the setter to customise the behaviour.
 
 Further classes are used to define input, exceptions, etc.
 
-Some global constants like
-:py:data:`~ska_integration_test_harness.extensions.subarray.DEFAULT_SUBARRAY_ID`,
-:py:data:`~ska_integration_test_harness.extensions.subarray.COMMANDS_STATES_MAP`
-and :py:data:`~ska_integration_test_harness.extensions.subarray.STATE_CLASS_MAP`
-are also defined in this module and can be used to customise the behaviour
-of the framework.
-
-TODO: link ObsStateSetter subclasses in a separate section
-of the documentation.
+A ``DEFAULT_SUBARRAY_ID`` global constant is used to define the subarray ID
+that is used by default in the framework if you don't specify one in classes
+creations, method calls, etc. It is set to 1, but you can change it.
 
 """  # pylint: disable=line-too-long # noqa: E501
 
@@ -55,16 +52,23 @@ from .commands_factory import (
     ObsStateCommandHasNoTransition,
     ObsStateCommandsFactory,
 )
-from .setter import ObsStateCommandsInput, ObsStateSetter
+from .setter import ObsStateSetter
+from .setter_step import (
+    ObsStateCommandsInput,
+    ObsStateMissingCommandInput,
+    ObsStateSetterStep,
+    ObsStateSystemNotConsistent,
+)
 from .system import (
     DEFAULT_SUBARRAY_ID,
-    ObsStateSubarrayDoesNotExist,
     ObsStateSystem,
+    read_devices_obs_state,
+    read_obs_state,
+    read_sys_obs_state,
 )
 
 __all__ = [
     "ObsStateSystem",
-    "ObsStateSubarrayDoesNotExist",
     "DEFAULT_SUBARRAY_ID",
     "ObsStateCommandsFactory",
     "ObsStateCommandDoesNotExist",
@@ -72,4 +76,10 @@ __all__ = [
     "COMMANDS_STATES_MAP",
     "ObsStateSetter",
     "ObsStateCommandsInput",
+    "read_devices_obs_state",
+    "read_obs_state",
+    "read_sys_obs_state",
+    "ObsStateSetterStep",
+    "ObsStateMissingCommandInput",
+    "ObsStateSystemNotConsistent",
 ]

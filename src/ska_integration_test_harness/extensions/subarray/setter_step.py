@@ -22,12 +22,30 @@ class ObsStateCommandsInput(BaseModel):
     """Input for the observation state commands.
 
     This class represents the input for the observation state commands
-    to be used during the observation state set procedure.
+    to be used during the observation state set procedure. At the moment, it
+    includes the inputs for the commands:
+
+    - ``AssignResources``
+    - ``Configure``
+    - ``Scan``
+
+    All of them are optionally settable, so you can set only the ones you
+    think you need.
+
+    This class is a :py:mod:`pydantic.BaseModel`. Usually, where we ask
+    for an input of this type, you can pass a dictionary with the same
+    keys as the attributes of this class and classes will convert it
+    to the right object automatically.
     """
 
     AssignResources: str | None = None
+    """Input for the ``AssignResources`` command."""
+
     Configure: str | None = None
+    """Input for the ``Configure`` command."""
+
     Scan: str | None = None
+    """Input for the ``Scan`` command."""
 
     @staticmethod
     def get_object(
@@ -49,7 +67,11 @@ class ObsStateCommandsInput(BaseModel):
 class ObsStateMissingCommandInput(ValueError):
     """Raised when a command input is missing.
 
-    TODO: would it be better to move this exception in the factory?
+    If you see this raised while using some class, probably you forgot to
+    set the input for a command. Check the input object you are using
+    in your setter constructor or in the setter method. If you are not
+    sure on which input to use, check the documentation of the input
+    class :py:class:`~ObsStateCommandsInput` for the correct structure.
     """
 
     def __init__(
@@ -73,7 +95,27 @@ class ObsStateMissingCommandInput(ValueError):
 
 
 class ObsStateSystemNotConsistent(AssertionError):
-    """Raised when the system is not in a consistent observation state."""
+    """Raised when the system is not in a consistent observation state.
+
+    If you see this raised while using some class it means that the system
+    has been found in an inconsistent observation state. Conceptually, an
+    inconsistent observation state is when one or more of your subarray
+    devices are in a state that is not compatible with the state you
+    assume to be in.
+
+    For quiescent/stable states, it means that one or more devices are
+    not in the expected state (e.g., if the expected state is ``IDLE``,
+    but one device is still stuck in ``CONFIGURING`` or is in some unexpected
+    state like ``FAULT`` or ``ABORTING``).
+
+    For transient states, the pool of accepted states is usually wider,
+    since we configured the classes to accept also eventual previous and
+    next states. So if it fails it means that one or more devices are
+    not in the set of accepted states.
+
+    To conclude, if you see this error please analyse carefully the log
+    and the state of the devices to understand what is going wrong.
+    """
 
     def __init__(
         self,
@@ -167,6 +209,9 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
     that returns just the assumed state, but it can be overridden to return
     a wider range of states (useful when the state is transient/not stable).
 
+    :py:mod:`ska_integration_test_harness.extensions.subarray.steps` contains
+    the concrete implementations of the steps.
+
     **Other utilities**
 
     NOTE: since in many cases the logic to move the system in the observation
@@ -213,7 +258,7 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
         )
         """
         The inputs to use for commands, such as ``AssignResources``,
-        ``Configure`` and ``Scan.
+        ``Configure`` and ``Scan``.
         """
 
         self.commands_factory = ObsStateCommandsFactory(system)

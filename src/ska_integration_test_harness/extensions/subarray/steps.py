@@ -203,6 +203,7 @@ class ObsStateSetterStepSupportsRestart(ObsStateSetterStep, abc.ABC):
     """Step to handle transitions from states that support Restart.
 
     Routing rules:
+
     - If the target state is ``RESTARTING``, send ``Restart`` synchronizing
       on the transient state.
     - For any other state, send ``Restart`` synchronizing on the quiescent

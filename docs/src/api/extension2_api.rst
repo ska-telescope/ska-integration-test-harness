@@ -29,3 +29,9 @@ Subarray module
     :members:
     :undoc-members:
 
+Steps implementation
+"""""""""""""""""""""
+
+.. automodule:: ska_integration_test_harness.extensions.subarray.steps
+    :members:
+    :undoc-members:

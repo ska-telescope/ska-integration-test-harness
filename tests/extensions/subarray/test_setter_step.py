@@ -21,7 +21,7 @@ from ska_integration_test_harness.extensions.subarray.setter_step import (
     ObsStateSetterStep,
     ObsStateSystemNotConsistent,
 )
-from ska_integration_test_harness.extensions.subarray.setter_steps_imp import (
+from ska_integration_test_harness.extensions.subarray.steps import (
     ObsStateSetterStepFromAborted,
     ObsStateSetterStepFromAborting,
     ObsStateSetterStepFromConfiguring,
