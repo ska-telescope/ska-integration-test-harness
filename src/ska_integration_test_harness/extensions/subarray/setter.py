@@ -356,7 +356,7 @@ class ObsStateSetter(SUTAction, abc.ABC):
             # execute the step (propagating this class log policy
             # and other settings - timeout included)
             step.set_logging(self.is_logging_enabled())
-            step.execute(**self._last_execution_params)
+            step.execute(**self._last_execution_params.as_dict())
 
     def verify_postconditions(self, timeout: SupportsFloat = 0):
         """Verify the system reached the observation state consistently.

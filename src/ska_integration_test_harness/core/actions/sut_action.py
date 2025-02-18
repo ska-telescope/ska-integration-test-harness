@@ -2,7 +2,81 @@
 
 import abc
 import logging
+from dataclasses import dataclass
 from typing import SupportsFloat
+
+from ska_tango_testing.integration.assertions import ChainedAssertionsTimeout
+
+
+@dataclass
+class SUTActionLastExecutionParams:
+    """The parameters from the last action execution.
+
+    This class contains the parameters that were passed to the
+    :py:meth:`~ska_integration_test_harness.core.actions.SUTAction.execute`
+    method the last time the action was executed.
+
+    The parameters are:
+
+    - the timeout for the postconditions verification, automatically
+      converted to a
+      :py:class:`ska_tango_testing.integration.assertions.ChainedAssertionsTimeout`
+      object
+    - a flag that tells if preconditions should be verified
+    - a flag that tells if postconditions should be verified
+    """  # pylint: disable=line-too-long # noqa: E501
+
+    postconditions_timeout: ChainedAssertionsTimeout = (
+        ChainedAssertionsTimeout(0)
+    )
+    """The timeout for the postconditions verification."""
+
+    verify_preconditions: bool = True
+    """True if the preconditions should be verified, False otherwise."""
+
+    verify_postconditions: bool = True
+    """True if the postconditions should be verified, False otherwise."""
+
+    def as_dict(self) -> dict:
+        """Return the object as a dictionary.
+
+        :return: The object as a dictionary.
+        """
+        return {
+            "postconditions_timeout": self.postconditions_timeout,
+            "verify_preconditions": self.verify_preconditions,
+            "verify_postconditions": self.verify_postconditions,
+        }
+
+    @staticmethod
+    def from_params(
+        postconditions_timeout: SupportsFloat = 0,
+        verify_preconditions: bool = True,
+        verify_postconditions: bool = True,
+    ) -> "SUTActionLastExecutionParams":
+        """Create a new instance from the parameters.
+
+        It automatically creates the timeout object from the given
+        numerical value.
+
+        :param postconditions_timeout: The timeout for the postconditions
+            verification. By default, the timeout is 0s.
+        :param verify_preconditions: True if the preconditions should be
+            verified, False otherwise. By default, the preconditions are
+            verified.
+        :param verify_postconditions: True if the postconditions should be
+            verified, False otherwise. By default, the postconditions are
+            verified.
+
+        :return: A new instance of the class.
+        """
+        return SUTActionLastExecutionParams(
+            postconditions_timeout=ChainedAssertionsTimeout.get_timeout_object(
+                postconditions_timeout
+            ),
+            verify_preconditions=verify_preconditions,
+            verify_postconditions=verify_postconditions,
+        )
 
 
 class SUTAction(abc.ABC):
@@ -117,18 +191,11 @@ class SUTAction(abc.ABC):
         self.logger.setLevel(logging.INFO)
         self.set_logging(True)
 
-        self._last_execution_params = {
-            "postconditions_timeout": 0,
-            "verify_preconditions": True,
-            "verify_postconditions": True,
-        }
-        """Parameters passed the last time :py:meth:`execute` was called.
-
-        TODO: refactor into a dataclass/pydantic model.
-        """
+        self._last_execution_params = SUTActionLastExecutionParams()
+        """Parameters passed the last time :py:meth:`execute` was called."""
 
     # ------------------------------------------------------------------
-    # ENTRY POINTS FOR EXTERNAL USERS
+    # ENTRY POINTS FOR EXTERNAL USERS & UTILITIES
 
     def execute(
         self,
@@ -164,6 +231,14 @@ class SUTAction(abc.ABC):
 
         :param postconditions_timeout: The timeout for the
             postconditions verification. By default, the timeout is 0s.
+            You can pass a float or an integer, or also a
+            :py:class:`ska_tango_testing.integration.assertions.ChainedAssertionsTimeout`
+            object. If you pass a numerical value, internally it is
+            converted into an object to make it be "shared by default"
+            inside the action.
+            The timeout will start before verifying the postconditions. If you
+            want to start it before, you should create the timeout object
+            by yourself and pass it already started.
         :param verify_preconditions: True if the preconditions should be
             verified before executing the action, False otherwise. By default,
             the preconditions are verified.
@@ -173,13 +248,14 @@ class SUTAction(abc.ABC):
         :raises: AssertionError if the preconditions or postconditions are
             not satisfied. Additional exceptions can be raised by the
             :py:meth:`execute_procedure` method if the action fails.
-        """  # noqa: DAR402
+        """  # pylint: disable=line-too-long # noqa: E501 # noqa: DAR402
         # store locally the last execution parameters
-        self._last_execution_params = {
-            "postconditions_timeout": postconditions_timeout,
-            "verify_preconditions": verify_preconditions,
-            "verify_postconditions": verify_postconditions,
-        }
+        self._last_execution_params = SUTActionLastExecutionParams.from_params(
+            postconditions_timeout=postconditions_timeout,
+            verify_preconditions=verify_preconditions,
+            verify_postconditions=verify_postconditions,
+        )
+
         # setup and the action and prepare it to be executed
         self.logger.info(
             "Executing action %s: %s "
@@ -197,6 +273,9 @@ class SUTAction(abc.ABC):
 
         # execute the action
         self.execute_procedure()
+
+        # ensure the timeout is started
+        self._last_execution_params.postconditions_timeout.start()
 
         # verify the postconditions
         if verify_postconditions:

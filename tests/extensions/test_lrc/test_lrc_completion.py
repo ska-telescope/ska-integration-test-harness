@@ -10,6 +10,7 @@ from tests.actions.utils.mock_device_proxy import create_device_proxy_mock
 from tests.actions.utils.mock_event_tracer import add_event
 
 
+@pytest.mark.platform
 @pytest.mark.extensions
 class TestAssertLRCCompletion:
     """Unit tests for the AssertLRCCompletion class.

@@ -35,6 +35,7 @@ class MockTracerAction(TracerAction):
         return "A dummy procedure that accomplishes nothing."
 
 
+@pytest.mark.platform
 @pytest.mark.core
 class TestTracerAction:
     """Unit tests for the TracerAction class.

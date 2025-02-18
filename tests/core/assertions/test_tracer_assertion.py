@@ -32,6 +32,7 @@ class MockTracerAssertion(TracerAssertion):
         return "A dummy assumption that accomplishes nothing."
 
 
+@pytest.mark.platform
 @pytest.mark.core
 class TestTracerAssertion:
     """Unit tests for the TracerAssertion class.

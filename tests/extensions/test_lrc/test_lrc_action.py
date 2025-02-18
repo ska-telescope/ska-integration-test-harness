@@ -19,6 +19,7 @@ from tests.utils import assert_elapsed_time_is_closed_to
 from ...core.actions.utils import create_state_change_assertion
 
 
+@pytest.mark.platform
 @pytest.mark.extensions
 class TestTangoLRCAction:
     """Unit tests for the TangoLRCAction class.

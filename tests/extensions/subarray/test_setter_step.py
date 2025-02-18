@@ -1,11 +1,13 @@
 """Unit tests for the ObsStateSetterStep class."""
 
-from unittest.mock import MagicMock
-
 import pytest
 from assertpy import assert_that
 from ska_control_model import ObsState
+from ska_tango_testing.integration.assertions import ChainedAssertionsTimeout
 
+from ska_integration_test_harness.core.actions.sut_action import (
+    SUTActionLastExecutionParams,
+)
 from ska_integration_test_harness.core.assertions.dev_state_changes import (
     AssertDevicesStateChanges,
 )
@@ -38,6 +40,7 @@ from ska_integration_test_harness.extensions.subarray.steps import (
 from .utils import MockSubarraySystem, MockTangoLRCActionPatcher
 
 
+@pytest.mark.platform
 @pytest.mark.extensions
 class TestObsStateSetterStep:
     """Unit tests for the ObsStateSetterStep class.
@@ -765,13 +768,15 @@ class TestObsStateSetterStep:
             },
         )
         # simulate being in an execution context
-        mock_timeout = MagicMock()
+        mock_timeout = ChainedAssertionsTimeout(10)
         # pylint: disable=protected-access
-        setter._last_execution_params = {
-            "postconditions_timeout": mock_timeout,
-            "verify_preconditions": False,
-            "verify_postconditions": False,
-        }
+        setter._last_execution_params = (
+            SUTActionLastExecutionParams.from_params(
+                postconditions_timeout=mock_timeout,
+                verify_preconditions=False,
+                verify_postconditions=False,
+            )
+        )
 
         patcher = MockTangoLRCActionPatcher()
         with patcher.patch():

@@ -254,8 +254,8 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
         )
         command_action.set_logging(self.is_logging_enabled())
         command_action.execute(
-            self._last_execution_params["postconditions_timeout"],
-            self._last_execution_params["verify_preconditions"],
+            self._last_execution_params.postconditions_timeout,
+            self._last_execution_params.verify_preconditions,
             # (postconditions are always verified by the command action,
             # independently of the value of the parameter)
             True,

@@ -16,6 +16,7 @@ from tests.core.actions.utils import (
 )
 
 
+@pytest.mark.platform
 @pytest.mark.core
 class TestSUTActionSequence:
     """Unit tests for the SUTActionSequence class.

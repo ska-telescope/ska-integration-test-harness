@@ -20,6 +20,7 @@ from ska_integration_test_harness.extensions.subarray.commands_factory import ( 
 from .utils import MockSubarraySystem
 
 
+@pytest.mark.platform
 @pytest.mark.extensions
 class TestObsStateCommandsFactory:
     """Unit tests for the observation state commands factory.

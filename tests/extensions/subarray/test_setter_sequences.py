@@ -125,6 +125,7 @@ def assert_command_and_postcondition(
     assert_command_has_postcondition_for_state(commands[index], expected_state)
 
 
+@pytest.mark.platform
 @pytest.mark.extensions
 class TestObsStateSetterSequences:
     """Test to verify the setter calls the correct commands sequences.

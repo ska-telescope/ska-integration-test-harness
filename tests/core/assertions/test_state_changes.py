@@ -10,6 +10,7 @@ from tests.actions.utils.mock_device_proxy import create_device_proxy_mock
 from tests.actions.utils.mock_event_tracer import add_event, delayed_add_event
 
 
+@pytest.mark.platform
 @pytest.mark.core
 class TestAssertDevicesStateChanges:
     """Unit tests for the AssertDevicesStateChange class.

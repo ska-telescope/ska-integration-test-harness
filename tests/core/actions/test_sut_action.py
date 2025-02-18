@@ -8,6 +8,7 @@ from assertpy import assert_that
 from .utils import MockSUTAction, assert_action_logged_execution
 
 
+@pytest.mark.platform
 @pytest.mark.core
 class TestSUTAction:
     """Unit tests for the SUTAction class.

@@ -27,6 +27,7 @@ class MockObsStateSetterStep(ObsStateSetterStep):
         """Do nothing."""
 
 
+@pytest.mark.platform
 @pytest.mark.extensions
 class TestObsStateSetter:
     """Unit tests for the ObsStateSetter class.

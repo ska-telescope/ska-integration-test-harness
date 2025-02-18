@@ -10,6 +10,7 @@ from ska_integration_test_harness.core.actions.command_action import (
 )
 
 
+@pytest.mark.platform
 @pytest.mark.core
 class TestTangoCommandAction:
     """Unit tests for the TangoCommandAction class."""

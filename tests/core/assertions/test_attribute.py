@@ -9,6 +9,7 @@ from ska_integration_test_harness.core.assertions.dev_are_in_state import (
 from tests.actions.utils.mock_device_proxy import create_device_proxy_mock
 
 
+@pytest.mark.platform
 @pytest.mark.core
 class TestAssertDevicesAreInState:
     """Unit tests for the AssertDevicesAreInState class."""
