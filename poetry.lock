@@ -1841,8 +1841,8 @@ files = [
 [package.dependencies]
 numpy = [
     {version = ">=1.22.4", markers = "python_version < \"3.11\""},
-    {version = ">=1.23.2", markers = "python_version == \"3.11\""},
     {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
+    {version = ">=1.23.2", markers = "python_version == \"3.11\""},
 ]
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
@@ -2381,8 +2381,8 @@ astroid = ">=3.3.4,<=3.4.0-dev0"
 colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
 dill = [
     {version = ">=0.2", markers = "python_version < \"3.11\""},
-    {version = ">=0.3.6", markers = "python_version >= \"3.11\" and python_version < \"3.12\""},
     {version = ">=0.3.7", markers = "python_version >= \"3.12\""},
+    {version = ">=0.3.6", markers = "python_version >= \"3.11\" and python_version < \"3.12\""},
 ]
 isort = ">=4.2.5,<5.13.0 || >5.13.0,<6"
 mccabe = ">=0.6,<0.8"
@@ -2931,7 +2931,7 @@ pytango = ">=9.4.2 <11.0.0"
 type = "git"
 url = "https://gitlab.com/ska-telescope/ska-tango-testing.git"
 reference = "sst-1022-refactor-tracer-and-add-stop-condition"
-resolved_reference = "69dbc080b23d1acf38ab128596220a6aa4f650a6"
+resolved_reference = "1fcee8e38a4b310989b9bea692eddeda562e8c4f"
 
 [[package]]
 name = "snowballstemmer"
