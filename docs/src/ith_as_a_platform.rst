@@ -113,13 +113,6 @@ the `ska-integration-test-harness <https://gitlab.com/ska-telescope/ska-integrat
 Contributions to this layer are welcome, provided they meet the
 Core layer’s quality and unit-testing standards.
 
-Development Process
-^^^^^^^^^^^^^^^^^^^^
-
-The development of this new structure will be incremental and driven by
-the needs of the teams. At present, we are collaborating with the CREAM
-team to implement a Core and Common Extensions suitable for testing
-*CSP.LMC* in Low.
 
 ITH Components and Building Blocks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -152,12 +145,82 @@ mechanism provided by
 `SKA Tango Testing <https://developer.skao.int/projects/ska-tango-testing/en/latest/>`_,
 which serves as the basis for the ITH as a Platform.
 
+Development Process
+^^^^^^^^^^^^^^^^^^^^
+
+The development of this new structure will be incremental and guided by 
+the needs of the teams. At present, we are collaborating with the CREAM 
+team to implement a Core and Common Extensions framework suitable for testing 
+*CSP.LMC* in Low.
+
+The first increment includes the following three elements:
+
+- **For the Core layer**: A framework to represent interactions with the 
+  SUT as **Actions** and **Assertions**.
+- **For the Common Extensions layer**:
+
+  - an Action to send **Tango Long Running Commands**, synchronise on 
+    their completion, and fail if any errors are reported in the events;
+  - utilities to generate Actions to send 
+    **Tango Commands to Subarray Devices**, along with 
+    utilities to **reset a Subarray-based SUT** to a known state from 
+    any initial state.
 
 Actions, Assertions and Synchronisation
 ---------------------------------------
 
-TODO: introduce the idea of actions, assertions and synchronisation. For
-the moment, read:
+The first logical building block to consider is the **Action**. An Action 
+is a structured representation of an interaction with the SUT. Concretely, 
+it can be any operation you may wish to perform on the SUT, such as sending 
+a command, setting an attribute, or orchestrating something more complex.
+
+We assume that most interactions with the SUT, whether simple or complex, 
+can be represented as a sequence of the following three +1 steps:
+
+1. The **verification of certain pre-conditions**, which must be satisfied 
+   before the action can be executed (e.g., ensuring the SUT is in a 
+   specific known state).
+2. The **execution of the action procedure** itself 
+   (e.g., sending a command, setting an attribute, etc.).
+3. The **verification of certain post-conditions**, which are expected to be 
+   met following a successful action execution (e.g., confirming the SUT has 
+   reached a given target state).
+
+As we are working with distributed systems where interactions are highly 
+event-based, post-conditions will typically need to be **verified within 
+a timeout**. This is because the SUT may take time to reach the expected 
+state, and waiting indefinitely is not practical. In this sense, 
+post-condition verification is a form of **synchronisation**.
+
+Additionally, since we are dealing with an event-based system, an action 
+may require a **setup** phase to prepare for execution and condition 
+verification. This setup phase may involve subscribing to certain events 
+or clearing existing events to prevent false positives or negatives in 
+verifications, thereby ensuring that the action can be executed multiple times.
+
+In ITH as a Platform, we provide a base class for actions 
+(:py:class:`~ska_integration_test_harness.core.actions.SUTAction`) that 
+implements the fundamental structure of an action, including setup, 
+pre-conditions, post-conditions, and timeout handling. This base class is 
+designed to be extended by custom actions, allowing users to implement 
+specific interaction logic for their SUT.
+
+Since some requirements may be common across teams, we also provide 
+ready-to-use actions in both the 
+:py:mod:`~ska_integration_test_harness.core` layer and the 
+:py:mod:`~ska_integration_test_harness.extensions` layer. For example, 
+the :py:class:`~ska_integration_test_harness.extensions.lrc.TangoLRCAction` 
+is a pre-built action that sends a Tango Long Running Command to a device, 
+waits for its completion, and synchronises with certain device state changes.
+
+From your test code (whether in your customisation of the Test Harness or 
+within your tests), you can utilise these ready-to-use actions, or you can 
+create your own custom actions by extending the base class and implementing 
+the necessary extension points.
+
+|ith-platform-actions|
+
+The core logic of actions is implemented in the following modules:
 
 - :py:mod:`ska_integration_test_harness.core.actions`
 - :py:mod:`ska_integration_test_harness.core.assertions`
@@ -512,3 +575,6 @@ Subarray Orchestration Common Extensions
 ------------------------------------------
 
 TODO: introduce the subarray common extension
+
+
+.. |ith-platform-actions| image:: uml-docs/ith-platform-actions.png

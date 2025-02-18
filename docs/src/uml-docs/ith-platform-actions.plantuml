@@ -1,0 +1,101 @@
+@startuml
+skinparam linetype ortho
+
+namespace ska_integration_test_harness.core.actions {
+    abstract class SUTAction {
+        + execute(timeout: SupportsFloat, ...): None
+        + setup(): None
+        + verify_preconditions(): None
+        + verify_postconditions(timeout: SupportsFloat): None
+        + name(): str
+        + describe(): str
+        + {abstract} execute_procedure(): None
+    }
+}
+
+namespace ska_integration_test_harness.extensions.lrc {
+    class TangoLRCAction {
+        + target_device
+        + command_name
+        + command_param
+        + sync_lrc: bool
+        + execute_procedure(): None
+        + describe(): str
+        + add_postconditions(...)
+        + add_lrc_completion_to_postconditions()
+    }
+}
+
+namespace ska_integration_test_harness.core.assertions {
+    class AssertDevicesStateChanges {
+        + devices: list[tango.DeviceProxy]
+        + attribute_name: str
+        + attribute_value
+        + ...
+    }
+}
+
+namespace your_test_repository {
+
+    class YourCustomAction {
+        + your attributes here
+        + execute_procedure(): None
+        + describe(): str
+        + verify_postconditions(timeout: SupportsFloat): None
+    }
+
+    class YourTestHarnesOrTestCode {
+    }
+}
+
+
+
+YourCustomAction --up--|> SUTAction
+TangoLRCAction -up-|> SUTAction
+YourTestHarnesOrTestCode .up.> YourCustomAction : Use
+YourTestHarnesOrTestCode ..> TangoLRCAction : Use
+TangoLRCAction ..> AssertDevicesStateChanges : Use
+
+note right of SUTAction
+SUTAction <-- a base class for operations over a SUT
+
+- may have preconditions
+- may have post conditions (synchronisation)
+- has a procedure
+- is executed within a timeout
+
+execute() orchestrates the execution calling in order setup(), 
+verify_preconditions(), execute_procedure(), verify_postconditions().
+Meanwhile, it handles things like producing semantic logging, ensuring 
+a timeout object is available and correctly configured, etc.
+
+Subclasses may extend the base class and fill the extension points.
+execute_procedure() is the only compulsory extension point. 
+All the other are optional.
+
+To represent particular interactions with the SUT, you may want to
+create custom actions that extend SUTAction for your test code. Alternatively,
+you can use the ready-to-use implementations available in the
+extensions package.
+end note
+
+note right of TangoLRCAction
+In Common Extensions, you may find some ready-to-use implementations
+that cover common use cases.
+
+A very common use case is sending Tango LongRunningCommands 
+to devices and then synchronizing on some device state changes 
+and on the LRC successful completion. The TangoLRCAction is
+a ready-to-use implementation for this use case, that extends
+SUTAction (actually, it extends a subclass of a subclass of SUTAction) and
+provides the logic to:
+
+- send a Tango command to a device
+- wait for the LRC to complete
+- wait for some device state changes
+- monitor the events for LRC errors
+
+This class is available in extensions.lrc and you can directly use it
+in your test code.
+end note
+@enduml
