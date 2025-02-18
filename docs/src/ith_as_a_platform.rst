@@ -212,6 +212,11 @@ ready-to-use actions in both the
 the :py:class:`~ska_integration_test_harness.extensions.lrc.TangoLRCAction` 
 is a pre-built action that sends a Tango Long Running Command to a device, 
 waits for its completion, and synchronises with certain device state changes.
+Another more sophisticated example is the
+:py:class:`~ska_integration_test_harness.extensions.subarray.ObsStateSetter`
+action, that move a Subarray-based SUT to a
+desired target :py:class:`~ska_control_model.ObsState` starting from
+any initial state.
 
 From your test code (whether in your customisation of the Test Harness or 
 within your tests), you can utilise these ready-to-use actions, or you can 
