@@ -86,7 +86,8 @@ class MockSUTAction(SUTAction):
         self.preconditions_verified = False
         self.procedure_executed = False
         self.postconditions_verified = False
-        self.last_timeout = None
+        self.last_timeout_value = None
+        self.last_timeout_object = None
 
     def setup(self) -> None:
         self.setup_called = True
@@ -102,7 +103,8 @@ class MockSUTAction(SUTAction):
         self.procedure_executed = True
 
     def verify_postconditions(self, timeout: SupportsFloat = 0) -> None:
-        self.last_timeout = float(timeout)
+        self.last_timeout_value = float(timeout)
+        self.last_timeout_object = timeout
         if self.fail_postconditions:
             raise AssertionError("Postconditions failed")
         self.postconditions_verified = True

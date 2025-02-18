@@ -285,7 +285,10 @@ class SUTAction(abc.ABC):
                 self.name(),
                 float(postconditions_timeout),
             )
-            self.verify_postconditions(timeout=postconditions_timeout)
+            self.verify_postconditions(
+                # pass the timeout (as an object)
+                timeout=self._last_execution_params.postconditions_timeout
+            )
 
         # successful completion
         self.logger.info(

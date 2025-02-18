@@ -216,8 +216,8 @@ class TestSUTActionSequence:
         sequence.add_actions(action1, action2)
         sequence.execute(postconditions_timeout=10)
 
-        assert_that(action1.last_timeout).is_close_to(10, 0.1)
-        assert_that(action2.last_timeout).is_close_to(10, 0.1)
+        assert_that(action1.last_timeout_value).is_close_to(10, 0.1)
+        assert_that(action2.last_timeout_value).is_close_to(10, 0.1)
 
     @staticmethod
     def test_sequence_timeout_is_shared_between_actions():
@@ -238,5 +238,5 @@ class TestSUTActionSequence:
         sequence.add_actions(action1, action2)
         sequence.execute(postconditions_timeout=3)
 
-        assert_that(action1.last_timeout).is_close_to(3, 0.1)
-        assert_that(action2.last_timeout).is_close_to(2.5, 0.1)
+        assert_that(action1.last_timeout_value).is_close_to(3, 0.1)
+        assert_that(action2.last_timeout_value).is_close_to(2.5, 0.1)
