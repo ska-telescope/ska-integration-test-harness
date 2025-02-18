@@ -225,7 +225,7 @@ desired states are reached. To achieve this, we proceed as follows:
         AssertDevicesAreInState(
             devices=subarray_devices,
             attribute_name="obsState",
-            expected_value=ObsState.EMPTY,
+            attribute_value=ObsState.EMPTY,
         ),
     )
 
@@ -236,13 +236,13 @@ desired states are reached. To achieve this, we proceed as follows:
         AssertDevicesStateChanges(
             devices=subarray_devices,
             attribute_name="obsState",
-            expected_value=ObsState.RESOURCING,
+            attribute_value=ObsState.RESOURCING,
         ),
         # Expect a state change in the devices to the IDLE state
         AssertDevicesStateChanges(
             devices=subarray_devices,
             attribute_name="obsState",
-            expected_value=ObsState.IDLE,
+            attribute_value=ObsState.IDLE,
             previous_value=ObsState.RESOURCING,
         ),
     )
