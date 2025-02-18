@@ -280,9 +280,9 @@ class ObsStateSetter(SUTAction, abc.ABC):
         ``FAULT`` and ``RESETTING``.
         """
 
-        # TODO: create a separate step runner that runs the steps
-        # and takes care of tracking which step are executed and
-        # the states of the system
+        # TODO (idea for the future): create a separate step runner
+        # that runs the steps and takes care of tracking which step are
+        # executed and the states of the system
         # e.g., I could potentially generate in case of errors messages like:
         # followed path:
         # - EMPTY -> RESOURCING (ObsStateSetterStepFromEmpty)

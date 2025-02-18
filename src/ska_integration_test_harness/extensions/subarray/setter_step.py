@@ -83,11 +83,6 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
     that allows to send commands to the right subarray and synchronise
     on the right transient or quiescent state, dealing also with LRC
     completion and LRC errors.
-
-    TODO: conclude. Essentially this will become the action that does
-    the step while ObsStateSetter will become a coordinator. tests will
-    adjust accordingly (most of the existent will be on this class, the
-    remaining on the coordinator).
     """  # pylint: disable=line-too-long # noqa: E501
 
     def __init__(
@@ -287,7 +282,8 @@ class ObsStateSetterStep(SUTAction, abc.ABC):
         Moreover, the LRC action is already configured to stop early if any
         LRC error is detected.
 
-        TODO: if I add in factory something like "does command support
+        TODO (idea for the future): if I add in factory something like
+        "does command support
         transient state?" I could here synchronise on:
         ``transient -> quiescent -> LRC completion``
         instead of just ``quiescent -> LRC completion``. Actually I don't
