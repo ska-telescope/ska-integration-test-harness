@@ -14,24 +14,24 @@ Long Running Command (LRC) module
     :members:
     :undoc-members:
 
-Subarray module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. Subarray module
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: ska_integration_test_harness.extensions.subarray
-    :members:
-    :undoc-members:
+.. .. automodule:: ska_integration_test_harness.extensions.subarray
+..     :members:
+..     :undoc-members:
 
-Subarray Setter Steps implementation
-"""""""""""""""""""""""""""""""""""""""
+.. Subarray Setter Steps implementation
+.. """""""""""""""""""""""""""""""""""""""
 
-.. automodule:: ska_integration_test_harness.extensions.subarray.steps
-    :members:
-    :undoc-members:
+.. .. automodule:: ska_integration_test_harness.extensions.subarray.steps
+..     :members:
+..     :undoc-members:
 
-Subarray Exeptions
-"""""""""""""""""""""
+.. Subarray Exceptions
+.. """""""""""""""""""""
 
-.. automodule:: ska_integration_test_harness.extensions.subarray.exceptions
-    :members:
-    :undoc-members:
+.. .. automodule:: ska_integration_test_harness.extensions.subarray.exceptions
+..     :members:
+..     :undoc-members:
 
