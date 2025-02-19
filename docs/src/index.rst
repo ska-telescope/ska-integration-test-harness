@@ -14,5 +14,6 @@ of production or emulated SKA subsystems.
    extend_and_apply_ith
    api/index
    ith_as_a_platform 
+   platform-concepts/index
    api/core2_api
    api/extension2_api
