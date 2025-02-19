@@ -211,12 +211,12 @@ class SUTAction(abc.ABC):
         1. :py:meth:`setup` is called to prepare the action to be executed
            (and reset eventual internal resources).
         2. :py:meth:`verify_preconditions` is called to check if the
-            preconditions are satisfied. If the preconditions are not
-            satisfied, an exception is raised.
+           preconditions are satisfied. If the preconditions are not
+           satisfied, an exception is raised.
         3. :py:meth:`execute_procedure` is called to act on the SUT.
         4. :py:meth:`verify_postconditions` is called to check if the
-            postconditions are satisfied (within the given ``timeout``).
-            If the postconditions are not satisfied, an exception is raised.
+           postconditions are satisfied (within the given ``timeout``).
+           If the postconditions are not satisfied, an exception is raised.
 
         An action is supposed to be executable multiple times, given the
         preconditions are satisfied.
@@ -245,6 +245,7 @@ class SUTAction(abc.ABC):
         :param verify_postconditions: True if the postconditions should be
             verified after executing the action, False otherwise. By default,
             the postconditions are verified.
+        :rtype: None
         :raises: AssertionError if the preconditions or postconditions are
             not satisfied. Additional exceptions can be raised by the
             :py:meth:`execute_procedure` method if the action fails.
@@ -343,6 +344,8 @@ class SUTAction(abc.ABC):
         - in the docstring of the method, specify the resources that
           are set up (and briefly recap also what is done by superclasses,
           potentially referencing the superclasses method docstring)
+
+        :rtype: None
         """
 
     def verify_preconditions(self) -> None:
@@ -370,8 +373,9 @@ class SUTAction(abc.ABC):
           is verified (and briefly recap also what is done by superclasses,
           potentially referencing the superclasses method docstring)
 
+        :rtype: None
         :raises: AssertionError if the preconditions are not satisfied.
-        """  # noqa: DAR402
+        """
 
     @abc.abstractmethod
     def execute_procedure(self) -> None:
@@ -398,6 +402,7 @@ class SUTAction(abc.ABC):
         - describe in the docstring what the action does (this method
           docstring, but also the class docstring)
 
+        :rtype: None
         :raises: AssertionError if the action fails.
         """
 
@@ -433,6 +438,7 @@ class SUTAction(abc.ABC):
 
         :param timeout: the time in seconds to wait for the postconditions to
           be verified. If not specified, it defaults to 0.
+        :rtype: None
         :raises: AssertionError if the postconditions are not satisfied.
         """
 
@@ -450,8 +456,6 @@ class SUTAction(abc.ABC):
         a your custom name. Make it be just 1 or few more words. We don't
         really suggest to override this method unless you have a good reason
         to do so (override instead the :py:meth:`description` method).
-
-        , override instead the :py:meth:`description` method.
         """
         return self.__class__.__name__
 
