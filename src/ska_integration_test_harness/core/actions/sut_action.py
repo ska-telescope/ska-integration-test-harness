@@ -22,8 +22,8 @@ class SUTActionLastExecutionParams:
       converted to a
       :py:class:`ska_tango_testing.integration.assertions.ChainedAssertionsTimeout`
       object
-    - a flag that tells if preconditions should be verified
-    - a flag that tells if postconditions should be verified
+    - a flag that indicates if preconditions should be verified
+    - a flag that indicates if postconditions should be verified
     """  # pylint: disable=line-too-long # noqa: E501
 
     postconditions_timeout: ChainedAssertionsTimeout = (
@@ -178,7 +178,7 @@ class SUTAction(abc.ABC):
     """
 
     def __init__(self) -> None:
-        """Initialize the action.
+        """Initialise the action.
 
         By default, the action logs the execution messages.
         """
