@@ -1,30 +1,12 @@
-
-
 ITH as a Platform: Introduction
 ================================
 
-Temporary documentation for the ITH as a Platform idea. This document
-will be used to collect ideas and show example of how the ITH as a Platform
-can be used and extended.
+The Integration Test Harness (ITH) is evolving from a monolithic structure
+to a versatile platform. This transformation aims to provide generic tools
+for integration testing any Tango-based system within the SKA project
 
-A quick guide to find stuff:
-
-- API documentation for the core: :py:mod:`ska_integration_test_harness.core`
-- API documentation for the extensions:
-  :py:mod:`ska_integration_test_harness.extensions`
-- git branch & MR where I am working on this:
-  
-  - Merge Request: `MR 13 <https://gitlab.com/ska-telescope/ska-integration-test-harness/-/merge_requests/13>`_
-  - Git Branch `sst-1018-ith-as-platform-actions <https://gitlab.com/ska-telescope/ska-integration-test-harness/-/tree/sst-1018-ith-as-platform-actions>`_
-
-- Jira tickets:
-  
-  - `SST-1018 (generic ticket) <https://jira.skatelescope.org/browse/SST-1018>`_
-  - `SST-1019 (CSP.LMC collaboration) <https://jira.skatelescope.org/browse/SST-1019>`_
-
-- Miro board: `Refactoring to a Generic Integration Test Harness <https://miro.com/app/board/uXjVL7Eop40=/>`_
-- Code snippets examples: :doc:`./ith_as_a_platform` (this document)
-
+For detailed concepts and practical examples,
+refer to the section: :doc:`platform-concepts/index`.
 
 From a Monolith to a Platform
 --------------------------------
