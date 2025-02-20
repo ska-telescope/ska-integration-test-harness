@@ -25,6 +25,7 @@ class CSPWrapper(SubsystemWrapper, abc.ABC):
         self.csp_subarray = tango.DeviceProxy(
             csp_configuration.csp_subarray1_name
         )
+        self.config = csp_configuration
 
     # --------------------------------------------------------------
     # Subsystem properties definition
@@ -43,25 +44,17 @@ class CSPWrapper(SubsystemWrapper, abc.ABC):
     # --------------------------------------------------------------
     # Specific CSP methods and properties
 
-    @abc.abstractmethod
-    def move_to_on(self) -> None:
-        """Move the CSP to the ON state."""
-
-    @abc.abstractmethod
-    def move_to_off(self) -> None:
-        """Move the CSP to the OFF state."""
-
-    @abc.abstractmethod
     def tear_down(self) -> None:
         """Tear down the CSP (if needed)."""
 
-    @abc.abstractmethod
     def clear_command_call(self) -> None:
         """Clear the command call on the CSP (if needed)."""
 
     def set_subarray_id(self, subarray_id: str) -> None:
         """Set the subarray ID on the CSP subarray."""
         subarray_id = str(subarray_id).zfill(2)
+        target = "low" if self.config.supports_low() else "mid"
+
         self.csp_subarray = tango.DeviceProxy(
-            f"mid-csp/subarray/{subarray_id}"
+            f"{target}-csp/subarray/{subarray_id}"
         )

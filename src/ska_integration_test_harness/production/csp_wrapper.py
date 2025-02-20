@@ -1,6 +1,8 @@
 """A wrapper for a production CSP."""
 
+import tango
 from assertpy import assert_that
+from ska_control_model import AdminMode, HealthState
 from ska_tango_testing.integration import TangoEventTracer
 from tango import DevState
 
@@ -30,47 +32,84 @@ class ProductionCSPWrapper(CSPWrapper):
         super().__init__(csp_configuration)
         self.all_production = all_production
 
+        if self.config.supports_low():
+
+            # (at the moment only in Low) PST is needed
+            self.pst = tango.DeviceProxy(self.config.pst_name)
+
+            # ensure the Admin mode is ONLINE
+            self.ensure_admin_mode_online()
+
+            # set the CBF devices devices too
+            # TODO: read them from configuration
+            self.cbf_proc1 = tango.DeviceProxy("low-cbf/processor/0.0.0")
+            self.cbf_proc2 = tango.DeviceProxy("low-cbf/processor/0.0.1")
+            self.cbf_controller = tango.DeviceProxy("low-cbf/control/0")
+            self.cbf_subarray1 = tango.DeviceProxy("low-cbf/subarray/01")
+
+    def ensure_admin_mode_online(self) -> None:
+        """Ensure the CSP master is in ONLINE admin mode."""
+        if self.csp_master.adminMode != AdminMode.ONLINE:
+
+            # set ADMIN mode to ONLINE
+            self.csp_master.adminMode = AdminMode.ONLINE
+
+            # wait for the CSP admin to transition to ONLINE
+            tracer = TangoEventTracer(
+                {
+                    "healthState": HealthState,
+                }
+            )
+
+            # NOTE: in this case, the subscriptions should be deferred since
+            # before setting the admin mode to ONLINE devices are
+            # not reachable. This is a special case, and it's an interesting
+            # to investigate how the refactoring may handle it.
+
+            tracer.subscribe_event(self.csp_master, "state")
+            tracer.subscribe_event(self.csp_master, "healthState")
+            tracer.subscribe_event(self.csp_subarray, "state")
+            tracer.subscribe_event(self.csp_subarray, "healthState")
+
+            # TODO: check if it's really necessary to wait for the PST?
+            # It may be good to remove this (probably outdated) patches
+            # Maybe also remove fully the PST references
+            tracer.subscribe_event(self.pst, "state")
+            tracer.subscribe_event(self.pst, "healthState")
+
+            assert_that(tracer).described_as(
+                "FAIL IN CSP SETUP: "
+                "The CSP components are supposed to be reachable and in "
+                "their expected state."
+            ).within_timeout(10).has_change_event_occurred(
+                self.csp_master, "state", DevState.ON
+            ).has_change_event_occurred(
+                self.csp_subarray, "state", DevState.ON
+            ).has_change_event_occurred(
+                self.pst, "state", DevState.OFF
+            ).has_change_event_occurred(
+                self.csp_master, "healthState", HealthState.UNKNOWN
+            ).has_change_event_occurred(
+                self.csp_subarray, "healthState", HealthState.UNKNOWN
+            ).has_change_event_occurred(
+                self.pst, "healthState", HealthState.UNKNOWN
+            )
+
+        assert_that(self.csp_master.adminMode).described_as(
+            "FAIL IN CSP SETUP: The CSP LMC controller "
+            "admin mode is supposed to be ONLINE."
+        ).is_equal_to(AdminMode.ONLINE)
+        assert_that(self.csp_subarray.adminMode).described_as(
+            "FAIL IN CSP SETUP: The CSP LMC subarray "
+            "admin mode is supposed to be ONLINE."
+        ).is_equal_to(AdminMode.ONLINE)
+        assert_that(self.pst.adminMode).described_as(
+            "FAIL IN CSP SETUP: The CSP PST admin mode "
+            "is supposed to be ONLINE."
+        ).is_equal_to(AdminMode.ONLINE)
+
     # --------------------------------------------------------------
     # Subsystem properties definition
 
     def is_emulated(self) -> bool:
         return False
-
-    # --------------------------------------------------------------
-    # Specific CSP methods and properties
-
-    WAIT_FOR_OFF_TIMEOUT = 50
-
-    def move_to_on(self) -> None:
-        if not self.all_production:
-            # NOTE: in old code this line was BEFORE
-            # self.central_node.TelescopeOn(). Empirically,
-            # it seems the order not to matter, but I am not sure.
-
-            event_tracer = TangoEventTracer()
-            event_tracer.subscribe_event(self.csp_master, "State")
-
-            # NOTE: why CSP should be in OFF state when I want the telescope
-            # to be ON? It seems a contradiction.
-            if self.csp_master.adminMode != 0:
-                self.csp_master.adminMode = 0
-
-            # wait for the CSP master to be in OFF state
-            assert_that(event_tracer).described_as(
-                "FAIL IN MoveToOn PROCEDURE: "
-                f"CSP master ({self.csp_master.dev_name()}) "
-                "is supposed to be in OFF state."
-            ).within_timeout(
-                self.WAIT_FOR_OFF_TIMEOUT
-            ).has_change_event_occurred(
-                self.csp_master, "State", DevState.OFF
-            )
-
-    def move_to_off(self) -> None:
-        """Move to OFF for production test wrapper does nothing."""
-
-    def tear_down(self) -> None:
-        """Tear down the CSP (not needed)."""
-
-    def clear_command_call(self) -> None:
-        """Clear the command call on the CSP (not needed)."""

@@ -6,6 +6,7 @@ from ska_integration_test_harness.common_utils.tango_devices_info import (
 )
 from ska_integration_test_harness.structure.csp_wrapper import CSPWrapper
 from ska_integration_test_harness.structure.dishes_wrapper import DishesWrapper
+from ska_integration_test_harness.structure.mccs_wrapper import MCCSWrapper
 from ska_integration_test_harness.structure.sdp_wrapper import SDPWrapper
 from ska_integration_test_harness.structure.subsystem_wrapper import (
     SubsystemWrapper,
@@ -79,6 +80,7 @@ class TelescopeWrapper:
     _sdp: SDPWrapper | None = None
     _csp: CSPWrapper | None = None
     _dishes: DishesWrapper | None = None
+    _mccs: MCCSWrapper | None = None
 
     @property
     def tmc(self) -> TMCWrapper:
@@ -118,7 +120,30 @@ class TelescopeWrapper:
         :raises ValueError: If one or more subsystems are missing.
         """
         self.fail_if_not_set_up()
+
+        if not self.tmc.supports_mid():
+            raise ValueError(
+                "Dishes subsystem is not available in the current setup."
+            )
+
         return self._dishes
+
+    @property
+    def mccs(self) -> MCCSWrapper:
+        """A wrapper for the MCCS subsystem and its devices.
+
+        :return: The MCCSDevices instance.
+
+        :raises ValueError: If one or more subsystems are missing.
+        """
+        self.fail_if_not_set_up()
+
+        if not self.tmc.supports_low():
+            raise ValueError(
+                "MCCS subsystem is not available in the current setup."
+            )
+
+        return self._mccs
 
     # -----------------------------------------------------------------
     # Recap generation tools
@@ -128,6 +153,42 @@ class TelescopeWrapper:
 
     (Used for recap purposes).
     """
+
+    def get_required_subsystems(self) -> dict[SubsystemWrapper]:
+        """Get all the required subsystems (based on the TMC configuration).
+
+        :return: The list of all the required subsystems.
+        """
+        required_subsystems = {
+            "TMC": self._tmc,
+            "SDP": self._sdp,
+            "CSP": self._csp,
+        }
+
+        if self._tmc and self._tmc.supports_mid():
+            required_subsystems["Dishes"] = self._dishes
+
+        if self._tmc and self._tmc.supports_low():
+            required_subsystems["MCCS"] = self._mccs
+
+        return required_subsystems
+
+    def get_active_subsystems(self) -> list[SubsystemWrapper]:
+        """Get all the active subsystems.
+
+        :return: The list of all the subsystems.
+        """
+        return [
+            subsystem
+            for subsystem in [
+                self._tmc,
+                self._sdp,
+                self._csp,
+                self._dishes,
+                self._mccs,
+            ]
+            if subsystem and isinstance(subsystem, SubsystemWrapper)
+        ]
 
     def get_subsystems_recap(self, update_devices_info: bool = True) -> str:
         """Get a recap of the active subsystems and their devices.
@@ -151,10 +212,8 @@ class TelescopeWrapper:
                     f"error:\n{error}\n\n"
                 )
 
-        for subsystem in [self._tmc, self._sdp, self._csp, self._dishes]:
-            if subsystem:
-                assert isinstance(subsystem, SubsystemWrapper)
-                recap += subsystem.get_recap(self.devices_info_provider) + "\n"
+        for subsystem in self.get_active_subsystems():
+            recap += subsystem.get_recap(self.devices_info_provider) + "\n"
 
         if recap == "":
             recap = "No subsystems are currently set up."
@@ -167,24 +226,28 @@ class TelescopeWrapper:
     actions_default_timeout: int = 60
     """The default timeout (in seconds) used in the telescope actions."""
 
+    # pylint: disable=too-many-arguments disable=too-many-positional-arguments
     def set_up(
         self,
         tmc: TMCWrapper,
         sdp: SDPWrapper,
         csp: CSPWrapper,
-        dishes: DishesWrapper,
+        dishes: DishesWrapper | None = None,
+        mccs: MCCSWrapper | None = None,
     ) -> None:
         """Initialise the telescope test structure with the given devices.
 
         :param tmc: The TMC subsystem wrapper.
         :param sdp: The SDP subsystem wrapper.
         :param csp: The CSP subsystem wrapper.
-        :param dishes: The Dishes subsystem wrapper.
+        :param dishes: The Dishes subsystem wrapper (required for mid).
+        :param mccs: The MCCS subsystem wrapper (required for low).
         """
         self._tmc = tmc
         self._sdp = sdp
         self._csp = csp
         self._dishes = dishes
+        self._mccs = mccs
 
     def tear_down(self) -> None:
         """Tear down the entire telescope test structure.
@@ -193,27 +256,41 @@ class TelescopeWrapper:
         """
         self.fail_if_not_set_up()
 
+        # REFACTOR NOTE: tear_down may be worth of being an action
+
         self.tmc.tear_down()
         self.sdp.tear_down()
         self.csp.tear_down()
-        self.dishes.tear_down()
+
+        if self.tmc.supports_mid():
+            self.dishes.tear_down()
+
+        if self.tmc.supports_low():
+            self.mccs.tear_down()
 
     def fail_if_not_set_up(self) -> None:
-        """Fail if the telescope test structure is not set up.
+        """Fail if a valid structure is not set up.
 
         :raises ValueError: If one or more subsystems are missing.
         """
-        if self._tmc and self._sdp and self._csp and self._dishes:
-            return
+        required_subsystems = self.get_required_subsystems()
 
-        raise ValueError(
-            "Telescope test structure is not set up "
-            "(one or more subsystems are missing). subsystems: "
-            f"TMC={self._tmc}, SDP={self._sdp}, "
-            f"CSP={self._csp}, Dishes={self._dishes}.\n"
-            "Please set up the telescope test structure first calling the "
-            "`set_up` method."
-        )
+        missing_subsystems = [
+            subsystem_name
+            for subsystem_name, subsystem in required_subsystems.items()
+            if not subsystem
+        ]
+
+        if missing_subsystems:
+            raise ValueError(
+                "Telescope test structure is not correctly set up for "
+                f"{'low' if self._tmc.supports_low() else 'mid'} target. "
+                "The following (required) subsystems are missing: "
+                f"{missing_subsystems}.\n"
+                "Please set up the telescope test structure first calling the "
+                "`set_up` method and ensure the following "
+                f"subsystems are added: {list(required_subsystems.keys())}."
+            )
 
     # -----------------------------------------------------------------
     # Other "technical" commands
@@ -227,9 +304,18 @@ class TelescopeWrapper:
         """
         self.fail_if_not_set_up()
 
+        # REFACTOR NOTE: this is something that has a lot to do with the
+        # fact of a system being emulated or not. Can we maybe have something
+        # like `s.clear_command_call() for s in self.get_emulated()`?
+
         self.sdp.clear_command_call()
         self.csp.clear_command_call()
-        self.dishes.clear_command_call()
+
+        if self.tmc.supports_mid():
+            self.dishes.clear_command_call()
+
+        if self.tmc.supports_low():
+            self.mccs.clear_command_call()
 
     def set_subarray_id(self, subarray_id: int) -> None:
         """Create subarray devices for the requested subarray.
@@ -242,4 +328,9 @@ class TelescopeWrapper:
 
         self.sdp.set_subarray_id(subarray_id)
         self.csp.set_subarray_id(subarray_id)
+
+        # if we are in low, also MCCS has a subarray
+        if self.tmc.supports_low():
+            self.mccs.set_subarray_id(subarray_id)
+
         self.tmc.set_subarray_id(subarray_id)

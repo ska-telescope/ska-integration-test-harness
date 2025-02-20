@@ -31,6 +31,8 @@ from tests.actions.utils.mock_device_proxy import create_device_proxy_mock
 class MockProductionTMCWrapper(ProductionTMCWrapper):
     """Mock implementation of ProductionTMCWrapper for testing."""
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self) -> None:
         """Init does nothing."""
         # pylint: disable=super-init-not-called
@@ -54,6 +56,9 @@ class MockProductionTMCWrapper(ProductionTMCWrapper):
         ]
         self.csp_subarray_leaf_node = None
         self.sdp_subarray_leaf_node = None
+        self.config = MagicMock()
+        self.config.supports_mid.return_value = True
+        self.config.supports_low.return_value = False
 
 
 class MockEmulatedSDPWrapper(EmulatedSDPWrapper):
@@ -64,6 +69,9 @@ class MockEmulatedSDPWrapper(EmulatedSDPWrapper):
         # pylint: disable=super-init-not-called
         self.sdp_master = create_device_proxy_mock("mid-sdp/control/0")
         self.sdp_subarray = create_device_proxy_mock("mid-sdp/subarray/1")
+        self.config = MagicMock()
+        self.config.supports_mid.return_value = True
+        self.config.supports_low.return_value = False
 
 
 class MockProductionCSPWrapper(ProductionCSPWrapper):
@@ -74,6 +82,9 @@ class MockProductionCSPWrapper(ProductionCSPWrapper):
         # pylint: disable=super-init-not-called
         self.csp_master = create_device_proxy_mock("mid-csp/elt/master")
         self.csp_subarray = create_device_proxy_mock("mid-csp/elt/subarray_1")
+        self.config = MagicMock()
+        self.config.supports_mid.return_value = True
+        self.config.supports_low.return_value = False
 
 
 class MockEmulatedDishesWrapper(EmulatedDishesWrapper):
@@ -105,6 +116,9 @@ class MockEmulatedDishesWrapper(EmulatedDishesWrapper):
         self.dish_master_dict["dish_100"].dev_name.return_value = (
             "ska100/elt/master"
         )
+        self.config = MagicMock()
+        self.config.supports_mid.return_value = True
+        self.config.supports_low.return_value = False
 
 
 class TestTelescopeWrapper:
@@ -169,8 +183,9 @@ class TestTelescopeWrapper:
 
         assert_that(str(exc_info.value)).described_as(
             "TMC is expected to be set up, but not SDP, CSP, and Dishes."
-        ).contains("SDP=None", "CSP=None", "Dishes=None").does_not_contain(
-            "TMC=None"
+        ).contains("are missing: ['SDP', 'CSP', 'Dishes']").contains(
+            "ensure the following subsystems are added: "
+            "['TMC', 'SDP', 'CSP', 'Dishes']"
         )
 
         with pytest.raises(ValueError):

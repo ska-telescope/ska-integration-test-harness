@@ -14,8 +14,6 @@ from ska_integration_test_harness.inputs.json_input import JSONInput
 class SubarrayScan(TelescopeCommandAction):
     """Invoke Scan command on subarray Node."""
 
-    # TODO: scan may be too a TransientQuiescentCommandAction
-
     def __init__(self, scan_input: JSONInput):
         super().__init__()
         self.target_device = self.telescope.tmc.subarray_node

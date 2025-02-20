@@ -32,6 +32,21 @@ class SubsystemConfiguration(abc.ABC):
 
     is_emulated: bool = True
 
+    target: str = "mid"
+    """
+    The target environment for the subsystem.
+
+    It can be "mid" (default) or "low".
+    """
+
+    def supports_mid(self) -> bool:
+        """Check if the configuration supports the mid target environment."""
+        return self.target == "mid"
+
+    def supports_low(self) -> bool:
+        """Check if the configuration supports the low target environment."""
+        return self.target == "low"
+
     @abc.abstractmethod
     def get_device_names(self) -> dict[str, str]:
         """Return all the device names.
@@ -65,6 +80,7 @@ class TMCConfiguration(SubsystemConfiguration):
     # Controllers leaf nodes names
     tmc_csp_master_leaf_node_name: str = None
     tmc_sdp_master_leaf_node_name: str = None
+    tmc_mccs_master_leaf_node_name: str | None = None
 
     # Subarray nodes names
     subarrays_names: dict[int, str] = field(default_factory=dict)
@@ -72,6 +88,9 @@ class TMCConfiguration(SubsystemConfiguration):
         default_factory=dict
     )
     tmc_sdp_subarrays_leaf_nodes_names: dict[int, str] = field(
+        default_factory=dict
+    )
+    tmc_mccs_subarrays_leaf_nodes_names: dict[int, str] = field(
         default_factory=dict
     )
 
@@ -90,17 +109,32 @@ class TMCConfiguration(SubsystemConfiguration):
         """Get the name of the first subarray node."""
         return self.tmc_csp_subarrays_leaf_nodes_names.get(1)
 
+    @property
+    def tmc_mccs_subarray_leaf_node_name(self) -> str:
+        """Get the name of the first subarray node."""
+        return self.tmc_mccs_subarrays_leaf_nodes_names.get(1)
+
     # Dish leaf nodes
     tmc_dish_leaf_node1_name: str = None
     tmc_dish_leaf_node2_name: str = None
     tmc_dish_leaf_node3_name: str = None
     tmc_dish_leaf_node4_name: str = None
 
-    # NOTE: in TMC hierarchy, is it more sensed to group by master/subarray
-    # or by device type?
+    target: str = "mid"
+    """
+    The target environment for the TMC. It can be "mid" (default) or "low".
+    """
+
+    def supports_mid(self) -> bool:
+        """Check if the configuration supports the mid target environment."""
+        return self.target == "mid"
+
+    def supports_low(self) -> bool:
+        """Check if the configuration supports the low target environment."""
+        return self.target == "low"
 
     def get_device_names(self) -> dict[str, str]:
-        return {
+        all_devices = {
             "centralnode_name": self.centralnode_name,
             "tmc_subarraynode1_name": self.tmc_subarraynode1_name,
             "tmc_csp_master_leaf_node_name": (
@@ -115,14 +149,61 @@ class TMCConfiguration(SubsystemConfiguration):
             "tmc_sdp_subarray_leaf_node_name": (
                 self.tmc_sdp_subarray_leaf_node_name
             ),
-            "tmc_dish_leaf_node1_name": self.tmc_dish_leaf_node1_name,
-            "tmc_dish_leaf_node2_name": self.tmc_dish_leaf_node2_name,
-            "tmc_dish_leaf_node3_name": self.tmc_dish_leaf_node3_name,
-            "tmc_dish_leaf_node4_name": self.tmc_dish_leaf_node4_name,
         }
 
+        if self.supports_mid():
+            all_devices.update(
+                {
+                    "tmc_dish_leaf_node1_name": self.tmc_dish_leaf_node1_name,
+                    "tmc_dish_leaf_node2_name": self.tmc_dish_leaf_node2_name,
+                    "tmc_dish_leaf_node3_name": self.tmc_dish_leaf_node3_name,
+                    "tmc_dish_leaf_node4_name": self.tmc_dish_leaf_node4_name,
+                }
+            )
+
+        if self.supports_low():
+            all_devices.update(
+                {
+                    "tmc_mccs_master_leaf_node_name": (
+                        self.tmc_mccs_master_leaf_node_name
+                    ),
+                    "tmc_mccs_subarray_leaf_node_name": (
+                        self.tmc_mccs_subarray_leaf_node_name
+                    ),
+                }
+            )
+
+        return all_devices
+
     def mandatory_attributes(self) -> list[str]:
-        return self.get_device_names().keys()
+        mandatory_device_names = [
+            "centralnode_name",
+            "tmc_subarraynode1_name",
+            "tmc_csp_master_leaf_node_name",
+            "tmc_csp_subarray_leaf_node_name",
+            "tmc_sdp_master_leaf_node_name",
+            "tmc_sdp_subarray_leaf_node_name",
+        ]
+
+        if self.supports_mid():
+            mandatory_device_names.extend(
+                [
+                    "tmc_dish_leaf_node1_name",
+                    "tmc_dish_leaf_node2_name",
+                    "tmc_dish_leaf_node3_name",
+                    "tmc_dish_leaf_node4_name",
+                ]
+            )
+
+        if self.supports_low():
+            mandatory_device_names.extend(
+                [
+                    "tmc_mccs_master_leaf_node_name",
+                    "tmc_mccs_subarray_leaf_node_name",
+                ]
+            )
+
+        return mandatory_device_names
 
 
 @dataclass
@@ -136,19 +217,36 @@ class CSPConfiguration(SubsystemConfiguration):
     csp_master_name: str = None
     csp_subarrays_names: dict[int, str] = field(default_factory=dict)
 
+    # At the moment the following are required just for low
+    pst_name: str | None = None
+
     @property
     def csp_subarray1_name(self) -> str:
         """Get the name of the first subarray."""
         return self.csp_subarrays_names.get(1)
 
     def get_device_names(self) -> dict[str, str]:
-        return {
+        dev_names = {
             "csp_master_name": self.csp_master_name,
             "csp_subarray1_name": self.csp_subarray1_name,
         }
 
+        # NOTE: maybe PST is available only after the Online mode thing
+        # removed that check for now, since it fails.
+
+        return dev_names
+
     def mandatory_attributes(self) -> list[str]:
-        return self.get_device_names().keys()
+        attrs = [
+            "csp_master_name",
+            "csp_subarray1_name",
+        ]
+
+        # TODO: check if it's really necessary and if it isn't, remove it
+        if not self.is_emulated and self.supports_low():
+            attrs.append("pst_name")
+
+        return attrs
 
 
 @dataclass
@@ -197,6 +295,32 @@ class DishesConfiguration(SubsystemConfiguration):
             "dish_master2_name": self.dish_master2_name,
             "dish_master3_name": self.dish_master3_name,
             "dish_master4_name": self.dish_master4_name,
+        }
+
+    def mandatory_attributes(self) -> list[str]:
+        return self.get_device_names().keys()
+
+
+@dataclass
+class MCCSConfiguration(SubsystemConfiguration):
+    """Configuration for the MCCS.
+
+    It contains the names of the various devices that make up the MCCS.
+    It is initialised with default values.
+    """
+
+    mccs_controller_name: str = None
+    mccs_subarrays_names: dict[int, str] = field(default_factory=dict)
+
+    @property
+    def mccs_subarray1_name(self) -> str:
+        """Get the name of the first subarray."""
+        return self.mccs_subarrays_names.get(1)
+
+    def get_device_names(self) -> dict[str, str]:
+        return {
+            "mccs_controller_name": self.mccs_controller_name,
+            "mccs_subarray1_name": self.mccs_subarray1_name,
         }
 
     def mandatory_attributes(self) -> list[str]:

@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.3.0 (20th February 2025)
+
+- **SST-1012**: make the ITH to support TMC-X in Low integration tests.
+
 ## v0.2.4 (11th November 2024)
 
 - **SST-982**: make various actions support the check for the LRC completion

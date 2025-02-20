@@ -29,18 +29,6 @@ class SubarrayRunCommand(TelescopeCommandAction):
     expected obsState before it terminates.
     """
 
-    # TODO: unit test (and possibly see where it is appropriate to use)
-
-    # TODO: of course, this can be merged with CentralNodeRunCommand
-    # into something more generic. Talking more in general, those two
-    # actions can potentially be base-classes for most of the
-    # command-based actions
-    # (e.g., CentralNodeAssignResources, SubarrayConfigure, SubarrayScan, etc.)
-    # With an appropriate refactoring (and a bit of thinking), we can
-    # probably replace most of those classes at all.
-    # To conclude, if you read this I know there is space for more
-    # generalisation here, but this will be object of a future MR.
-
     def __init__(
         self,
         command_name: str,

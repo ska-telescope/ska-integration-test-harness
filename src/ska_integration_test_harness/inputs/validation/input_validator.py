@@ -31,7 +31,9 @@ class InputValidator(abc.ABC):
         """The prefix used to log the validation messages."""
 
     @abc.abstractmethod
-    def validate_inputs_presence(self, inputs: TestHarnessInputs) -> None:
+    def validate_inputs_presence(
+        self, inputs: TestHarnessInputs, is_mid: bool = True
+    ) -> None:
         """Validate the presence of the required inputs.
 
         A given set of inputs must contain all the needed inputs to run
@@ -81,7 +83,6 @@ class BasicInputValidator(InputValidator):
         super().__init__(logger)
 
         self.required_inputs = [
-            TestHarnessInputs.InputName.DEFAULT_VCC_CONFIG,
             TestHarnessInputs.InputName.ASSIGN,
             TestHarnessInputs.InputName.CONFIGURE,
             TestHarnessInputs.InputName.SCAN,
@@ -89,11 +90,22 @@ class BasicInputValidator(InputValidator):
         ]
         """The list of the required inputs."""
 
-    def validate_inputs_presence(self, inputs: TestHarnessInputs) -> None:
+        self.additional_inputs_for_mid = [
+            TestHarnessInputs.InputName.DEFAULT_VCC_CONFIG,
+        ]
+        """The list of the additional inputs required for the MID."""
+
+    def validate_inputs_presence(
+        self, inputs: TestHarnessInputs, is_mid: bool = True
+    ) -> None:
         """Validate the presence of the required inputs."""
         self._log_info("Checking the presence of the required inputs:")
 
-        for input_name in self.required_inputs:
+        required_inputs = self.required_inputs
+        if is_mid:
+            required_inputs += self.additional_inputs_for_mid
+
+        for input_name in required_inputs:
             if not inputs.get_input(input_name, fail_if_missing=False):
                 raise ValueError(
                     f"The required default input {input_name} is missing. "

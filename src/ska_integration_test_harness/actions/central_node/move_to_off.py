@@ -21,12 +21,14 @@ from tango import DevState
 from ska_integration_test_harness.actions.command_action import (
     TelescopeCommandAction,
 )
+from ska_integration_test_harness.actions.expected_event import (
+    ExpectedStateChange,
+)
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
 )
 from ska_integration_test_harness.actions.utils.termination_conditions import (
     dishes_have_dish_mode,
-    master_and_subarray_devices_have_state,
 )
 from ska_integration_test_harness.inputs.dish_mode import DishMode
 
@@ -42,7 +44,7 @@ class MoveToOffCommand(TelescopeCommandAction):
     def _action(self):
         self._log("Moving the central node to OFF state")
         res = self.telescope.tmc.central_node.TelescopeOff()
-        self.telescope.csp.move_to_off()
+        # self.telescope.csp.move_to_off()
         return res
 
     def termination_condition(self):
@@ -60,17 +62,41 @@ class MoveToOffCommand(TelescopeCommandAction):
 
         Devices are in OFF state, dishes are in STANDBY_LP mode.
         """
-        # The central node, SDP subarray, SDP master, CSP subarray, CSP master
-        # and all dishes should be in OFF state.
-        expected_events = master_and_subarray_devices_have_state(
-            self.telescope,
-            DevState.OFF,
-        )
+        expected_events = [
+            # The SDP controller and subarray nodes should be in OFF state
+            ExpectedStateChange(
+                self.telescope.sdp.sdp_subarray, "State", DevState.OFF
+            ),
+            ExpectedStateChange(
+                self.telescope.sdp.sdp_master, "State", DevState.OFF
+            ),
+        ]
 
-        # All dishes should be in STANDBY_LP mode
-        expected_events += dishes_have_dish_mode(
-            self.telescope, DishMode.STANDBY_LP
-        )
+        if self.telescope.tmc.supports_mid():
+            expected_events += [
+                # (in Mid) CSP controller should be in OFF state
+                ExpectedStateChange(
+                    self.telescope.csp.csp_master,
+                    "State",
+                    DevState.OFF,
+                ),
+                # (in Mid) central node should be in OFF state
+                ExpectedStateChange(
+                    self.telescope.tmc.central_node,
+                    "telescopeState",
+                    DevState.OFF,
+                ),
+            ]
+
+            # (in Mid) All dishes should be in STANDBY_LP mode
+            expected_events += dishes_have_dish_mode(
+                self.telescope, DishMode.STANDBY_LP
+            )
+
+        # In Low:
+        # - TMC and CSP are always ON
+        # - MCCS maybe also (?)
+        # - probably nothing more
 
         return expected_events
 

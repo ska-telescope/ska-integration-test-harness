@@ -34,6 +34,8 @@ class TestTestHarnessBuilder:
     since they will be needed only in teardown procedures or similar).
     """
 
+    # pylint: disable=too-many-public-methods
+
     @pytest.fixture(autouse=True)
     def telescope_wrapper_is_not_yet_defined(self):
         """Ensure the telescope wrapper is not yet defined."""
@@ -55,6 +57,16 @@ class TestTestHarnessBuilder:
     def missing_key_config_file(self) -> str:
         """Create a path to a configuration file with a missing key."""
         return f"{self.CONFIG_DATA_DIR}/missing_tmc_centralnode_name.yaml"
+
+    @pytest.fixture
+    def valid_low_config_file(self) -> str:
+        """Create a path to a valid low configuration file."""
+        return f"{self.CONFIG_DATA_DIR}/valid_test_harness_config_low.yaml"
+
+    @pytest.fixture
+    def missing_mccs_config_file(self) -> str:
+        """Create a path to a configuration file with missing MCCS config."""
+        return f"{self.CONFIG_DATA_DIR}/missing_mccs_low.yaml"
 
     @pytest.fixture
     def valid_json_input(self) -> JSONInput:
@@ -115,6 +127,35 @@ class TestTestHarnessBuilder:
         """When no configuration is set, the validation raises a ValueError."""
         builder = TestHarnessBuilder()
         assert_that(builder.is_config_validated()).is_false()
+
+        with pytest.raises(ValueError):
+            builder.validate_configurations()
+        assert_that(builder.is_config_validated()).is_false()
+
+    def test_validate_config_with_valid_low_config_terminates_successfully(
+        self, valid_low_config_file: str
+    ):
+        """When a valid low configuration file is passed, validation succeeds.
+
+        (HAPPY PATH)
+        """
+        builder = TestHarnessBuilder()
+
+        builder.read_config_file(valid_low_config_file)
+
+        with patch("tango.DeviceProxy", MagicMock()):
+            builder.validate_configurations()
+
+        assert_that(builder.is_config_validated()).is_true()
+
+    def test_validate_config_low_with_missing_mccs_config_raises_value_error(
+        self, missing_mccs_config_file: str
+    ):
+        """When a low config file misses the MCCS section,
+        the validation raises a ValueError."""
+        builder = TestHarnessBuilder()
+
+        builder.read_config_file(missing_mccs_config_file)
 
         with pytest.raises(ValueError):
             builder.validate_configurations()
@@ -193,6 +234,50 @@ class TestTestHarnessBuilder:
         """When no default input is set, the validation raises a ValueError."""
         builder = TestHarnessBuilder()
         assert_that(builder.are_default_inputs_validated()).is_false()
+
+        with pytest.raises(ValueError):
+            builder.validate_default_inputs()
+        assert_that(builder.are_default_inputs_validated()).is_false()
+
+    def test_validate_input_without_default_vcc_is_successful_when_in_low(
+        self, valid_json_input: JSONInput, valid_low_config_file: str
+    ):
+        """When in Low mode, the default VCC input is not required.
+
+        (HAPPY PATH)
+        """
+        builder = TestHarnessBuilder().read_config_file(valid_low_config_file)
+
+        builder.set_default_inputs(
+            TestHarnessInputs(
+                assign_input=valid_json_input,
+                configure_input=valid_json_input,
+                release_input=valid_json_input,
+                scan_input=valid_json_input,
+            )
+        )
+
+        builder.validate_default_inputs()
+
+        assert_that(builder.are_default_inputs_validated()).is_true()
+
+    def test_validate_default_vcc_is_required_in_mid_mode(
+        self, valid_json_input: JSONInput, config_file: str
+    ):
+        """When in Mid mode, the default VCC input is required.
+
+        (HAPPY PATH)
+        """
+        builder = TestHarnessBuilder().read_config_file(config_file)
+
+        builder.set_default_inputs(
+            TestHarnessInputs(
+                assign_input=valid_json_input,
+                configure_input=valid_json_input,
+                release_input=valid_json_input,
+                scan_input=valid_json_input,
+            )
+        )
 
         with pytest.raises(ValueError):
             builder.validate_default_inputs()

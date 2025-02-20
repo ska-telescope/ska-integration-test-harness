@@ -25,7 +25,7 @@ class SetStandby(TelescopeCommandAction):
     def _action(self):
         self._log("Setting the central node to STANDBY state")
         res = self.telescope.tmc.central_node.TelescopeStandby()
-        self.telescope.csp.move_to_off()
+        # self.telescope.csp.move_to_off()
         return res
 
     def termination_condition(self):
@@ -35,18 +35,40 @@ class SetStandby(TelescopeCommandAction):
         # LRC must terminate
         expected_events = super().termination_condition()
 
-        # The central node should be in STANDBY state
+        # The central node should be in STANDBY state (when )
         expected_events += [
+            # The SDP controller should be in STANDBY
+            # and subarray nodes should be in OFF state
             ExpectedStateChange(
-                self.telescope.tmc.central_node,
-                "telescopeState",
-                DevState.STANDBY,
+                self.telescope.sdp.sdp_subarray,
+                "State",
+                DevState.OFF,
+            ),
+            ExpectedStateChange(
+                self.telescope.sdp.sdp_master, "State", DevState.STANDBY
             ),
         ]
 
-        # All dishes should be in STANDBY_LP mode
-        expected_events += dishes_have_dish_mode(
-            self.telescope, DishMode.STANDBY_LP
-        )
+        if self.telescope.tmc.supports_mid():
+            expected_events += [
+                # (in Mid) CSP controller should be in STANDBY state
+                ExpectedStateChange(
+                    self.telescope.csp.csp_master, "State", DevState.STANDBY
+                ),
+                # (in Mid) central node should be in STANDBY state
+                ExpectedStateChange(
+                    self.telescope.tmc.central_node,
+                    "telescopeState",
+                    DevState.STANDBY,
+                ),
+            ]
+
+            # (in Mid) All dishes should be in STANDBY_LP mode
+            expected_events += dishes_have_dish_mode(
+                self.telescope, DishMode.STANDBY_LP
+            )
+
+        # In Low:
+        # (nothing)
 
         return expected_events

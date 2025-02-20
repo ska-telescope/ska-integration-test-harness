@@ -202,7 +202,12 @@ class TestHarnessBuilder:
         :raises ValueError: if some input is missing.
         """
         self._default_inputs_validated = False
-        self.input_validator.validate_inputs_presence(self.default_inputs)
+        self.input_validator.validate_inputs_presence(
+            self.default_inputs,
+            # if the configuration is not yet available we suppose to be in Mid
+            self.config.tmc_config is None
+            or self.config.tmc_config.supports_mid(),
+        )
         self.input_validator.validate_inputs_correctness(self.default_inputs)
 
         self._default_inputs_validated = True
