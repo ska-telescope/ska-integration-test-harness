@@ -3,15 +3,18 @@
 import abc
 import logging
 
-from ska_integration_test_harness.config.test_harness_config import (
-    TestHarnessConfiguration,
-)
-from ska_integration_test_harness.config.validation.subsys_config_validator import (  # pylint: disable=line-too-long # noqa: E501
+from ..test_harness_config import TestHarnessConfiguration
+from .subsys_config_validator import (
     DeviceNamesValidator,
     EmulationConsistencyValidator,
     RequiredFieldsValidator,
     SubsystemConfigurationValidator,
 )
+
+# REFACTOR NOTE: this configuration validator mechanism maybe it's a bit
+# of a overkill (or maybe also boilerplate). In the big refactoring
+# we could consider simplifying it (maybe just letting the configurations
+# validate themselves)
 
 
 class ConfigurationValidator(abc.ABC):
@@ -79,7 +82,8 @@ class BasicConfigurationValidator(ConfigurationValidator):
 
     This validator:
 
-    - checks the presence of TMC, CSP, SDP and the Dishes configurations
+    - checks the presence of TMC, CSP, SDP and Dishes or MCCS configurations
+      (depending on the target being Mid or Low)
     - ensure the required fields are set for each subsystem
     - ensure the device names are valid and that they point to reachable
       devices
@@ -89,14 +93,6 @@ class BasicConfigurationValidator(ConfigurationValidator):
     def __init__(self, logger: logging.Logger | None = None) -> None:
         super().__init__(logger)
 
-        self.required_subsystems = [
-            TestHarnessConfiguration.SubsystemName.TMC,
-            TestHarnessConfiguration.SubsystemName.CSP,
-            TestHarnessConfiguration.SubsystemName.SDP,
-            TestHarnessConfiguration.SubsystemName.DISHES,
-        ]
-        """Required subsystems."""
-
         self.subsystem_validators: SubsystemConfigurationValidator = [
             RequiredFieldsValidator(logger),
             DeviceNamesValidator(logger),
@@ -104,20 +100,56 @@ class BasicConfigurationValidator(ConfigurationValidator):
         ]
         """The validators used to validate the subsystem configurations."""
 
+    def _check_subsystems_presence(
+        self, config: TestHarnessConfiguration, subsystem_name: str
+    ) -> None:
+        """Check the presence of a subsystem in the configuration.
+
+        Everything is logged using the logger if available.
+
+        :param config: The configuration to check.
+        :param subsystem_name: The name of the subsystem to check.
+        :raises ValueError: If the subsystem is missing.
+        """
+        if not config.get_subsystem_config(subsystem_name):
+            raise ValueError(
+                f"The configuration for the subsystem '{subsystem_name}' "
+                "is missing which instead is required."
+            )
+
+        self._log_info(f"Required configuration for '{subsystem_name}': OK.")
+
     def validate_subsystems_presence(
         self, config: TestHarnessConfiguration
     ) -> None:
         """Validate the presence of TMC, CSP, SDP, and Dishes configs."""
         self._log_info("Checking the presence of the required subsystems.")
 
-        for subsystem in self.required_subsystems:
-            if not config.get_subsystem_config(subsystem):
-                raise ValueError(
-                    "The configuration for the subsystem "
-                    f"'{subsystem}' is missing which instead is required. "
-                    f"Required subsystems: {self.required_subsystems}"
-                )
-            self._log_info(f"Required configuration for '{subsystem}': OK.")
+        # TMC, CSP and SDP are always required
+        for subsystem in [
+            TestHarnessConfiguration.SubsystemName.TMC,
+            TestHarnessConfiguration.SubsystemName.CSP,
+            TestHarnessConfiguration.SubsystemName.SDP,
+        ]:
+            self._check_subsystems_presence(config, subsystem)
+
+        # Dishes is required only for the mid target
+        if config.tmc_config.supports_mid():
+            self._check_subsystems_presence(
+                config, TestHarnessConfiguration.SubsystemName.DISHES
+            )
+
+        # MCCS is required only for the low target
+        elif config.tmc_config.supports_low():
+            self._check_subsystems_presence(
+                config, TestHarnessConfiguration.SubsystemName.MCCS
+            )
+        else:
+            raise ValueError(
+                f"Invalid 'target' field: {config.tmc_config.target}. "
+                "It must be 'mid' or 'low'. You can leave it empty to "
+                "use the default value ('mid')."
+            )
 
         self._log_info("All the required subsystems are present.")
 

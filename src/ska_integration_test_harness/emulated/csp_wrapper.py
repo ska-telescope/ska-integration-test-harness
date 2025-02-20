@@ -1,6 +1,6 @@
 """A wrapper for an emulated CSP."""
 
-from tango import DevState
+from ska_control_model import AdminMode
 
 from ska_integration_test_harness.emulated.utils.teardown_helper import (  # pylint: disable=line-too-long # noqa: E501
     EmulatedTeardownHelper,
@@ -19,6 +19,13 @@ class EmulatedCSPWrapper(CSPWrapper):
     procedure for emulated devices.
     """
 
+    def __init__(self, csp_configuration):
+        super().__init__(csp_configuration)
+
+        # Set the admin mode for the CSP master and the CSP subarray
+        # (Now they emulate the real devices behaviour)
+        self.csp_master.adminMode = AdminMode.ONLINE
+
     # --------------------------------------------------------------
     # Subsystem properties definition
 
@@ -27,15 +34,6 @@ class EmulatedCSPWrapper(CSPWrapper):
 
     # --------------------------------------------------------------
     # Specific CSP methods and properties
-
-    def move_to_on(self) -> None:
-        # NOTE: in old code this line was AFTER
-        # self.central_node.TelescopeOn(). Empirically,
-        # it seems the order not to matter, but I am not sure.
-        self.csp_subarray.SetDirectState(DevState.ON)
-
-    def move_to_off(self) -> None:
-        self.csp_subarray.SetDirectState(DevState.OFF)
 
     def tear_down(self) -> None:
         """Tear down the CSP.

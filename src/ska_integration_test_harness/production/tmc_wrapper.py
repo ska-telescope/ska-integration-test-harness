@@ -11,8 +11,10 @@ from ..actions.central_node.central_node_release_resources import (
     CentralNodeReleaseResources,
 )
 from ..actions.central_node.move_to_off import MoveToOff
+from ..actions.central_node.set_standby import SetStandby
 from ..actions.subarray.force_change_of_obs_state import ForceChangeOfObsState
 from ..inputs.test_harness_inputs import TestHarnessInputs
+from ..structure.telescope_wrapper import TelescopeWrapper
 from ..structure.tmc_wrapper import TMCWrapper
 
 
@@ -59,7 +61,7 @@ class ProductionTMCWrapper(TMCWrapper):
         - Force the subarray state to EMPTY.
         - Move the central node to OFF.
         - Move the subarray to OFF.
-        - Load the default dish VCC configuration (if needed).
+        - Load the default dish VCC configuration (if needed and if in Mid).
         """
         self.logger.info(
             "Calling tear down for TMC (Starting subarray state: %s)",
@@ -79,22 +81,29 @@ class ProductionTMCWrapper(TMCWrapper):
             ObsState.EMPTY, self.default_commands_input
         ).execute()
 
-        # if source dish vcc config is empty or not matching with default
-        # dish vcc then load default dish vcc config
-        # CSP_SIMULATION_ENABLED condition will be removed after testing
-        # with real csp
-        expected_vcc_config = (
-            self.default_commands_input.default_vcc_config_input
-        )
-        if self.central_node.isDishVccConfigSet and (
-            not self.csp_master_leaf_node.sourceDishVccConfig
-            or not expected_vcc_config.is_equal_to_json(
-                self.csp_master_leaf_node.sourceDishVccConfig
+        # if we are in Mid, reset dishes config
+        if self.supports_mid():
+            # if source dish vcc config is empty or not matching with default
+            # dish vcc then load default dish vcc config
+            # CSP_SIMULATION_ENABLED condition will be removed after testing
+            # with real csp
+            expected_vcc_config = (
+                self.default_commands_input.default_vcc_config_input
             )
-        ):
-            CentralNodeLoadDishConfig(expected_vcc_config).execute()
+            if self.central_node.isDishVccConfigSet and (
+                not self.csp_master_leaf_node.sourceDishVccConfig
+                or not expected_vcc_config.is_equal_to_json(
+                    self.csp_master_leaf_node.sourceDishVccConfig
+                )
+            ):
+                CentralNodeLoadDishConfig(expected_vcc_config).execute()
 
-        # ensure the central node is in OFF state
-        MoveToOff().execute()
+        # ensure the central node is in OFF state (except from a special
+        # case where we are in Low and CSP is production, where I
+        # have to call a stand by)
+        if self.supports_low() and not TelescopeWrapper().csp.is_emulated():
+            SetStandby().execute()
+        else:
+            MoveToOff().execute()
 
         self.logger.info("TMC tear down completed.")

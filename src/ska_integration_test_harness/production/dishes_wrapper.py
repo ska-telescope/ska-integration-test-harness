@@ -46,9 +46,3 @@ class ProductionDishesWrapper(DishesWrapper):
         )
         self.dish1_dev_class = dish1_info.class_name
         self.dish1_dev_server = dish1_info.ds_full_name
-
-    def tear_down(self) -> None:
-        """Tear down the CSP (not needed)."""
-
-    def clear_command_call(self):
-        """Clear the command call on the Dishes (not needed)."""

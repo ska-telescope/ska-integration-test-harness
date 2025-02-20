@@ -6,6 +6,7 @@ from enum import Enum
 from ska_integration_test_harness.config.components_config import (
     CSPConfiguration,
     DishesConfiguration,
+    MCCSConfiguration,
     SDPConfiguration,
     SubsystemConfiguration,
     TMCConfiguration,
@@ -45,11 +46,13 @@ class TestHarnessConfiguration:
         CSP = "csp"
         SDP = "sdp"
         DISHES = "dishes"
+        MCCS = "mccs"
 
     tmc_config: TMCConfiguration | None = None
     csp_config: CSPConfiguration | None = None
     sdp_config: SDPConfiguration | None = None
     dishes_config: DishesConfiguration | None = None
+    mccs_config: MCCSConfiguration | None = None
 
     def get_included_subsystems(self) -> list[SubsystemConfiguration]:
         """Get the list of subsystems that are included in the configuration.

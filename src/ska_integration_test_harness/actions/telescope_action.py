@@ -384,8 +384,6 @@ class TelescopeAction(abc.ABC, Generic[T]):
 
         :return: The result of the action (optional)
         """
-        # TODO: make this class be a generic to permit to
-        # specify the return type of the _action method
 
     @abc.abstractmethod
     def termination_condition(self) -> list[ExpectedEvent]:

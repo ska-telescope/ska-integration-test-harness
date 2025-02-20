@@ -5,7 +5,7 @@ Extensions and specific logic API
 This section is a sort of enumeration of the main concrete *non-core*
 classes and components that are part of the 
 ska-integration-test-harness for testing
-TMC-CSP in Mid (at the time of writing).
+TMC-CSP in Mid and Low (at the time of writing).
 
 **IMPORTANT NOTE**: A very crucial difference from the core mechanisms
 section is that the classes and components described here are not unit

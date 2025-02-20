@@ -20,12 +20,14 @@ from tango import DevState
 from ska_integration_test_harness.actions.command_action import (
     TelescopeCommandAction,
 )
+from ska_integration_test_harness.actions.expected_event import (
+    ExpectedStateChange,
+)
 from ska_integration_test_harness.actions.telescope_action import (
     TelescopeAction,
 )
 from ska_integration_test_harness.actions.utils.termination_conditions import (
     dishes_have_dish_mode,
-    master_and_subarray_devices_have_state,
 )
 from ska_integration_test_harness.inputs.dish_mode import DishMode
 
@@ -62,17 +64,34 @@ class MoveToOnCommand(TelescopeCommandAction):
 
         Devices are in ON state, dishes are in STANDBY_FP mode.
         """
-        # The central node, SDP subarray, SDP master, CSP subarray, CSP master
-        # and all dishes should be in ON state.
-        expected_events = master_and_subarray_devices_have_state(
-            self.telescope,
-            DevState.ON,
-        )
+        expected_events = [
+            # The central node should be in ON state
+            ExpectedStateChange(
+                self.telescope.tmc.central_node,
+                "telescopeState",
+                DevState.ON,
+            ),
+            # The SDP controller and subarray nodes should be in ON state
+            ExpectedStateChange(
+                self.telescope.sdp.sdp_subarray, "State", DevState.ON
+            ),
+            ExpectedStateChange(
+                self.telescope.sdp.sdp_master, "State", DevState.ON
+            ),
+        ]
 
-        # All dishes should be in STANDBY_FP mode
-        expected_events += dishes_have_dish_mode(
-            self.telescope, DishMode.STANDBY_FP
-        )
+        if self.telescope.tmc.supports_mid():
+            # (in Mid) CSP controller is supposed to be in ON state
+            expected_events += [
+                ExpectedStateChange(
+                    self.telescope.csp.csp_master, "State", DevState.ON
+                )
+            ]
+
+            # (in Mid) All dishes should be in STANDBY_FP mode
+            expected_events += dishes_have_dish_mode(
+                self.telescope, DishMode.STANDBY_FP
+            )
 
         return expected_events
 

@@ -1,12 +1,12 @@
 """Generate some termination conditions for the subarray."""
 
-import tango
 from ska_control_model import ObsState
 
 from ska_integration_test_harness.actions.expected_event import (
     ExpectedEvent,
     ExpectedStateChange,
 )
+from ska_integration_test_harness.inputs.json_input import StrJSONInput
 from ska_integration_test_harness.structure.telescope_wrapper import (
     TelescopeWrapper,
 )
@@ -54,40 +54,12 @@ def all_subarrays_have_obs_state(
             ]
         )
 
-    return res
-
-
-def master_and_subarray_devices_have_state(
-    telescope: TelescopeWrapper, expected_state: tango.DevState
-) -> list[ExpectedEvent]:
-    """Termination condition for waiting devices to have a certain state.
-
-    Generate a termination condition for waiting all active master and
-    subarray devices (across TMC, CSP and SDP) to have a certain telescope
-    state. The involved devices are:
-
-    - TMC Central Node (telescopeState attribute)
-    - CSP Master Node (State attribute)
-    - SDP Subarray Node (State attribute)
-    - SDP Master Node (State attribute)
-
-    :param telescope: The telescope wrapper.
-    :param expected_state: The expected state.
-
-    :return: The termination condition, as a sequence of expected events.
-    """
-    res = [
-        ExpectedStateChange(
-            telescope.tmc.central_node,
-            "telescopeState",
-            expected_state,
-        ),
-        ExpectedStateChange(
-            telescope.sdp.sdp_subarray, "State", expected_state
-        ),
-        ExpectedStateChange(telescope.csp.csp_master, "State", expected_state),
-        ExpectedStateChange(telescope.sdp.sdp_master, "State", expected_state),
-    ]
+    if telescope.tmc.supports_low():
+        res.append(
+            ExpectedStateChange(
+                telescope.mccs.mccs_subarray, "obsState", expected_obs_state
+            )
+        )
 
     return res
 
@@ -100,36 +72,39 @@ def dishes_have_dish_mode(
     Generate a termination condition for waiting all active dishes to have a
     certain dish mode.
 
+
     :param telescope: The telescope wrapper.
     :param expected_dish_mode: The expected dish mode.
 
     :return: The termination condition, as a sequence of expected events.
     """
-    res = [
+    return [
         ExpectedStateChange(dish, "dishMode", expected_dish_mode)
         for dish in telescope.dishes.dish_master_list
     ]
-
-    return res
 
 
 def resources_are_released(telescope: TelescopeWrapper) -> list[ExpectedEvent]:
     """Termination condition to check that resources are released.
 
-    It extracts the assignedResources attribute value before and after the
-    action and checks that they are different.
+    The assignedResources attribute of the SubarrayNode should be empty.
 
     :param telescope: The telescope wrapper.
 
     :return: The termination condition, as a sequence of expected events.
     """
-    pre_action_attr_value = telescope.tmc.subarray_node.assignedResources
-
+    # there is an event that tells that resources are empty, as an empty tuple
+    # or as a tuple with an empty json string
+    # () or ('{}')
     return [
         ExpectedEvent(
             device=telescope.tmc.subarray_node,
             attribute="assignedResources",
-            predicate=lambda event: event.attribute_value
-            != pre_action_attr_value,
+            # predicate=lambda event: not event.attribute_value,
+            predicate=lambda event: len(event.attribute_value) == 0
+            or (
+                len(event.attribute_value) == 1
+                and not StrJSONInput(event.attribute_value[0]).as_dict()
+            ),
         )
     ]

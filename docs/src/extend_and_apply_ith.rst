@@ -2,9 +2,9 @@ How to Use and Extend
 ========================
 
 
-At the moment (October 2024) this harness has no well-defined
-extension points yet and it is pretty specific to the TMC-CSP
-integration tests in Mid. Based on feedback and on the evolution of the
+At the moment (February 2025) this harness has no well-defined
+extension points yet and it is pretty specific to the TMC-X
+integration tests in Mid and Low. Based on feedback and on the evolution of the
 project, the harness will be extended to be more flexible and to support
 more use cases.
 
@@ -17,8 +17,8 @@ How to extend this test harness (within the current limitations)
 ----------------------------------------------------------------
 
 Right now the test harness is designed for integration
-tests of the TMC with CSP in Mid. Probably, it is still capable of
-supporting TMC-X in Mid integrations tests.
+tests of the TMC in Mid and Low, so it's a bit specific (for TMC) and not yet
+generic.
 
 Even if it is not yet generic, it still supports some level of
 customisation. Within the current limitations, your main ways to extend
@@ -94,7 +94,7 @@ How you will be able to extend this test harness in the future
 --------------------------------------------------------------
 
 In the future, the test harness will be more flexible and will not be
-centered strictly on the TMC-X integration tests in Mid.
+centred strictly on the TMC-X integration tests in Mid and Low.
 
 Probably, there will be a generic *core*, made by an elastic
 infrastructure, the action mechanism, some generic and parametric
@@ -122,9 +122,12 @@ tests <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-integration/-/merge_
 to test the subarray-related operations on
 the TMC (with a production CSP and emulated SDP and Dishes).
 
-In October 2024, this test harness was used for 
+In October 2025, this test harness was used for 
 `this new set of TMC system tests <https://gitlab.com/ska-telescope/ska-sw-integration-testing/-/merge_requests/7/>`__,
 which run in an environment where TMC, CSP, SDP and Dishes are production
 subsystems.
 
+In January 2025, this test harness have been adapted to support Low
+TMC-all emulator tests. Here some examples used during debugging:
+`TMC-Low emulator tests <https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-low-integration/-/merge_requests/64>`__.
 

@@ -5,6 +5,7 @@ import abc
 from ska_integration_test_harness.config.components_config import (
     CSPConfiguration,
     DishesConfiguration,
+    MCCSConfiguration,
     SDPConfiguration,
     TMCConfiguration,
 )
@@ -47,15 +48,36 @@ class ConfigurationReader(abc.ABC):
         return: A collection of all the test harness configurations that
             have been found by the reader.
         """
-        return TestHarnessConfiguration(
-            tmc_config=self.get_tmc_configuration(),
-            csp_config=self.get_csp_configuration(),
-            sdp_config=self.get_sdp_configuration(),
-            dishes_config=self.get_dish_configuration(),
+
+        if self.get_target() == "mid":
+            return TestHarnessConfiguration(
+                tmc_config=self.get_tmc_configuration(),
+                csp_config=self.get_csp_configuration(),
+                sdp_config=self.get_sdp_configuration(),
+                dishes_config=self.get_dish_configuration(),
+            )
+        if self.get_target() == "low":
+            return TestHarnessConfiguration(
+                tmc_config=self.get_tmc_configuration(),
+                csp_config=self.get_csp_configuration(),
+                sdp_config=self.get_sdp_configuration(),
+                mccs_config=self.get_mccs_configuration(),
+            )
+        raise ValueError(
+            f"Invalid 'target' field: {self.get_target()}. "
+            "It must be 'mid' or 'low'. You can leave it empty to "
+            "use the default value ('mid')."
         )
 
     # -------------------------------------------------------------------------
     # Subsystems configuration readers
+
+    @abc.abstractmethod
+    def get_target(self) -> str:
+        """Get the target environment for the configuration.
+
+        return: The target environment for the configuration.
+        """
 
     @abc.abstractmethod
     def get_tmc_configuration(self) -> TMCConfiguration | None:
@@ -83,4 +105,11 @@ class ConfigurationReader(abc.ABC):
         """Get the configuration for the dishes.
 
         return: The dishes configuration (if any).
+        """
+
+    @abc.abstractmethod
+    def get_mccs_configuration(self) -> MCCSConfiguration | None:
+        """Get the configuration for the MCCS.
+
+        return: The MCCS configuration (if any).
         """

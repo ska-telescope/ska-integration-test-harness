@@ -18,6 +18,8 @@ from ska_integration_test_harness.structure.subsystem_wrapper import (
 class TMCWrapper(SubsystemWrapper, abc.ABC):
     """A wrapper for the TMC component."""
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, tmc_configuration: TMCConfiguration):
         """Initialise the TMC wrapper.
 
@@ -36,14 +38,32 @@ class TMCWrapper(SubsystemWrapper, abc.ABC):
         self.sdp_master_leaf_node = tango.DeviceProxy(
             tmc_configuration.tmc_sdp_master_leaf_node_name
         )
-        self.dish_leaf_node_list = [
-            tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node1_name),
-            tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node2_name),
-            tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node3_name),
-            tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node4_name),
-        ]
-        self.csp_subarray_leaf_node = None
-        self.sdp_subarray_leaf_node = None
+        self.csp_subarray_leaf_node = tango.DeviceProxy(
+            tmc_configuration.tmc_csp_subarray_leaf_node_name
+        )
+        self.sdp_subarray_leaf_node = tango.DeviceProxy(
+            tmc_configuration.tmc_sdp_subarray_leaf_node_name
+        )
+
+        if tmc_configuration.supports_mid():
+            self.dish_leaf_node_list = [
+                tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node1_name),
+                tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node2_name),
+                tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node3_name),
+                tango.DeviceProxy(tmc_configuration.tmc_dish_leaf_node4_name),
+            ]
+
+        if tmc_configuration.supports_low():
+            self.mccs_master_leaf_node = tango.DeviceProxy(
+                tmc_configuration.tmc_mccs_master_leaf_node_name
+            )
+            self.mccs_subarray_leaf_node = tango.DeviceProxy(
+                tmc_configuration.tmc_mccs_subarray_leaf_node_name
+            )
+
+        # TODO: Use a tango dev factory instead of DeviceProxy
+
+        self.config = tmc_configuration
 
     # --------------------------------------------------------------
     # Subsystem properties definition
@@ -59,10 +79,6 @@ class TMCWrapper(SubsystemWrapper, abc.ABC):
             "subarray_node": self.subarray_node,
             "csp_master_leaf_node": self.csp_master_leaf_node,
             "sdp_master_leaf_node": self.sdp_master_leaf_node,
-            "dish_leaf_node_001": self.dish_leaf_node_list[0],
-            "dish_leaf_node_036": self.dish_leaf_node_list[1],
-            "dish_leaf_node_063": self.dish_leaf_node_list[2],
-            "dish_leaf_node_100": self.dish_leaf_node_list[3],
         }
 
         if self.csp_subarray_leaf_node is not None:
@@ -70,6 +86,16 @@ class TMCWrapper(SubsystemWrapper, abc.ABC):
 
         if self.sdp_subarray_leaf_node is not None:
             res["sdp_subarray_leaf_node"] = self.sdp_subarray_leaf_node
+
+        if self.supports_mid():
+            res["dish_leaf_node_001"] = self.dish_leaf_node_list[0]
+            res["dish_leaf_node_036"] = self.dish_leaf_node_list[1]
+            res["dish_leaf_node_063"] = self.dish_leaf_node_list[2]
+            res["dish_leaf_node_100"] = self.dish_leaf_node_list[3]
+
+        if self.supports_low():
+            res["mccs_master_leaf_node"] = self.mccs_master_leaf_node
+            res["mccs_subarray_leaf_node"] = self.mccs_subarray_leaf_node
 
         return res
 
@@ -100,17 +126,24 @@ class TMCWrapper(SubsystemWrapper, abc.ABC):
 
     def set_subarray_id(self, subarray_id: int):
         """Set subarray ID"""
-
+        target = "low" if self.config.supports_low() else "mid"
         self.subarray_node = tango.DeviceProxy(
-            f"ska_mid/tm_subarray_node/{subarray_id}"
+            f"ska_{target}/tm_subarray_node/{subarray_id}"
         )
 
-        # NOTE: why zfill(2) after the first DeviceProxy creation?
+        # adapt subarray ID name to the format used in the leaf nodes
         subarray_id = str(subarray_id).zfill(2)
-
         self.csp_subarray_leaf_node = tango.DeviceProxy(
-            f"ska_mid/tm_leaf_node/csp_subarray{subarray_id}"
+            f"ska_{target}/tm_leaf_node/csp_subarray{subarray_id}"
         )
         self.sdp_subarray_leaf_node = tango.DeviceProxy(
-            f"ska_mid/tm_leaf_node/sdp_subarray{subarray_id}"
+            f"ska_{target}/tm_leaf_node/sdp_subarray{subarray_id}"
         )
+
+    def supports_low(self) -> bool:
+        """Check if the configuration supports the low target environment."""
+        return self.config.supports_low()
+
+    def supports_mid(self) -> bool:
+        """Check if the configuration supports the mid target environment."""
+        return self.config.supports_mid()
