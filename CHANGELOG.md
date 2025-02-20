@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.3.0 (to be released)
+## v0.3.0 (20th February 2025)
 
 - **SST-1012**: make the ITH to support TMC-X in Low integration tests.
 
