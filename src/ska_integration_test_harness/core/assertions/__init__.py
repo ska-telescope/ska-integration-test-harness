@@ -48,7 +48,7 @@ If you are writing a test case, especially if you are in a THEN step,
 you should prefer to directly use the assertion methods provided by
 `assertpy <https://assertpy.github.io/docs.html>`_ and the
 `ska-tango-testing <https://developer.skao.int/projects/ska-tango-testing/en/latest/guide/integration/getting_started.html>`_
-utilities (this to facilitate test readability and debugging).
+utilities (to facilitate test readability and debugging).
 
 So, given those premises, **how are assertions implemented in the ITH?**
 In this module we provide essentially two base classes for assertions:
