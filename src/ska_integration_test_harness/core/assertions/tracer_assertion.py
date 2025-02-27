@@ -276,8 +276,6 @@ class TracerAssertion(SUTAssertion, abc.ABC):
             ]:
                 context.has_change_event_occurred(device, attr, value)
 
-
-
         :return: the assertpy context to use for the assertion
         """
         return (

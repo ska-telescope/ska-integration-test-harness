@@ -69,7 +69,6 @@ class TangoLRCAction(TangoCommandAction):
         # monitor LRC errors (if any)
         ).add_lrc_errors_to_early_stop()
 
-
         # execute the action within a timeout of 5 seconds
         # (which will stop early if the LRC fails or if it detects
         # an event with an attribute value less than 42)
@@ -155,7 +154,6 @@ class TangoLRCAction(TangoCommandAction):
             ).add_lrc_completion_to_postconditions(
                 expected_result_codes=ResultCode.OK
             ).add_lrc_errors_to_early_stop()
-
 
     """  # pylint: disable=line-too-long # noqa: E501
 
