@@ -76,7 +76,7 @@ class SUTActionSequence(SUTAction):
         if put_them_at_beginning:
             self._actions = list(actions) + self._actions
         else:
-            self._actions += list(actions)
+            self._actions.extend(actions)
 
     def set_logging(self, enable_logging: bool):
         """Set the logging for this instance and for the whole sequence.

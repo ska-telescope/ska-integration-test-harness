@@ -58,10 +58,10 @@ def create_mock_assertion(
     return mock
 
 
+# pylint: disable-next=too-many-instance-attributes
 class MockSUTAction(SUTAction):
     """Mock subclass of SUTAction for testing purposes."""
 
-    # pylint: disable-next=too-many-instance-attributes
     def __init__(
         self,
         fail_preconditions=False,
