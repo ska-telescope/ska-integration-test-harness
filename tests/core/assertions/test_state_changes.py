@@ -80,8 +80,8 @@ class TestAssertDevicesStateChanges:
         ).contains(
             "to ON"
         ).described_as(
-            "The failure message includes a reference to the device "
-            "for which the events have not been received."
+            "The failure message includes a reference to the device"
+            " for which the events have not been received."
         ).contains(
             "Events not found for test/dev/3.state"
         ).described_as(

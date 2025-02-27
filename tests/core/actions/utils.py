@@ -136,16 +136,16 @@ def assert_action_logged_execution(
     """
 
     mock_logger.info.assert_any_call(
-        "Executing action %s: %s "
-        "(verify_preconditions=%s, verify_postconditions=%s)",
+        "Executing action %s: %s"
+        " (verify_preconditions=%s, verify_postconditions=%s)",
         action_name,
         action_description,
         verify_preconditions,
         verify_postconditions,
     )
     mock_logger.info.assert_any_call(
-        "Action %s: procedure executed successfully. "
-        "Verifying postconditions (within a %s seconds timeout)...",
+        "Action %s: procedure executed successfully."
+        " Verifying postconditions (within a %s seconds timeout)...",
         action_name,
         timeout,
     )

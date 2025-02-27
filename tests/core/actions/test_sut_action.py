@@ -173,16 +173,16 @@ class TestSUTAction:
         action.execute(postconditions_timeout=10)
 
         assert_that(action.last_timeout_object).described_as(
-            "The timeout object is supposed to be a "
-            "ChainedAssertionsTimeout instance"
+            "The timeout object is supposed to be a"
+            " ChainedAssertionsTimeout instance"
         ).is_instance_of(ChainedAssertionsTimeout)
         timeout_object: ChainedAssertionsTimeout = action.last_timeout_object
         assert_that(timeout_object.is_started()).described_as(
             "The timeout object is supposed to be started"
         ).is_true()
         assert_that(timeout_object.get_remaining_timeout()).described_as(
-            "The timeout object is supposed to be started but only after the "
-            "execute_procedure terminates"
+            "The timeout object is supposed to be started but only after the"
+            " execute_procedure terminates"
         ).is_close_to(10, 0.1)
 
     @staticmethod
@@ -197,6 +197,6 @@ class TestSUTAction:
         action.execute(postconditions_timeout=timeout)
 
         assert_that(action.last_timeout_object).described_as(
-            "The exact timeout instance is supposed to be passed to the "
-            "verify_postconditions method"
+            "The exact timeout instance is supposed to be passed to the"
+            " verify_postconditions method"
         ).is_equal_to(timeout)

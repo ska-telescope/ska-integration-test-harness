@@ -95,21 +95,21 @@ class TestTracerAction:
             "The action can set an early stop condition"
         ).is_same_as(mock_new_early_stop)
         assert_that(post_cond1.early_stop).described_as(
-            "The new early stop condition is used for an action without "
-            "an early stop condition"
+            "The new early stop condition is used for an action without"
+            " an early stop condition"
         ).is_same_as(mock_new_early_stop)
         assert_that(post_cond2.early_stop).described_as(
-            "The new early stop condition is combined in OR "
-            "with an existing early stop condition in a postcondition"
+            "The new early stop condition is combined in OR"
+            " with an existing early stop condition in a postcondition"
         ).is_not_same_as(mock_initial_early_stop)
 
         # Test that the new early stop condition is used
         # for a postcondition without an early stop condition
         mock_event = MagicMock()
         assert_that(post_cond1.early_stop(mock_event)).described_as(
-            "The new early stop condition is used for an action without "
-            "an early stop condition"
-            "(Old: Not set, New: True --> True)"
+            "The new early stop condition is used for an action without"
+            " an early stop condition"
+            " (Old: Not set, New: True --> True)"
         ).is_true()
         mock_new_early_stop.assert_called_with(mock_event)
         mock_new_early_stop.reset_mock()
@@ -118,9 +118,9 @@ class TestTracerAction:
         # with an existing early stop condition in a postcondition
         mock_event2 = MagicMock()
         assert_that(post_cond2.early_stop(mock_event2)).described_as(
-            "The new early stop condition is combined in OR "
-            "with an existing early stop condition in a postcondition"
-            "(Old: False, New: True --> True)"
+            "The new early stop condition is combined in OR"
+            " with an existing early stop condition in a postcondition"
+            " (Old: False, New: True --> True)"
         ).is_true()
         mock_new_early_stop.assert_called_once_with(mock_event2)
         mock_initial_early_stop.assert_called_once_with(mock_event2)
@@ -210,16 +210,16 @@ class TestTracerAction:
         action.add_postconditions(post_cond)
 
         assert_that(post_cond.early_stop).described_as(
-            "The postcondition early stop is combined "
-            "with the action early stop"
+            "The postcondition early stop is combined"
+            " with the action early stop"
         ).is_not_same_as(action_mock_early_stop)
 
         # Test that both the early stop conditions are called
         mock_event = MagicMock()
         assert_that(post_cond.early_stop(mock_event)).described_as(
-            "The postcondition early stop is combined "
-            "with the action early stop"
-            "(Action: False, Postcondition: False --> False)"
+            "The postcondition early stop is combined"
+            " with the action early stop"
+            " (Action: False, Postcondition: False --> False)"
         ).is_false()
         action_mock_early_stop.assert_called_once_with(mock_event)
         post_cond_mock_early_stop.assert_called_once_with(mock_event)

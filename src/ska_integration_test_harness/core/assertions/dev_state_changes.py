@@ -98,8 +98,8 @@ class AssertDevicesStateChanges(TracerAssertion):
         # foreach device, chain to the context an event check
         for device in self.devices:
             context.described_as(
-                f"{self.describe_assumption()} Events not found for "
-                f"{device.dev_name()}.{self.attribute_name}."
+                f"{self.describe_assumption()} Events not found for"
+                f" {device.dev_name()}.{self.attribute_name}."
             ).has_change_event_occurred(
                 device_name=device.dev_name(),
                 attribute_name=self.attribute_name,
@@ -122,20 +122,20 @@ class AssertDevicesStateChanges(TracerAssertion):
         :return: the description of the assumption
         """
         desc = ", ".join(device.dev_name() for device in self.devices)
-        desc += " have recorded state changes "
-        desc += f"in the attribute {self.attribute_name} "
+        desc += " have recorded state changes"
+        desc += f" in the attribute {self.attribute_name}"
 
         if self.previous_value is not None:
-            desc += f"from {self.previous_value} "
+            desc += f" from {self.previous_value}"
         if self.attribute_value is not None:
-            desc += f"to {self.attribute_value} "
+            desc += f" to {self.attribute_value}"
         if self.custom_matcher is not None:
-            desc += f"matching {self.custom_matcher.__name__} "
+            desc += f" matching {self.custom_matcher.__name__}"
         if self.timeout.initial_timeout > 0:
-            desc += f"within {self.timeout.initial_timeout} seconds "
-            desc += f"(remaining {self.timeout.get_remaining_timeout()}) "
+            desc += f" within {self.timeout.initial_timeout} seconds"
+            desc += f" (remaining {self.timeout.get_remaining_timeout()})"
 
         if self.early_stop:
-            desc += f"using early stop sentinel {self.early_stop.__name__} "
+            desc += f" using early stop sentinel {self.early_stop.__name__}"
 
-        return desc.strip() + "."
+        return desc + "."

@@ -36,11 +36,11 @@ class TestAssertDevicesAreInState:
             assertion.verify()
 
         assert_that(str(exc_info.value)).described_as(
-            "The failure description includes a reference to the devices, "
-            "the attribute name and the expected value."
+            "The failure description includes a reference to the devices,"
+            " the attribute name and the expected value."
         ).contains("test/dev/1", "test/dev/2", "state", "ON").described_as(
-            "The failure message includes a specific reference to the "
-            "device and attribute that failed."
+            "The failure message includes a specific reference to the"
+            " device and attribute that failed."
         ).contains(
             "test/dev/2.state"
         ).described_as(
@@ -67,6 +67,6 @@ class TestAssertDevicesAreInState:
         description = assertion.describe_assumption()
 
         assert_that(description).described_as(
-            "The description includes a reference to the devices, "
-            "the attribute name and the expected value."
+            "The description includes a reference to the devices,"
+            " the attribute name and the expected value."
         ).contains("test/dev/1", "test/dev/2", "state", "ON")

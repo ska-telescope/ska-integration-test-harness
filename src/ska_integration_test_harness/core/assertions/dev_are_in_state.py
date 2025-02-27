@@ -63,14 +63,14 @@ class AssertDevicesAreInState(SUTAssertion):
                 value = device.read_attribute(self.attribute_name).value
             except tango.DevFailed as df:
                 raise AssertionError(
-                    f"{self.describe_assumption()} Error reading attribute "
-                    f"{device.dev_name()}.{self.attribute_name}."
+                    f"{self.describe_assumption()} Error reading attribute"
+                    f" {device.dev_name()}.{self.attribute_name}."
                 ) from df
 
             # compare it with the expected value
             assert_that(value).described_as(
-                f"{self.describe_assumption()} Mismatch in attribute value "
-                f"for {device.dev_name()}.{self.attribute_name}. "
+                f"{self.describe_assumption()} Mismatch in attribute value"
+                f" for {device.dev_name()}.{self.attribute_name}."
             ).is_equal_to(self.attribute_value)
 
     def describe_assumption(self):
@@ -86,6 +86,6 @@ class AssertDevicesAreInState(SUTAssertion):
         :return: the description of the assumption
         """
         desc = ", ".join(device.dev_name() for device in self.devices)
-        desc += f" have attribute {self.attribute_name} value equal "
-        desc += f"to {self.attribute_value}."
+        desc += f" have attribute {self.attribute_name} value equal"
+        desc += f" to {self.attribute_value}."
         return desc

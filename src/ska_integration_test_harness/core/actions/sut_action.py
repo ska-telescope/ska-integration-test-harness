@@ -281,8 +281,8 @@ class SUTAction(abc.ABC):
         # verify the postconditions
         if verify_postconditions:
             self.logger.info(
-                "Action %s: procedure executed successfully. "
-                "Verifying postconditions (within a %s seconds timeout)...",
+                "Action %s: procedure executed successfully."
+                " Verifying postconditions (within a %s seconds timeout)...",
                 self.name(),
                 float(postconditions_timeout),
             )

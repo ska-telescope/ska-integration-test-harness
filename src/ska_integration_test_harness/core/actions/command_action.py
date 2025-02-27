@@ -131,8 +131,8 @@ class TangoCommandAction(TracerAction):
         """
         return (
             self.__class__.__name__
-            + f"(target_device={self.target_device.dev_name()}, "
-            f"command_name={self.command_name})"
+            + f"(target_device={self.target_device.dev_name()}"
+            f", command_name={self.command_name})"
         )
 
     def description(self):
@@ -140,12 +140,12 @@ class TangoCommandAction(TracerAction):
 
         :return: a string describing the command and its arguments.
         """
-        desc = f"Execute command {self.command_name} "
-        desc += f"on device {self.target_device.dev_name()} "
+        desc = f"Execute command {self.command_name}"
+        desc += f" on device {self.target_device.dev_name()}"
         if self.command_param:
-            desc += f"with param {self.command_param} "
+            desc += f" with param {self.command_param}"
         if self.command_kwargs:
             connector = "and" if self.command_param else "with"
-            desc += f"{connector} kwargs {self.command_kwargs} "
+            desc += f" {connector} kwargs {self.command_kwargs}"
 
-        return desc.strip() + "."
+        return desc + "."

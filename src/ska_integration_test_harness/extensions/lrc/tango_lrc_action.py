@@ -344,18 +344,18 @@ class TangoLRCAction(TangoCommandAction):
         :raises AssertionError: if the last command result is not as expected.
         """
         assert_that(self.last_command_result).described_as(
-            "The last command result is expected to be a iterable of at least "
-            "two elements"
+            "The last command result is expected to be a iterable of at least"
+            " two elements"
         ).is_length(2)
 
         assert_that(self.last_command_result[1]).described_as(
-            "The second element of the last command result is expected to be "
-            "a list of at least one element"
+            "The second element of the last command result is expected to be"
+            " a list of at least one element"
         ).is_instance_of(list).is_not_empty()
 
         assert_that(self.last_command_result[1][0]).described_as(
-            "The first element of the second element of the last "
-            "command result is expected to be a string (the LRC ID)"
+            "The first element of the second element of the last"
+            " command result is expected to be a string (the LRC ID)"
         ).is_instance_of(str)
 
         return self.last_command_result[1][0]

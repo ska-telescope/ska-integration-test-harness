@@ -10,10 +10,9 @@ import logging
 from ..lrc.assert_lrc_completion import AssertLRCCompletion
 
 logging.warning(
-    "The 'ska_integration_test_harness.extensions.assertions' "
-    "module is deprecated "
-    "and will be removed in the future. Please use the new "
-    "'ska_integration_test_harness.extensions.lrc' module instead."
+    "The 'ska_integration_test_harness.extensions.assertions'"
+    " module is deprecated and will be removed in the future. Please use the"
+    " new 'ska_integration_test_harness.extensions.lrc' module instead."
 )
 
 __all__ = ["AssertLRCCompletion"]

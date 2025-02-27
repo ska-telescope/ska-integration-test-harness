@@ -173,9 +173,9 @@ class TestSUTActionSequence:
         sequence.execute()
 
         assert_that(mock_logger.info.call_count).described_as(
-            "Nine log messages are expected: "
-            "3 for the sequence object, 3 for the first action, "
-            "and 3 for the second action"
+            "Nine log messages are expected:"
+            " 3 for the sequence object, 3 for the first action,"
+            " and 3 for the second action"
         ).is_equal_to(9)
         assert_action_logged_execution(
             mock_logger,

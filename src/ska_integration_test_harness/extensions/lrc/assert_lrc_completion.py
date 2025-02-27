@@ -210,20 +210,20 @@ class AssertLRCCompletion(TracerAssertion):
         ]
 
     def describe_assumption(self):
-        desc = f"{self.device.dev_name()} has recorded a "
-        desc += f"{self.expected_attribute_name} completion event "
+        desc = f"{self.device.dev_name()} has recorded a"
+        desc += f" {self.expected_attribute_name} completion event"
 
         if self.lrc_id is not None:
-            desc += f"for LRC with ID {self.lrc_id} "
+            desc += f" for LRC with ID {self.lrc_id}"
         else:
-            desc += "for any LRC ID "
+            desc += " for any LRC ID"
 
         if self.expected_result_codes:
-            desc += "expecting result code(s) "
+            desc += " expecting result code(s) "
             desc += ", ".join(
                 result_code.name for result_code in self.expected_result_codes
             )
         else:
-            desc += "expecting any result code"
+            desc += " expecting any result code"
 
         return desc + "."
