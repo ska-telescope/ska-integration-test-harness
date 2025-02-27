@@ -132,7 +132,7 @@ class TangoCommandAction(TracerAction):
         return (
             self.__class__.__name__
             + f"(target_device={self.target_device.dev_name()}, "
-            + f"command_name={self.command_name})"
+            f"command_name={self.command_name})"
         )
 
     def description(self):
