@@ -78,8 +78,7 @@ Further actions and assertions (e.g, for dealing with long-running commands
 and subarray commands) can be found in the
 :py:mod:`ska_integration_test_harness.extensions`
 module. We suggest you look at that module before implementing
-your own actions and assertions
-from scratch.
+your own actions and assertions from scratch.
 """  # pylint: disable=line-too-long # noqa: E501
 
 from .dev_are_in_state import AssertDevicesAreInState
