@@ -140,7 +140,7 @@ class TestTracerAssertion:
 
         assertion.setup()
 
-        # pylint: disable=protected-access
+        # pylint: disable-next=protected-access
         assert_that(
             assertion.tracer._subscriber._subscription_ids
         ).described_as(
@@ -168,7 +168,7 @@ class TestTracerAssertion:
 
         assertion.setup()
 
-        # pylint: disable=protected-access
+        # pylint: disable-next=protected-access
         assert_that(
             assertion.tracer._subscriber._subscription_ids
         ).described_as(

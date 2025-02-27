@@ -297,7 +297,7 @@ class TestTracerAction:
 
         action.setup()
 
-        # pylint: disable=protected-access
+        # pylint: disable-next=protected-access
         assert_that(action.tracer._subscriber._subscription_ids).described_as(
             "We expect the tracer subscriptions to be cleared"
         ).is_empty()

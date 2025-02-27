@@ -28,7 +28,7 @@ class AssertDevicesStateChanges(TracerAssertion):
     assertions to detect the events.
     """  # pylint: disable=line-too-long # noqa: E501
 
-    # pylint: disable=too-many-arguments, too-many-positional-arguments
+    # pylint: disable-next=too-many-arguments, too-many-positional-arguments
     def __init__(
         self,
         devices: list[tango.DeviceProxy],

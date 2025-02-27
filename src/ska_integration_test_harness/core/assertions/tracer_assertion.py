@@ -91,7 +91,7 @@ class TracerAssertion(SUTAssertion, abc.ABC):
 
         # ---------------------------------------------------------------
         # verification with an early stop condition
-        assertion.tracer = None # This way the tracer will be managed
+        assertion.tracer = None  # This way the tracer will be managed
         assertion.early_stop = lambda event:
             "ERROR" in str(event.attribute_value)
 

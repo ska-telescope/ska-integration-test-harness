@@ -61,7 +61,7 @@ def create_mock_assertion(
 class MockSUTAction(SUTAction):
     """Mock subclass of SUTAction for testing purposes."""
 
-    # pylint: disable=too-many-instance-attributes
+    # pylint: disable-next=too-many-instance-attributes
     def __init__(
         self,
         fail_preconditions=False,
@@ -116,7 +116,7 @@ class MockSUTAction(SUTAction):
         return "Mock a SUT action and track calls"
 
 
-# pylint: disable=too-many-arguments, too-many-positional-arguments
+# pylint: disable-next=too-many-arguments, too-many-positional-arguments
 def assert_action_logged_execution(
     mock_logger: MagicMock,
     action_name: str,

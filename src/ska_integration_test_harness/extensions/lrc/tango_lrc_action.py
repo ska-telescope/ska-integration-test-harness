@@ -197,7 +197,7 @@ class TangoLRCAction(TangoCommandAction):
     ) -> "TangoLRCAction":
         """Add a postcondition to verify the completion of the LRC.
 
-        Call this method to append to postconditions a
+        Call this method to append to postconditions
         an assertion to check the LRC completes with some
         :py:class:`ska_control_model.ResultCode`. This is done through an
         :py:class:`~ska_integration_test_harness.extensions.lrc.AssertLRCCompletion`
