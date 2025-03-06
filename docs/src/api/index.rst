@@ -6,7 +6,7 @@ The following API documentation is divided into two main sections:
 1. The core mechanisms of the ska-integration-test-harness.
 2. The specific actions, facades and structures that are currently implemented.
 
-The first section is a general overview of the core mechanisms that
+The first section is a general overview of the generic mechanisms that
 make up the ska-integration-test-harness (e.g., such as the telescope
 definition, the abstract subsystem wrappers, the extension points to create
 actions and the configuration and initialisation mechanisms).
@@ -26,16 +26,22 @@ test harness are calculated only on the first section** (*at the time of
 writing, the coverage on the first section is approximately 90%, while
 the overall coverage is around 60%*).
 
-An example of tests that use what is described in the second section
-are the ones introduced in `ska-tmc-mid-integration` by this
-`merge request <https://gitlab.com/ska-telescope/ska-tmc-mid-integration/-/merge_requests/1>`_.
-
 
 .. toctree::
    :maxdepth: 2
 
    core_api
    extension_api
+
+IMPORTANT: Monolith vs Platform
+-------------------------------
+
+**Important Note:** This section of the documentation refers to the  
+TMC-specific monolithic test harness. In the long term, this monolithic  
+test harness will be relocated elsewhere (likely to a TMC testing repository).  
+This repository will instead focus on the **Test Harness as a Platform**.  
+
+For more details, see :doc:`../ith_as_a_platform`.  
 
 
 
