@@ -3,25 +3,32 @@ ITH as a Platform: Introduction
 
 The Integration Test Harness (ITH) is evolving from a monolithic structure
 to a versatile platform. This transformation aims to provide generic tools
-for integration testing any Tango-based system within the SKA project
+for integration testing any Tango-based system within the SKA project.
 
-For detailed concepts and practical examples,
-refer to the section: :doc:`platform-concepts/index`.
+In this document you can find an overview of the general ideas behind the
+ITH as a Platform, the structure of the platform and the development process.
+
+.. contents:: Table of Contents
+   :local:
+   :depth: 2
+
+For a more technical detailed explanation of the building blocks and how to
+use them, refer to the section: :doc:`platform-concepts/index`.
 
 From a Monolith to a Platform
 --------------------------------
 
-At the moment (27th January 2025),
-as you may see from other sections of the documentation,
-the ITH is essentially a large monolith that provides a set of facades,
-wrappers and actions to test TMC, integrated with CSP, SDP and the Dishes
-subsystems (in a Low environment, using software only and potentially
-including emulators). While this is a solid starting point, it is not
-what the ITH will be in the long term.
+Before the ``0.4.0`` release, the ITH was a **Monolithic Test Harness**
+specifically designed for testing TMC in both Mid and Low environments.
+As you can still see in other sections of the documentation,
+the *TMC Monolith* is a set of facades, wrappers and actions to test TMC,
+integrated with CSP, SDP, the Dishes and MCCS in both Mid and Low
+environments. **While this have been a solid starting point, it is not
+what the ITH will be in the long term.**
 
-In the long term, the ITH should be seen as a platform that provides a set
-of generic tools to integration test potentially any Tango-based system,
-covering a wide range of use cases within the SKA project. To achieve this,
+In the long term, the ITH should be seen as a *platform* that provides a *set
+of generic tools* to integration test potentially any Tango-based system,
+covering a *wide range of use cases within the SKA project*. To achieve this,
 we plan to gradually re-write the ITH to follow the *"as a Platform"* approach,
 as described in the book `Team Topologies <https://teamtopologies.com/>`_.
 
@@ -52,24 +59,25 @@ The ITH as a Platform will be structured in 3+1 layers:
 1. At the centre, there is the **Core** layer, which is the heart of the
    ITH as a Platform. The Core layer provides the basic building blocks
    to create wrappers, configurations, actions, etc. By itself,
-   the Core will be highly generic, and it is being designed so that it
+   the Core will be *highly generic*, and it is being designed so that it
    does not assume the SUT is a telescope or an SKA subsystem. Instead, it
-   will be versatile enough to integration test any Tango-based system.
+   will be *versatile enough to integration test any Tango-based system*.
    The Core layer will be the most stable and thoroughly unit-tested part
    of the ITH as a Platform. It will reside in the
    `ska-integration-test-harness <https://gitlab.com/ska-telescope/ska-integration-test-harness/>`_
    repository and will be distributed as a Python package of the same name.
-   In the short to medium term, development and maintenance are handled by
-   Emanuele Lena, Giorgio Brajnik, and Verity Allan. In the long term,
-   the maintenance and development strategy is yet to be defined.
+   In the short to medium term, *development and maintenance are handled by
+   Emanuele Lena, Giorgio Brajnik, and Verity Allan*. In the long term,
+   the maintenance and development strategy may involve a wider group of
+   contributors.
 
-2. Surrounding the Core is the **Extensions** layer, where building blocks
+2. Surrounding the Core is the **Customisation** layer, where building blocks
    are composed to create specific actions, assertions, configurations,
    etc., tailored to integration testing one or more specific subsystems.
-   Unlike the Core, the Extensions will: 1) be developed and maintained
-   by individual teams as needed, 2) be decentralised (each team will
+   Unlike the Core, the Customisations will: 1) be *developed and maintained
+   by individual teams* as needed, 2) be *decentralised* (each team will
    store their extensions in appropriate locations, likely alongside
-   their tests), and 3) be dynamic, flexible and easily adaptable to
+   their tests), and 3) be *dynamic, flexible and easily adaptable* to
    changes in the SUT.
 
 3. Surrounding the Extensions is the **Tests** layer, representing
@@ -82,12 +90,15 @@ The ITH as a Platform will be structured in 3+1 layers:
    notebooks. Many tests may reuse the same ITH Extensions.
 
 Additionally, there is the **Common Extensions** layer, which comprises
-extensions that may be useful for multiple teams and are not tied to a
-specific SUT. Common Extensions are intended as building blocks generic
+extensions that may be *useful for multiple teams across SKAO
+and are not tied to a specific SUT*. Common Extensions are intended as building blocks generic
 enough for almost any SKA project. However, as they assume the SUT is part
 of a telescope within the SKA context, they cannot be included in the
 Core layer. An example might be a command call action capable of handling
-Long Running Commands (LRC) in line with SKA conventions. Currently, the
+Long Running Commands (LRC) in line with SKA conventions; another
+(more complex) example could be a framework for managing the lifecycle
+of one or more Tango Subarray devices in a test environment
+(see the next section for more details). Currently, the
 Common Extensions layer will be distributed alongside the Core in
 the `ska-integration-test-harness <https://gitlab.com/ska-telescope/ska-integration-test-harness/>`_.
 Contributions to this layer are welcome, provided they meet the
@@ -128,55 +139,78 @@ which serves as the basis for the ITH as a Platform.
 A vision of the shape of this new structure is defined in this
 `Miro board <https://miro.com/app/board/uXjVL7Eop40=/>`_.
 
-.. _development_process:
-Development Process
---------------------------------
 
-The development of this new structure will be **incremental** and **guided by 
+.. _development_process:
+
+Development Process
+-------------------
+
+The development of this new structure will be **incremental** and **driven by 
 the needs of the teams**. This means that:
 
-- The ITH as a Platform will not be released as a whole, but rather
-  incrementally, as new building blocks are developed, unit tested, documented,
-  tested by the teams, reviewed, and merged.
-- The development process will be guided by the needs of the teams who choose
-  to collaborate with us and adopt (some of) the building blocks we develop. So
-  if you are interested in using the ITH as a Platform, please get in touch
-  with us, let us know your needs, and we will try to accommodate them. The
-  first you get in touch, the more influence you will have on the development
+- The **ITH as a Platform** will not be released as a whole but rather 
+  incrementally, as new building blocks are developed, unit tested, 
+  documented, tested by teams, reviewed, and merged.
+- The development process will be **guided by the needs of the teams** that 
+  choose to collaborate with us and adopt (some of) the building blocks we 
+  develop.  
+
+  If you are interested in using the **ITH as a Platform**, please **get in 
+  touch with us** (*Giorgio Brajnik*, *Emanuele Lena*, *Verity Allan*).  
+  Let us know your needs, and we will do our best to accommodate them.  
+  The sooner you reach out, the greater your influence on the development 
   process.
 
-At present (February 2025), we are collaborating with the CREAM 
-team to implement a Core and Common Extensions framework suitable for testing 
-*CSP.LMC* in Low.
+Below is a diary of the development process.
 
-Here there follows a diary of the development process.
 
-1. **February 2025**: Test Harness as a Platform foundation. This first
-   increment introduces:
+1. **March 2025**: Test Harness as a Platform Foundation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This first increment introduces:
    
-   - **For the Core Layer**: A framework to represent interactions with the 
-     SUT as **Actions** and **Assertions**.
-   - **For the Common Extensions Layer**: an Action to send
-     **Tango Long Running Commands**, synchronise on 
-     their completion, and fail if any errors are reported in the events.
+- **For the Core Layer**: A framework for representing interactions with the  
+  SUT as **Actions** and **Assertions**.
+- **For the Common Extensions Layer**: An action to send **Tango Long Running  
+  Commands**, synchronise on their completion, and fail if any errors are  
+  reported in the events.
+
+This increment was developed in collaboration with the **CREAM Team** to  
+provide suitable (but still generic) building blocks for  
+`CSP.LMC testing <https://jira.skatelescope.org/browse/CT-1519>`_.
    
-   Documentation and references:
+Documentation and References:
    
-   - Examples and user documentation: :doc:`./platform-concepts/actions`
-   - API documentation:
-     - :py:mod:`ska_integration_test_harness.core.actions`
-     - :py:mod:`ska_integration_test_harness.extensions.lrc`
-   - Merge request: `MR 13 <https://gitlab.com/ska-telescope/ska-integration-test-harness/-/merge_requests/13>`_
-   - Jira tickets:
-     - `SST-1018 (generic ticket) <https://jira.skatelescope.org/browse/SST-1018>`_
-     - `SST-1019 (CREAM/CSP.LMC collaboration) <https://jira.skatelescope.org/browse/SST-1019>`_
+- **Examples and user documentation**: :doc:`./platform-concepts/actions`
+- **API documentation**:
+
+  - :py:mod:`ska_integration_test_harness.core.actions`  
+  - :py:mod:`ska_integration_test_harness.extensions.lrc`  
+- **ITH Merge Request**:
+
+  - `MR 13 <https://gitlab.com/ska-telescope/ska-integration-test-harness/-/merge_requests/13>`_  
+- **Jira tickets**:
+
+  - `SST-1018 (generic ticket for the first increment of the ITH) <https://jira.skatelescope.org/browse/SST-1018>`_  
+  - `SST-1019 (CREAM/CSP.LMC collaboration) <https://jira.skatelescope.org/browse/SST-1019>`_  
+  - **CREAM Team tickets**:
+
+    - `SP-4457 <https://jira.skatelescope.org/browse/SP-4457>`_  
+    - `CT-1519 <https://jira.skatelescope.org/browse/CT-1519>`_  
 
 
-2. **March 2025**: The second increment introduces:
-   
-   - **For the Common Extensions Layer**: Some actions and tools to interacting
-     with a Subarray-based system (i.e., a system that have one or more Tango
-     subarray devices that implement the SKA Observation State Machine). The
-     interaction will likely include an action to reset the Subarray to a given
-     Observation State starting from any other state.
+2. **To Be Released**: Subarray Management and Reset Framework
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+This upcoming increment (not yet released) introduces:
+   
+- **For the Common Extensions Layer**: Actions and tools for interacting  
+  with a **Subarray-based system** (i.e., a system with one or more Tango  
+  subarray devices that implement the SKA Observation State Machine).  
+
+  The interaction will likely include an action to reset the **Subarray** to  
+  a given **Observation State**, starting from any other state.
+
+At present, this increment exists only as a draft.  
+
+**If you are interested in this, please get in touch with us.**
