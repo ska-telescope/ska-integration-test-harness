@@ -9,7 +9,7 @@ project, the harness will be extended to be more flexible and to support
 more use cases.
 
 IMPORTANT: Monolith vs Platform
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------
 
 **Important Note:** This section of the documentation refers to the  
 TMC-specific monolithic test harness. In the long term, this monolithic  

@@ -15,7 +15,7 @@ likely remain the same.
 This document was last updated in February 2025.
 
 IMPORTANT: Monolith vs Platform
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------
 
 **Important Note:** This section of the documentation refers to the  
 TMC-specific monolithic test harness. In the long term, this monolithic  
