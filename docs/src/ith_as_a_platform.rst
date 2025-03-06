@@ -23,16 +23,16 @@ specifically designed for testing TMC in both Mid and Low environments.
 As you can still see in other sections of the documentation,
 the *TMC Monolith* is a set of facades, wrappers and actions to test TMC,
 integrated with CSP, SDP, the Dishes and MCCS in both Mid and Low
-environments. **While this have been a solid starting point, it is not
-what the ITH will be in the long term.**
+environments. While this have been a solid starting point, the ITH
+is evolving further.
 
-In the long term, the ITH should be seen as a *platform* that provides a *set
-of generic tools* to integration test potentially any Tango-based system,
-covering a *wide range of use cases within the SKA project*. To achieve this,
+In the long term, the ITH should be seen as a **platform** that provides a set
+of **generic tools to integration test potentially any SKA Tango-based system**,
+covering a wide range of use cases within the SKA project. To achieve this,
 we plan to gradually re-write the ITH to follow the *"as a Platform"* approach,
 as described in the book `Team Topologies <https://teamtopologies.com/>`_.
 
-Essentially, *as a Platform* means the ITH should be considered a
+Essentially, *"as a Platform"* means the ITH should be considered a
 set of shared tools, services and capabilities that all teams can use
 to work more effectively and efficiently. In this specific context, the
 **ITH as a Platform** should be considered an **Object-Oriented Framework**
