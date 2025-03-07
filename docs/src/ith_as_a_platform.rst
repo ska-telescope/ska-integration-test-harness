@@ -51,10 +51,10 @@ test harnesses for their specific System Under Test (SUT). What sets the
 4. the ITH will focus on **Developer Experience (DX)**, prioritising ease
    of use, writing new code, creating new tests, and debugging.
 
-The 3+1 Layers Structure
+The 2+1 Layers Structure
 --------------------------------
 
-The ITH as a Platform will be structured in 3+1 layers:
+The ITH as a Platform will be structured in **2+1 layers**:
 
 1. At the centre, there is the **Core** layer, which is the heart of the
    ITH as a Platform. The Core layer provides the basic building blocks
@@ -76,18 +76,9 @@ The ITH as a Platform will be structured in 3+1 layers:
    etc., tailored to integration testing one or more specific subsystems.
    Unlike the Core, the Customisations will: 1) be *developed and maintained
    by individual teams* as needed, 2) be *decentralised* (each team will
-   store their extensions in appropriate locations, likely alongside
-   their tests), and 3) be *dynamic, flexible and easily adaptable* to
+   store their extensions in appropriate locations, *likely alongside
+   their tests*), and 3) be *dynamic, flexible and easily adaptable* to
    changes in the SUT.
-
-3. Surrounding the Extensions is the **Tests** layer, representing
-   the component, integration and system-level tests teams will write
-   to test their SUT. The Tests layer is distinct from the Extensions
-   layer because it is hoped that, thanks to the ITH Core and Extensions,
-   teams will be able to write readable, semantic, reusable, and
-   abstract tests. The Tests layer may include Gherkin definitions, pytest
-   implementations, test fixtures, and possibly manual Jupyter test
-   notebooks. Many tests may reuse the same ITH Extensions.
 
 Additionally, there is the **Common Extensions** layer, which comprises
 extensions that may be *useful for multiple teams across SKAO
@@ -103,6 +94,12 @@ Common Extensions layer will be distributed alongside the Core in
 the `ska-integration-test-harness <https://gitlab.com/ska-telescope/ska-integration-test-harness/>`_.
 Contributions to this layer are welcome, provided they meet the
 Core layer’s quality and unit-testing standards.
+
+The **Tests** can potentially use all the layers according
+to the needs. If the needs are simple and generic enough the test can just
+directly use the Core and Common Extensions layers. If the needs are more
+specific, a Customisation Layer can be created to encapsulate the specific
+logic for the SUT and for the testing context.
 
 
 ITH Components and Building Blocks
