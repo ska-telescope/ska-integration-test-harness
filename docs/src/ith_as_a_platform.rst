@@ -136,9 +136,6 @@ mechanism provided by
 `SKA Tango Testing <https://developer.skao.int/projects/ska-tango-testing/en/latest/>`_,
 which serves as the basis for the ITH as a Platform.
 
-A vision of the shape of this new structure is defined in this
-`Miro board <https://miro.com/app/board/uXjVL7Eop40=/>`_.
-
 
 .. _development_process:
 
