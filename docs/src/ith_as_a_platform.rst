@@ -96,11 +96,10 @@ Contributions to this layer are welcome, provided they meet the
 Core layer’s quality and unit-testing standards.
 
 The **Tests** can potentially use all the layers according
-to the needs. If the needs are simple and generic enough the test can just
+to their needs. If the needs are simple and generic enough, the test can just
 directly use the Core and Common Extensions layers. If the needs are more
 specific, a Customisation Layer can be created to encapsulate the specific
-logic for the SUT and for the testing context.
-
+logic for the SUT and the testing context.
 
 ITH Components and Building Blocks
 ------------------------------------
