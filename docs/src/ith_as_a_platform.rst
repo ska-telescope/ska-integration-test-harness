@@ -48,7 +48,7 @@ test harnesses for their specific System Under Test (SUT). What sets the
 3. through a **continuous feedback loop**, the ITH will evolve according
    to the needs of the teams (by satisfying common needs with new built-in
    blocks, while also ensuring the ITH is elastic enough where required);
-4. the ITH will focus on **Developer Experience (DX)**, prioritising ease
+4. the ITH will focus on **Developer Experience (DevEx)**, prioritising ease
    of use, writing new code, creating new tests, and debugging.
 
 The 2+1 Layers Structure
