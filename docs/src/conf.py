@@ -24,7 +24,7 @@ copyright = "2024, IDS Srl"
 author = "Emanuele Lena <emanuele.lena@designcoaching.net>"
 
 # The full version, including alpha/beta/rc tags.
-version = "0.3.0"
+version = "0.4.0"
 
 # -- General configuration ------------------------------------------------
 
