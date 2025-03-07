@@ -27,7 +27,7 @@ Platform**.
 
 In the long term, this monolithic test harness will be relocated elsewhere.
 
-For documentation on the **Monolithic TMC Test Harness**, refer to the  
+For documentation on the **Monolithic TMC Test Harness**, refer to 
 :doc:`this section of the documentation <getting_started>`.
 
 

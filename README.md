@@ -23,7 +23,7 @@ it but includes additional components for **Test Harness as a Platform**.
 
 In the long term, this monolithic test harness will be relocated elsewhere.
 
-For documentation on the **Monolithic TMC Test Harness**, refer to the  
+For documentation on the **Monolithic TMC Test Harness**, refer to  
 [this section of the documentation](https://developer.skao.int/projects/ska-integration-test-harness/en/latest/?badge=latest).
 
 ---
@@ -46,7 +46,16 @@ to develop your own **customised** test harness.
 More details about this approach can be found in  
 [this section of the documentation](https://developer.skao.int/projects/ska-integration-test-harness/en/latest/ith_as_a_platform.html).
 
-As of **March 2025 (version 0.4.0)**, the **Test Harness as a Platform**
+**IMPORTANT NOTE**:  
+As of **March 2025 (version 0.4.0)**, the **Test Harness as a Platform**  
 includes only a few building blocks, but it is actively growing.  
-[It can evolve based on your needs](https://developer.skao.int/projects/ska-integration-test-harness/en/latest/ith_as_a_platform.html#development-process).  
-In the long term, this will be the **main focus** of the repository.
+In the long term, this will be the **main focus** of the repository, and we  
+hope many teams will find it useful and adopt it. For this reason,  
+[it may still evolve based on your specific but generalisable  
+needs](https://developer.skao.int/projects/ska-integration-test-harness/en/latest/ith_as_a_platform.html#development-process). If you are interested in expanding the  
+**ITH as a Platform**, please **get in touch with us**  
+(*Giorgio Brajnik*, *Emanuele Lena*, *Verity Allan*).  
+
+Let us know your needs, and we will do our best to accommodate them.  
+The sooner you reach out, the greater your influence on the development  
+process.  
