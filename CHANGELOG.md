@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.4.0 (7th March 2025)
+
+- **SST-1018**: release of a generic core and common extensions
+for the Test Harness as a Platform. First release of the Test Harness
+as a Platform (still retro-compatible with the Monolithic TMC Test Harness).
+
 ## v0.3.0 (20th February 2025)
 
 - **SST-1012**: make the ITH to support TMC-X in Low integration tests.
