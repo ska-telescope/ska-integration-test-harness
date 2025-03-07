@@ -148,7 +148,7 @@ the needs of the teams**. This means that:
   choose to collaborate with us and adopt (some of) the building blocks we 
   develop.  
 
-  If you are interested in using the **ITH as a Platform**, please **get in 
+  If you are interested in expanding the **ITH as a Platform**, please **get in 
   touch with us** (*Giorgio Brajnik*, *Emanuele Lena*, *Verity Allan*).  
   Let us know your needs, and we will do our best to accommodate them.  
   The sooner you reach out, the greater your influence on the development 

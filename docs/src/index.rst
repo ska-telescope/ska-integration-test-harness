@@ -49,10 +49,20 @@ develop your own **customised** test harness.
 More details about this approach can be found in  
 :doc:`this section of the documentation <ith_as_a_platform>`.
 
+**IMPORTANT NOTE**:  
 As of **March 2025 (version 0.4.0)**, the **Test Harness as a Platform**  
 includes only a few building blocks, but it is actively growing.  
-:ref:`It can evolve based on your needs <development_process>`.  
-In the long term, this will be the **main focus** of the repository.
+In the long term, this will be the **main focus** of the repository, and we  
+hope many teams will find it useful and adopt it. For this reason,  
+:ref:`it may still evolve based on your specific but generalisable  
+needs <development_process>`. If you are interested in expanding the  
+**ITH as a Platform**, please **get in touch with us**  
+(*Giorgio Brajnik*, *Emanuele Lena*, *Verity Allan*).  
+
+Let us know your needs, and we will do our best to accommodate them.  
+The sooner you reach out, the greater your influence on the development  
+process.  
+
 
 
 .. toctree::
