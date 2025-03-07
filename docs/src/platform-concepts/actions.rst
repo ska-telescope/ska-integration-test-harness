@@ -59,6 +59,33 @@ the necessary extension points.
 
 |ith-platform-actions|
 
+Here there follows a few notes on the key components of the action mechanism.
+
+- :py:class:`~ska_integration_test_harness.core.actions.SUTAction`
+  is a base class for executing operations on a SUT, supporting preconditions,
+  postconditions (e.g., synchronization), a setup and a defined procedure.
+- ``execute()`` orchestrates the execution of the specific methods.
+  It also handles logging, timeouts, and other utilities.
+- Subclasses must implement ``execute_procedure()``, other methods are optional
+  and by default they simply do nothing. You can create custom actions
+  by extending :py:class:`~ska_integration_test_harness.core.actions.SUTAction`
+  or any of its subclasses.
+- :py:class:`~ska_integration_test_harness.extensions.lrc.TangoLRCAction` is
+  a ready-to-use action for sending Tango Long Running Commands (LRCs) to
+  devices, handling synchronization, and monitoring device state changes.
+- It stays in the Common Extension package, since it embeds some SKA-specific
+  knowledge about how Long Running Commands emit events.
+- :py:class:`~ska_integration_test_harness.extensions.lrc.TangoLRCAction`,
+  concretely sends a Tango command to a device, waits for LRC completion,
+  and monitors device state changes and LRC errors. It does all this
+  extending some
+  :py:class:`~ska_integration_test_harness.core.actions.SUTAction` descendants,
+  using structured ways to represent expected pre and post conditions, which
+  are then synchronised with the tracer.
+
+More details on this mechanism can be found in the following example
+and in the API documentation.
+
 The core logic of actions is implemented in the following modules:
 
 - :py:mod:`ska_integration_test_harness.core.actions`
