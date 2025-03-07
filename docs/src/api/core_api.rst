@@ -1,20 +1,20 @@
 
-Core mechanisms API
---------------------------------
+Generic mechanisms API (TMC Monolith)
+-------------------------------------
 
 
-Here below are documented the core mechanisms
+Here below are documented the generic mechanisms
 of the ska-integration-test-harness. Implementation of specific
 actions and structures are currently left outside, see directly the code
 for more details.
 
-**IMPORTANT NOTE**: A very crucial aspect of the core mechanisms is that
+**IMPORTANT NOTE**: A very crucial aspect of the generic mechanisms is that
 they are unit tested code, while the specific actions and structures are
 not unit tested (and in a certain sense, the integration tests that use
 the test harness are the validation of the correctness of the implementation
 of the specific actions and structures). **The coverage metrics of the
-test harness are calculated only on the core mechanisms** (*at the time of
-writing, the coverage on the core mechanisms is approximately 90%, while
+test harness are calculated only on the generic mechanisms** (*at the time of
+writing, the coverage on the generic mechanisms is approximately 90%, while
 the overall coverage is around 60%*).
 
 Structure module

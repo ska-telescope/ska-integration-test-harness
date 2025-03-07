@@ -14,6 +14,16 @@ likely remain the same.
 
 This document was last updated in February 2025.
 
+IMPORTANT: Monolith vs Platform
+----------------------------------------
+
+**Important Note:** This section of the documentation refers to the  
+TMC-specific monolithic test harness. In the long term, this monolithic  
+test harness will be relocated elsewhere (likely to a TMC testing repository).  
+This repository will instead focus on the **Test Harness as a Platform**.  
+
+For more details, see :doc:`ith_as_a_platform`.  
+
 What glues the test scripts to the SUT?
 ----------------------------------------
 

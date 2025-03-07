@@ -8,6 +8,16 @@ integration tests in Mid and Low. Based on feedback and on the evolution of the
 project, the harness will be extended to be more flexible and to support
 more use cases.
 
+IMPORTANT: Monolith vs Platform
+----------------------------------------
+
+**Important Note:** This section of the documentation refers to the  
+TMC-specific monolithic test harness. In the long term, this monolithic  
+test harness will be relocated elsewhere (likely to a TMC testing repository).  
+This repository will instead focus on the **Test Harness as a Platform**.  
+
+For more details, see :doc:`ith_as_a_platform`.  
+
 How to use this test harness right now as is
 --------------------------------------------
 
@@ -101,7 +111,7 @@ infrastructure, the action mechanism, some generic and parametric
 actions, the input classes and a generic and flexible configuration and
 initialisation mechanism. Then, partially through extension, partially
 through configuration, you will be able to adapt the test harness to
-your needs.
+your needs (please check the :doc:`ith_as_a_platform`!).
 
 Please contact *Emanuele Lena*, *Giorgio Brajnik* and/or *Verity Allan*
 if you think this test harness can be useful for your tests, if you have

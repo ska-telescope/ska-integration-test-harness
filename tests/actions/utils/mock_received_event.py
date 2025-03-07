@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock
 
+import tango
 from ska_tango_testing.integration.event import ReceivedEvent
 
 
@@ -32,11 +33,30 @@ def create_received_event_mock(
     event.attribute_name = attribute_name
     event.attribute_value = attribute_value
     event.reception_time = datetime.now() - timedelta(seconds=seconds_ago)
-    event.has_device = (
-        lambda target_device_name: event.device_name == target_device_name
-    )
+
+    def has_device(target_device_name):
+        """Check if the event is for a given device."""
+        if isinstance(target_device_name, tango.DeviceProxy):
+            target_device_name = target_device_name.dev_name()
+        return event.device_name == target_device_name
+
+    event.has_device = has_device
     event.has_attribute = (
-        lambda target_attribute_name: event.attribute_name
-        == target_attribute_name
+        lambda target_attribute_name: event.attribute_name.lower()
+        == target_attribute_name.lower()
     )
+    device_name_str = (
+        device_name if isinstance(device_name, str) else device_name.dev_name()
+    )
+
+    def to_str(_):
+        """Return a string representation of the event."""
+        msg = "ReceivedEvent("
+        msg += f"device_name={device_name_str}, "
+        msg += f"attribute_name={attribute_name}, "
+        msg += f"attribute_value={attribute_value})"
+        return msg
+
+    event.__str__ = to_str
+
     return event

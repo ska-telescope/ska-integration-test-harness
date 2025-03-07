@@ -25,7 +25,7 @@ def add_event(
     device: str,
     attribute: str,
     value: int,
-) -> None:
+) -> MagicMock:
     """
     Add an event to the event tracer.
 
@@ -44,6 +44,8 @@ def add_event(
             "ERROR IN TEST SETUP: when adding an event to the event tracer, "
             "the given tracer must be a MagicMock or a TangoEventTracer"
         )
+
+    return event_mock
 
 
 def delayed_add_event(

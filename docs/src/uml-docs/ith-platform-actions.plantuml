@@ -1,0 +1,57 @@
+@startuml
+skinparam linetype ortho
+
+namespace ska_integration_test_harness.core.actions {
+    abstract class SUTAction {
+        + execute(timeout: SupportsFloat, ...): None
+        + setup(): None
+        + verify_preconditions(): None
+        + verify_postconditions(timeout: SupportsFloat): None
+        + name(): str
+        + describe(): str
+        + {abstract} execute_procedure(): None
+    }
+}
+
+namespace ska_integration_test_harness.extensions.lrc {
+    class TangoLRCAction {
+        + target_device
+        + command_name
+        + command_param
+        + sync_lrc: bool
+        + execute_procedure(): None
+        + describe(): str
+        + add_postconditions(...)
+        + add_lrc_completion_to_postconditions()
+    }
+}
+
+namespace ska_integration_test_harness.core.assertions {
+    class AssertDevicesStateChanges {
+        + devices: list[tango.DeviceProxy]
+        + attribute_name: str
+        + attribute_value
+        + ...
+    }
+}
+
+namespace your_test_repository {
+
+    class YourCustomAction {
+        + your attributes here
+        + execute_procedure(): None
+        + describe(): str
+        + verify_postconditions(timeout: SupportsFloat): None
+    }
+
+    class YourTestHarnesOrTestCode {
+    }
+}
+
+YourCustomAction --up--|> SUTAction
+TangoLRCAction -up-|> SUTAction
+YourTestHarnesOrTestCode .up.> YourCustomAction : Use
+YourTestHarnesOrTestCode ..> TangoLRCAction : Use
+TangoLRCAction ..> AssertDevicesStateChanges : Use
+
+@enduml

@@ -1,13 +1,13 @@
-Extensions and specific logic API
--------------------------------------
+Extensions and specific logic API (TMC Monolith)
+------------------------------------------------
 
 
-This section is a sort of enumeration of the main concrete *non-core*
+This section is a sort of enumeration of the main concrete *non-generic*
 classes and components that are part of the 
 ska-integration-test-harness for testing
 TMC-CSP in Mid and Low (at the time of writing).
 
-**IMPORTANT NOTE**: A very crucial difference from the core mechanisms
+**IMPORTANT NOTE**: A very crucial difference from the generic mechanisms
 section is that the classes and components described here are not unit
 tested code, since they are considered more related to the specific SUT
 logic than to the test harness itself. In a certain sense, the integration
